@@ -6,6 +6,7 @@ import os
 class DataBaseConnector:
     """
     Database 연결 후 쿼리 전송
+    결과를 tuple List에 담아서 반환 => [(1, a, 2), (2, b, 3)]
     """
     @classmethod
     def query_sender(cls, query):
@@ -22,11 +23,7 @@ class DataBaseConnector:
         engine = create_engine(url_object)
 
         with engine.connect() as conn:
-            return conn.execute(text(query))
+            result = conn.execute(text(query))
+            return [row for row in result]
 
-# 사용 방법
-# result = DataBaseConnector.query_sender('select * from v_api2_incident_api')
-# rows = [row for row in result]
-#
-# print(rows)
 
