@@ -1,16 +1,15 @@
 from sqlalchemy import create_engine, text, URL
+from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
 
 
 class DataBaseConnector:
     """
-    Database 연결 후 쿼리 전송
-    결과를 tuple List에 담아서 반환 => [(1, a, 2), (2, b, 3)]
-    orm을 사용하지 않고 쿼리를 직접 작성할 것이기에 session 미사용
+    Database 연결 후 ORM 사용
     """
     @classmethod
-    def query_sender(cls, query):
+    def create_session(cls):
         load_dotenv()
 
         url_object = URL.create(
@@ -22,9 +21,9 @@ class DataBaseConnector:
         )
 
         engine = create_engine(url_object)
+        session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        return session()
 
-        with engine.connect() as conn:
-            result = conn.execute(text(query))
-            return [row for row in result]
-
-
+    @classmethod
+    def close_session(cls, session):
+        session.close()
