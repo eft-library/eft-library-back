@@ -4,8 +4,7 @@ from fastapi.openapi.docs import (
     get_redoc_html,
     get_swagger_ui_html,
 )
-from exceptions import ErrorResponse
-from constants import HTTPErrorCode
+from router import api_router
 
 app = FastAPI(
     title='tarkov-korea-wiki-back',
@@ -37,15 +36,7 @@ async def redoc_html():
 
 @app.get("/")
 def root():
-    return ErrorResponse.return_error(HTTPErrorCode.BAD_REQUEST)
-    # return {"message": "hi"}
+    return {"message": "hi"}
 
 
-@app.get("/home")
-def home():
-    return {"message": "home"}
-
-
-@app.get("/home/{name}")
-def home(name: str):
-    return {"message": name}
+app.include_router(api_router, prefix="/api")
