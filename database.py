@@ -2,21 +2,21 @@ from sqlalchemy import create_engine, text, URL
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
-import urllib.parse
+from sqlalchemy.ext.declarative import declarative_base
 
 
 class DataBaseConnector:
     """
     Database 연결 후 ORM 사용
     """
+    Base = declarative_base()
     @classmethod
     def create_session(cls):
         load_dotenv()
-
         url_object = URL.create(
             "postgresql+psycopg2",
             username=os.getenv("DB_USER"),
-            password=urllib.parse.quote_plus(os.getenv("DB_PASSWORD")),
+            password=os.getenv("DB_PASSWORD"),
             host=os.getenv("DB_HOST"),
             database=os.getenv("DB_NAME"),
             port=os.getenv("DB_PORT")
@@ -25,3 +25,7 @@ class DataBaseConnector:
         engine = create_engine(url_object)
         session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         return session()
+
+    @classmethod
+    def get_base(cls):
+        return cls.Base
