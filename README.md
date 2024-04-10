@@ -10,6 +10,8 @@ pip3 install sqlalchemy
 
 pip3 install python-dotenv
 
+pip3 install psycopg2-binary
+
 uvicorn main:app --reload
 
 구조

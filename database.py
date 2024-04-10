@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine, text, URL
+from sqlalchemy import create_engine
+from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
