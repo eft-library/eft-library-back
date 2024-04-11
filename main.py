@@ -4,7 +4,7 @@ from fastapi.openapi.docs import (
     get_redoc_html,
     get_swagger_ui_html,
 )
-from router import api_router
+from api.router import api_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -14,7 +14,6 @@ app = FastAPI(
     redoc_url=None)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
 
 
 @app.get("/docs", include_in_schema=False)
@@ -35,6 +34,7 @@ async def redoc_html():
         title=app.title + " - ReDoc",
         redoc_js_url="/static/redoc.standalone.js",
     )
+
 
 @app.get("/")
 def root():
