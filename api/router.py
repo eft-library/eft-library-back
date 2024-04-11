@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from api.maps import maps_router
+from api.map import map_router
 
 api_router = APIRouter()
 
-api_router.include_router(maps_router.router, prefix="/maps")
+api_router.include_router(map_router.router, prefix="/map")
 

@@ -2,8 +2,10 @@ from sqlalchemy import Column, String, JSON
 from database import DataBaseConnector
 
 
-# 3D 사진 클래스
 class ThreeMap(DataBaseConnector.Base):
+    """
+    3D map
+    """
     __tablename__ = "tkw_three_map"
 
     three_map_id = Column(String, primary_key=True)
@@ -14,6 +16,9 @@ class ThreeMap(DataBaseConnector.Base):
 
 
 class JpgMap(DataBaseConnector.Base):
+    """
+    2D map
+    """
     __tablename__ = "tkw_jpg_map"
 
     jpg_map_id = Column(String, primary_key=True)

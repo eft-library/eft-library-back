@@ -6,6 +6,10 @@ from fastapi.openapi.docs import (
 )
 from api.router import api_router
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = FastAPI(
     title='tarkov-korea-wiki-back',
@@ -41,7 +45,7 @@ def root():
     return {"message": "hi"}
 
 
-app.include_router(api_router, prefix="/api")
+app.include_router(api_router, prefix=os.getenv("API_PREFIX"))
 
 app.add_middleware(
     CORSMiddleware,
