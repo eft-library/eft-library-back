@@ -22,15 +22,6 @@ COMMENT ON COLUMN TKW_FRONT_LOG.FRONT_LOG_ID IS 'Frontend 로그 자동 생성 I
 COMMENT ON COLUMN TKW_FRONT_LOG.FRONT_LOG_MESSAGE IS 'Frontend 에러 로그 메시지';
 COMMENT ON COLUMN TKW_FRONT_LOG.FRONT_LOG_OCCUR_TIME IS 'Frontend 에러 로그 발생 시간';
 
--- tarkov tweeter 업데이트 소식
-CREATE TABLE TKW_X
-(
-    X_ID VARCHAR(30) NOT NULL PRIMARY KEY,
-    X_UPDATE_TIME timestamp with time zone default now()
-);
-COMMENT ON COLUMN TKW_X.X_ID IS 'X 게시판 ID';
-COMMENT ON COLUMN TKW_X.X_UPDATE_TIME IS 'DB 업데이트 시간';
-
 -- map dae 파일 링크 주소, item 위치 정보 보내기
 CREATE TABLE TKW_THREE_MAP
 (
