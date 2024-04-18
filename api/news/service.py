@@ -1,12 +1,13 @@
 from api.news.models import Youtube
-from api.session_scope import SessionManger
+from database import DataBaseConnector
 import copy
 
 
 class NewsService:
     @staticmethod
     def get_youtube():
-        with SessionManger.session_scope() as session:
-            youtube = session.query(Youtube).one()
-            return copy.deepcopy(youtube)
+        session = DataBaseConnector.create_session()
+        youtube = session.query(Youtube).one()
+        session.close()
+        return copy.deepcopy(youtube)
         

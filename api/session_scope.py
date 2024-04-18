@@ -15,6 +15,3 @@ class SessionManger:
             session.commit()
         except Exception as e:
             session.rollback()
-            raise
-        finally:
-            session.close()
