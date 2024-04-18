@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from api.map.service import MapService
 from api.response import CustomResponse
 from util.constants import HTTPCode
-from .constants import Message
+from api.constants import Message
 
 router = APIRouter()
 
