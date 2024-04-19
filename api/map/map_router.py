@@ -7,33 +7,17 @@ from api.constants import Message
 router = APIRouter()
 
 
-@router.get("/three_map/{map_id}")
-def get_three_map(map_id: str):
-    three_map = MapService.get_three_map(map_id)
-    if three_map is None:
+@router.get("/info/{map_id}")
+def get_map(map_id: str):
+    response_map = MapService.get_map(map_id)
+    if response_map is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.MAP_NOT_FOUND)
-    return CustomResponse.response(three_map, HTTPCode.OK, Message.SUCCESS)
+    return CustomResponse.response(response_map, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/three_map")
-def get_all_three_map():
-    three_maps = MapService.get_all_three_map()
-    if three_maps is None:
+@router.get("/all")
+def get_all_map():
+    maps = MapService.get_all_map()
+    if maps is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.MAP_NOT_FOUND)
-    return CustomResponse.response(three_maps, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/jpg_map/{map_id}")
-def get_jpg_map(map_id: str):
-    jpg_map = MapService.get_jpg_map(map_id)
-    if jpg_map is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.MAP_NOT_FOUND)
-    return CustomResponse.response(jpg_map, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/jpg_map")
-def get_all_jpg_map():
-    jpg_maps = MapService.get_all_jpg_map()
-    if jpg_maps is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.MAP_NOT_FOUND)
-    return CustomResponse.response(jpg_maps, HTTPCode.OK, Message.SUCCESS)
+    return CustomResponse.response(maps, HTTPCode.OK, Message.SUCCESS)

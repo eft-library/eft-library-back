@@ -1,28 +1,45 @@
-from sqlalchemy import Column, String, JSON
+from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, ForeignKey
+from sqlalchemy.orm import relationship
+
 from database import DataBaseConnector
 
 
-class ThreeMap(DataBaseConnector.Base):
+class ParentMap(DataBaseConnector.Base):
     """
-    3D map
+    parent map
     """
-    __tablename__ = "tkw_three_map"
+    __tablename__ = "tkw_map_parent"
 
-    three_map_id = Column(String, primary_key=True)
-    three_map_name_en = Column(String)
-    three_map_name_kr = Column(String)
-    three_map_path = Column(String)
-    three_map_item_path = Column(JSON)
+    map_id = Column(String, primary_key=True)
+    map_name_en = Column(String)
+    map_name_kr = Column(String)
+    map_three_path = Column(String)
+    map_three_item_path = Column(JSON)
+    map_jpg_path = Column(String)
+    map_jpg_item_path = Column(JSON)
+    map_depth = Column(Integer)
+    map_link = Column(String)
+    map_main_image = Column(String)
+    map_update_time = Column(TIMESTAMP)
+    map_sub = relationship("Map", backref="parent_map")
 
 
-class JpgMap(DataBaseConnector.Base):
+class Map(DataBaseConnector.Base):
     """
-    2D map
+    map
     """
-    __tablename__ = "tkw_jpg_map"
+    __tablename__ = "tkw_map"
 
-    jpg_map_id = Column(String, primary_key=True)
-    jpg_map_name_en = Column(String)
-    jpg_map_name_kr = Column(String)
-    jpg_map_path = Column(String)
-    jpg_map_item_path = Column(JSON)
+    map_id = Column(String, primary_key=True)
+    map_name_en = Column(String)
+    map_name_kr = Column(String)
+    map_three_path = Column(String)
+    map_three_item_path = Column(JSON)
+    map_jpg_path = Column(String)
+    map_jpg_item_path = Column(JSON)
+    map_depth = Column(Integer)
+    map_link = Column(String)
+    map_parent_value = Column(String, ForeignKey('tkw_map_parent.map_id'))
+    map_main_image = Column(String)
+    map_update_time = Column(TIMESTAMP)
+

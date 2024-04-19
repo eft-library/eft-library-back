@@ -1,5 +1,5 @@
-from sqlalchemy.orm import joinedload, subqueryload
-from api.menu.models import MainMenu, SubMenu
+from sqlalchemy.orm import subqueryload
+from api.menu.models import MainMenu
 from database import DataBaseConnector
 
 
