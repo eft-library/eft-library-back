@@ -20,7 +20,6 @@ class MapService:
         """
         map 전체 조회
         """
-        print("hihihihi")
         try:
             session = DataBaseConnector.create_session()
             maps = (session
