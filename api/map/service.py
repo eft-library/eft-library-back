@@ -25,6 +25,7 @@ class MapService:
             maps = (session
                     .query(ParentMap)
                     .options(subqueryload(ParentMap.map_sub))
+                    .order_by(Map.map_order)
                     .all())
             session.close()
             return maps
