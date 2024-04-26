@@ -25,9 +25,13 @@ class MapService:
             maps = (session
                     .query(ParentMap)
                     .options(subqueryload(ParentMap.map_sub))
-                    .order_by(Map.map_order)
+                    .order_by(ParentMap.map_order)
                     .all())
             session.close()
+
+            for parent_map in maps:
+                parent_map.map_sub.sort(key=lambda x: x.map_order)
+
             return maps
         except Exception as e:
             print("오류 발생:", e)

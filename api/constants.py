@@ -6,3 +6,4 @@ class Message(Enum):
     MAP_NOT_FOUND = 'Map not found'
     YOUTUBE_NOT_FOUND = 'Youtube not found'
     MENU_NOT_FOUND = 'Menu not Found'
+    NPC_NOT_FOUND = 'NPC not Found'
