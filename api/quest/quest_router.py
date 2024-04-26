@@ -13,3 +13,11 @@ def get_npc():
     if npc_list is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.NPC_NOT_FOUND)
     return CustomResponse.response(npc_list, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/all")
+def get_all_quest():
+    quest_list = QuestService.get_all_quest_preview()
+    if quest_list is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.NPC_NOT_FOUND)
+    return CustomResponse.response(quest_list, HTTPCode.OK, Message.SUCCESS)
