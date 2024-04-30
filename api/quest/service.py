@@ -20,3 +20,13 @@ class QuestService:
                       .order_by(QuestPreview.quest_order).all())
         session.close()
         return quest_list
+
+    @staticmethod
+    def get_quest_by_id(quest_id):
+        session = DataBaseConnector.create_session()
+        quest = (session
+                 .query(QuestPreview)
+                 .filter(QuestPreview.quest_id == quest_id)
+                 .first())
+        session.close()
+        return quest

@@ -1,5 +1,5 @@
 from database import DataBaseConnector
-from sqlalchemy import Column, String, Integer, TIMESTAMP, ARRAY, Boolean
+from sqlalchemy import Column, String, Integer, TIMESTAMP, ARRAY, Boolean, TEXT
 
 
 class NPC(DataBaseConnector.Base):
@@ -33,3 +33,4 @@ class QuestPreview(DataBaseConnector.Base):
     quest_required_kappa = Column(Boolean)
     quest_update_time = Column(TIMESTAMP)
     quest_order = Column(Integer)
+    quest_guide = Column(TEXT)
