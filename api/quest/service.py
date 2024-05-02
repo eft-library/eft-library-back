@@ -24,9 +24,11 @@ class QuestService:
     @staticmethod
     def get_quest_by_id(quest_id):
         session = DataBaseConnector.create_session()
-        quest = (session
-                 .query(QuestPreview)
+        quest_npc_info = (session
+                 .query(QuestPreview, NPC)
+                 .filter(QuestPreview.quest_npc_value == NPC.npc_id)
                  .filter(QuestPreview.quest_id == quest_id)
                  .first())
+        combined_info = {**quest_npc_info[0].__dict__, **quest_npc_info[1].__dict__}
         session.close()
-        return quest
+        return combined_info
