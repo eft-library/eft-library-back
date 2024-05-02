@@ -551,3 +551,25 @@ COMMENT ON COLUMN TKW_SUB_MENU_INFO.SUB_MENU_LINK IS 'Menu 주소';
 COMMENT ON COLUMN TKW_SUB_MENU_INFO.SUB_MENU_ORDER IS 'Menu 순서';
 COMMENT ON COLUMN TKW_SUB_MENU_INFO.SUB_MENU_IMAGE IS 'Menu 이미지';
 COMMENT ON COLUMN TKW_SUB_MENU_INFO.SUB_MENU_UPDATE_TIME IS 'Menu 업데이트 시간';
+
+-- tarkov-dev item api
+CREATE TABLE tkw_item (
+    id VARCHAR(24) PRIMARY KEY,
+    name VARCHAR(255),
+    short_name VARCHAR(100),
+    updated TIMESTAMP,
+    width INTEGER,
+    height INTEGER,
+    icon_link VARCHAR(255),
+    grid_image_link VARCHAR(255),
+    types TEXT[],
+    accuracy_modifier FLOAT,
+    recoil_modifier FLOAT,
+    ergonomics_modifier FLOAT,
+    has_grid BOOLEAN,
+    blocks_headphones BOOLEAN,
+    link VARCHAR(255),
+    weight FLOAT,
+    velocity FLOAT,
+    loudness FLOAT
+);
