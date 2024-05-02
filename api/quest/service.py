@@ -32,7 +32,9 @@ class QuestService:
                           .filter(QuestPreview.quest_npc_value == NPC.npc_id)
                           .filter(QuestPreview.quest_id == quest_id)
                           .first())
-        quest_npc_info[0].quest_guide = quest_npc_info[0].quest_guide.replace("/tkw_quest", os.getenv("NAS_DATA") + "/tkw_quest")
+
+        if quest_npc_info[0].quest_guide != None:
+            quest_npc_info[0].quest_guide = quest_npc_info[0].quest_guide.replace("/tkw_quest", os.getenv("NAS_DATA") + "/tkw_quest")
         combined_info = {**quest_npc_info[0].__dict__, **quest_npc_info[1].__dict__}
         session.close()
         return combined_info
