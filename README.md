@@ -17,6 +17,4 @@ uvicorn main:app --reload
 구조
 ```
 그냥 내 생각대로 가자
-
-240507 airflow 구축 실패 - 오후에 다시 할 예정
 ```
