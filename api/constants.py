@@ -9,3 +9,4 @@ class Message(Enum):
     NPC_NOT_FOUND = 'NPC not found'
     QUEST_NOT_FOUND = 'Quest not found'
     WEAPON_NOT_FOUND = 'Weapon not found'
+    MAIN_INFO_NOT_FOUND = "Main info not found"

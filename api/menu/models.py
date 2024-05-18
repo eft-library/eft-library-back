@@ -34,3 +34,18 @@ class SubMenu(DataBaseConnector.Base):
     sub_menu_order = Column(Integer)
     sub_menu_image = Column(String)
     sub_menu_update_time = Column(TIMESTAMP)
+
+
+class MainInfo(DataBaseConnector.Base):
+    """
+    MainInfo
+    """
+    __tablename__ = "tkw_main_info"
+
+    info_value = Column(String, primary_key=True)
+    info_en_name = Column(String)
+    info_kr_name = Column(String)
+    info_link = Column(String)
+    info_order = Column(Integer)
+    info_image = Column(String)
+    info_update_time = Column(TIMESTAMP)

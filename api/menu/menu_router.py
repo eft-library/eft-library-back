@@ -13,3 +13,11 @@ def get_menu():
     if menu_list is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.MENU_NOT_FOUND)
     return CustomResponse.response(menu_list, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/info")
+def get_main_info():
+    main_info_list = MenuService.get_main_info()
+    if main_info_list is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.MAIN_INFO_NOT_FOUND)
+    return CustomResponse.response(main_info_list, HTTPCode.OK, Message.SUCCESS)
