@@ -12,30 +12,56 @@ def run_query(query):
 
 new_query = """
 {
-         items {
-            id
-            name
-            shortName
-            image512pxLink
-            category {
-              name
-              parent {
-                name
-              }
-            }
-            properties {
-              ... on ItemPropertiesMelee {
-            slashDamage
-            stabDamage
-            hitRadius
-            }
-          }
-        }
+  items {
+    id
+    name
+    shortName
+    image512pxLink
+    category {
+      name
+      parent {
+        name
+      }
     }
+    properties {
+      ... on ItemPropertiesWeapon {
+        caliber
+        defaultAmmo {
+          name
+        }
+        fireModes
+        fireRate
+        defaultErgonomics
+        defaultRecoilVertical
+        defaultRecoilHorizontal
+      }
+      ... on ItemPropertiesMelee {
+        slashDamage
+        stabDamage
+        hitRadius
+      }
+      ... on ItemPropertiesGrenade {
+        type
+        fuse
+        minExplosionDistance
+        maxExplosionDistance
+        fragments
+        contusionRadius
+      }
+    }
+  }
+}
 """
 
 result = run_query(new_query)
 
-for item in result['data']['items']:
-    if item['category']['name'] == "Throwable weapon":
-        print(item)
+a = [
+    item for item in result['data']['items']
+    if item['category']['name'] == "Knife"  and item['properties'] != {}
+]
+for i in a:
+    print(i)
+
+# for item in result['data']['items']:
+#     if item['category']['name'] == "Knife":
+#         print(item)
