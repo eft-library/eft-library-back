@@ -56,6 +56,7 @@ class Throwable(DataBaseConnector.Base):
     throwable_image = Column(TEXT)
     throwable_category = Column(TEXT)
     throwable_fuse = Column(NUMERIC)
+    throwable_min_fuse = Column(NUMERIC)
     throwable_min_explosion_distance = Column(Integer)
     throwable_max_explosion_distance = Column(Integer)
     throwable_fragments = Column(Integer)
