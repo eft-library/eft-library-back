@@ -4,7 +4,7 @@ from api.response import CustomResponse
 from util.constants import HTTPCode
 from api.constants import Message
 
-router = APIRouter()
+router = APIRouter(tags=["Menu"])
 
 
 @router.get("/navi")

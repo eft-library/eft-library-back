@@ -4,7 +4,7 @@ from api.response import CustomResponse
 from util.constants import HTTPCode
 from api.constants import Message
 
-router = APIRouter()
+router = APIRouter(tags=["News"])
 
 
 @router.get("/youtube")
@@ -13,4 +13,3 @@ def get_youtube():
     if three_map is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.YOUTUBE_NOT_FOUND)
     return CustomResponse.response(three_map, HTTPCode.OK, Message.SUCCESS)
-

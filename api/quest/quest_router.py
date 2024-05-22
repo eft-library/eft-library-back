@@ -4,7 +4,7 @@ from util.constants import HTTPCode
 from api.constants import Message
 from api.quest.service import QuestService
 
-router = APIRouter()
+router = APIRouter(tags=["Quest"])
 
 
 @router.get("/npc")
