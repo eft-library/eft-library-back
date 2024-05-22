@@ -23,4 +23,5 @@ class Boss(DataBaseConnector.Base):
     boss_health_total = Column(Integer)
     boss_location_guide = Column(TEXT)
     boss_loot = Column(ARRAY(TEXT))
+    boss_spawn = Column(ARRAY(TEXT))
     boss_update_time = Column(TIMESTAMP)
