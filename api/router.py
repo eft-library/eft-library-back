@@ -6,6 +6,7 @@ from api.quest import quest_router
 from api.weapon import weapon_router
 from api.boss import boss_router
 from api.map_of_tarkov import map_of_tarkov_router
+from api.table_column import table_column_router
 
 api_router = APIRouter()
 
@@ -16,3 +17,4 @@ api_router.include_router(quest_router.router, prefix="/quest")
 api_router.include_router(weapon_router.router, prefix="/weapon")
 api_router.include_router(boss_router.router, prefix="/boss")
 api_router.include_router(map_of_tarkov_router.router, prefix="/map_of_tarkov")
+api_router.include_router(table_column_router.router, prefix="/table_column")
