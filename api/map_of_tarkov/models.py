@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, TEXT
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, ARRAY, TEXT
 
 from database import DataBaseConnector
 

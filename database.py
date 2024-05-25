@@ -23,7 +23,7 @@ class DataBaseConnector:
             port=os.getenv("DB_PORT")
         )
 
-        engine = create_engine(url_object)
+        engine = create_engine(url_object, echo=True)
         session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         return session()
 
