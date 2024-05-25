@@ -7,9 +7,9 @@ from api.constants import Message
 router = APIRouter(tags=["Table Column"])
 
 
-@router.get("/weapon")
-def get_weapon_column():
-    weapon_column = TableColumnService.get_weapon_column()
-    if weapon_column is None:
+@router.get("/column/{column_id}")
+def get_column(column_id: str):
+    column = TableColumnService.get_column(column_id)
+    if column is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.COLUMN_NOT_FOUND)
-    return CustomResponse.response(weapon_column, HTTPCode.OK, Message.SUCCESS)
+    return CustomResponse.response(column, HTTPCode.OK, Message.SUCCESS)

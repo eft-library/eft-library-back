@@ -4,13 +4,13 @@ from database import DataBaseConnector
 
 class TableColumnService:
     @staticmethod
-    def get_weapon_column():
+    def get_column(column_id):
         """
-        weapon 페이지 column 조회
+        column 조회
         """
         try:
             session = DataBaseConnector.create_session()
-            weapon_column = session.query(TableColumn).filter(TableColumn.column_type == "WEAPON").all()
+            weapon_column = session.query(TableColumn).filter(TableColumn.column_type == column_id).all()
             session.close()
             return weapon_column
         except Exception as e:
