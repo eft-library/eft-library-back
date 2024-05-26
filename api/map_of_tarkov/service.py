@@ -1,5 +1,6 @@
 from api.boss.models import Boss
 from api.map.models import Map
+from api.map_of_tarkov.models import Extraction
 from database import DataBaseConnector
 import os
 from dotenv import load_dotenv
@@ -14,7 +15,9 @@ class MapOfTarkovService:
         try:
             load_dotenv()
             session = DataBaseConnector.create_session()
-            boss_list = session.query(Boss).filter(Boss.boss_spawn.contains([map_id])).all()
+            boss_list = (
+                session.query(Boss).filter(Boss.boss_spawn.contains([map_id])).all()
+            )
 
             updated_boss_list = []
             for boss in boss_list:
@@ -29,9 +32,16 @@ class MapOfTarkovService:
 
             map_info = session.query(Map).filter(Map.map_id == map_id).first()
 
+            extraction_info = (
+                session.query(Extraction)
+                .filter(Extraction.extraction_map == map_id)
+                .first()
+            )
+
             map_of_tarkov = {
-                'boss_list': combined_info,
-                'map_info': map_info
+                "boss_list": combined_info,
+                "map_info": map_info,
+                "extraction_info": extraction_info,
             }
 
             session.close()
