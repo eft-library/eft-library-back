@@ -1,5 +1,7 @@
+from sqlalchemy.orm import subqueryload
+
 from api.boss.models import Boss
-from api.map.models import Map
+from api.map.models import Map, ParentMap
 from api.map_of_tarkov.models import Extraction
 from database import DataBaseConnector
 import os
@@ -30,7 +32,11 @@ class MapOfTarkovService:
             # 각각의 Boss 객체를 딕셔너리로 변환
             combined_info = [boss.__dict__ for boss in updated_boss_list]
 
-            map_info = session.query(Map).filter(Map.map_id == map_id).first()
+            map_info = (
+                session.query(ParentMap)
+                .options(subqueryload(ParentMap.map_sub))
+                .filter(ParentMap.map_id == map_id)
+            ).first()
 
             extraction_info = (
                 session.query(Extraction)
