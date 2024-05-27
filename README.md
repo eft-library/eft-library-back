@@ -18,3 +18,5 @@ uvicorn main:app --reload
 ```
 그냥 내 생각대로 가자
 ```
+
+jenkins 구축 진행중
