@@ -1,7 +1,7 @@
 from sqlalchemy.orm import subqueryload
 
 from api.boss.models import Boss
-from api.map.models import Map, ParentMap
+from api.map.models import ParentMap
 from api.map_of_tarkov.models import Extraction
 from database import DataBaseConnector
 import os
@@ -41,7 +41,7 @@ class MapOfTarkovService:
             extraction_info = (
                 session.query(Extraction)
                 .filter(Extraction.extraction_map == map_id)
-                .first()
+                .all()
             )
 
             map_of_tarkov = {
