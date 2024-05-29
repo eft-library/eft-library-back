@@ -13,3 +13,4 @@ class Message(Enum):
     BOSS_NOT_FOUND = "Boss not found"
     MAP_OF_TARKOV_NOT_FOUND = "Map of tarkov not found"
     COLUMN_NOT_FOUND = "Column not found"
+    SEARCH_NOT_FOUND = "SEARCH not found"
