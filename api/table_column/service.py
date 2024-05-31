@@ -4,16 +4,15 @@ from database import DataBaseConnector
 
 class TableColumnService:
     @staticmethod
-    def get_column(column_id):
+    def get_all_column():
         """
-        column 조회
+        column 전체 조회
         """
         try:
             session = DataBaseConnector.create_session()
-            weapon_column = session.query(TableColumn).filter(TableColumn.column_type == column_id).all()
+            column_list = session.query(TableColumn).all()
             session.close()
-            return weapon_column
+            return column_list
         except Exception as e:
             print("오류 발생:", e)
         return None
-
