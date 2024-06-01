@@ -12,7 +12,7 @@ class Weapon(DataBaseConnector.Base):
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
     short_name = Column(TEXT)
-    img = Column(TEXT)
+    image = Column(TEXT)
     category = Column(TEXT)
     carliber = Column(TEXT)
     default_ammo = Column(TEXT)
