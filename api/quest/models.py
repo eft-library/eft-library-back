@@ -6,12 +6,12 @@ class NPC(DataBaseConnector.Base):
     """
     NPC
     """
-    __tablename__ = "tkw_npc_info"
+    __tablename__ = "tkw_npc"
 
     id = Column(String, primary_key=True)
     name_en = Column(String)
     name_kr = Column(String)
-    img_path = Column(String)
+    image = Column(String)
     order = Column(Integer)
     update_time = Column(TIMESTAMP)
 
