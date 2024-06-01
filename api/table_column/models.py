@@ -9,11 +9,11 @@ class TableColumn(DataBaseConnector.Base):
     Table Column
     """
 
-    __tablename__ = "tkw_table_column_info"
+    __tablename__ = "tkw_table_column"
 
-    column_id = Column(Integer, primary_key=True)
-    column_value_en = Column(ARRAY(TEXT))
-    column_value_kr = Column(ARRAY(TEXT))
-    column_json_value = Column(JSON)
-    column_type = Column(String)
-    column_update_time = Column(TIMESTAMP)
+    id = Column(Integer, primary_key=True)
+    value_en = Column(ARRAY(TEXT))
+    value_kr = Column(ARRAY(TEXT))
+    json_value = Column(JSON)
+    type = Column(String)
+    update_time = Column(TIMESTAMP)

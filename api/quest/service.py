@@ -10,7 +10,7 @@ class QuestService:
         session = DataBaseConnector.create_session()
         npc_list = (session
                     .query(NPC)
-                    .order_by(NPC.npc_order).all())
+                    .order_by(NPC.order).all())
         session.close()
         return npc_list
 
@@ -19,7 +19,7 @@ class QuestService:
         session = DataBaseConnector.create_session()
         quest_list = (session
                       .query(QuestPreview)
-                      .order_by(QuestPreview.quest_order).all())
+                      .order_by(QuestPreview.order).all())
         session.close()
         return quest_list
 
@@ -27,14 +27,14 @@ class QuestService:
     def get_quest_by_id(quest_id):
         load_dotenv()
         session = DataBaseConnector.create_session()
-        quest_npc_info = (session
+        quest_npc = (session
                           .query(QuestPreview, NPC)
-                          .filter(QuestPreview.quest_npc_value == NPC.npc_id)
-                          .filter(QuestPreview.quest_id == quest_id)
+                          .filter(QuestPreview.npc_value == NPC.id)
+                          .filter(QuestPreview.id == quest_id)
                           .first())
 
-        if quest_npc_info[0].quest_guide != None:
-            quest_npc_info[0].quest_guide = quest_npc_info[0].quest_guide.replace("/tkw_quest", os.getenv("NAS_DATA") + "/tkw_quest")
-        combined_info = {**quest_npc_info[0].__dict__, **quest_npc_info[1].__dict__}
+        if quest_npc[0].guide != None:
+            quest_npc[0].guide = quest_npc[0].guide.replace("/tkw_quest", os.getenv("NAS_DATA") + "/tkw_quest")
+        combined_info = {**quest_npc[0].__dict__, **quest_npc[1].__dict__}
         session.close()
         return combined_info

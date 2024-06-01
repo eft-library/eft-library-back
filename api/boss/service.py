@@ -17,8 +17,8 @@ class BossService:
 
             updated_boss_list = []
             for boss in boss_list:
-                if boss.boss_location_guide is not None:
-                    boss.boss_location_guide = boss.boss_location_guide.replace(
+                if boss.location_guide is not None:
+                    boss.location_guide = boss.location_guide.replace(
                         "/tkw_quest", os.getenv("NAS_DATA") + "/tkw_quest"
                     )
                 updated_boss_list.append(boss)

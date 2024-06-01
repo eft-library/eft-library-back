@@ -8,10 +8,10 @@ class Search(DataBaseConnector.Base):
     search info
     """
 
-    __tablename__ = "tkw_search_info"
+    __tablename__ = "tkw_search"
 
-    search_id = Column(String, primary_key=True)
-    search_value = Column(String)
-    search_link = Column(String)
-    search_order = Column(INTEGER)
-    search_update_time = Column(TIMESTAMP)
+    id = Column(String, primary_key=True)
+    value = Column(String)
+    link = Column(String)
+    order = Column(INTEGER)
+    update_time = Column(TIMESTAMP)

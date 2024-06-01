@@ -8,15 +8,15 @@ class Extraction(DataBaseConnector.Base):
     Extraction info
     """
 
-    __tablename__ = "tkw_extraction_info"
+    __tablename__ = "tkw_extraction"
 
-    extraction_id = Column(String, primary_key=True)
-    extraction_name = Column(TEXT)
-    extraction_image = Column(TEXT)
-    extraction_faction = Column(String)
-    extraction_always_available = Column(BOOLEAN)
-    extraction_single_use = Column(BOOLEAN)
-    extraction_requirements = Column(JSON)
-    extraction_tip = Column(ARRAY(TEXT))
-    extraction_map = Column(String)
-    extraction_update_time = Column(TIMESTAMP)
+    id = Column(String, primary_key=True)
+    name = Column(TEXT)
+    image = Column(TEXT)
+    faction = Column(String)
+    always_available = Column(BOOLEAN)
+    single_use = Column(BOOLEAN)
+    requirements = Column(JSON)
+    tip = Column(ARRAY(TEXT))
+    map = Column(String)
+    update_time = Column(TIMESTAMP)

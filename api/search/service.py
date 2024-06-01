@@ -10,7 +10,7 @@ class SearchService:
         """
         try:
             session = DataBaseConnector.create_session()
-            search_list = session.query(Search).order_by(Search.search_order).all()
+            search_list = session.query(Search).order_by(Search.order).all()
             session.close()
 
             return search_list

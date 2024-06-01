@@ -11,7 +11,7 @@ class MapService:
         ID를 통한 map 조회
         """
         session = DataBaseConnector.create_session()
-        response_map = session.query(Map).filter(Map.map_id == map_id).first()
+        response_map = session.query(Map).filter(Map.id == map_id).first()
         session.close()
         return response_map
 
@@ -24,13 +24,13 @@ class MapService:
             session = DataBaseConnector.create_session()
             maps = (session
                     .query(ParentMap)
-                    .options(subqueryload(ParentMap.map_sub))
-                    .order_by(ParentMap.map_order)
+                    .options(subqueryload(ParentMap.sub))
+                    .order_by(ParentMap.order)
                     .all())
             session.close()
 
             for parent_map in maps:
-                parent_map.map_sub.sort(key=lambda x: x.map_order)
+                parent_map.sub.sort(key=lambda x: x.order)
 
             return maps
         except Exception as e:

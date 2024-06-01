@@ -8,5 +8,5 @@ class Youtube(DataBaseConnector.Base):
     """
     __tablename__ = "tkw_youtube"
 
-    youtube_id = Column(String, primary_key=True)
-    youtube_update_time = Column(TIMESTAMP)
+    id = Column(String, primary_key=True)
+    update_time = Column(TIMESTAMP)

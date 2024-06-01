@@ -10,7 +10,7 @@ class MenuService:
         main_menu_list = (session
                           .query(MainMenu)
                           .options(subqueryload(MainMenu.sub_menus))
-                          .order_by(MainMenu.main_menu_order).all())
+                          .order_by(MainMenu.order).all())
         session.close()
         return main_menu_list
 
@@ -19,6 +19,6 @@ class MenuService:
         session = DataBaseConnector.create_session()
         main_info_list = (session
                           .query(MainInfo)
-                          .order_by(MainInfo.info_order).all())
+                          .order_by(MainInfo.order).all())
         session.close()
         return main_info_list
