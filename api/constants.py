@@ -16,3 +16,4 @@ class Message(Enum):
     SEARCH_NOT_FOUND = "SEARCH not found"
     ITEM_FILTER_NOT_FOUND = "Item filter not found"
     HEADSET_NOT_FOUND = "Headset not found"
+    HEAD_WEAR_NOT_FOUND = "Head wear not found"
