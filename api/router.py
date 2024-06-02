@@ -9,6 +9,7 @@ from api.map_of_tarkov import map_of_tarkov_router
 from api.table_column import table_column_router
 from api.search import search_router
 from api.item_filter import item_filter_router
+from api.item import item_router
 
 api_router = APIRouter()
 
@@ -22,3 +23,4 @@ api_router.include_router(map_of_tarkov_router.router, prefix="/map_of_tarkov")
 api_router.include_router(table_column_router.router, prefix="/table_column")
 api_router.include_router(search_router.router, prefix="/search")
 api_router.include_router(item_filter_router.router, prefix="/item_filter")
+api_router.include_router(item_router.router, prefix="/item")

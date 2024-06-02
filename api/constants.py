@@ -15,3 +15,4 @@ class Message(Enum):
     COLUMN_NOT_FOUND = "Column not found"
     SEARCH_NOT_FOUND = "SEARCH not found"
     ITEM_FILTER_NOT_FOUND = "Item filter not found"
+    HEADSET_NOT_FOUND = "Headset not found"
