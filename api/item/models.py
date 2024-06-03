@@ -35,3 +35,21 @@ class HeadWear(DataBaseConnector.Base):
     ricochet_str_kr = Column(TEXT)
     ricochet_str_en = Column(TEXT)
     update_time = Column(TIMESTAMP)
+
+
+class ArmorVest(DataBaseConnector.Base):
+    """
+    ArmorVest
+    """
+    __tablename__ = "tkw_armor_vest"
+
+    id = Column(TEXT, primary_key=True)
+    name = Column(TEXT)
+    short_name = Column(TEXT)
+    class_value = Column(TEXT)
+    areas_en = Column(ARRAY(TEXT))
+    areas_kr = Column(ARRAY(TEXT))
+    durability = Column(INTEGER)
+    weight = Column(NUMERIC)
+    image = Column(TEXT)
+    update_time = Column(TIMESTAMP)

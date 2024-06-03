@@ -1,4 +1,4 @@
-from api.item.models import Headset, HeadWear
+from api.item.models import Headset, HeadWear, ArmorVest
 from database import DataBaseConnector
 
 
@@ -44,6 +44,20 @@ class ItemService:
             }
 
             return result_head_wear
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_armo_vest():
+        """
+        armor vest 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session()
+            headset = (session.query(ArmorVest).order_by(ArmorVest.class_value).all())
+            session.close()
+            return headset
         except Exception as e:
             print("오류 발생:", e)
             return None

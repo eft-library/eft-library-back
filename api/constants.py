@@ -17,3 +17,4 @@ class Message(Enum):
     ITEM_FILTER_NOT_FOUND = "Item filter not found"
     HEADSET_NOT_FOUND = "Headset not found"
     HEAD_WEAR_NOT_FOUND = "Head wear not found"
+    ARMOR_VEST_NOT_FOUND = "Armor vest not found"
