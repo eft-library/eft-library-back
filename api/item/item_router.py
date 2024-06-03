@@ -29,3 +29,11 @@ def get_all_head_wear():
     if armor_vest is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.ARMOR_VEST_NOT_FOUND)
     return CustomResponse.response(armor_vest, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/rig")
+def get_all_rig():
+    rig = ItemService.get_all_rig()
+    if rig is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.RIG_NOT_FOUND)
+    return CustomResponse.response(rig, HTTPCode.OK, Message.SUCCESS)

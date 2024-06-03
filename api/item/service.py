@@ -1,4 +1,4 @@
-from api.item.models import Headset, HeadWear, ArmorVest
+from api.item.models import Headset, HeadWear, ArmorVest, Rig
 from database import DataBaseConnector
 
 
@@ -58,6 +58,20 @@ class ItemService:
             headset = (session.query(ArmorVest).order_by(ArmorVest.class_value).all())
             session.close()
             return headset
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_rig():
+        """
+        rig 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session()
+            rig = (session.query(Rig).order_by(Rig.class_value).all())
+            session.close()
+            return rig
         except Exception as e:
             print("오류 발생:", e)
             return None

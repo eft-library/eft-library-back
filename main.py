@@ -27,6 +27,7 @@ app.mount("/static", StaticFiles(directory="ui/build/static"), name="static")
 @app.get("/head-wear/{path:path}")
 @app.get("/headset/{path:path}")
 @app.get("/armor-vest/{path:path}")
+@app.get("/rig/{path:path}")
 async def serve_react_app():
     return FileResponse("ui/build/index.html")
 

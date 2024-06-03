@@ -53,3 +53,22 @@ class ArmorVest(DataBaseConnector.Base):
     weight = Column(NUMERIC)
     image = Column(TEXT)
     update_time = Column(TIMESTAMP)
+
+
+class Rig(DataBaseConnector.Base):
+    """
+    Rig
+    """
+    __tablename__ = "tkw_rig"
+
+    id = Column(TEXT, primary_key=True)
+    name = Column(TEXT)
+    short_name = Column(TEXT)
+    class_value = Column(TEXT)
+    areas_en = Column(ARRAY(TEXT))
+    areas_kr = Column(ARRAY(TEXT))
+    durability = Column(INTEGER)
+    capacity = Column(INTEGER)
+    weight = Column(NUMERIC)
+    image = Column(TEXT)
+    update_time = Column(TIMESTAMP)
