@@ -25,7 +25,7 @@ class ItemService:
         """
         try:
             session = DataBaseConnector.create_session()
-            head_wear = (session.query(HeadWear).order_by(HeadWear.name).all())
+            head_wear = (session.query(HeadWear).order_by(HeadWear.class_value).all())
             session.close()
 
             class_head_wear = []
