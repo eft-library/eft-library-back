@@ -24,6 +24,8 @@ app.mount("/static", StaticFiles(directory="ui/build/static"), name="static")
 @app.get("/hideout/{path:path}")
 @app.get("/weapon/{path:path}")
 @app.get("/map_of_tarkov/{path:path}")
+@app.get("/head-wear/{path:path}")
+@app.get("/headset/{path:path}")
 async def serve_react_app():
     return FileResponse("ui/build/index.html")
 

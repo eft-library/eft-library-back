@@ -32,4 +32,6 @@ class HeadWear(DataBaseConnector.Base):
     ricochet_chance = Column(NUMERIC)
     weight = Column(NUMERIC)
     image = Column(TEXT)
+    ricochet_str_kr = Column(TEXT)
+    ricochet_str_en = Column(TEXT)
     update_time = Column(TIMESTAMP)
