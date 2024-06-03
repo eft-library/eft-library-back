@@ -71,7 +71,22 @@ class ItemService:
             session = DataBaseConnector.create_session()
             rig = (session.query(Rig).order_by(Rig.class_value).all())
             session.close()
-            return rig
+            class_rig = []
+
+            no_class_rig = []
+
+            for item in rig:
+                if item.class_value is None:
+                    no_class_rig.append(item)
+                else:
+                    class_rig.append(item)
+
+            result_rig = {
+                'class_rig': [item.__dict__ for item in class_rig],
+                'no_class_rig': [item.__dict__ for item in no_class_rig],
+            }
+
+            return result_rig
         except Exception as e:
             print("오류 발생:", e)
             return None
