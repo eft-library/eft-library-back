@@ -24,13 +24,14 @@ async def custom_swagger_ui_html():
     )
 
 
+app.include_router(api_router, prefix=os.getenv("API_PREFIX"))
+
+
 # React 애플리케이션의 index.html을 반환하는 라우터 추가
 @app.get("/{full_path:path}")
 async def serve_react_app():
     return FileResponse("ui/build/index.html")
 
-
-app.include_router(api_router, prefix=os.getenv("API_PREFIX"))
 
 # CORS 미들웨어 추가
 app.add_middleware(
