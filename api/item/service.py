@@ -11,7 +11,7 @@ class ItemService:
         """
         try:
             session = DataBaseConnector.create_session()
-            headset = (session.query(Headset).order_by(Headset.name).all())
+            headset = session.query(Headset).order_by(Headset.name).all()
             session.close()
             return headset
         except Exception as e:
@@ -25,7 +25,7 @@ class ItemService:
         """
         try:
             session = DataBaseConnector.create_session()
-            head_wear = (session.query(HeadWear).order_by(HeadWear.class_value).all())
+            head_wear = session.query(HeadWear).order_by(HeadWear.class_value).all()
             session.close()
 
             class_head_wear = []
@@ -39,8 +39,8 @@ class ItemService:
                     class_head_wear.append(wear)
 
             result_head_wear = {
-                'class_head_wear': [item.__dict__ for item in class_head_wear],
-                'no_class_head_wear': [item.__dict__ for item in no_class_head_wear],
+                "class_head_wear": [item.__dict__ for item in class_head_wear],
+                "no_class_head_wear": [item.__dict__ for item in no_class_head_wear],
             }
 
             return result_head_wear
@@ -55,7 +55,7 @@ class ItemService:
         """
         try:
             session = DataBaseConnector.create_session()
-            headset = (session.query(ArmorVest).order_by(ArmorVest.class_value).all())
+            headset = session.query(ArmorVest).order_by(ArmorVest.class_value).all()
             session.close()
             return headset
         except Exception as e:
@@ -69,7 +69,7 @@ class ItemService:
         """
         try:
             session = DataBaseConnector.create_session()
-            rig = (session.query(Rig).order_by(Rig.class_value).all())
+            rig = session.query(Rig).order_by(Rig.class_value, Rig.capacity).all()
             session.close()
             class_rig = []
 
@@ -82,8 +82,8 @@ class ItemService:
                     class_rig.append(item)
 
             result_rig = {
-                'class_rig': [item.__dict__ for item in class_rig],
-                'no_class_rig': [item.__dict__ for item in no_class_rig],
+                "class_rig": [item.__dict__ for item in class_rig],
+                "no_class_rig": [item.__dict__ for item in no_class_rig],
             }
 
             return result_rig
