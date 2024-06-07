@@ -1,6 +1,6 @@
 from sqlalchemy.orm import subqueryload
 
-from api.map.models import Map, ParentMap
+from api.map.models import  ParentMap
 from database import DataBaseConnector
 
 
@@ -11,7 +11,7 @@ class MapService:
         ID를 통한 map 조회
         """
         session = DataBaseConnector.create_session()
-        response_map = session.query(Map).filter(Map.id == map_id).first()
+        response_map = session.query(ParentMap).options(subqueryload(ParentMap.sub)).filter(ParentMap.id == map_id).first()
         session.close()
         return response_map
 

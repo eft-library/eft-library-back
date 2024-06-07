@@ -3,16 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 from api.router import api_router
-from starlette.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from fastapi.openapi.docs import get_swagger_ui_html
 
 load_dotenv()
 
 app = FastAPI(title="tarkov-korea-wiki-back")
-
-# 정적 파일 서빙 설정
-app.mount("/static", StaticFiles(directory="ui/build/static"), name="static")
 
 
 # Swagger UI 제공을 위한 엔드포인트
@@ -28,9 +23,6 @@ app.include_router(api_router, prefix=os.getenv("API_PREFIX"))
 
 
 # React 애플리케이션의 index.html을 반환하는 라우터 추가
-@app.get("/{full_path:path}")
-async def serve_react_app():
-    return FileResponse("ui/build/index.html")
 
 
 # CORS 미들웨어 추가
