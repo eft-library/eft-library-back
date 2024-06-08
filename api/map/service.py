@@ -1,6 +1,6 @@
 from sqlalchemy.orm import subqueryload
 
-from api.map.models import  ParentMap
+from api.map.models import Map, ParentMap
 from database import DataBaseConnector
 
 
@@ -36,3 +36,13 @@ class MapService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_sub_map(map_id: str):
+        """
+        ID를 통한 sub map 조회
+        """
+        session = DataBaseConnector.create_session()
+        response_map = session.query(Map).filter(Map.parent_value == map_id).all()
+        session.close()
+        return response_map
