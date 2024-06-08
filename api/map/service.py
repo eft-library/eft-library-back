@@ -43,6 +43,6 @@ class MapService:
         ID를 통한 sub map 조회
         """
         session = DataBaseConnector.create_session()
-        response_map = session.query(Map).filter(Map.parent_value == map_id).all()
+        response_map = session.query(Map).filter(Map.parent_value == map_id).order_by(Map.order).all()
         session.close()
         return response_map
