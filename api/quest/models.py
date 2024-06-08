@@ -24,8 +24,8 @@ class QuestPreview(DataBaseConnector.Base):
 
     id = Column(Integer, primary_key=True)
     npc_value = Column(String)
-    name_en = Column(String)
-    name_kr = Column(String)
+    title_en = Column("name_en",String)
+    title_kr = Column("name_kr", String)
     objectives_en = Column(ARRAY(String))
     objectives_kr = Column(ARRAY(String))
     rewards_en = Column(ARRAY(String))
@@ -34,3 +34,4 @@ class QuestPreview(DataBaseConnector.Base):
     update_time = Column(TIMESTAMP)
     order = Column(Integer)
     guide = Column(TEXT)
+    next_step = Column(ARRAY(String))
