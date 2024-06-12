@@ -1,4 +1,4 @@
-from api.item.models import Headset, HeadWear, ArmorVest, Rig, Backpack
+from api.item.models import Headset, HeadWear, ArmorVest, Rig, Backpack, Container, Key
 from database import DataBaseConnector
 
 
@@ -72,6 +72,34 @@ class ItemService:
             backpack = session.query(Backpack).order_by(Backpack.capacity).all()
             session.close()
             return backpack
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_container():
+        """
+        container 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session()
+            container = session.query(Container).order_by(Container.capacity).all()
+            session.close()
+            return container
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_key():
+        """
+        key 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session()
+            key = session.query(Key).order_by(Key.uses).all()
+            session.close()
+            return key
         except Exception as e:
             print("오류 발생:", e)
             return None

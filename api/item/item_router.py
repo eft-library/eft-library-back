@@ -45,3 +45,19 @@ def get_all_rig():
     if rig is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.RIG_NOT_FOUND)
     return CustomResponse.response(rig, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/container")
+def get_all_container():
+    container = ItemService.get_all_container()
+    if container is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.CONTAINER_NOT_FOUND)
+    return CustomResponse.response(container, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/key")
+def get_all_key():
+    key = ItemService.get_all_key()
+    if key is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.KEY_NOT_FOUND)
+    return CustomResponse.response(key, HTTPCode.OK, Message.SUCCESS)

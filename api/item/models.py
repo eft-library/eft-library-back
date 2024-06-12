@@ -93,3 +93,37 @@ class Backpack(DataBaseConnector.Base):
     weight = Column(NUMERIC)
     image = Column(TEXT)
     update_time = Column(TIMESTAMP)
+
+
+class Container(DataBaseConnector.Base):
+    """
+    Container
+    """
+
+    __tablename__ = "tkw_container"
+
+    id = Column(TEXT, primary_key=True)
+    name = Column(TEXT)
+    short_name = Column(TEXT)
+    grids = Column(JSON)
+    capacity = Column(INTEGER)
+    image = Column(TEXT)
+    update_time = Column(TIMESTAMP)
+
+
+class Key(DataBaseConnector.Base):
+    """
+    Key
+    """
+
+    __tablename__ = "tkw_key"
+
+    id = Column(TEXT, primary_key=True)
+    name = Column(TEXT)
+    short_name = Column(TEXT)
+    uses = Column(INTEGER)
+    use_map_en = Column(TEXT)
+    use_map_kr = Column(TEXT)
+    map_value = Column(TEXT)
+    image = Column(TEXT)
+    update_time = Column(TIMESTAMP)
