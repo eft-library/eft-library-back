@@ -97,7 +97,7 @@ class ItemService:
         """
         try:
             session = DataBaseConnector.create_session()
-            key = session.query(Key).order_by(Key.uses).all()
+            key = session.query(Key).order_by(Key.name).all()
             session.close()
             return key
         except Exception as e:
