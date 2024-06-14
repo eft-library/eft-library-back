@@ -253,9 +253,9 @@ CREATE TABLE TKW_KEY
     SHORT_NAME TEXT,
     IMAGE TEXT,
     USES INTEGER,
-    USE_MAP_EN TEXT,
-    USE_MAP_KR TEXT,
-    MAP_VALUE TEXT,
+    USE_MAP_EN TEXT[],
+    USE_MAP_KR TEXT[],
+    MAP_VALUE TEXT[],
     UPDATE_TIME timestamp with time zone default now()
 );
 COMMENT ON COLUMN TKW_KEY.ID IS 'Key ID';
