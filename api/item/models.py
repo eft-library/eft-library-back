@@ -91,6 +91,7 @@ class FoodDrink(DataBaseConnector.Base):
     energy = Column(INTEGER)
     hydration = Column(INTEGER)
     stim_effects = Column(JSON)
+    image = Column(TEXT)
     update_time = Column(TIMESTAMP)
 
 
