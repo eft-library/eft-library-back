@@ -141,7 +141,7 @@ class ItemService:
         """
         try:
             session = DataBaseConnector.create_session()
-            key = session.query(FoodDrink).order_by(desc(FoodDrink.category), FoodDrink.name_kr).all()
+            key = session.query(FoodDrink).order_by(desc(FoodDrink.category), FoodDrink.energy, FoodDrink.hydration).all()
             session.close()
             return key
         except Exception as e:
