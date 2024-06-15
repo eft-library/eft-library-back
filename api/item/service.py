@@ -1,5 +1,6 @@
-from api.item.models import Headset, HeadWear, ArmorVest, Rig, Backpack, Container, Key
+from api.item.models import Headset, HeadWear, ArmorVest, Rig, Backpack, Container, Key, FoodDrink
 from database import DataBaseConnector
+from sqlalchemy import desc
 
 
 class ItemService:
@@ -129,6 +130,20 @@ class ItemService:
             }
 
             return result_rig
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_food_drink():
+        """
+        food drink 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session()
+            key = session.query(FoodDrink).order_by(desc(FoodDrink.category), FoodDrink.name_kr).all()
+            session.close()
+            return key
         except Exception as e:
             print("오류 발생:", e)
             return None
