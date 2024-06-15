@@ -1,4 +1,4 @@
-from sqlalchemy import Column, TEXT, TIMESTAMP, ARRAY, INTEGER, NUMERIC
+from sqlalchemy import Column, TEXT, TIMESTAMP, JSON, ARRAY, INTEGER, NUMERIC
 
 from database import DataBaseConnector
 
@@ -70,5 +70,23 @@ class Rig(DataBaseConnector.Base):
     durability = Column(INTEGER)
     capacity = Column(INTEGER)
     weight = Column(NUMERIC)
+    image = Column(TEXT)
+    update_time = Column(TIMESTAMP)
+
+
+class FoodDrink(DataBaseConnector.Base):
+    """
+    FoodDrink
+    """
+    __tablename__ = "tkw_food_drink"
+
+    id = Column(TEXT, primary_key=True)
+    name_en = Column(TEXT)
+    name_kr = Column(TEXT)
+    short_name = Column(TEXT)
+    category = Column(TEXT)
+    energy = Column(INTEGER)
+    hydration = Column(INTEGER)
+    stim_effects = Column(JSON)
     image = Column(TEXT)
     update_time = Column(TIMESTAMP)
