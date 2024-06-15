@@ -19,3 +19,6 @@ class Message(Enum):
     HEAD_WEAR_NOT_FOUND = "Head wear not found"
     ARMOR_VEST_NOT_FOUND = "Armor vest not found"
     RIG_NOT_FOUND = "Rig not found"
+    BACKPACK_NOT_FOUND = "Backpack not found"
+    CONTAINER_NOT_FOUND = "Container not found"
+    KEY_NOT_FOUND = "Key not found"

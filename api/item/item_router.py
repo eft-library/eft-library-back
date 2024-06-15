@@ -31,9 +31,33 @@ def get_all_head_wear():
     return CustomResponse.response(armor_vest, HTTPCode.OK, Message.SUCCESS)
 
 
+@router.get("/backpack")
+def get_all_backpack():
+    backpack = ItemService.get_all_backpack()
+    if backpack is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.BACKPACK_NOT_FOUND)
+    return CustomResponse.response(backpack, HTTPCode.OK, Message.SUCCESS)
+
+
 @router.get("/rig")
 def get_all_rig():
     rig = ItemService.get_all_rig()
     if rig is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.RIG_NOT_FOUND)
     return CustomResponse.response(rig, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/container")
+def get_all_container():
+    container = ItemService.get_all_container()
+    if container is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.CONTAINER_NOT_FOUND)
+    return CustomResponse.response(container, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/key")
+def get_all_key():
+    key = ItemService.get_all_key()
+    if key is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.KEY_NOT_FOUND)
+    return CustomResponse.response(key, HTTPCode.OK, Message.SUCCESS)
