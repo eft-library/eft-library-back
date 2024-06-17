@@ -22,3 +22,4 @@ class Message(Enum):
     BACKPACK_NOT_FOUND = "Backpack not found"
     CONTAINER_NOT_FOUND = "Container not found"
     KEY_NOT_FOUND = "Key not found"
+    FOOD_DRINK_NOT_FOUND = "Food drink not found"

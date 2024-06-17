@@ -61,3 +61,11 @@ def get_all_key():
     if key is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.KEY_NOT_FOUND)
     return CustomResponse.response(key, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/food_drink")
+def get_all_food_drink():
+    food_drink = ItemService.get_all_food_drink()
+    if food_drink is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FOOD_DRINK_NOT_FOUND)
+    return CustomResponse.response(food_drink, HTTPCode.OK, Message.SUCCESS)
