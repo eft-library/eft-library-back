@@ -17,9 +17,7 @@ class MapOfTarkovService:
         try:
             load_dotenv()
             session = DataBaseConnector.create_session()
-            boss_list = (
-                session.query(Boss).filter(Boss.spawn.contains([map_id])).all()
-            )
+            boss_list = session.query(Boss).filter(Boss.spawn.contains([map_id])).all()
 
             updated_boss_list = []
             for boss in boss_list:
@@ -41,6 +39,7 @@ class MapOfTarkovService:
             extraction_info = (
                 session.query(Extraction)
                 .filter(Extraction.map == map_id)
+                .order_by(Extraction.faction)
                 .all()
             )
 
