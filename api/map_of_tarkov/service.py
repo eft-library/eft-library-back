@@ -39,7 +39,7 @@ class MapOfTarkovService:
             extraction_info = (
                 session.query(Extraction)
                 .filter(Extraction.map == map_id)
-                .order_by(Extraction.faction)
+                .order_by(Extraction.faction, Extraction.name)
                 .all()
             )
 
