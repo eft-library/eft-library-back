@@ -19,4 +19,5 @@ class Extraction(DataBaseConnector.Base):
     requirements = Column(JSON)
     tip = Column(ARRAY(TEXT))
     map = Column(String)
+    image_thumbnail = Column(TEXT)
     update_time = Column(TIMESTAMP)
