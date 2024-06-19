@@ -1,11 +1,12 @@
 from database import DataBaseConnector
-from sqlalchemy import Column, String, Integer, TIMESTAMP, ARRAY, Boolean, TEXT
+from sqlalchemy import Column, String, Integer, TIMESTAMP, ARRAY, Boolean, TEXT, JSON
 
 
 class NPC(DataBaseConnector.Base):
     """
     NPC
     """
+
     __tablename__ = "tkw_npc"
 
     id = Column(String, primary_key=True)
@@ -20,11 +21,12 @@ class QuestPreview(DataBaseConnector.Base):
     """
     QuestPreview
     """
+
     __tablename__ = "tkw_quest"
 
     id = Column(Integer, primary_key=True)
     npc_value = Column(String)
-    title_en = Column("name_en",String)
+    title_en = Column("name_en", String)
     title_kr = Column("name_kr", String)
     objectives_en = Column(ARRAY(String))
     objectives_kr = Column(ARRAY(String))
@@ -34,4 +36,5 @@ class QuestPreview(DataBaseConnector.Base):
     update_time = Column(TIMESTAMP)
     order = Column(Integer)
     guide = Column(TEXT)
-    next_step = Column(ARRAY(String))
+    requires = Column(JSON)
+    next = Column(JSON)
