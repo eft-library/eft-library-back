@@ -34,4 +34,4 @@ class QuestPreview(DataBaseConnector.Base):
     update_time = Column(TIMESTAMP)
     order = Column(Integer)
     guide = Column(TEXT)
-    next_step = Column(ARRAY(String))
+    requires = Column(ARRAY(String))
