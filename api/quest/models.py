@@ -22,7 +22,7 @@ class QuestPreview(DataBaseConnector.Base):
     """
     __tablename__ = "tkw_quest"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True)
     npc_value = Column(String)
     title_en = Column("name_en",String)
     title_kr = Column("name_kr", String)

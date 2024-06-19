@@ -24,7 +24,7 @@ def get_all_quest():
 
 
 @router.get("/detail/{quest_id}")
-def get_quest_by_id(quest_id: int):
+def get_quest_by_id(quest_id: str):
     quest = QuestService.get_quest_by_id(quest_id)
     if quest is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.QUEST_NOT_FOUND)
