@@ -168,5 +168,6 @@ class Medical(DataBaseConnector.Base):
     energy_impact = Column(INTEGER)
     hydration_impact = Column(INTEGER)
     painkiller_duration = Column(INTEGER)
+    hitpoints = Column(INTEGER)
     image = Column(TEXT)
     update_time = Column(TIMESTAMP)
