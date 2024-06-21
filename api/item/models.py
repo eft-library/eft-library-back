@@ -81,6 +81,7 @@ class FoodDrink(DataBaseConnector.Base):
     """
     FoodDrink
     """
+
     __tablename__ = "tkw_food_drink"
 
     id = Column(TEXT, primary_key=True)
@@ -142,5 +143,30 @@ class Key(DataBaseConnector.Base):
     use_map_en = Column(ARRAY(TEXT))
     use_map_kr = Column(ARRAY(TEXT))
     map_value = Column(ARRAY(TEXT))
+    image = Column(TEXT)
+    update_time = Column(TIMESTAMP)
+
+
+class Medical(DataBaseConnector.Base):
+    """
+    Medical
+    """
+
+    __tablename__ = "tkw_medical"
+
+    id = Column(TEXT, primary_key=True)
+    name_en = Column(TEXT)
+    name_kr = Column(TEXT)
+    short_name = Column(TEXT)
+    cures_en = Column(ARRAY(TEXT))
+    cures_kr = Column(ARRAY(TEXT))
+    category = Column(TEXT)
+    buff = Column(JSON)
+    debuff = Column(JSON)
+    user_time = Column(INTEGER)
+    uses = Column(INTEGER)
+    energy_impact = Column(INTEGER)
+    hydration_impact = Column(INTEGER)
+    painkiller_duration = Column(INTEGER)
     image = Column(TEXT)
     update_time = Column(TIMESTAMP)
