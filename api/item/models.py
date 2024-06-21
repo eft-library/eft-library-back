@@ -163,7 +163,7 @@ class Medical(DataBaseConnector.Base):
     category = Column(TEXT)
     buff = Column(JSON)
     debuff = Column(JSON)
-    user_time = Column(INTEGER)
+    use_time = Column(INTEGER)
     uses = Column(INTEGER)
     energy_impact = Column(INTEGER)
     hydration_impact = Column(INTEGER)
