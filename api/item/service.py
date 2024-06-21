@@ -1,4 +1,14 @@
-from api.item.models import Headset, HeadWear, ArmorVest, Rig, Backpack, Container, Key, FoodDrink
+from api.item.models import (
+    Headset,
+    HeadWear,
+    ArmorVest,
+    Rig,
+    Backpack,
+    Container,
+    Key,
+    FoodDrink,
+    Medical,
+)
 from database import DataBaseConnector
 from sqlalchemy import desc
 
@@ -141,9 +151,29 @@ class ItemService:
         """
         try:
             session = DataBaseConnector.create_session()
-            key = session.query(FoodDrink).order_by(desc(FoodDrink.category), FoodDrink.energy, FoodDrink.hydration).all()
+            food_drink = (
+                session.query(FoodDrink)
+                .order_by(
+                    desc(FoodDrink.category), FoodDrink.energy, FoodDrink.hydration
+                )
+                .all()
+            )
             session.close()
-            return key
+            return food_drink
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_medical():
+        """
+        medical 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session()
+            medical = session.query(Medical).order_by(Medical.category).all()
+            session.close()
+            return medical
         except Exception as e:
             print("오류 발생:", e)
             return None
