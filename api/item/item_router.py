@@ -73,7 +73,7 @@ def get_all_food_drink():
 
 @router.get("/medical")
 def get_all_medical():
-    medical = ItemService.get_all_food_drink()
+    medical = ItemService.get_all_medical()
     if medical is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.MEDICAL)
     return CustomResponse.response(medical, HTTPCode.OK, Message.SUCCESS)
