@@ -173,3 +173,27 @@ class Medical(DataBaseConnector.Base):
     hitpoints = Column(INTEGER)
     image = Column(TEXT)
     update_time = Column(TIMESTAMP)
+
+
+class Ammo(DataBaseConnector.Base):
+    """
+    Ammo
+    """
+
+    __tablename__ = "tkw_ammo"
+
+    id = Column(TEXT, primary_key=True)
+    name = Column(TEXT)
+    short_name = Column(TEXT)
+    category = Column(TEXT)
+    round = Column(TEXT)
+    damage = Column(INTEGER)
+    penetration_power = Column(INTEGER)
+    armor_damage = Column(INTEGER)
+    accuracy_modifier = Column(NUMERIC)
+    recoil_modifier = Column(NUMERIC)
+    light_bleed_modifier = Column(NUMERIC)
+    heavy_bleed_modifier = Column(NUMERIC)
+    efficiency = Column(ARRAY(INTEGER))
+    image = Column(TEXT)
+    update_time = Column(TIMESTAMP)

@@ -7,7 +7,7 @@ from api.item.models import (
     Container,
     Key,
     FoodDrink,
-    Medical,
+    Medical,Ammo
 )
 from database import DataBaseConnector
 from sqlalchemy import desc
@@ -174,6 +174,20 @@ class ItemService:
             medical = session.query(Medical).order_by(Medical.category).all()
             session.close()
             return medical
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_ammo():
+        """
+        ammo 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session()
+            ammo = session.query(Ammo).order_by(Ammo.category).all()
+            session.close()
+            return ammo
         except Exception as e:
             print("오류 발생:", e)
             return None

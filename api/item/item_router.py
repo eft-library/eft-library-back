@@ -77,3 +77,11 @@ def get_all_medical():
     if medical is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.MEDICAL)
     return CustomResponse.response(medical, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/ammo")
+def get_all_ammo():
+    ammo = ItemService.get_all_ammo()
+    if ammo is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.AMMO)
+    return CustomResponse.response(ammo, HTTPCode.OK, Message.SUCCESS)

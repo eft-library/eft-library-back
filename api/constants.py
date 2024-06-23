@@ -24,3 +24,4 @@ class Message(Enum):
     KEY_NOT_FOUND = "Key not found"
     FOOD_DRINK_NOT_FOUND = "Food drink not found"
     MEDICAL = "Medical not found"
+    AMMO = "Ammo not found"
