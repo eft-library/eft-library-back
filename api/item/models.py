@@ -197,3 +197,19 @@ class Ammo(DataBaseConnector.Base):
     efficiency = Column(ARRAY(INTEGER))
     image = Column(TEXT)
     update_time = Column(TIMESTAMP)
+
+
+class Loot(DataBaseConnector.Base):
+    """
+    Loot
+    """
+
+    __tablename__ = "tkw_loot"
+
+    id = Column(TEXT, primary_key=True)
+    name = Column(TEXT)
+    short_name = Column(TEXT)
+    image = Column(TEXT)
+    notes = Column(JSON)
+    category = Column(TEXT)
+    update_time = Column(TIMESTAMP)

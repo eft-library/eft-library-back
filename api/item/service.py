@@ -9,6 +9,7 @@ from api.item.models import (
     FoodDrink,
     Medical,
     Ammo,
+    Loot,
 )
 from database import DataBaseConnector
 from sqlalchemy import desc
@@ -188,6 +189,20 @@ class ItemService:
             with session() as s:
                 ammo = s.query(Ammo).order_by(Ammo.armor_damage).all()
                 return ammo
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_loot():
+        """
+        loot 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                loot = s.query(Loot).order_by(Loot.category).all()
+                return loot
         except Exception as e:
             print("오류 발생:", e)
             return None

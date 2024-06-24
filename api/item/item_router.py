@@ -85,3 +85,11 @@ def get_all_ammo():
     if ammo is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.AMMO)
     return CustomResponse.response(ammo, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/loot")
+def get_all_loot():
+    loot = ItemService.get_all_loot()
+    if loot is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.LOOT)
+    return CustomResponse.response(loot, HTTPCode.OK, Message.SUCCESS)

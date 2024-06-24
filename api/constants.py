@@ -25,3 +25,4 @@ class Message(Enum):
     FOOD_DRINK_NOT_FOUND = "Food drink not found"
     MEDICAL = "Medical not found"
     AMMO = "Ammo not found"
+    LOOT = "Loot not found"
