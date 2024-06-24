@@ -7,24 +7,24 @@ from api.item.models import (
     Container,
     Key,
     FoodDrink,
-    Medical,Ammo
+    Medical,
+    Ammo,
 )
 from database import DataBaseConnector
 from sqlalchemy import desc
 
 
 class ItemService:
-
     @staticmethod
     def get_all_headset():
         """
         headset 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session()
-            headset = session.query(Headset).order_by(Headset.name).all()
-            session.close()
-            return headset
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                headset = s.query(Headset).order_by(Headset.name).all()
+                return headset
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -35,9 +35,9 @@ class ItemService:
         head_wear 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session()
-            head_wear = session.query(HeadWear).order_by(HeadWear.class_value).all()
-            session.close()
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                head_wear = s.query(HeadWear).order_by(HeadWear.class_value).all()
 
             class_head_wear = []
 
@@ -60,15 +60,15 @@ class ItemService:
             return None
 
     @staticmethod
-    def get_all_armo_vest():
+    def get_all_armor_vest():
         """
         armor vest 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session()
-            headset = session.query(ArmorVest).order_by(ArmorVest.class_value).all()
-            session.close()
-            return headset
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                armor_vest = s.query(ArmorVest).order_by(ArmorVest.class_value).all()
+                return armor_vest
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -79,10 +79,10 @@ class ItemService:
         backpack 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session()
-            backpack = session.query(Backpack).order_by(Backpack.capacity).all()
-            session.close()
-            return backpack
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                backpack = s.query(Backpack).order_by(Backpack.capacity).all()
+                return backpack
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -93,10 +93,10 @@ class ItemService:
         container 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session()
-            container = session.query(Container).order_by(Container.capacity).all()
-            session.close()
-            return container
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                container = s.query(Container).order_by(Container.capacity).all()
+                return container
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -107,10 +107,10 @@ class ItemService:
         key 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session()
-            key = session.query(Key).order_by(Key.name).all()
-            session.close()
-            return key
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                key = s.query(Key).order_by(Key.name).all()
+                return key
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -121,11 +121,11 @@ class ItemService:
         rig 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session()
-            rig = session.query(Rig).order_by(Rig.class_value, Rig.capacity).all()
-            session.close()
-            class_rig = []
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                rig = s.query(Rig).order_by(Rig.class_value, Rig.capacity).all()
 
+            class_rig = []
             no_class_rig = []
 
             for item in rig:
@@ -150,16 +150,16 @@ class ItemService:
         food drink 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session()
-            food_drink = (
-                session.query(FoodDrink)
-                .order_by(
-                    desc(FoodDrink.category), FoodDrink.energy, FoodDrink.hydration
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                food_drink = (
+                    s.query(FoodDrink)
+                    .order_by(
+                        desc(FoodDrink.category), FoodDrink.energy, FoodDrink.hydration
+                    )
+                    .all()
                 )
-                .all()
-            )
-            session.close()
-            return food_drink
+                return food_drink
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -170,10 +170,10 @@ class ItemService:
         medical 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session()
-            medical = session.query(Medical).order_by(Medical.category).all()
-            session.close()
-            return medical
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                medical = s.query(Medical).order_by(Medical.category).all()
+                return medical
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -184,10 +184,10 @@ class ItemService:
         ammo 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session()
-            ammo = session.query(Ammo).order_by(Ammo.category).all()
-            session.close()
-            return ammo
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                ammo = s.query(Ammo).order_by(Ammo.category).all()
+                return ammo
         except Exception as e:
             print("오류 발생:", e)
             return None

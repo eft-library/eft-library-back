@@ -25,7 +25,7 @@ def get_all_head_wear():
 
 @router.get("/armor_vest")
 def get_all_head_wear():
-    armor_vest = ItemService.get_all_armo_vest()
+    armor_vest = ItemService.get_all_armor_vest()
     if armor_vest is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.ARMOR_VEST_NOT_FOUND)
     return CustomResponse.response(armor_vest, HTTPCode.OK, Message.SUCCESS)

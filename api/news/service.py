@@ -1,13 +1,15 @@
 from api.news.models import Youtube
 from database import DataBaseConnector
-import copy
 
 
 class NewsService:
     @staticmethod
     def get_youtube():
-        session = DataBaseConnector.create_session()
-        youtube = session.query(Youtube).one()
-        session.close()
-        return copy.deepcopy(youtube)
-        
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                youtube = s.query(Youtube).one()
+                return youtube
+        except Exception as e:
+            print("오류 발생:", e)
+            return None

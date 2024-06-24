@@ -15,7 +15,7 @@ def get_all_column():
     return CustomResponse.response(column_list, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/info/{column_key}")
+@router.get("/info/{column_key}", deprecated=True)
 def get_all_column(column_key: str):
     column_list = TableColumnService.get_column(column_key)
     if column_list is None:
