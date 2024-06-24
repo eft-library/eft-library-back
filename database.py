@@ -32,23 +32,3 @@ class DataBaseConnector:
         engine = cls.create_engine()
         session = sessionmaker(bind=engine)
         return session
-
-    @classmethod
-    def create_session(cls):
-        load_dotenv()
-        url_object = URL.create(
-            "postgresql+psycopg2",
-            username=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            host=os.getenv("DB_HOST"),
-            database=os.getenv("DB_NAME"),
-            port=os.getenv("DB_PORT"),
-        )
-
-        engine = create_engine(url_object, echo=True)
-        session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-        return session()
-
-    @classmethod
-    def get_base(cls):
-        return cls.Base
