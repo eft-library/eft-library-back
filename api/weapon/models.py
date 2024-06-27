@@ -7,7 +7,7 @@ class Weapon(DataBaseConnector.Base):
     Weapon Gun
     """
 
-    __tablename__ = "tkw_weapon"
+    __tablename__ = "tkl_weapon"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -30,7 +30,7 @@ class Knife(DataBaseConnector.Base):
     Weapon Knife
     """
 
-    __tablename__ = "tkw_knife"
+    __tablename__ = "tkl_knife"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -48,7 +48,7 @@ class Throwable(DataBaseConnector.Base):
     Weapon Throwable
     """
 
-    __tablename__ = "tkw_throwable"
+    __tablename__ = "tkl_throwable"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)

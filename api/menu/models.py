@@ -8,7 +8,8 @@ class MainMenu(DataBaseConnector.Base):
     """
     MainMenu
     """
-    __tablename__ = "tkw_main_menu"
+
+    __tablename__ = "tkl_main_menu"
 
     value = Column(String, primary_key=True)
     en_name = Column(String)
@@ -17,19 +18,20 @@ class MainMenu(DataBaseConnector.Base):
     order = Column(Integer)
     image = Column(String)
     update_time = Column(TIMESTAMP)
-    sub_menus = relationship("SubMenu", backref="main_menu", order_by='SubMenu.order')
+    sub_menus = relationship("SubMenu", backref="main_menu", order_by="SubMenu.order")
 
 
 class SubMenu(DataBaseConnector.Base):
     """
     SubMenu
     """
-    __tablename__ = "tkw_sub_menu"
+
+    __tablename__ = "tkl_sub_menu"
 
     value = Column(String, primary_key=True)
     en_name = Column(String)
     kr_name = Column(String)
-    parent_value = Column(String, ForeignKey('tkw_main_menu.value'))
+    parent_value = Column(String, ForeignKey("tkl_main_menu.value"))
     link = Column(String)
     order = Column(Integer)
     image = Column(String)
@@ -40,7 +42,8 @@ class MainInfo(DataBaseConnector.Base):
     """
     MainInfo
     """
-    __tablename__ = "tkw_main"
+
+    __tablename__ = "tkl_main"
 
     value = Column(String, primary_key=True)
     en_name = Column(String)

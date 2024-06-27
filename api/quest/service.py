@@ -42,7 +42,7 @@ class QuestService:
 
             if quest_npc[0].guide is not None:
                 quest_npc[0].guide = quest_npc[0].guide.replace(
-                    "/tkw_quest", os.getenv("NAS_DATA") + "/tkw_quest"
+                    "/tkl_quest", os.getenv("NAS_DATA") + "/tkl_quest"
                 )
             combined_info = {**quest_npc[0].__dict__, **quest_npc[1].__dict__}
 

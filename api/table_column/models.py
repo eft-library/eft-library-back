@@ -9,7 +9,7 @@ class TableColumn(DataBaseConnector.Base):
     Table Column
     """
 
-    __tablename__ = "tkw_table_column"
+    __tablename__ = "tkl_table_column"
 
     id = Column(Integer, primary_key=True)
     value_en = Column(ARRAY(TEXT))

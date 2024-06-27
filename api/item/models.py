@@ -7,7 +7,7 @@ class Headset(DataBaseConnector.Base):
     Headset
     """
 
-    __tablename__ = "tkw_head_phone"
+    __tablename__ = "tkl_head_phone"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -21,7 +21,7 @@ class HeadWear(DataBaseConnector.Base):
     HeadWear
     """
 
-    __tablename__ = "tkw_head_wear"
+    __tablename__ = "tkl_head_wear"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -43,7 +43,7 @@ class ArmorVest(DataBaseConnector.Base):
     ArmorVest
     """
 
-    __tablename__ = "tkw_armor_vest"
+    __tablename__ = "tkl_armor_vest"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -62,7 +62,7 @@ class Rig(DataBaseConnector.Base):
     Rig
     """
 
-    __tablename__ = "tkw_rig"
+    __tablename__ = "tkl_rig"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -82,7 +82,7 @@ class FoodDrink(DataBaseConnector.Base):
     FoodDrink
     """
 
-    __tablename__ = "tkw_food_drink"
+    __tablename__ = "tkl_food_drink"
 
     id = Column(TEXT, primary_key=True)
     name_en = Column(TEXT)
@@ -102,7 +102,7 @@ class Backpack(DataBaseConnector.Base):
     Backpack
     """
 
-    __tablename__ = "tkw_backpack"
+    __tablename__ = "tkl_backpack"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -119,7 +119,7 @@ class Container(DataBaseConnector.Base):
     Container
     """
 
-    __tablename__ = "tkw_container"
+    __tablename__ = "tkl_container"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -135,7 +135,7 @@ class Key(DataBaseConnector.Base):
     Key
     """
 
-    __tablename__ = "tkw_key"
+    __tablename__ = "tkl_key"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -154,7 +154,7 @@ class Medical(DataBaseConnector.Base):
     Medical
     """
 
-    __tablename__ = "tkw_medical"
+    __tablename__ = "tkl_medical"
 
     id = Column(TEXT, primary_key=True)
     name_en = Column(TEXT)
@@ -180,7 +180,7 @@ class Ammo(DataBaseConnector.Base):
     Ammo
     """
 
-    __tablename__ = "tkw_ammo"
+    __tablename__ = "tkl_ammo"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -204,7 +204,7 @@ class Loot(DataBaseConnector.Base):
     Loot
     """
 
-    __tablename__ = "tkw_loot"
+    __tablename__ = "tkl_loot"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)

@@ -9,7 +9,7 @@ class Boss(DataBaseConnector.Base):
     Boss
     """
 
-    __tablename__ = "tkw_boss"
+    __tablename__ = "tkl_boss"
 
     id = Column(Integer, primary_key=True)
     name_en = Column(String)

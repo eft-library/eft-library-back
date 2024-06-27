@@ -8,7 +8,7 @@ class Extraction(DataBaseConnector.Base):
     Extraction info
     """
 
-    __tablename__ = "tkw_extraction"
+    __tablename__ = "tkl_extraction"
 
     id = Column(String, primary_key=True)
     name = Column(TEXT)

@@ -9,7 +9,7 @@ class ParentMap(DataBaseConnector.Base):
     parent map
     """
 
-    __tablename__ = "tkw_map_parent"
+    __tablename__ = "tkl_map_parent"
 
     id = Column(String, primary_key=True)
     name_en = Column(String)
@@ -32,7 +32,7 @@ class Map(DataBaseConnector.Base):
     map
     """
 
-    __tablename__ = "tkw_map"
+    __tablename__ = "tkl_map"
 
     id = Column(String, primary_key=True)
     name_en = Column(String)
@@ -44,7 +44,7 @@ class Map(DataBaseConnector.Base):
     depth = Column(Integer)
     order = Column(Integer)
     link = Column(String)
-    parent_value = Column(String, ForeignKey("tkw_map_parent.id"))
+    parent_value = Column(String, ForeignKey("tkl_map_parent.id"))
     main_image = Column(String)
     mot_image = Column(String)
     update_time = Column(TIMESTAMP)

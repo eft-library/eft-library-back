@@ -8,7 +8,7 @@ class Search(DataBaseConnector.Base):
     search info
     """
 
-    __tablename__ = "tkw_search"
+    __tablename__ = "tkl_search"
 
     id = Column(String, primary_key=True)
     value = Column(String)

@@ -7,7 +7,7 @@ class NPC(DataBaseConnector.Base):
     NPC
     """
 
-    __tablename__ = "tkw_npc"
+    __tablename__ = "tkl_npc"
 
     id = Column(String, primary_key=True)
     name_en = Column(String)
@@ -22,7 +22,7 @@ class QuestPreview(DataBaseConnector.Base):
     QuestPreview
     """
 
-    __tablename__ = "tkw_quest"
+    __tablename__ = "tkl_quest"
 
     id = Column(String, primary_key=True)
     npc_value = Column(String)
