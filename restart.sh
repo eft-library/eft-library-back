@@ -15,7 +15,7 @@ else
   echo "포트 $port를 사용 중인 프로세스가 없습니다."
 fi
 
-sleep 5
+sleep 1
 
 piid=$(netstat -tnlp | grep ":$port\b" | awk '{print $7}' | cut -d'/' -f1)
 
@@ -28,6 +28,6 @@ else
   echo "포트 $port를 사용 중인 프로세스가 없습니다."
 fi
 
-sleep 5
+sleep 1
 
 nohup uvicorn main:app --reload --host=0.0.0.0 --port=9010 > log.out 2>&1 &
