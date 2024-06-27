@@ -7,7 +7,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 
 load_dotenv()
 
-app = FastAPI(title="tarkov-korea-wiki-back")
+app = FastAPI(title="tarkov-library-back")
 
 
 # Swagger UI 제공을 위한 엔드포인트

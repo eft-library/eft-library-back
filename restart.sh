@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source venv/bin/activate
+
 # 포트 번호를 첫 번째 인수로 받아옴
 port=9010
 
@@ -31,3 +33,7 @@ fi
 sleep 1
 
 nohup uvicorn main:app --reload --host=0.0.0.0 --port=9010 > log.out 2>&1 &
+
+echo "fastAPI를 실행합니다."
+
+deactivate
