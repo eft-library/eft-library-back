@@ -15,9 +15,9 @@ def get_all_headset():
     return CustomResponse.response(headset, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/head_wear")
-def get_all_head_wear():
-    head_wear = ItemService.get_all_head_wear()
+@router.get("/headwear")
+def get_all_headwear():
+    head_wear = ItemService.get_all_headwear()
     if head_wear is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.HEAD_WEAR_NOT_FOUND)
     return CustomResponse.response(head_wear, HTTPCode.OK, Message.SUCCESS)
@@ -63,12 +63,12 @@ def get_all_key():
     return CustomResponse.response(key, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/food_drink")
-def get_all_food_drink():
-    food_drink = ItemService.get_all_food_drink()
-    if food_drink is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FOOD_DRINK_NOT_FOUND)
-    return CustomResponse.response(food_drink, HTTPCode.OK, Message.SUCCESS)
+@router.get("/provisions")
+def get_all_provisions():
+    provisions = ItemService.get_all_provisions()
+    if provisions is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.PROVISION_NOT_FOUND)
+    return CustomResponse.response(provisions, HTTPCode.OK, Message.SUCCESS)
 
 
 @router.get("/medical")

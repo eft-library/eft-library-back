@@ -7,7 +7,7 @@ class Headset(DataBaseConnector.Base):
     Headset
     """
 
-    __tablename__ = "tkl_headphone"
+    __tablename__ = "tkl_headset"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -16,9 +16,9 @@ class Headset(DataBaseConnector.Base):
     update_time = Column(TIMESTAMP)
 
 
-class HeadWear(DataBaseConnector.Base):
+class Headwear(DataBaseConnector.Base):
     """
-    HeadWear
+    Headwear
     """
 
     __tablename__ = "tkl_headwear"
@@ -77,12 +77,12 @@ class Rig(DataBaseConnector.Base):
     update_time = Column(TIMESTAMP)
 
 
-class FoodDrink(DataBaseConnector.Base):
+class Provisions(DataBaseConnector.Base):
     """
-    FoodDrink
+    Provisions
     """
 
-    __tablename__ = "tkl_food_drink"
+    __tablename__ = "tkl_provisions"
 
     id = Column(TEXT, primary_key=True)
     name_en = Column(TEXT)

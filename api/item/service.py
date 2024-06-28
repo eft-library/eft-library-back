@@ -1,12 +1,12 @@
 from api.item.models import (
     Headset,
-    HeadWear,
+    Headwear,
     ArmorVest,
     Rig,
     Backpack,
     Container,
     Key,
-    FoodDrink,
+    Provisions,
     Medical,
     Ammo,
     Loot,
@@ -31,31 +31,31 @@ class ItemService:
             return None
 
     @staticmethod
-    def get_all_head_wear():
+    def get_all_headwear():
         """
-        head_wear 전체 조회
+        headwear 전체 조회
         """
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                head_wear = s.query(HeadWear).order_by(HeadWear.class_value).all()
+                headwear = s.query(Headwear).order_by(Headwear.class_value).all()
 
-            class_head_wear = []
+            class_headwear = []
 
-            no_class_head_wear = []
+            no_class_headwear = []
 
-            for wear in head_wear:
+            for wear in headwear:
                 if wear.class_value is None:
-                    no_class_head_wear.append(wear)
+                    no_class_headwear.append(wear)
                 else:
-                    class_head_wear.append(wear)
+                    class_headwear.append(wear)
 
-            result_head_wear = {
-                "class_head_wear": [item.__dict__ for item in class_head_wear],
-                "no_class_head_wear": [item.__dict__ for item in no_class_head_wear],
+            result_headwear = {
+                "class_headwear": [item.__dict__ for item in class_headwear],
+                "no_class_headwear": [item.__dict__ for item in no_class_headwear],
             }
 
-            return result_head_wear
+            return result_headwear
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -146,21 +146,23 @@ class ItemService:
             return None
 
     @staticmethod
-    def get_all_food_drink():
+    def get_all_provisions():
         """
-        food drink 전체 조회
+        provisions 전체 조회
         """
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                food_drink = (
-                    s.query(FoodDrink)
+                provisions = (
+                    s.query(Provisions)
                     .order_by(
-                        desc(FoodDrink.category), FoodDrink.energy, FoodDrink.hydration
+                        desc(Provisions.category),
+                        Provisions.energy,
+                        Provisions.hydration,
                     )
                     .all()
                 )
-                return food_drink
+                return provisions
         except Exception as e:
             print("오류 발생:", e)
             return None
