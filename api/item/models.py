@@ -7,7 +7,7 @@ class Headset(DataBaseConnector.Base):
     Headset
     """
 
-    __tablename__ = "tkl_head_phone"
+    __tablename__ = "tkl_headphone"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
@@ -21,7 +21,7 @@ class HeadWear(DataBaseConnector.Base):
     HeadWear
     """
 
-    __tablename__ = "tkl_head_wear"
+    __tablename__ = "tkl_headwear"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
