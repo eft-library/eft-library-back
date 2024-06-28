@@ -207,9 +207,11 @@ class Loot(DataBaseConnector.Base):
     __tablename__ = "tkl_loot"
 
     id = Column(TEXT, primary_key=True)
-    name = Column(TEXT)
+    name_en = Column(TEXT)
+    name_kr = Column(TEXT)
     short_name = Column(TEXT)
     image = Column(TEXT)
     notes = Column(JSON)
-    category = Column(TEXT)
+    category_en = Column(TEXT)
+    category_kr = Column(TEXT)
     update_time = Column(TIMESTAMP)
