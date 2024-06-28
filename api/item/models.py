@@ -212,6 +212,5 @@ class Loot(DataBaseConnector.Base):
     short_name = Column(TEXT)
     image = Column(TEXT)
     notes = Column(JSON)
-    category_en = Column(TEXT)
-    category_kr = Column(TEXT)
+    category = Column(TEXT)
     update_time = Column(TIMESTAMP)
