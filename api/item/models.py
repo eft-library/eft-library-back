@@ -93,7 +93,7 @@ class Provisions(DataBaseConnector.Base):
     hydration = Column(INTEGER)
     stim_effects = Column(JSON)
     image = Column(TEXT)
-    link_quest = Column(JSON)
+    notes = Column(JSON)
     update_time = Column(TIMESTAMP)
 
 
@@ -145,7 +145,7 @@ class Key(DataBaseConnector.Base):
     use_map_kr = Column(ARRAY(TEXT))
     map_value = Column(ARRAY(TEXT))
     image = Column(TEXT)
-    link_quest = Column(JSON)
+    notes = Column(JSON)
     update_time = Column(TIMESTAMP)
 
 
