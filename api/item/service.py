@@ -203,7 +203,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                loot = s.query(Loot).order_by(Loot.category).all()
+                loot = s.query(Loot).order_by(Loot.name_en).all()
                 return loot
         except Exception as e:
             print("오류 발생:", e)
