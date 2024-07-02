@@ -26,3 +26,4 @@ class Message(Enum):
     MEDICAL = "Medical not found"
     AMMO = "Ammo not found"
     LOOT = "Loot not found"
+    HIDEOUT = "Hideout not found"

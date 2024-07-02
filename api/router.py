@@ -10,6 +10,7 @@ from api.table_column import table_column_router
 from api.search import search_router
 from api.item_filter import item_filter_router
 from api.item import item_router
+from api.hideout import hideout_router
 
 api_router = APIRouter()
 
@@ -24,3 +25,4 @@ api_router.include_router(table_column_router.router, prefix="/table_column")
 api_router.include_router(search_router.router, prefix="/search")
 api_router.include_router(item_filter_router.router, prefix="/item_filter")
 api_router.include_router(item_router.router, prefix="/item")
+api_router.include_router(hideout_router.router, prefix="/hideout")

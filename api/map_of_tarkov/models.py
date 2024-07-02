@@ -17,7 +17,7 @@ class Extraction(DataBaseConnector.Base):
     always_available = Column(BOOLEAN)
     single_use = Column(BOOLEAN)
     requirements = Column(JSON)
-    tip = Column(ARRAY(TEXT))
+    tip = Column(JSON)
     map = Column(String)
     image_thumbnail = Column(TEXT)
     update_time = Column(TIMESTAMP)
