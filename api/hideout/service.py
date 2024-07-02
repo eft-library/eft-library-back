@@ -1,15 +1,4 @@
 from sqlalchemy import text
-
-from api.hideout.models import (
-    HideoutMaster,
-    HideoutLevel,
-    HideoutCrafts,
-    HideoutBonus,
-    HideoutStationRequire,
-    HideoutItemRequire,
-    HideoutSkillRequire,
-    HideoutTraderRequire,
-)
 from database import DataBaseConnector
 
 
@@ -54,7 +43,8 @@ class HideoutService:
                                                     'name_en', tkl_hideout_item_require.name_en,
                                                     'name_kr', tkl_hideout_item_require.name_kr,
                                                     'count', tkl_hideout_item_require.count,
-                                                    'quantity', tkl_hideout_item_require.quantity
+                                                    'quantity', tkl_hideout_item_require.quantity,
+                                                    'image', tkl_hideout_item_require.image
                                                 )
                                             ) as item_require,
                                             json_agg(
@@ -69,14 +59,16 @@ class HideoutService:
                                                     'name_kr', tkl_hideout_trader_require.name_kr,
                                                     'compare', tkl_hideout_trader_require.compare,
                                                     'require_type', tkl_hideout_trader_require.require_type,
-                                                    'value', tkl_hideout_trader_require.value
+                                                    'value', tkl_hideout_trader_require.value,
+                                                    'image', tkl_hideout_trader_require.image
                                                 )
                                             ) as trader_require,
                                             json_agg(
                                                 distinct jsonb_build_object(
                                                     'level', tkl_hideout_station_require.level,
                                                     'name_en', tkl_hideout_station_require.name_en,
-                                                    'name_kr', tkl_hideout_station_require.name_kr
+                                                    'name_kr', tkl_hideout_station_require.name_kr,
+                                                    'image', tkl_hideout_station_require.image
                                                 )
                                             ) as station_require,
                                             json_agg(

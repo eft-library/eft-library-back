@@ -738,6 +738,7 @@ CREATE TABLE TKL_HIDEOUT_ITEM_REQUIRE
     NAME_KR TEXT,
     QUANTITY INTEGER,
     COUNT INTEGER,
+    IMAGE TEXT,
     UPDATE_TIME timestamp with time zone default now()
 );
 COMMENT ON COLUMN TKL_HIDEOUT_ITEM_REQUIRE.ID IS 'Hideout item require 아이디';
@@ -746,6 +747,7 @@ COMMENT ON COLUMN TKL_HIDEOUT_ITEM_REQUIRE.NAME_EN IS 'Hideout item require 이�
 COMMENT ON COLUMN TKL_HIDEOUT_ITEM_REQUIRE.NAME_KR IS 'Hideout item require 이름 한글';
 COMMENT ON COLUMN TKL_HIDEOUT_ITEM_REQUIRE.QUANTITY IS 'Hideout item require 양';
 COMMENT ON COLUMN TKL_HIDEOUT_ITEM_REQUIRE.COUNT IS 'Hideout item require 개수';
+COMMENT ON COLUMN TKL_HIDEOUT_ITEM_REQUIRE.IMAGE IS 'Hideout item require 이미지';
 COMMENT ON COLUMN TKL_HIDEOUT_ITEM_REQUIRE.UPDATE_TIME IS 'Hideout item require 업데이트 시간';
 
 -- hideout level
@@ -771,6 +773,7 @@ CREATE TABLE TKL_HIDEOUT_TRADER_REQUIRE
     COMPARE TEXT,
     REQUIRE_TYPE TEXT,
     VALUE INTEGER,
+    IMAGE TEXT,
     UPDATE_TIME timestamp with time zone default now()
 );
 COMMENT ON COLUMN TKL_HIDEOUT_TRADER_REQUIRE.ID IS 'Hideout trader 아이디';
@@ -780,6 +783,7 @@ COMMENT ON COLUMN TKL_HIDEOUT_TRADER_REQUIRE.NAME_KR IS 'Hideout trader 이름 �
 COMMENT ON COLUMN TKL_HIDEOUT_TRADER_REQUIRE.COMPARE IS 'Hideout trader 비교 수식';
 COMMENT ON COLUMN TKL_HIDEOUT_TRADER_REQUIRE.REQUIRE_TYPE IS 'Hideout trader 요구 타입';
 COMMENT ON COLUMN TKL_HIDEOUT_TRADER_REQUIRE.VALUE IS 'Hideout trader 값';
+COMMENT ON COLUMN TKL_HIDEOUT_TRADER_REQUIRE.IMAGE IS 'Hideout trader 이미지';
 COMMENT ON COLUMN TKL_HIDEOUT_TRADER_REQUIRE.UPDATE_TIME IS 'Hideout trader 업데이트 시간';
 
 -- hideout station require
@@ -790,6 +794,7 @@ CREATE TABLE TKL_HIDEOUT_STATION_REQUIRE
     LEVEL INTEGER,
     NAME_EN TEXT,
     NAME_KR TEXT,
+    IMAGE TEXT,
     UPDATE_TIME timestamp with time zone default now()
 );
 COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.ID IS 'Hideout station require 아이디';
@@ -797,6 +802,7 @@ COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.LEVEL_ID IS 'Hideout station requi
 COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.LEVEL IS 'Hideout station require 레벨';
 COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.NAME_EN IS 'Hideout station require 이름 영문';
 COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.NAME_KR IS 'Hideout station require 이름 한글';
+COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.IMAGE IS 'Hideout station require 이미지';
 COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.UPDATE_TIME IS 'Hideout station require 업데이트 시간';
 
 -- hideout crafts
