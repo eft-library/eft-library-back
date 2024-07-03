@@ -10,8 +10,8 @@ class Search(DataBaseConnector.Base):
 
     __tablename__ = "tkl_search"
 
-    id = Column(String, primary_key=True)
-    value = Column(String)
+    value = Column(String, primary_key=True)
     link = Column(String)
     order = Column(INTEGER)
+    page_value = Column(INTEGER)
     update_time = Column(TIMESTAMP)
