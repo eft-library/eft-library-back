@@ -18,7 +18,12 @@ class MapOfTarkovService:
             load_dotenv()
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                boss_list = s.query(Boss).filter(Boss.spawn.contains([map_id])).all()
+                boss_list = (
+                    s.query(Boss)
+                    .filter(Boss.spawn.contains([map_id]))
+                    .order_by(Boss.order)
+                    .all()
+                )
                 map_info = (
                     s.query(ParentMap)
                     .options(subqueryload(ParentMap.sub))

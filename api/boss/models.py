@@ -25,4 +25,5 @@ class Boss(DataBaseConnector.Base):
     location_guide = Column(TEXT)
     loot = Column(ARRAY(TEXT))
     spawn = Column(ARRAY(TEXT))
+    order = Column(Integer)
     update_time = Column(TIMESTAMP)
