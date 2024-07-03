@@ -122,7 +122,8 @@ class Container(DataBaseConnector.Base):
     __tablename__ = "tkl_container"
 
     id = Column(TEXT, primary_key=True)
-    name = Column(TEXT)
+    name_en = Column(TEXT)
+    name_kr = Column(TEXT)
     short_name = Column(TEXT)
     grids = Column(JSON)
     capacity = Column(INTEGER)
