@@ -12,6 +12,7 @@ class Search(DataBaseConnector.Base):
 
     value = Column(String, primary_key=True)
     link = Column(String)
-    order = Column(INTEGER)
+    type = Column(String)
     page_value = Column(INTEGER)
+    order = Column(INTEGER)
     update_time = Column(TIMESTAMP)
