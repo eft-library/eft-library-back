@@ -836,6 +836,7 @@ CREATE TABLE TKL_HIDEOUT_SKILL_REQUIRE
     LEVEL INTEGER,
     NAME_EN TEXT,
     NAME_KR TEXT,
+    IMAGE TEXT,
     UPDATE_TIME timestamp with time zone default now()
 );
 COMMENT ON COLUMN TKL_HIDEOUT_SKILL_REQUIRE.ID IS 'Hideout skill require 아이디';
@@ -843,6 +844,7 @@ COMMENT ON COLUMN TKL_HIDEOUT_SKILL_REQUIRE.LEVEL_ID IS 'Hideout skill require �
 COMMENT ON COLUMN TKL_HIDEOUT_SKILL_REQUIRE.LEVEL IS 'Hideout skill require 레벨';
 COMMENT ON COLUMN TKL_HIDEOUT_SKILL_REQUIRE.NAME_EN IS 'Hideout skill require 이름 영문';
 COMMENT ON COLUMN TKL_HIDEOUT_SKILL_REQUIRE.NAME_KR IS 'Hideout skill require 이름 한글';
+COMMENT ON COLUMN TKL_HIDEOUT_SKILL_REQUIRE.IMAGE IS 'Hideout skill require 사진';
 COMMENT ON COLUMN TKL_HIDEOUT_SKILL_REQUIRE.UPDATE_TIME IS 'Hideout skill require 업데이트 시간';
 
 -- hideout bonus
