@@ -12,7 +12,7 @@ from api.item.models import (
     Loot,
 )
 from database import DataBaseConnector
-from sqlalchemy import desc
+from sqlalchemy import desc, text
 
 
 class ItemService:
@@ -110,7 +110,42 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                key = s.query(Key).order_by(Key.name).all()
+                query = text(
+                    """
+                    select tkl_key.id,
+                           tkl_key.name,
+                           tkl_key.short_name,
+                           tkl_key.uses,
+                           tkl_key.use_map_en,
+                           tkl_key.use_map_kr,
+                           tkl_key.map_value,
+                           tkl_key.image,
+                           COALESCE(jsonb_agg(distinct
+                                    jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'require_kr',
+                                                       tkl_related_quest.require_kr, 'require_en', tkl_related_quest.require_en))
+                                    FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
+                    from tkl_key
+                             LEFT JOIN LATERAL unnest(tkl_key.related_quests) AS rq ON true
+                             LEFT JOIN tkl_quest on tkl_quest.id = rq
+                             LEFT JOIN tkl_related_quest on tkl_key.id = tkl_related_quest.item_id and tkl_quest.id = rq
+                    group by tkl_key.id, tkl_key.name, tkl_key.short_name, tkl_key.uses, tkl_key.use_map_en, tkl_key.use_map_kr, tkl_key.map_value, tkl_key.image
+                    """
+                )
+                result = s.execute(query)
+                key = []
+                for row in result:
+                    key_dict = {
+                        "id": row[0],
+                        "name": row[1],
+                        "short_name": row[2],
+                        "uses": row[3],
+                        "use_map_en": row[4],
+                        "use_map_kr": row[5],
+                        "map_value": row[6],
+                        "image": row[7],
+                        "related_quests": row[8],
+                    }
+                    key.append(key_dict)
                 return key
         except Exception as e:
             print("오류 발생:", e)
@@ -153,15 +188,45 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                provisions = (
-                    s.query(Provisions)
-                    .order_by(
-                        desc(Provisions.category),
-                        Provisions.energy,
-                        Provisions.hydration,
-                    )
-                    .all()
+                query = text(
+                    """
+                    select tkl_provisions.id,
+                           tkl_provisions.name_en,
+                           tkl_provisions.name_kr,
+                           tkl_provisions.short_name,
+                           tkl_provisions.category,
+                           tkl_provisions.energy,
+                           tkl_provisions.hydration,
+                           tkl_provisions.stim_effects,
+                           tkl_provisions.image,
+                           COALESCE(jsonb_agg(distinct
+                                    jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'require_kr', tkl_related_quest.require_kr, 'require_en', tkl_related_quest.require_en))
+                                    FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
+                    from tkl_provisions
+                             LEFT JOIN LATERAL unnest(tkl_provisions.related_quests) AS rq ON true
+                             LEFT JOIN tkl_quest on tkl_quest.id = rq
+                             LEFT JOIN tkl_related_quest on tkl_provisions.id = tkl_related_quest.item_id and tkl_quest.id = rq
+                    group by tkl_provisions.id, tkl_provisions.name_en, tkl_provisions.name_kr, tkl_provisions.short_name,
+                             tkl_provisions.category, tkl_provisions.energy, tkl_provisions.hydration, tkl_provisions.stim_effects,
+                             tkl_provisions.image
+                    """
                 )
+                result = s.execute(query)
+                provisions = []
+                for row in result:
+                    provision_dict = {
+                        "id": row[0],
+                        "name_en": row[1],
+                        "name_kr": row[2],
+                        "short_name": row[3],
+                        "category": row[4],
+                        "energy": row[5],
+                        "hydration": row[6],
+                        "stim_effects": row[7],
+                        "image": row[8],
+                        "related_quests": row[9],
+                    }
+                    provisions.append(provision_dict)
                 return provisions
         except Exception as e:
             print("오류 발생:", e)
@@ -203,7 +268,39 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                loot = s.query(Loot).order_by(Loot.name_en).all()
+                query = text(
+                    """
+                    select tkl_loot.id,
+                           tkl_loot.name_en,
+                           tkl_loot.name_kr,
+                           tkl_loot.short_name,
+                           tkl_loot.category,
+                           tkl_loot.image,
+                           COALESCE(jsonb_agg(distinct
+                                    jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'require_kr',
+                                                       tkl_related_quest.require_kr, 'require_en', tkl_related_quest.require_en))
+                                    FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
+                    from tkl_loot
+                             LEFT JOIN LATERAL unnest(tkl_loot.related_quests) AS rq ON true
+                             LEFT JOIN tkl_quest on tkl_quest.id = rq
+                             LEFT JOIN tkl_related_quest on tkl_loot.id = tkl_related_quest.item_id and tkl_quest.id = rq
+                    group by tkl_loot.id, tkl_loot.name_en, tkl_loot.name_kr, tkl_loot.short_name,
+                             tkl_loot.category, tkl_loot.image
+                    """
+                )
+                result = s.execute(query)
+                loot = []
+                for row in result:
+                    loot_dict = {
+                        "id": row[0],
+                        "name_en": row[1],
+                        "name_kr": row[2],
+                        "short_name": row[3],
+                        "category": row[4],
+                        "image": row[5],
+                        "related_quests": row[6],
+                    }
+                    loot.append(loot_dict)
                 return loot
         except Exception as e:
             print("오류 발생:", e)
