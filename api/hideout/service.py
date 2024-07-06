@@ -82,7 +82,8 @@ class HideoutService:
                                                  distinct jsonb_build_object(
                                                          'level', tkl_hideout_skill_require.level,
                                                          'name_en', tkl_hideout_skill_require.name_en,
-                                                         'name_kr', tkl_hideout_skill_require.name_kr
+                                                         'name_kr', tkl_hideout_skill_require.name_kr,
+                                                         'image', tkl_hideout_skill_require.image
                                                           )
                                                          ) FILTER (WHERE tkl_hideout_skill_require.level IS NOT NULL),
                                                  '[]'::json) as skill_require,
