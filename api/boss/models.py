@@ -41,5 +41,6 @@ class BossLoot(DataBaseConnector.Base):
     boss_id = Column(TEXT, ForeignKey("tkl_boss.id"))
     item_name = Column(TEXT)
     boss_name = Column(TEXT)
-    type = Column(TEXT)
+    item_type = Column(TEXT)
+    loot_type = Column(TEXT)
     item_image = Column(TEXT)

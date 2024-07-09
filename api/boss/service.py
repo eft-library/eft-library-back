@@ -19,6 +19,19 @@ class BossService:
 
             updated_boss_list = []
             for boss in boss_list:
+                boss_loot_list = []
+                followers_loot_list = []
+
+                if len(boss.sub) > 0:
+                    for loot in boss.sub:
+                        if loot.loot_type == "Boss":
+                            boss_loot_list.append(loot)
+                        else:
+                            followers_loot_list.append(loot)
+
+                boss.boss_loot_list = boss_loot_list
+                boss.followers_loot_list = followers_loot_list
+
                 if boss.location_guide is not None:
                     boss.location_guide = boss.location_guide.replace(
                         "/tkl_quest", os.getenv("NAS_DATA") + "/tkl_quest"
