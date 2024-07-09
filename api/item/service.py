@@ -208,6 +208,9 @@ class ItemService:
                              LEFT JOIN LATERAL unnest(tkl_provisions.related_quests) AS rq ON true
                              LEFT JOIN tkl_related_quest on rq = tkl_related_quest.quest_id and tkl_provisions.id = tkl_related_quest.item_id
                              LEFT JOIN tkl_quest on rq = tkl_quest.id
+                    group by tkl_provisions.id, tkl_provisions.name_en, tkl_provisions.name_kr, tkl_provisions.short_name,
+                             tkl_provisions.category, tkl_provisions.energy, tkl_provisions.hydration, tkl_provisions.stim_effects,
+                             tkl_provisions.image
                     """
                 )
                 result = s.execute(query)
