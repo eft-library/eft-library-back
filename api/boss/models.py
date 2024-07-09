@@ -26,4 +26,5 @@ class Boss(DataBaseConnector.Base):
     loot = Column(ARRAY(TEXT))
     spawn = Column(ARRAY(TEXT))
     order = Column(Integer)
+    followers_health = Column(JSON)
     update_time = Column(TIMESTAMP)
