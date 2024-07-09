@@ -63,6 +63,7 @@ class RelatedQuest(DataBaseConnector.Base):
     quest_id = Column(TEXT, ForeignKey("tkl_quest.id"))
     item_name = Column(TEXT)
     quest_name = Column(TEXT)
+    count = Column(Integer)
     type = Column(TEXT)
     in_raid = Column(Boolean)
     desc_text = Column(ARRAY(TEXT))
