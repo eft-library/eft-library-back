@@ -46,3 +46,4 @@ class BossLoot(DataBaseConnector.Base):
     item_type_kr = Column(TEXT)
     loot_type = Column(TEXT)
     item_image = Column(TEXT)
+    link = Column(TEXT)
