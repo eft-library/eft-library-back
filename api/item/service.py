@@ -122,7 +122,7 @@ class ItemService:
                            tkl_key.image,
                            COALESCE(jsonb_agg(distinct
                                     jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
-                                                       tkl_related_quest.in_raid, 'count', tkl_related_quest."count "))
+                                                       tkl_related_quest.in_raid, 'count', tkl_related_quest."count"))
                                     FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
                     from tkl_key
                              LEFT JOIN LATERAL unnest(tkl_key.related_quests) AS rq ON true
@@ -202,7 +202,7 @@ class ItemService:
                            tkl_provisions.image,
                            COALESCE(jsonb_agg(distinct
                                     jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
-                                                       tkl_related_quest.in_raid, 'count', tkl_related_quest."count "))
+                                                       tkl_related_quest.in_raid, 'count', tkl_related_quest."count"))
                                     FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
                     from tkl_provisions
                              LEFT JOIN LATERAL unnest(tkl_provisions.related_quests) AS rq ON true
@@ -280,7 +280,7 @@ class ItemService:
                            tkl_loot.image,
                            COALESCE(jsonb_agg(distinct
                                     jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
-                                                        tkl_related_quest.in_raid, 'count', tkl_related_quest."count "))
+                                                        tkl_related_quest.in_raid, 'count', tkl_related_quest."count"))
                                     FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
                     from tkl_loot
                              LEFT JOIN LATERAL unnest(tkl_loot.related_quests) AS rq ON true
