@@ -126,8 +126,8 @@ class ItemService:
                                     FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
                     from tkl_key
                              LEFT JOIN LATERAL unnest(tkl_key.related_quests) AS rq ON true
-                             LEFT JOIN tkl_quest on tkl_quest.id = rq
-                             LEFT JOIN tkl_related_quest on tkl_key.id = tkl_related_quest.item_id and tkl_quest.id = rq
+                             LEFT JOIN tkl_related_quest on rq = tkl_related_quest.quest_id and tkl_key.id = tkl_related_quest.item_id
+                             LEFT JOIN tkl_quest on rq = tkl_quest.id
                     group by tkl_key.id, tkl_key.name, tkl_key.short_name, tkl_key.uses, tkl_key.use_map_en, tkl_key.use_map_kr,
                              tkl_key.map_value, tkl_key.image
                     """
@@ -206,11 +206,8 @@ class ItemService:
                                     FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
                     from tkl_provisions
                              LEFT JOIN LATERAL unnest(tkl_provisions.related_quests) AS rq ON true
-                             LEFT JOIN tkl_quest on tkl_quest.id = rq
-                             LEFT JOIN tkl_related_quest on tkl_provisions.id = tkl_related_quest.item_id and tkl_quest.id = rq
-                    group by tkl_provisions.id, tkl_provisions.name_en, tkl_provisions.name_kr, tkl_provisions.short_name,
-                             tkl_provisions.category, tkl_provisions.energy, tkl_provisions.hydration, tkl_provisions.stim_effects,
-                             tkl_provisions.image
+                             LEFT JOIN tkl_related_quest on rq = tkl_related_quest.quest_id and tkl_provisions.id = tkl_related_quest.item_id
+                             LEFT JOIN tkl_quest on rq = tkl_quest.id
                     """
                 )
                 result = s.execute(query)
