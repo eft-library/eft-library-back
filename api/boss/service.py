@@ -2,6 +2,7 @@ from api.boss.models import Boss
 from database import DataBaseConnector
 import os
 from dotenv import load_dotenv
+from sqlalchemy.orm import subqueryload
 
 
 class BossService:
@@ -14,7 +15,7 @@ class BossService:
             load_dotenv()
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                boss_list = s.query(Boss).all()
+                boss_list = s.query(Boss).options(subqueryload(Boss.sub)).all()
 
             updated_boss_list = []
             for boss in boss_list:

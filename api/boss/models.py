@@ -1,5 +1,6 @@
-from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, TEXT
+from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, TEXT, ForeignKey
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.orm import relationship
 
 from database import DataBaseConnector
 
@@ -11,7 +12,7 @@ class Boss(DataBaseConnector.Base):
 
     __tablename__ = "tkl_boss"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(TEXT, primary_key=True)
     name_en = Column(String)
     name_kr = Column(String)
     faction = Column(String)
@@ -20,11 +21,25 @@ class Boss(DataBaseConnector.Base):
     followers_en = Column(ARRAY(TEXT))
     followers_kr = Column(ARRAY(TEXT))
     image = Column(TEXT)
-    health_image = Column(ARRAY(TEXT))
     health_total = Column(Integer)
     location_guide = Column(TEXT)
-    loot = Column(ARRAY(TEXT))
     spawn = Column(ARRAY(TEXT))
     order = Column(Integer)
     followers_health = Column(JSON)
     update_time = Column(TIMESTAMP)
+    sub = relationship("BossLoot", backref="boss")
+
+
+class BossLoot(DataBaseConnector.Base):
+    """
+    Boss Loot
+    """
+
+    __tablename__ = "tkl_boss_loot"
+
+    item_id = Column(TEXT, primary_key=True)
+    boss_id = Column(TEXT, ForeignKey("tkl_boss.id"))
+    item_name = Column(TEXT)
+    boss_name = Column(TEXT)
+    type = Column(TEXT)
+    item_image = Column(TEXT)
