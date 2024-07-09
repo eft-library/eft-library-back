@@ -18,7 +18,7 @@ class MainMenu(DataBaseConnector.Base):
     order = Column(Integer)
     image = Column(String)
     update_time = Column(TIMESTAMP)
-    sub_menus = relationship("SubMenu", backref="main_menu", order_by="SubMenu.order")
+    sub = relationship("SubMenu", backref="main_menu", order_by="SubMenu.order")
 
 
 class SubMenu(DataBaseConnector.Base):

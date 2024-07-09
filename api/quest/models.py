@@ -1,5 +1,16 @@
 from database import DataBaseConnector
-from sqlalchemy import Column, String, Integer, TIMESTAMP, ARRAY, Boolean, TEXT, JSON
+from sqlalchemy import (
+    Column,
+    String,
+    Integer,
+    TIMESTAMP,
+    ARRAY,
+    Boolean,
+    TEXT,
+    JSON,
+    ForeignKey,
+)
+from sqlalchemy.orm import relationship
 
 
 class NPC(DataBaseConnector.Base):
@@ -38,3 +49,20 @@ class QuestPreview(DataBaseConnector.Base):
     guide = Column(TEXT)
     requires = Column(JSON)
     next = Column(JSON)
+    sub = relationship("RelatedQuest", backref="quest_preview")
+
+
+class RelatedQuest(DataBaseConnector.Base):
+    """
+    Related Quest
+    """
+
+    __tablename__ = "tkl_related_quest"
+
+    item_id = Column(TEXT, primary_key=True)
+    quest_id = Column(TEXT, ForeignKey("tkl_quest.id"))
+    item_name = Column(TEXT)
+    quest_name = Column(TEXT)
+    type = Column(TEXT)
+    in_raid = Column(Boolean)
+    desc_text = Column(ARRAY(TEXT))

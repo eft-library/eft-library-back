@@ -2,6 +2,7 @@ from api.quest.models import NPC, QuestPreview
 from database import DataBaseConnector
 import os
 from dotenv import load_dotenv
+from sqlalchemy.orm import subqueryload
 
 
 class QuestService:
@@ -35,6 +36,7 @@ class QuestService:
             with session() as s:
                 quest_npc = (
                     s.query(QuestPreview, NPC)
+                    .options(subqueryload(QuestPreview.sub))
                     .filter(QuestPreview.npc_value == NPC.id)
                     .filter(QuestPreview.id == quest_id)
                     .first()
