@@ -1,13 +1,17 @@
-from sqlalchemy import Column, String, TIMESTAMP
+from sqlalchemy import Column, String, TIMESTAMP, TEXT
 from database import DataBaseConnector
 
 
-class Youtube(DataBaseConnector.Base):
+class News(DataBaseConnector.Base):
     """
-    Tarkov Youtube
+    news
     """
 
-    __tablename__ = "tkl_youtube"
+    __tablename__ = "tkl_news"
 
-    id = Column(String, primary_key=True)
-    update_time = Column(TIMESTAMP)
+    game_version = Column(TEXT, primary_key=True)
+    arena_version = Column(TEXT)
+    patch_link = Column(TEXT)
+    event_link = Column(TEXT)
+    youtube_id = Column(TEXT)
+    next_update = Column(TEXT)

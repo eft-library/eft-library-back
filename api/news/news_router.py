@@ -7,9 +7,9 @@ from api.constants import Message
 router = APIRouter(tags=["News"])
 
 
-@router.get("/youtube")
-def get_youtube():
-    three_map = NewsService.get_youtube()
-    if three_map is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.YOUTUBE_NOT_FOUND)
-    return CustomResponse.response(three_map, HTTPCode.OK, Message.SUCCESS)
+@router.get("/news")
+def get_news():
+    news = NewsService.get_news()
+    if news is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.NEWS_NOT_FOUND)
+    return CustomResponse.response(news, HTTPCode.OK, Message.SUCCESS)
