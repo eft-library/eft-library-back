@@ -11,5 +11,5 @@ router = APIRouter(tags=["Hideout"])
 def get_all_hideout():
     hideout = HideoutService.get_all_hideout()
     if hideout is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.HIDEOUT)
+        return CustomResponse.response(None, HTTPCode.OK, Message.HIDEOUT_NOT_FOUND)
     return CustomResponse.response(hideout, HTTPCode.OK, Message.SUCCESS)

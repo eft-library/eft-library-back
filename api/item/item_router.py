@@ -19,7 +19,7 @@ def get_all_headset():
 def get_all_headwear():
     head_wear = ItemService.get_all_headwear()
     if head_wear is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.HEAD_WEAR_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.HEADWEAR_NOT_FOUND)
     return CustomResponse.response(head_wear, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -75,7 +75,7 @@ def get_all_provisions():
 def get_all_medical():
     medical = ItemService.get_all_medical()
     if medical is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.MEDICAL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.MEDICAL_NOT_FOUND)
     return CustomResponse.response(medical, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -83,7 +83,7 @@ def get_all_medical():
 def get_all_ammo():
     ammo = ItemService.get_all_ammo()
     if ammo is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.AMMO)
+        return CustomResponse.response(None, HTTPCode.OK, Message.AMMO_NOT_FOUND)
     return CustomResponse.response(ammo, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -91,5 +91,5 @@ def get_all_ammo():
 def get_all_loot():
     loot = ItemService.get_all_loot()
     if loot is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.LOOT)
+        return CustomResponse.response(None, HTTPCode.OK, Message.LOOT_NOT_FOUND)
     return CustomResponse.response(loot, HTTPCode.OK, Message.SUCCESS)
