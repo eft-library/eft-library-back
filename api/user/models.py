@@ -33,3 +33,4 @@ class User(DataBaseConnector.Base):
     name = Column(TEXT)
     email = Column(TEXT)
     image = Column(TEXT)
+    nick_name = Column(TEXT)
