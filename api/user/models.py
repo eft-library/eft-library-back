@@ -1,14 +1,23 @@
 from database import DataBaseConnector
-from sqlalchemy import Column, Integer, TIMESTAMP, ARRAY, TEXT, NUMERIC
+from sqlalchemy import (
+    Column,
+    Integer,
+    TIMESTAMP,
+    ARRAY,
+    TEXT,
+    NUMERIC,
+    Boolean,
+    ForeignKey,
+)
 from pydantic import BaseModel
 
 
-class Token(BaseModel):
+class UserQuestReq(BaseModel):
     """
-    사용자 관련 통신 시 사용할 token
+    사용자 퀘스트 조회 요청
     """
 
-    token: str
+    provider: str
 
 
 class AddUserReq(BaseModel):
@@ -34,3 +43,17 @@ class User(DataBaseConnector.Base):
     email = Column(TEXT)
     image = Column(TEXT)
     nick_name = Column(TEXT)
+    point = Column(Integer)
+    is_ban = Column(Boolean)
+
+
+class UserQuest(DataBaseConnector.Base):
+    """
+    User quest
+    """
+
+    __tablename__ = "tkl_user_quest"
+
+    user_email = Column(TEXT, primary_key=True)
+    quest_id = Column(TEXT, ForeignKey("tkl_quest.id"))
+    is_clear = Column(Boolean)

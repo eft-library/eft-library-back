@@ -29,3 +29,11 @@ def get_quest_by_id(quest_id: str):
     if quest is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.QUEST_NOT_FOUND)
     return CustomResponse.response(quest, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/select")
+def get_user_select_quest():
+    quest = QuestService.get_user_select_quest()
+    if quest is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.QUEST_NOT_FOUND)
+    return CustomResponse.response(quest, HTTPCode.OK, Message.SUCCESS)

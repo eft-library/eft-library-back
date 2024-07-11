@@ -20,9 +20,9 @@ class NPC(DataBaseConnector.Base):
 
     __tablename__ = "tkl_npc"
 
-    id = Column(String, primary_key=True)
-    name_en = Column(String)
-    name_kr = Column(String)
+    id = Column(TEXT, primary_key=True)
+    name_en = Column(TEXT)
+    name_kr = Column(TEXT)
     image = Column(String)
     order = Column(Integer)
     update_time = Column(TIMESTAMP)
@@ -36,7 +36,7 @@ class QuestPreview(DataBaseConnector.Base):
     __tablename__ = "tkl_quest"
 
     id = Column(String, primary_key=True)
-    npc_value = Column(String)
+    npc_value = Column(String, ForeignKey("tkl_npc.id"))
     title_en = Column("name_en", String)
     title_kr = Column("name_kr", String)
     objectives_en = Column(ARRAY(String))

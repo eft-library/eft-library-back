@@ -28,3 +28,4 @@ class Message(Enum):
     LOOT_NOT_FOUND = "Loot not found"
     HIDEOUT_NOT_FOUND = "Hideout not found"
     USER_ADD_FAIL = "User add fail"
+    INVALID_USER = "Invalid User"
