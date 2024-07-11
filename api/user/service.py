@@ -1,4 +1,4 @@
-from api.user.models import User, AddUserReq, UserQuest, UserQuestAdd
+from api.user.models import User, AddUserReq, UserQuest, UserQuestUpdate
 from api.quest.models import QuestPreview, NPC
 from database import DataBaseConnector
 from dotenv import load_dotenv
@@ -77,54 +77,22 @@ class UserService:
             print("오류 발생:", e)
             return None
 
-    # @staticmethod
-    # def add_user_quest(userQuestAdd: UserQuestAdd):
-    #     try:
-    #         session = DataBaseConnector.create_session_factory()
-    #         with session() as s:
-    #             user_quests = (
-    #                 s.query(
-    #                     UserQuest.user_email,
-    #                     UserQuest.quest_id,
-    #                     QuestPreview.npc_value,
-    #                     QuestPreview.title_en,
-    #                     QuestPreview.title_kr,
-    #                     NPC.name_kr,
-    #                     NPC.name_en,
-    #                     UserQuest.is_clear,
-    #                 )
-    #                 .join(QuestPreview, UserQuest.quest_id == QuestPreview.id)
-    #                 .join(NPC, QuestPreview.npc_value == NPC.id)
-    #                 .filter(UserQuest.user_email == user_email)
-    #                 .all()
-    #             )
-    #
-    #             results = []
-    #             for row in user_quests:
-    #                 (
-    #                     user_email,
-    #                     quest_id,
-    #                     npc_value,
-    #                     title_en,
-    #                     title_kr,
-    #                     name_kr,
-    #                     name_en,
-    #                     is_clear,
-    #                 ) = row
-    #                 results.append(
-    #                     {
-    #                         "user_email": user_email,
-    #                         "quest_id": quest_id,
-    #                         "npc_value": npc_value,
-    #                         "title_en": title_en,
-    #                         "title_kr": title_kr,
-    #                         "name_kr": name_kr,
-    #                         "name_en": name_en,
-    #                         "is_clear": is_clear,
-    #                     }
-    #                 )
-    #
-    #             return results
-    #     except Exception as e:
-    #         print("오류 발생:", e)
-    #         return None
+    @staticmethod
+    def update_user_quest(userQuestAdd: UserQuestUpdate, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
+                if user_quest:
+                    user_quest.quest_id = userQuestAdd.quest_list
+                else:
+                    new_data = UserQuest(
+                        user_email=user_email, quest_id=userQuestAdd.quest_list
+                    )
+                    s.add(new_data)
+
+                s.commit()
+                return True
+        except Exception as e:
+            print("오류 발생:", e)
+            return None

@@ -21,9 +21,9 @@ class UserQuestReq(BaseModel):
     provider: str
 
 
-class UserQuestAdd(BaseModel):
+class UserQuestUpdate(BaseModel):
     """
-    사용자 퀘스트 추가
+    사용자 퀘스트 수정
     """
 
     provider: str
@@ -66,4 +66,3 @@ class UserQuest(DataBaseConnector.Base):
 
     user_email = Column(TEXT, primary_key=True)
     quest_id = Column(ARRAY(TEXT))
-    is_clear = Column(Boolean)
