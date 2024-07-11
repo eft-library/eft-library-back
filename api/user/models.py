@@ -10,6 +10,7 @@ from sqlalchemy import (
     ForeignKey,
 )
 from pydantic import BaseModel
+from typing import List
 
 
 class UserQuestReq(BaseModel):
@@ -18,6 +19,15 @@ class UserQuestReq(BaseModel):
     """
 
     provider: str
+
+
+class UserQuestAdd(BaseModel):
+    """
+    사용자 퀘스트 추가
+    """
+
+    provider: str
+    quest_list: List[str]
 
 
 class AddUserReq(BaseModel):
@@ -55,5 +65,5 @@ class UserQuest(DataBaseConnector.Base):
     __tablename__ = "tkl_user_quest"
 
     user_email = Column(TEXT, primary_key=True)
-    quest_id = Column(TEXT, ForeignKey("tkl_quest.id"))
+    quest_id = Column(ARRAY(TEXT))
     is_clear = Column(Boolean)
