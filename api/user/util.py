@@ -1,9 +1,10 @@
 import requests
 from fastapi import FastAPI, HTTPException
+import os
+from dotenv import load_dotenv
 
 
-NAVER_USER_INFO_URL = "https://openapi.naver.com/v1/nid/me"
-GOOGLE_TOKEN_INFO_URL = "https://www.googleapis.com/oauth2/v1/tokeninfo"
+load_dotenv()
 
 
 class UserUtil:
@@ -34,7 +35,7 @@ class UserUtil:
         headers = {
             "Authorization": f"Bearer {access_token}",
         }
-        response = requests.get(NAVER_USER_INFO_URL, headers=headers)
+        response = requests.get(os.getenv("NAVER_USER_INFO_URL"), headers=headers)
 
         if response.status_code != 200:
             raise HTTPException(status_code=401, detail="Invalid Naver access token")
@@ -46,7 +47,9 @@ class UserUtil:
         """
         구글 검증
         """
-        response = requests.get(f"{GOOGLE_TOKEN_INFO_URL}?access_token={access_token}")
+        response = requests.get(
+            f"{os.getenv('GOOGLE_TOKEN_INFO_URL')}?access_token={access_token}"
+        )
 
         if response.status_code != 200:
             raise HTTPException(status_code=401, detail="Invalid Google access token")
