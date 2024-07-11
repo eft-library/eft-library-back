@@ -26,6 +26,7 @@ class Message(Enum):
     MEDICAL_NOT_FOUND = "Medical not found"
     AMMO_NOT_FOUND = "Ammo not found"
     LOOT_NOT_FOUND = "Loot not found"
+    FACE_COVER_NOT_FOUND = "Face cover not found"
     HIDEOUT_NOT_FOUND = "Hideout not found"
     USER_ADD_FAIL = "User add fail"
     INVALID_USER = "Invalid User"

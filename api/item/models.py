@@ -215,3 +215,25 @@ class Loot(DataBaseConnector.Base):
     notes = Column(JSON)
     category = Column(TEXT)
     update_time = Column(TIMESTAMP)
+
+
+class FaceCover(DataBaseConnector.Base):
+    """
+    FaceCover
+    """
+
+    __tablename__ = "tkl_face_cover"
+
+    id = Column(TEXT, primary_key=True)
+    name = Column(TEXT)
+    short_name = Column(TEXT)
+    class_value = Column(TEXT)
+    areas_en = Column(ARRAY(TEXT))
+    areas_kr = Column(ARRAY(TEXT))
+    durability = Column(INTEGER)
+    ricochet_chance = Column(NUMERIC)
+    weight = Column(NUMERIC)
+    image = Column(TEXT)
+    ricochet_str_kr = Column(TEXT)
+    ricochet_str_en = Column(TEXT)
+    update_time = Column(TIMESTAMP)

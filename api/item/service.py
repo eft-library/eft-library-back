@@ -307,3 +307,33 @@ class ItemService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_all_face_cover():
+        """
+        face cover 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                face_cover = s.query(Headwear).order_by(Headwear.class_value).all()
+
+            class_face_cover = []
+
+            no_class_face_cover = []
+
+            for cover in face_cover:
+                if cover.class_value is None:
+                    no_class_face_cover.append(cover)
+                else:
+                    class_face_cover.append(cover)
+
+            result_face_cover = {
+                "class_face_cover": [item.__dict__ for item in class_face_cover],
+                "no_class_face_cover": [item.__dict__ for item in no_class_face_cover],
+            }
+
+            return result_face_cover
+        except Exception as e:
+            print("오류 발생:", e)
+            return None

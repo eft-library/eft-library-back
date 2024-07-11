@@ -93,3 +93,11 @@ def get_all_loot():
     if loot is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.LOOT_NOT_FOUND)
     return CustomResponse.response(loot, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/face_cover")
+def get_all_face_cover():
+    face_cover = ItemService.get_all_face_cover()
+    if face_cover is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FACE_COVER_NOT_FOUND)
+    return CustomResponse.response(face_cover, HTTPCode.OK, Message.SUCCESS)

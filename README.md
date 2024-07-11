@@ -12,8 +12,6 @@ pip install python-dotenv
 
 pip install psycopg2-binary
 
-pip install python-jose
-
 uvicorn main:app --reload
 
 구조
