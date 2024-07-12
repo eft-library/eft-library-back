@@ -10,6 +10,7 @@ from api.item.models import (
     Medical,
     Ammo,
     Loot,
+    FaceCover,
 )
 from database import DataBaseConnector
 from sqlalchemy import desc, text
@@ -316,7 +317,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                face_cover = s.query(Headwear).order_by(Headwear.class_value).all()
+                face_cover = s.query(FaceCover).order_by(FaceCover.class_value).all()
 
             class_face_cover = []
 
