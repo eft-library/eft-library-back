@@ -48,11 +48,13 @@ class UserService:
             with session() as s:
                 query = text(
                     """
-                    select
-                           tkl_npc.id        as npc_id,
-                           tkl_npc.name_kr   as npc_name_kr,
-                           tkl_npc.name_en   as npc_name_en,
-                           jsonb_agg(jsonb_build_object('quest_id', rq, 'quest_name_en', tkl_quest.name_en, 'quest_name_kr', tkl_quest.name_kr)) as quest_info
+                    select tkl_npc.id                                             as npc_id,
+                           tkl_npc.name_kr                                        as npc_name_kr,
+                           tkl_npc.name_en                                        as npc_name_en,
+                           tkl_npc.image                                          as npc_image,
+                           jsonb_agg(jsonb_build_object('quest_id', rq, 'quest_name_en', tkl_quest.name_en, 'quest_name_kr',
+                                                        tkl_quest.name_kr, 'objectives_kr', tkl_quest.objectives_kr, 'objectives_en',
+                                                        tkl_quest.objectives_en, 'next', tkl_quest.next)) as quest_info
                     from tkl_user_quest
                              left join lateral unnest(tkl_user_quest.quest_id) AS rq ON true
                              left join tkl_quest on rq = tkl_quest.id
