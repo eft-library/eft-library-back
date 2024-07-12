@@ -13,6 +13,15 @@ from pydantic import BaseModel
 from typing import List
 
 
+class UserQuestDelete(BaseModel):
+    """
+    사용자 퀘스트 삭제시
+    """
+
+    provider: str
+    userQuestList: List[str]
+
+
 class UserQuestSuccess(BaseModel):
     """
     사용자 퀘스트 완료시
@@ -20,7 +29,6 @@ class UserQuestSuccess(BaseModel):
 
     provider: str
     userQuestList: List[str]
-    successId: str
 
 
 class UserQuestReq(BaseModel):
