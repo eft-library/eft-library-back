@@ -38,7 +38,7 @@ class UserUtil:
         response = requests.get(os.getenv("NAVER_USER_INFO_URL"), headers=headers)
 
         if response.status_code != 200:
-            raise HTTPException(status_code=401, detail="Invalid Naver access token")
+            return False
         data = response.json()
         return data["response"]["email"]
 
@@ -52,6 +52,6 @@ class UserUtil:
         )
 
         if response.status_code != 200:
-            raise HTTPException(status_code=401, detail="Invalid Google access token")
+            return False
         data = response.json()
         return data["email"]

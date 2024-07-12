@@ -61,7 +61,9 @@ def success_user_quest(
     if user_email:
         result = UserService.success_user_quest(userQuestSuccess, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.USER_ADD_FAIL)
+            return CustomResponse.response(
+                None, HTTPCode.OK, Message.SUCCESS_QUEST_FAIL
+            )
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
