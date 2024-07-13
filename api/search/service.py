@@ -1,9 +1,5 @@
 from api.search.models import Search
 from database import DataBaseConnector
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
 
 
 class SearchService:
@@ -30,7 +26,7 @@ class SearchService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 search_list = s.query(Search).with_entities(Search.link).distinct().order_by(Search.link).all()
-                return [os.getenv("SITE_URL") + link for link, in search_list]
+                return [link for link, in search_list]
         except Exception as e:
             print("오류 발생:", e)
             return None
