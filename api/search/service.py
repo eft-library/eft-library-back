@@ -25,7 +25,7 @@ class SearchService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                search_list = s.query(Search).with_entities(Search.link).distinct().all()
+                search_list = s.query(Search).with_entities(Search.link).distinct().order_by(Search.link).all()
                 return [link for (link,) in search_list]
         except Exception as e:
             print("오류 발생:", e)
