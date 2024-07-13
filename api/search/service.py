@@ -16,3 +16,17 @@ class SearchService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_all_site_list():
+        """
+        사이트 정보 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                search_list = s.query(Search).with_entities(Search.link).distinct().all()
+                return [link for (link,) in search_list]
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
