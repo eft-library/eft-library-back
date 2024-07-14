@@ -3,7 +3,6 @@ from api.user.models import (
     AddUserReq,
     UserQuest,
     UserQuestUpdate,
-    UserQuestSuccess,
     UserQuestDelete,
 )
 from database import DataBaseConnector
@@ -93,27 +92,7 @@ class UserService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
-                if user_quest:
-                    user_quest.quest_id = userQuestAdd.quest_list
-                else:
-                    new_data = UserQuest(
-                        user_email=user_email, quest_id=userQuestAdd.quest_list
-                    )
-                    s.add(new_data)
-
-                s.commit()
-                return True
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
-    def success_user_quest(userQuestSuccess: UserQuestSuccess, user_email: str):
-        try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
-                user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
-                user_quest.quest_id = userQuestSuccess.userQuestList
+                user_quest.quest_id = userQuestAdd.userQuestList
                 s.commit()
                 query = text(
                     """

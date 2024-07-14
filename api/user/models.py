@@ -22,15 +22,6 @@ class UserQuestDelete(BaseModel):
     userQuestList: List[str]
 
 
-class UserQuestSuccess(BaseModel):
-    """
-    사용자 퀘스트 완료시
-    """
-
-    provider: str
-    userQuestList: List[str]
-
-
 class UserQuestReq(BaseModel):
     """
     사용자 퀘스트 조회 요청
@@ -45,7 +36,7 @@ class UserQuestUpdate(BaseModel):
     """
 
     provider: str
-    quest_list: List[str]
+    userQuestList: List[str]
 
 
 class AddUserReq(BaseModel):

@@ -8,7 +8,6 @@ from api.user.models import (
     AddUserReq,
     UserQuestReq,
     UserQuestUpdate,
-    UserQuestSuccess,
     UserQuestDelete,
 )
 from api.user.util import UserUtil
@@ -55,25 +54,6 @@ def get_user_quest(
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
-
-
-@router.post("/quest/success")
-def success_user_quest(
-    userQuestSuccess: UserQuestSuccess, token: str = Depends(oauth2_scheme)
-):
-    user_email = UserUtil.verify_token(
-        provider=userQuestSuccess.provider, access_token=token
-    )
-    if user_email:
-        result = UserService.success_user_quest(userQuestSuccess, user_email)
-        if result is None:
-            return CustomResponse.response(
-                None, HTTPCode.OK, Message.SUCCESS_QUEST_FAIL
-            )
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
-
 
 @router.post("/quest/delete")
 def delete_user_quest(
