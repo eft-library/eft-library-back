@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 import os
 import uuid
 from sqlalchemy import text
+from api.user.util import UserUtil
 
 
 load_dotenv()
@@ -51,24 +52,7 @@ class UserService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                query = text(
-                    """
-                    select tkl_npc.id                                             as npc_id,
-                           tkl_npc.name_kr                                        as npc_name_kr,
-                           tkl_npc.name_en                                        as npc_name_en,
-                           tkl_npc.image                                          as npc_image,
-                           jsonb_agg(jsonb_build_object('quest_id', rq, 'quest_name_en', tkl_quest.name_en, 'quest_name_kr',
-                                                        tkl_quest.name_kr, 'objectives_kr', tkl_quest.objectives_kr, 'objectives_en',
-                                                        tkl_quest.objectives_en, 'next', COALESCE(tkl_quest.next, jsonb '[]'::jsonb))) as quest_info
-                    from tkl_user_quest
-                             left join lateral unnest(tkl_user_quest.quest_id) AS rq ON true
-                             left join tkl_quest on rq = tkl_quest.id
-                             left join tkl_npc on tkl_quest.npc_value = tkl_npc.id
-                    WHERE tkl_user_quest.user_email = :user_email
-                    group by tkl_npc.id, tkl_npc.name_kr, tkl_npc.name_en
-                    order by tkl_npc.id
-                    """
-                )
+                query = text(UserUtil.user_quest_query())
                 result = s.execute(query, {"user_email": user_email})
                 user_quests = []
                 for row in result:
@@ -94,24 +78,7 @@ class UserService:
                 user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
                 user_quest.quest_id = userQuestAdd.userQuestList
                 s.commit()
-                query = text(
-                    """
-                    select tkl_npc.id                                             as npc_id,
-                           tkl_npc.name_kr                                        as npc_name_kr,
-                           tkl_npc.name_en                                        as npc_name_en,
-                           tkl_npc.image                                          as npc_image,
-                           jsonb_agg(jsonb_build_object('quest_id', rq, 'quest_name_en', tkl_quest.name_en, 'quest_name_kr',
-                                                        tkl_quest.name_kr, 'objectives_kr', tkl_quest.objectives_kr, 'objectives_en',
-                                                        tkl_quest.objectives_en, 'next', COALESCE(tkl_quest.next, jsonb '[]'::jsonb))) as quest_info
-                    from tkl_user_quest
-                             left join lateral unnest(tkl_user_quest.quest_id) AS rq ON true
-                             left join tkl_quest on rq = tkl_quest.id
-                             left join tkl_npc on tkl_quest.npc_value = tkl_npc.id
-                    WHERE tkl_user_quest.user_email = :user_email
-                    group by tkl_npc.id, tkl_npc.name_kr, tkl_npc.name_en
-                    order by tkl_npc.id
-                    """
-                )
+                query = text(UserUtil.user_quest_query())
 
                 result = s.execute(query, {"user_email": user_email})
                 new_user_quests = []
@@ -138,24 +105,7 @@ class UserService:
                 user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
                 user_quest.quest_id = userQuestDelete.userQuestList
                 s.commit()
-                query = text(
-                    """
-                    select tkl_npc.id                                             as npc_id,
-                           tkl_npc.name_kr                                        as npc_name_kr,
-                           tkl_npc.name_en                                        as npc_name_en,
-                           tkl_npc.image                                          as npc_image,
-                           jsonb_agg(jsonb_build_object('quest_id', rq, 'quest_name_en', tkl_quest.name_en, 'quest_name_kr',
-                                                        tkl_quest.name_kr, 'objectives_kr', tkl_quest.objectives_kr, 'objectives_en',
-                                                        tkl_quest.objectives_en, 'next', COALESCE(tkl_quest.next, jsonb '[]'::jsonb))) as quest_info
-                    from tkl_user_quest
-                             left join lateral unnest(tkl_user_quest.quest_id) AS rq ON true
-                             left join tkl_quest on rq = tkl_quest.id
-                             left join tkl_npc on tkl_quest.npc_value = tkl_npc.id
-                    WHERE tkl_user_quest.user_email = :user_email
-                    group by tkl_npc.id, tkl_npc.name_kr, tkl_npc.name_en
-                    order by tkl_npc.id
-                    """
-                )
+                query = text(UserUtil.user_quest_query())
                 result = s.execute(query, {"user_email": user_email})
                 new_user_quests = []
                 for row in result:
