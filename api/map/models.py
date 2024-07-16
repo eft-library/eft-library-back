@@ -23,6 +23,7 @@ class ParentMap(DataBaseConnector.Base):
     link = Column(String)
     main_image = Column(String)
     mot_image = Column(String)
+    map_json = Column(JSON)
     update_time = Column(TIMESTAMP)
     sub = relationship("Map", backref="parent_map")
 
@@ -47,4 +48,5 @@ class Map(DataBaseConnector.Base):
     parent_value = Column(String, ForeignKey("tkl_map_parent.id"))
     main_image = Column(String)
     mot_image = Column(String)
+    map_json = Column(JSON)
     update_time = Column(TIMESTAMP)
