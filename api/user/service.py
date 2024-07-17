@@ -41,6 +41,11 @@ class UserService:
                         is_ban=False,
                     )
                     s.add(new_user)
+                    new_user_quest = UserQuest(
+                        user_email=addUserReq.email,
+                        quest_id=[],
+                    )
+                    s.add(new_user_quest)
                     s.commit()
                     return True
         except Exception as e:
