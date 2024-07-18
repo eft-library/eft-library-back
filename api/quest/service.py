@@ -30,9 +30,6 @@ class QuestService:
 
     @staticmethod
     def get_quest_by_id(quest_id):
-        """
-        필요할 줄 알았는데 필요 없음
-        """
         try:
             load_dotenv()
             session = DataBaseConnector.create_session_factory()
