@@ -67,3 +67,4 @@ class RelatedQuest(DataBaseConnector.Base):
     type = Column(TEXT)
     in_raid = Column(Boolean)
     item_image = Column(TEXT)
+    desc_text = Column(ARRAY(TEXT))
