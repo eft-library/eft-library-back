@@ -1,4 +1,4 @@
-from api.quest.models import NPC, QuestPreview, Event
+from api.quest.models import NPC, QuestPreview
 from database import DataBaseConnector
 import os
 from dotenv import load_dotenv
@@ -34,23 +34,6 @@ class QuestService:
             return None
 
     @staticmethod
-    def get_all_event_quest():
-        try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
-                quest_list = (
-                    s.query(QuestPreview)
-                    .options(subqueryload(QuestPreview.event_sub))
-                    .order_by(QuestPreview.order)
-                    .filter(QuestPreview.is_event == True)
-                    .all()
-                )
-                return quest_list
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
     def get_quest_by_id(quest_id):
         try:
             load_dotenv()
@@ -59,7 +42,6 @@ class QuestService:
                 quest_npc = (
                     s.query(QuestPreview, NPC)
                     .options(subqueryload(QuestPreview.sub))
-                    .options(subqueryload(QuestPreview.event_sub))
                     .filter(QuestPreview.npc_value == NPC.id)
                     .filter(QuestPreview.id == quest_id)
                     .first()

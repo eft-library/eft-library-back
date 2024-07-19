@@ -23,14 +23,6 @@ def get_all_quest():
     return CustomResponse.response(quest_list, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/event/all")
-def get_all_event_quest():
-    quest_list = QuestService.get_all_event_quest()
-    if quest_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.EVENT_NOT_FOUND)
-    return CustomResponse.response(quest_list, HTTPCode.OK, Message.SUCCESS)
-
-
 @router.get("/detail/{quest_id}")
 def get_quest_by_id(quest_id: str):
     quest = QuestService.get_quest_by_id(quest_id)
