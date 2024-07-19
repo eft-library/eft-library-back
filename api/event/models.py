@@ -4,6 +4,7 @@ from sqlalchemy import (
     String,
     ARRAY,
     TEXT,
+    TIMESTAMP
 )
 
 class Event(DataBaseConnector.Base):
@@ -18,3 +19,4 @@ class Event(DataBaseConnector.Base):
     name_kr = Column(String)
     event_text_en = Column(ARRAY(TEXT))
     event_text_kr = Column(ARRAY(TEXT))
+    update_time = Column(TIMESTAMP)
