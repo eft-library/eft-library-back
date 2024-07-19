@@ -1,4 +1,4 @@
-from api.quest.models import NPC, QuestPreview
+from api.quest.models import NPC, QuestPreview, Event
 from database import DataBaseConnector
 import os
 from dotenv import load_dotenv
@@ -22,7 +22,29 @@ class QuestService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                quest_list = s.query(QuestPreview).order_by(QuestPreview.order).all()
+                quest_list = (
+                    s.query(QuestPreview)
+                    .order_by(QuestPreview.order)
+                    .filter(QuestPreview.is_event == False)
+                    .all()
+                )
+                return quest_list
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_event_quest():
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                quest_list = (
+                    s.query(QuestPreview)
+                    .options(subqueryload(QuestPreview.event_sub))
+                    .order_by(QuestPreview.order)
+                    .filter(QuestPreview.is_event == True)
+                    .all()
+                )
                 return quest_list
         except Exception as e:
             print("오류 발생:", e)
@@ -37,6 +59,7 @@ class QuestService:
                 quest_npc = (
                     s.query(QuestPreview, NPC)
                     .options(subqueryload(QuestPreview.sub))
+                    .options(subqueryload(QuestPreview.event_sub))
                     .filter(QuestPreview.npc_value == NPC.id)
                     .filter(QuestPreview.id == quest_id)
                     .first()
@@ -49,30 +72,6 @@ class QuestService:
             combined_info = {**quest_npc[0].__dict__, **quest_npc[1].__dict__}
 
             return combined_info
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
-    def get_user_select_quest():
-        try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
-                quest_list = s.query(QuestPreview).order_by(QuestPreview.order).all()
-                npc_list = s.query(NPC).order_by(NPC.order).all()
-
-                npc_quest = []
-
-                for npc in npc_list:
-                    npc_dict = {"name_kr": npc.name_kr, "name_en": npc.name_en}
-                    quest_with_npc = []
-                    for quest in quest_list:
-                        if quest.npc_value == npc.id:
-                            quest_with_npc.append(quest)
-                        npc_dict["quests"] = quest_with_npc
-                    npc_quest.append(npc_dict)
-
-                return npc_quest
         except Exception as e:
             print("오류 발생:", e)
             return None

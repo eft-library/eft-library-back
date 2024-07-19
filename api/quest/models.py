@@ -49,7 +49,9 @@ class QuestPreview(DataBaseConnector.Base):
     guide = Column(TEXT)
     requires = Column(JSON)
     next = Column(JSON)
+    is_event = Column(Boolean)
     sub = relationship("RelatedQuest", backref="quest_preview")
+    event_sub = relationship("Event", backref="quest_preview")
 
 
 class RelatedQuest(DataBaseConnector.Base):
@@ -71,3 +73,16 @@ class RelatedQuest(DataBaseConnector.Base):
     item_image = Column(TEXT)
     desc_text = Column(ARRAY(TEXT))
     item_link = Column(TEXT)
+
+
+class Event(DataBaseConnector.Base):
+    """
+    Event
+    """
+
+    __tablename__ = "tkl_event"
+
+    event_id = Column("id", TEXT, ForeignKey("tkl_quest.id"))
+    event_title_en = Column("name_en", String, primary_key=True)
+    event_text_en = Column(ARRAY(TEXT))
+    event_text_kr = Column(ARRAY(TEXT))
