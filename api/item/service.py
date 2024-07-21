@@ -294,7 +294,8 @@ class ItemService:
                              LEFT JOIN tkl_related_quest on rq = tkl_related_quest.quest_id and tkl_loot.id = tkl_related_quest.item_id
                              LEFT JOIN tkl_quest on rq = tkl_quest.id
                              LEFT JOIN LATERAL unnest(tkl_loot.related_hideout) AS hid on true
-                             LEFT JOIN tkl_related_hideout on hid = tkl_related_hideout.hideout_sub_id
+                             LEFT JOIN tkl_related_hideout
+                                       on hid = tkl_related_hideout.hideout_sub_id and tkl_loot.id = tkl_related_hideout.item_id
                     group by tkl_loot.id, tkl_loot.name_en, tkl_loot.name_kr, tkl_loot.short_name,
                              tkl_loot.category, tkl_loot.image
                     """
