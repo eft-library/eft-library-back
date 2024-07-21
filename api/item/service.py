@@ -284,7 +284,8 @@ class ItemService:
                                                        tkl_related_quest.in_raid, 'count', tkl_related_quest."count"))
                                     FILTER (WHERE rq IS NOT NULL), '[]'::jsonb)  as quest_notes,
                            COALESCE(jsonb_agg(distinct
-                                    jsonb_build_object('id', hid, 'master_id', tkl_related_hideout.hideout_master_id, 'name',
+                                    jsonb_build_object('item_id', tkl_related_hideout.item_id, 'level_id', hid, 'master_id',
+                                                       tkl_related_hideout.hideout_master_id, 'name',
                                                        tkl_related_hideout.hideout_master_name_en, 'name_kr',
                                                        tkl_related_hideout.hideout_master_name_kr, 'count', tkl_related_hideout."count"))
                                     FILTER (WHERE hid IS NOT NULL), '[]'::jsonb) as hideout_notes
@@ -309,7 +310,7 @@ class ItemService:
                         "category": row[4],
                         "image": row[5],
                         "related_quests": row[6],
-                        "related_hideout": row[7]
+                        "related_hideout": row[7],
                     }
                     loot.append(loot_dict)
                 return loot
