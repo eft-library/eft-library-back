@@ -11,6 +11,7 @@ import os
 import uuid
 from sqlalchemy import text
 from api.user.util import UserUtil
+from datetime import datetime
 
 
 load_dotenv()
@@ -39,6 +40,11 @@ class UserService:
                         nick_name=uuid_v5,
                         point=0,
                         is_ban=False,
+                        is_delete=False,
+                        grade="뉴비",
+                        create_time=datetime.now(),
+                        update_time=None,
+                        delete_time=None,
                     )
                     s.add(new_user)
                     new_user_quest = UserQuest(

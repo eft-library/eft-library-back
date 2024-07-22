@@ -64,6 +64,11 @@ class User(DataBaseConnector.Base):
     nick_name = Column(TEXT)
     point = Column(Integer)
     is_ban = Column(Boolean)
+    is_delete = Column(Boolean)
+    grade = Column(TEXT)
+    create_time = Column(TIMESTAMP)
+    update_time = Column(TIMESTAMP)
+    delete_time = Column(TIMESTAMP)
 
 
 class UserQuest(DataBaseConnector.Base):
