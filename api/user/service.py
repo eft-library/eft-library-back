@@ -37,7 +37,7 @@ class UserService:
                         name=addUserReq.name,
                         email=addUserReq.email,
                         image="/tkl_user/icon/newbie.png",
-                        nick_name=uuid_v5,
+                        nick_name=uuid_v5[:10],
                         point=0,
                         is_ban=False,
                         is_delete=False,
