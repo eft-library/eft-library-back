@@ -15,7 +15,7 @@ def get_all_search():
     return CustomResponse.response(search_list, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/sitemap")
+@router.get("/new_sitemap")
 def get_all_sitemap():
     site_list = SearchService.get_all_site_list()
     if site_list is None:
