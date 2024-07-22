@@ -32,8 +32,6 @@ class SearchService:
             with session() as s:
                 query = text(
                     """
-                    select '/icon.ico' as tkl_link
-                    union all
                     select '/privacy' as tkl_link
                     union all
                     select '/terms' as tkl_link
