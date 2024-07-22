@@ -9,6 +9,7 @@ from api.user.models import (
     UserQuestReq,
     UserQuestUpdate,
     UserQuestDelete,
+    UserInfoReq,
 )
 from api.user.util import UserUtil
 
@@ -24,6 +25,19 @@ def add_user(addUserReq: AddUserReq):
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.USER_ADD_FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.post("/get")
+def get_user(useInfoReq: UserInfoReq, token: str = Depends(oauth2_scheme)):
+
+    user_email = UserUtil.verify_token(provider=useInfoReq.provider, access_token=token)
+    if user_email:
+        user = UserService.get_user(user_email)
+        if user is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
 @router.post("/quest")
@@ -54,6 +68,7 @@ def get_user_quest(
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
 
 @router.post("/quest/delete")
 def delete_user_quest(

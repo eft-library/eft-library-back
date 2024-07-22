@@ -13,6 +13,14 @@ from pydantic import BaseModel
 from typing import List
 
 
+class UserInfoReq(BaseModel):
+    """
+    사용자 정보 요청
+    """
+
+    provider: str
+
+
 class UserQuestDelete(BaseModel):
     """
     사용자 퀘스트 삭제시

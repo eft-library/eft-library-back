@@ -133,3 +133,14 @@ class UserService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_user(user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user = s.query(User).filter(User.email == user_email).first()
+                return user
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
