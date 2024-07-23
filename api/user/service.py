@@ -1,7 +1,9 @@
-from api.user.models import (
+from api.user.user_res_models import (
     User,
-    AddUserReq,
     UserQuest,
+)
+from api.user.user_req_models import (
+    AddUserReq,
     UserQuestUpdate,
     UserQuestDelete,
 )
@@ -11,8 +13,7 @@ import os
 import uuid
 from sqlalchemy import text
 from api.user.util import UserUtil
-from datetime import datetime
-
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -141,6 +142,44 @@ class UserService:
             with session() as s:
                 user = s.query(User).filter(User.email == user_email).first()
                 return user
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def change_user_nickname(new_nickname: str, user_email: str):
+        """
+        요건 적합 : return user
+        30일 안지남 : return 2
+        중복 : return 3
+        """
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user = s.query(User).filter(User.email == user_email).first()
+
+                # 수정 시간이 30일이 지났는지 확인
+                thirty_days_ago = datetime.now() - timedelta(days=30)
+                if user.update_time < thirty_days_ago:
+                    # 30일 지남
+                    nickname_duplicate = s.query(User).filter(
+                        User.nick_name == new_nickname
+                    )
+
+                    if nickname_duplicate:
+                        # 중복
+                        return 3
+                    else:
+                        user.nick_name = new_nickname
+                        s.commit()
+
+                        change_user = (
+                            s.query(User).filter(User.email == user_email).first()
+                        )
+                        return change_user
+                else:
+                    # 30일 안 되었음
+                    return 2
         except Exception as e:
             print("오류 발생:", e)
             return None

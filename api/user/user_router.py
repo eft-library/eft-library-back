@@ -4,8 +4,9 @@ from fastapi.security import OAuth2PasswordBearer
 from util.constants import HTTPCode
 from api.constants import Message
 from api.user.service import UserService
-from api.user.models import (
+from api.user.user_req_models import (
     AddUserReq,
+    ChangeUserNickname,
     UserQuestReq,
     UserQuestUpdate,
     UserQuestDelete,
@@ -84,5 +85,36 @@ def delete_user_quest(
                 None, HTTPCode.OK, Message.SUCCESS_QUEST_FAIL
             )
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/nickname/change")
+def change_user_nickname(
+    changeUserNickname: ChangeUserNickname, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_token(
+        provider=changeUserNickname.provider, access_token=token
+    )
+    if user_email:
+        result = UserService.change_user_nickname(
+            changeUserNickname.nickname, user_email
+        )
+
+        if result == 2:
+            # 30일이 지나지 않은 경우
+            return CustomResponse.response(
+                None, HTTPCode.FORBIDDEN, Message.NICKNAME_CHANGE_NOT_AVAILABLE
+            )
+        elif result == 3:
+            # 중복인 케이스
+            return CustomResponse.response(
+                None, HTTPCode.CONFLICT, Message.NICKNAME_DUPLICATE
+            )
+        elif result:
+            # 정상
+            return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+        else:
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
