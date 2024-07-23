@@ -100,7 +100,7 @@ def change_user_nickname(
         result = UserService.change_user_nickname(
             changeUserNickname.nickname, user_email
         )
-
+        print(result)
         if result == 2:
             # 30일이 지나지 않은 경우
             return CustomResponse.response(

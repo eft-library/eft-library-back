@@ -14,6 +14,8 @@ pip install psycopg2-binary
 
 pip install requests
 
+pip install pytz
+
 uvicorn main:app --reload
 
 구조

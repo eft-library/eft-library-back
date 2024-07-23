@@ -14,6 +14,7 @@ import uuid
 from sqlalchemy import text
 from api.user.util import UserUtil
 from datetime import datetime, timedelta
+import pytz
 
 load_dotenv()
 
@@ -159,18 +160,22 @@ class UserService:
                 user = s.query(User).filter(User.email == user_email).first()
 
                 # 수정 시간이 30일이 지났는지 확인
-                thirty_days_ago = datetime.now() - timedelta(days=30)
-                if user.update_time < thirty_days_ago:
-                    # 30일 지남
-                    nickname_duplicate = s.query(User).filter(
-                        User.nick_name == new_nickname
-                    )
+                thirty_days_ago = datetime.now(pytz.UTC) - timedelta(days=30)
 
+                if (
+                    user.update_time.replace(tzinfo=pytz.UTC) is None
+                    or user.update_time < thirty_days_ago
+                ):
+                    # 30일 지났거나 변경한 적 없음
+                    nickname_duplicate = (
+                        s.query(User).filter(User.nick_name == new_nickname).first()
+                    )
                     if nickname_duplicate:
                         # 중복
                         return 3
                     else:
                         user.nick_name = new_nickname
+                        user.update_time = datetime.now()
                         s.commit()
 
                         change_user = (
