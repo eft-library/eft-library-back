@@ -101,3 +101,11 @@ def get_all_face_cover():
     if face_cover is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FACE_COVER_NOT_FOUND)
     return CustomResponse.response(face_cover, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/arm-band")
+def get_all_arm_band():
+    arm_band = ItemService.get_all_arm_band()
+    if arm_band is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.ARM_BAND_NOT_FOUND)
+    return CustomResponse.response(arm_band, HTTPCode.OK, Message.SUCCESS)

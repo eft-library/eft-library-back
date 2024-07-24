@@ -237,3 +237,18 @@ class FaceCover(DataBaseConnector.Base):
     ricochet_str_kr = Column(TEXT)
     ricochet_str_en = Column(TEXT)
     update_time = Column(TIMESTAMP)
+
+
+class ArmBand(DataBaseConnector.Base):
+    """
+    Arm band
+    """
+
+    __tablename__ = "tkl_arm_band"
+
+    id = Column(TEXT, primary_key=True)
+    name = Column(TEXT)
+    short_name = Column(TEXT)
+    weight = Column(NUMERIC)
+    image = Column(TEXT)
+    update_time = Column(TIMESTAMP)

@@ -11,6 +11,7 @@ from api.item.models import (
     Ammo,
     Loot,
     FaceCover,
+    ArmBand,
 )
 from database import DataBaseConnector
 from sqlalchemy import desc, text
@@ -345,6 +346,20 @@ class ItemService:
             }
 
             return result_face_cover
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_arm_band():
+        """
+        arm band 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                arm_band = s.query(ArmBand).order_by(ArmBand.name).all()
+                return arm_band
         except Exception as e:
             print("오류 발생:", e)
             return None
