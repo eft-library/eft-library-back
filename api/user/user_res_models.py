@@ -20,6 +20,7 @@ class User(DataBaseConnector.Base):
     name = Column(TEXT)
     email = Column(TEXT)
     image = Column(TEXT)
+    image_list = Column(ARRAY(TEXT))
     nick_name = Column(TEXT)
     point = Column(Integer)
     is_ban = Column(Boolean)
@@ -27,6 +28,7 @@ class User(DataBaseConnector.Base):
     grade = Column(TEXT)
     create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
+    ban_end_time = Column(TIMESTAMP)
     delete_time = Column(TIMESTAMP)
 
 

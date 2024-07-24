@@ -39,14 +39,13 @@ class UserService:
                         name=addUserReq.name,
                         email=addUserReq.email,
                         image="/tkl_user/icon/newbie.gif",
+                        image_list=["/tkl_user/icon/newbie.gif"],
                         nick_name=uuid_v5[:10],
                         point=0,
                         is_ban=False,
                         is_delete=False,
                         grade="뉴비",
                         create_time=datetime.now(),
-                        update_time=None,
-                        delete_time=None,
                     )
                     s.add(new_user)
                     new_user_quest = UserQuest(
@@ -163,8 +162,8 @@ class UserService:
                 thirty_days_ago = datetime.now(pytz.UTC) - timedelta(days=30)
 
                 if (
-                    user.update_time.replace(tzinfo=pytz.UTC) is None
-                    or user.update_time < thirty_days_ago
+                    user.update_time is None
+                    or user.update_time.replace(tzinfo=pytz.UTC) < thirty_days_ago
                 ):
                     # 30일 지났거나 변경한 적 없음
                     nickname_duplicate = (
@@ -185,6 +184,21 @@ class UserService:
                 else:
                     # 30일 안 되었음
                     return 2
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def change_user_icon(new_icon: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user = s.query(User).filter(User.email == user_email).first()
+                user.image = new_icon
+                s.commit()
+
+                new_user = s.query(User).filter(User.email == user_email).first()
+                return new_user
         except Exception as e:
             print("오류 발생:", e)
             return None

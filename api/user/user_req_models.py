@@ -54,3 +54,12 @@ class ChangeUserNickname(BaseModel):
 
     provider: str
     nickname: str
+
+
+class ChangeUserIcon(BaseModel):
+    """
+    사용자 아이콘 수정
+    """
+
+    provider: str
+    icon: str
