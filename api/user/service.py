@@ -44,6 +44,7 @@ class UserService:
                         point=0,
                         is_ban=False,
                         is_delete=False,
+                        is_admin=False,
                         grade="뉴비",
                         create_time=datetime.now(),
                     )

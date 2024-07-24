@@ -1,12 +1,5 @@
 from database import DataBaseConnector
-from sqlalchemy import (
-    Column,
-    Integer,
-    TIMESTAMP,
-    ARRAY,
-    TEXT,
-    Boolean,
-)
+from sqlalchemy import Column, Integer, TIMESTAMP, ARRAY, TEXT, Boolean, BIGINT
 
 
 class User(DataBaseConnector.Base):
@@ -22,9 +15,10 @@ class User(DataBaseConnector.Base):
     image = Column(TEXT)
     image_list = Column(ARRAY(TEXT))
     nick_name = Column(TEXT)
-    point = Column(Integer)
+    point = Column(BIGINT)
     is_ban = Column(Boolean)
     is_delete = Column(Boolean)
+    is_admin = Column(Boolean)
     grade = Column(TEXT)
     create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
