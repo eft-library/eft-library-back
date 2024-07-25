@@ -7,7 +7,7 @@ from api.event.service import EventService
 router = APIRouter(tags=["Event"])
 
 
-@router.get("/board/")
+@router.get("/board")
 def get_event_quest(page: int, page_size: int):
     event_list = EventService.get_event_quest(page, page_size)
     if event_list is None:
