@@ -1,19 +1,19 @@
 from sqlalchemy import func
 
-from api.notice.models import Notice
+from api.patch_notes.models import PatchNotes
 from database import DataBaseConnector
 
 
-class NoticeService:
+class PatchNotesService:
 
     @staticmethod
-    def get_notice(page: int, page_size: int):
+    def get_patch_notes(page: int, page_size: int):
         try:
             session = DataBaseConnector.create_session_factory()
             offset = (page - 1) * page_size
             with session() as s:
                 # 전체 행 수 조회
-                total_count = s.query(func.count(Notice.id)).scalar()
+                total_count = s.query(func.count(PatchNotes.id)).scalar()
 
                 # 최대 페이지 수 계산
                 max_pages = (total_count // page_size) + (
@@ -22,8 +22,8 @@ class NoticeService:
 
                 # 현재 페이지의 데이터 조회
                 notice_list = (
-                    s.query(Notice)
-                    .order_by(Notice.update_time)
+                    s.query(PatchNotes)
+                    .order_by(PatchNotes.update_time)
                     .limit(page_size)
                     .offset(offset)
                     .all()

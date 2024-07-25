@@ -2,16 +2,16 @@ from database import DataBaseConnector
 from sqlalchemy import Column, String, ARRAY, TEXT, TIMESTAMP
 
 
-class Notice(DataBaseConnector.Base):
+class PatchNotes(DataBaseConnector.Base):
     """
-    Notice
+    PatchNotes
     """
 
-    __tablename__ = "tkl_notice"
+    __tablename__ = "tkl_patch_notes"
 
     id = Column("id", TEXT, primary_key=True)
     name_en = Column(String)
     name_kr = Column(String)
-    notice_text_en = Column(ARRAY(TEXT))
-    notice_text_kr = Column(ARRAY(TEXT))
+    patch_notes_en = Column(ARRAY(TEXT))
+    patch_notes_kr = Column(ARRAY(TEXT))
     update_time = Column(TIMESTAMP)
