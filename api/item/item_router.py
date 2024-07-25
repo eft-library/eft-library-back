@@ -109,3 +109,11 @@ def get_all_arm_band():
     if arm_band is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.ARM_BAND_NOT_FOUND)
     return CustomResponse.response(arm_band, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/glasses")
+def get_all_glasses():
+    glasses = ItemService.get_all_glasses()
+    if glasses is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.GLASSES_NOT_FOUND)
+    return CustomResponse.response(glasses, HTTPCode.OK, Message.SUCCESS)

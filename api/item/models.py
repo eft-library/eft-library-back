@@ -252,3 +252,20 @@ class ArmBand(DataBaseConnector.Base):
     weight = Column(NUMERIC)
     image = Column(TEXT)
     update_time = Column(TIMESTAMP)
+
+
+class Glasses(DataBaseConnector.Base):
+    """
+    Glasses
+    """
+
+    __tablename__ = "tkl_glasses"
+
+    id = Column(TEXT, primary_key=True)
+    name = Column(TEXT)
+    short_name = Column(TEXT)
+    class_value = Column(INTEGER)
+    durability = Column(INTEGER)
+    blindness_protection = Column(NUMERIC)
+    image = Column(TEXT)
+    update_time = Column(TIMESTAMP)

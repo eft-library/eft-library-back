@@ -12,6 +12,7 @@ from api.item.models import (
     Loot,
     FaceCover,
     ArmBand,
+    Glasses,
 )
 from database import DataBaseConnector
 from sqlalchemy import desc, text
@@ -360,6 +361,36 @@ class ItemService:
             with session() as s:
                 arm_band = s.query(ArmBand).order_by(ArmBand.name).all()
                 return arm_band
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_glasses():
+        """
+        glasses 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                glasses = s.query(Glasses).order_by(Glasses.class_value).all()
+
+            class_glasses = []
+
+            no_class_glasses = []
+
+            for glass in glasses:
+                if glass.class_value is None:
+                    no_class_glasses.append(glass)
+                else:
+                    class_glasses.append(glass)
+
+            result_glasses = {
+                "class_glasses": [item.__dict__ for item in class_glasses],
+                "no_class_glasses": [item.__dict__ for item in no_class_glasses],
+            }
+
+            return result_glasses
         except Exception as e:
             print("오류 발생:", e)
             return None
