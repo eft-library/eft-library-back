@@ -13,6 +13,7 @@ from api.item import item_router
 from api.hideout import hideout_router
 from api.user import user_router
 from api.event import event_router
+from api.notice import notice_router
 
 api_router = APIRouter()
 
@@ -30,3 +31,4 @@ api_router.include_router(item_router.router, prefix="/item")
 api_router.include_router(hideout_router.router, prefix="/hideout")
 api_router.include_router(user_router.router, prefix="/user")
 api_router.include_router(event_router.router, prefix="/event")
+api_router.include_router(notice_router.router, prefix="/notice")
