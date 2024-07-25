@@ -373,21 +373,59 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                glasses = s.query(Glasses).order_by(Glasses.class_value).all()
+                query = text(
+                    """
+                    select tkl_glasses.id,
+                           tkl_glasses.name,
+                           tkl_glasses.short_name,
+                           tkl_glasses.class_value,
+                           tkl_glasses.durability,
+                           tkl_glasses.blindness_protection,
+                           tkl_glasses.image,
+                           COALESCE(jsonb_agg(distinct
+                                    jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
+                                                       tkl_related_quest.in_raid, 'count', tkl_related_quest."count"))
+                                    FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
+                    from tkl_glasses
+                             LEFT JOIN LATERAL unnest(tkl_glasses.related_quests) AS rq ON true
+                             LEFT JOIN tkl_related_quest
+                                       on rq = tkl_related_quest.quest_id and tkl_glasses.id = tkl_related_quest.item_id
+                             LEFT JOIN tkl_quest on rq = tkl_quest.id
+                    group by tkl_glasses.id, tkl_glasses.name, tkl_glasses.short_name,
+                             tkl_glasses.class_value, tkl_glasses.durability, tkl_glasses.blindness_protection,
+                             tkl_glasses.image
+                    order by tkl_glasses.blindness_protection
+                    """
+                )
+
+                result = s.execute(query)
+                glasses = []
+                for row in result:
+                    glasses_dict = {
+                        "id": row[0],
+                        "name": row[1],
+                        "short_name": row[2],
+                        "class_value": row[3],
+                        "durability": row[4],
+                        "blindness_protection": row[5],
+                        "image": row[6],
+                        "related_quests": row[7],
+                    }
+                    glasses.append(glasses_dict)
 
             class_glasses = []
 
             no_class_glasses = []
 
             for glass in glasses:
-                if glass.class_value is None:
+                if glass.get("class_value") == 0:
                     no_class_glasses.append(glass)
                 else:
                     class_glasses.append(glass)
 
             result_glasses = {
-                "class_glasses": [item.__dict__ for item in class_glasses],
-                "no_class_glasses": [item.__dict__ for item in no_class_glasses],
+                "class_glasses": class_glasses,
+                "no_class_glasses": no_class_glasses,
             }
 
             return result_glasses

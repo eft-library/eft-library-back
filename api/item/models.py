@@ -268,4 +268,5 @@ class Glasses(DataBaseConnector.Base):
     durability = Column(INTEGER)
     blindness_protection = Column(NUMERIC)
     image = Column(TEXT)
+    related_quests = Column(ARRAY(TEXT))
     update_time = Column(TIMESTAMP)
