@@ -22,17 +22,6 @@ class BoardService:
 
     @staticmethod
     def upload_to_remote(local_path: str, filename: str) -> bool:
-        print([
-                    "sshpass",
-                    "-p",
-                    os.getenv("SERVER_PW"),
-                    "scp",
-                    "-O",
-                    "-P",
-                    os.getenv("SERVER_PORT"),
-                    local_path,
-                    f"{os.getenv('SERVER_HOST')}:{os.getenv('SERVER_PATH')}/{filename}",
-                ])
         try:
             subprocess.run(
                 [
@@ -40,7 +29,7 @@ class BoardService:
                     "-p",
                     os.getenv("SERVER_PW"),
                     "scp",
-                    "-O",
+                    # "-O",
                     "-P",
                     os.getenv("SERVER_PORT"),
                     local_path,
