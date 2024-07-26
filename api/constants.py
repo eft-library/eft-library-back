@@ -9,6 +9,7 @@ class Message(Enum):
     NPC_NOT_FOUND = "NPC not found"
     QUEST_NOT_FOUND = "Quest not found"
     EVENT_NOT_FOUND = "Event not found"
+    IMAGE_UPLOAD_FAIL = "Image upload fail"
     PATCH_NOTES_NOT_FOUND = "Patch notes not found"
     WEAPON_NOT_FOUND = "Weapon not found"
     MAIN_INFO_NOT_FOUND = "Main info not found"
