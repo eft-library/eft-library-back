@@ -15,8 +15,7 @@ router = APIRouter(tags=["Board"])
 @router.post("/upload_image")
 def upload_image(file: UploadFile = File(...)):
     file_location, unique_filename = BoardService.save_file(file, file.filename)
-    if BoardService.upload_to_remote(file_location, unique_filename):
-        image_url = f"{os.getenv('BOARD_IMAGE_PATH')}/{unique_filename}"
-        return CustomResponse.response(image_url, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.IMAGE_UPLOAD_FAIL)
+    # 로직 변경 -> scp로 파일 전달에서 바로 저장공간을 연동으로 변경
+    # if BoardService.upload_to_remote(file_location, unique_filename):
+    image_url = f"{os.getenv('BOARD_IMAGE_PATH')}/{unique_filename}"
+    return CustomResponse.response(image_url, HTTPCode.OK, Message.SUCCESS)
