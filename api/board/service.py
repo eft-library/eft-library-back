@@ -40,3 +40,7 @@ class BoardService:
             return True
         except subprocess.CalledProcessError:
             return False
+
+    @staticmethod
+    def insert_post():
+        pass

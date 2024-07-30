@@ -8,10 +8,8 @@ from api.user.user_req_models import (
     AddUserReq,
     ChangeUserNickname,
     ChangeUserIcon,
-    UserQuestReq,
     UserQuestUpdate,
     UserQuestDelete,
-    UserInfoReq,
 )
 from api.user.util import UserUtil
 
@@ -30,9 +28,9 @@ def add_user(addUserReq: AddUserReq):
 
 
 @router.post("/get")
-def get_user(useInfoReq: UserInfoReq, token: str = Depends(oauth2_scheme)):
+def get_user(token: str = Depends(oauth2_scheme)):
 
-    user_email = UserUtil.verify_token(provider=useInfoReq.provider, access_token=token)
+    user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
         user = UserService.get_user(user_email)
         if user is None:
@@ -43,10 +41,8 @@ def get_user(useInfoReq: UserInfoReq, token: str = Depends(oauth2_scheme)):
 
 
 @router.post("/quest")
-def get_user_quest(userQuestReq: UserQuestReq, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_token(
-        provider=userQuestReq.provider, access_token=token
-    )
+def get_user_quest(token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
         result = UserService.get_user_quest(user_email)
         if result is None:
@@ -60,9 +56,7 @@ def get_user_quest(userQuestReq: UserQuestReq, token: str = Depends(oauth2_schem
 def get_user_quest(
     userQuestUpdate: UserQuestUpdate, token: str = Depends(oauth2_scheme)
 ):
-    user_email = UserUtil.verify_token(
-        provider=userQuestUpdate.provider, access_token=token
-    )
+    user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
         result = UserService.update_user_quest(userQuestUpdate, user_email)
         if result is None:
@@ -76,9 +70,7 @@ def get_user_quest(
 def delete_user_quest(
     userQuestDelete: UserQuestDelete, token: str = Depends(oauth2_scheme)
 ):
-    user_email = UserUtil.verify_token(
-        provider=userQuestDelete.provider, access_token=token
-    )
+    user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
         result = UserService.delete_user_quest(userQuestDelete, user_email)
         if result is None:
@@ -94,9 +86,7 @@ def delete_user_quest(
 def change_user_nickname(
     changeUserNickname: ChangeUserNickname, token: str = Depends(oauth2_scheme)
 ):
-    user_email = UserUtil.verify_token(
-        provider=changeUserNickname.provider, access_token=token
-    )
+    user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
         result = UserService.change_user_nickname(
             changeUserNickname.nickname, user_email
@@ -125,9 +115,7 @@ def change_user_nickname(
 def change_user_icon(
     changeUserIcon: ChangeUserIcon, token: str = Depends(oauth2_scheme)
 ):
-    user_email = UserUtil.verify_token(
-        provider=changeUserIcon.provider, access_token=token
-    )
+    user_email = UserUtil.verify_google_token(access_token=token)
 
     if user_email:
         result = UserService.change_user_icon(changeUserIcon.icon, user_email)

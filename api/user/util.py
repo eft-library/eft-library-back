@@ -13,6 +13,7 @@ class UserUtil:
     def verify_token(provider: str, access_token: str):
         """
         1차 토큰 분류
+        naver를 없애면서 사용안함
         """
         if provider == "naver":
             res = UserUtil.verify_naver_token(access_token)

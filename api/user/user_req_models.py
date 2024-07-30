@@ -2,29 +2,12 @@ from pydantic import BaseModel
 from typing import List
 
 
-class UserInfoReq(BaseModel):
-    """
-    사용자 정보 요청
-    """
-
-    provider: str
-
-
 class UserQuestDelete(BaseModel):
     """
     사용자 퀘스트 삭제시
     """
 
-    provider: str
     userQuestList: List[str]
-
-
-class UserQuestReq(BaseModel):
-    """
-    사용자 퀘스트 조회 요청
-    """
-
-    provider: str
 
 
 class UserQuestUpdate(BaseModel):
@@ -32,7 +15,6 @@ class UserQuestUpdate(BaseModel):
     사용자 퀘스트 수정
     """
 
-    provider: str
     userQuestList: List[str]
 
 
@@ -52,7 +34,6 @@ class ChangeUserNickname(BaseModel):
     사용자 닉네임 수정
     """
 
-    provider: str
     nickname: str
 
 
@@ -61,5 +42,4 @@ class ChangeUserIcon(BaseModel):
     사용자 아이콘 수정
     """
 
-    provider: str
     icon: str
