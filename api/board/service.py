@@ -84,7 +84,11 @@ class BoardService:
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        return file_location, unique_filename
+        image_url = (
+            f"{os.getenv('NAS_DATA')}{os.getenv('BOARD_IMAGE_PATH')}/{unique_filename}"
+        )
+
+        return file_location, unique_filename, image_url
 
     @staticmethod
     def upload_to_remote(local_path: str, filename: str) -> bool:
