@@ -10,3 +10,11 @@ class AddPost(BaseModel):
     title: str
     contents: str
     type: str
+
+
+class LikeOrDisPost(BaseModel):
+    """
+    좋아요, 싫어요
+    """
+
+    id: str

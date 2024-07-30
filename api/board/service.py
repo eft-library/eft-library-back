@@ -10,8 +10,9 @@ from api.board.board_res_models import (
     NoticeBoard,
     IncidentBoard,
     Issue,
+    PostLike,
 )
-from api.board.board_req_models import AddPost
+from api.board.board_req_models import AddPost, LikeOrDisPost
 from database import DataBaseConnector
 from api.user.user_res_models import User
 from datetime import datetime
@@ -122,6 +123,37 @@ class BoardService:
                     s.add(new_post)
                     s.commit()
                     return True
+
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def change_user_like_post(likeOrDis: LikeOrDisPost, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_like_info = (
+                    s.query(PostLike)
+                    .filter(
+                        PostLike.user_email == user_email
+                        and PostLike.board_id == likeOrDis.id
+                    )
+                    .first()
+                )
+
+                if user_like_info:
+                    s.delete(user_like_info)
+                    s.commit()
+                else:
+                    new_like_user = PostLike(
+                        board_id=likeOrDis.id,
+                        user_email=user_email,
+                        update_time=datetime.now(),
+                    )
+                    s.add(new_like_user)
+                    s.commit()
+                return True
 
         except Exception as e:
             print("오류 발생:", e)

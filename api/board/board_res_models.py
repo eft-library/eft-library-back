@@ -30,7 +30,6 @@ class Issue(DataBaseConnector.Base):
     __tablename__ = "tkl_issue"
 
     board_id = Column(BIGINT, primary_key=True)
-    like_count = Column(Integer)
     writer = Column(TEXT)
     update_time = Column(TIMESTAMP)
 
@@ -108,4 +107,16 @@ class NoticeBoard(DataBaseConnector.Base):
     writer = Column(TEXT)
     view_count = Column(Integer)
     create_time = Column(TIMESTAMP)
+    update_time = Column(TIMESTAMP)
+
+
+class PostLike(DataBaseConnector.Base):
+    """
+    Post like
+    """
+
+    __tablename__ = "tkl_post_like"
+
+    board_id = Column(BIGINT, primary_key=True)
+    user_email = Column(TEXT, primary_key=True)
     update_time = Column(TIMESTAMP)
