@@ -39,3 +39,4 @@ class Message(Enum):
     SUCCESS_QUEST_FAIL = "Success quest fail"
     NICKNAME_DUPLICATE = "Nickname is duplicate"
     NICKNAME_CHANGE_NOT_AVAILABLE = "Available after 30 days."
+    ADD_BOARD_FAIL = "Add board fail"
