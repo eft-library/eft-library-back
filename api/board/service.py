@@ -59,7 +59,7 @@ def valid_post_type(addPost: AddPost, user_email: str):
 def remove_video_delete_button(html):
     # 정규 표현식을 사용하여 <button class="ql-video-delete"> 태그를 제거합니다.
     cleaned_html = re.sub(
-        r'<button class="ql-video-delete"[^>]*>.*?</button>', "", html
+        r'<button class="ql-video-delete"[^>]*>.*?</button>', "", html, flags=re.DOTALL
     )
     return cleaned_html
 
