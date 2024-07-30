@@ -3,6 +3,8 @@ import os
 import subprocess
 from uuid import uuid4
 from dotenv import load_dotenv
+from sqlalchemy import select, text
+
 from api.board.board_res_models import (
     ForumBoard,
     HumorBoard,
@@ -158,6 +160,78 @@ class BoardService:
                     s.add(new_like_user)
                     s.commit()
                 return True
+
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_post(page: int, page_size: int):
+        session_factory = DataBaseConnector.create_session_factory()
+
+        try:
+            with session_factory() as session:
+                # 전체 데이터 수를 구하는 쿼리
+                max_cnt_query = text(
+                    """
+                    SELECT COUNT(*)
+                    FROM (
+                        SELECT id FROM tkl_forum
+                        UNION ALL
+                        SELECT id FROM tkl_tip
+                        UNION ALL
+                        SELECT id FROM tkl_incident
+                        UNION ALL
+                        SELECT id FROM tkl_humor
+                    ) AS combined
+                """
+                )
+
+                # OFFSET 계산
+                offset = (page - 1) * page_size
+
+                # 전체 데이터 수 조회
+                result = session.execute(max_cnt_query)
+                real_total_count = result.scalar()
+
+                # 총 페이지 수 계산
+                max_pages = (real_total_count // page_size) + (
+                    1 if real_total_count % page_size > 0 else 0
+                )
+
+                # 실제 데이터 조회 쿼리
+                query = text(
+                    """
+                    SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
+                    FROM (
+                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
+                        FROM tkl_forum
+                        UNION ALL
+                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
+                        FROM tkl_tip
+                        UNION ALL
+                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
+                        FROM tkl_incident
+                        UNION ALL
+                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
+                        FROM tkl_humor
+                    ) AS combined
+                    ORDER BY update_time DESC
+                    LIMIT :limit OFFSET :offset
+                """
+                )
+
+                # 데이터 조회
+                params = {"limit": page_size, "offset": offset}
+                result = session.execute(query, params)
+                posts = [dict(row) for row in result]
+
+                return {
+                    "data": posts,
+                    "total_count": real_total_count,
+                    "max_pages": max_pages,
+                    "current_page": page,
+                }
 
         except Exception as e:
             print("오류 발생:", e)

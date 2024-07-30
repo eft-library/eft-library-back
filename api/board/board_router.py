@@ -52,3 +52,11 @@ def change_user_like_post(
         return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.get("/all")
+def get_posts(page: int, page_size: int):
+    posts = BoardService.get_post(page, page_size)
+    if posts is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
+    return CustomResponse.response(posts, HTTPCode.OK, Message.SUCCESS)
