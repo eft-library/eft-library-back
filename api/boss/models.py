@@ -28,6 +28,7 @@ class Boss(DataBaseConnector.Base):
     followers_health = Column(JSON)
     update_time = Column(TIMESTAMP)
     sub = relationship("BossLoot", backref="boss")
+    sub_followers = relationship("FollowersLoot", backref="boss")
 
 
 class BossLoot(DataBaseConnector.Base):
@@ -44,6 +45,24 @@ class BossLoot(DataBaseConnector.Base):
     item_type = Column(TEXT)
     item_type_en = Column(TEXT)
     item_type_kr = Column(TEXT)
-    loot_type = Column(TEXT)
+    item_image = Column(TEXT)
+    link = Column(TEXT)
+
+
+class FollowersLoot(DataBaseConnector.Base):
+    """
+    Followers Loot
+    """
+
+    __tablename__ = "tkl_followers_loot"
+
+    item_id = Column(TEXT, primary_key=True)
+    boss_id = Column(TEXT, ForeignKey("tkl_boss.id"))
+    follower_id = Column(TEXT)
+    item_name = Column(TEXT)
+    follower_name = Column(TEXT)
+    item_type = Column(TEXT)
+    item_type_en = Column(TEXT)
+    item_type_kr = Column(TEXT)
     item_image = Column(TEXT)
     link = Column(TEXT)

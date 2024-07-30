@@ -15,23 +15,14 @@ class BossService:
             load_dotenv()
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                boss_list = s.query(Boss).options(subqueryload(Boss.sub)).all()
+                boss_list = (
+                    s.query(Boss)
+                    .options(subqueryload(Boss.sub), subqueryload(Boss.sub_followers))
+                    .all()
+                )
 
             updated_boss_list = []
             for boss in boss_list:
-                boss_loot_list = []
-                followers_loot_list = []
-
-                if len(boss.sub) > 0:
-                    for loot in boss.sub:
-                        if loot.loot_type == "Boss":
-                            boss_loot_list.append(loot)
-                        else:
-                            followers_loot_list.append(loot)
-
-                boss.boss_loot_list = boss_loot_list
-                boss.followers_loot_list = followers_loot_list
-
                 if boss.location_guide is not None:
                     boss.location_guide = boss.location_guide.replace(
                         "/tkl_quest", os.getenv("NAS_DATA") + "/tkl_quest"
