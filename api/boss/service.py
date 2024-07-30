@@ -20,7 +20,6 @@ class BossService:
                     .options(
                         subqueryload(Boss.sub_followers).subqueryload(Followers.loot)
                     )
-                    .options(subqueryload(Boss.sub))
                     .all()
                 )
 

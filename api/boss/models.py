@@ -27,27 +27,6 @@ class Boss(DataBaseConnector.Base):
     order = Column(Integer)
     update_time = Column(TIMESTAMP)
     sub_followers = relationship("Followers", backref="boss")
-    sub = relationship("BossLoot", backref="boss")
-
-
-class BossLoot(DataBaseConnector.Base):
-    """
-    Boss Loot
-    """
-
-    __tablename__ = "tkl_boss_loot"
-
-    item_id = Column(TEXT, primary_key=True)
-    boss_id = Column(TEXT, ForeignKey("tkl_boss.id"))
-    item_name_en = Column(TEXT)
-    item_name_kr = Column(TEXT)
-    boss_name_en = Column(TEXT)
-    boss_name_kr = Column(TEXT)
-    item_type = Column(TEXT)
-    item_type_en = Column(TEXT)
-    item_type_kr = Column(TEXT)
-    item_image = Column(TEXT)
-    link = Column(TEXT)
 
 
 class Followers(DataBaseConnector.Base):
