@@ -1,4 +1,4 @@
-from api.boss.models import Boss
+from api.boss.models import Boss, Followers
 from database import DataBaseConnector
 import os
 from dotenv import load_dotenv
@@ -17,7 +17,10 @@ class BossService:
             with session() as s:
                 boss_list = (
                     s.query(Boss)
-                    .options(subqueryload(Boss.sub), subqueryload(Boss.sub_followers))
+                    .options(
+                        subqueryload(Boss.sub_followers).subqueryload(Followers.loot)
+                    )
+                    .options(subqueryload(Boss.sub))
                     .all()
                 )
 
