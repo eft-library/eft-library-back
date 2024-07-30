@@ -10,4 +10,3 @@ class AddPost(BaseModel):
     title: str
     contents: str
     type: str
-    thumbnail: str
