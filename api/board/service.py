@@ -138,7 +138,7 @@ class BoardService:
                     new_post = valid_post_type(addPost, user_email)
                     s.add(new_post)
                     s.commit()
-                    return True
+                    return {"id": new_post.id, "type": new_post.type}
 
         except Exception as e:
             print("오류 발생:", e)
