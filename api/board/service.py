@@ -250,7 +250,7 @@ class BoardService:
                         "type": post.type,
                         "create_time": post.create_time,
                         "update_time": post.update_time,
-                        "writer_image": image,
+                        "image": image,
                     }
                     result.append(post_dict)
                 return {
@@ -289,7 +289,7 @@ class BoardService:
                         "type": post.type,
                         "create_time": post.create_time,
                         "update_time": post.update_time,
-                        "writer_image": image,
+                        "image": image,
                     }
                     return post_dict
 
