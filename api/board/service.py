@@ -4,7 +4,7 @@ import subprocess
 from uuid import uuid4
 from dotenv import load_dotenv
 from sqlalchemy import text, func, desc
-
+from api.board.util import BoardUtil
 from api.board.board_res_models import (
     ForumBoard,
     PvpBoard,
@@ -182,24 +182,7 @@ class BoardService:
         try:
             with session_factory() as session:
                 # 전체 데이터 수를 구하는 쿼리
-                max_cnt_query = text(
-                    """
-                    SELECT COUNT(*)
-                    FROM (
-                        SELECT id FROM tkl_board_forum
-                        UNION ALL
-                        SELECT id FROM tkl_board_arena
-                        UNION ALL
-                        SELECT id FROM tkl_board_pve
-                        UNION ALL
-                        SELECT id FROM tkl_board_pvp
-                        UNION ALL
-                        SELECT id FROM tkl_board_question
-                        UNION ALL
-                        SELECT id FROM tkl_board_tip
-                    ) AS combined
-                """
-                )
+                max_cnt_query = text(BoardUtil.get_post_max_cnt_query())
 
                 # OFFSET 계산
                 offset = (page - 1) * page_size
@@ -214,37 +197,14 @@ class BoardService:
                 )
 
                 # 실제 데이터 조회 쿼리
-                query = text(
-                    """
-                    SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
-                    FROM (
-                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
-                        FROM tkl_board_forum
-                        UNION ALL
-                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
-                        FROM tkl_board_arena
-                        UNION ALL
-                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
-                        FROM tkl_board_pve
-                        UNION ALL
-                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
-                        FROM tkl_board_pvp
-                        UNION ALL
-                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
-                        FROM tkl_board_question
-                        UNION ALL
-                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
-                        FROM tkl_board_tip
-                    ) AS combined
-                    ORDER BY create_time DESC
-                    LIMIT :limit OFFSET :offset
-                """
-                )
+                query = text(BoardUtil.get_post_query())
 
                 # 데이터 조회
                 params = {"limit": page_size, "offset": offset}
-                result = session.execute(query, params)
-                posts = [dict(row) for row in result]
+                result = session.execute(query, params).fetchall()
+
+                # 컬럼 이름과 값을 매핑하여 딕셔너리로 변환
+                posts = [dict(row._mapping) for row in result]
 
                 return {
                     "data": posts,
@@ -269,15 +229,32 @@ class BoardService:
                     1 if total_count % page_size > 0 else 0
                 )
                 post_list = (
-                    s.query(board_class)
+                    s.query(board_class, User.email, User.image)
+                    .join(User, User.email == board_class.writer)  # join 조건 수정
                     .order_by(desc(board_class.create_time))
                     .limit(page_size)
                     .offset(offset)
                     .all()
                 )
-
+                result = []
+                for post, email, image in post_list:
+                    post_dict = {
+                        "id": post.id,
+                        "title": post.title,
+                        "contents": post.contents,
+                        "thumbnail": post.thumbnail,
+                        "writer": post.writer,
+                        "like_count": post.like_count,
+                        "dislike_count": post.dislike_count,
+                        "view_count": post.view_count,
+                        "type": post.type,
+                        "create_time": post.create_time,
+                        "update_time": post.update_time,
+                        "writer_image": image,
+                    }
+                    result.append(post_dict)
                 return {
-                    "data": post_list,
+                    "data": result,
                     "total_count": total_count,
                     "max_pages": max_pages,
                     "current_page": page,
@@ -293,8 +270,29 @@ class BoardService:
             session = DataBaseConnector.create_session_factory()
             board_class = get_post_type(board_type)
             with session() as s:
-                post = s.query(board_class).filter(board_class.id == board_id).first()
-                return post
+                posts = (
+                    s.query(board_class, User.email, User.image)
+                    .join(User, User.email == board_class.writer)
+                    .filter(board_class.id == board_id)
+                    .all()
+                )
+                for post, email, image in posts:
+                    post_dict = {
+                        "id": post.id,
+                        "title": post.title,
+                        "contents": post.contents,
+                        "thumbnail": post.thumbnail,
+                        "writer": post.writer,
+                        "like_count": post.like_count,
+                        "dislike_count": post.dislike_count,
+                        "view_count": post.view_count,
+                        "type": post.type,
+                        "create_time": post.create_time,
+                        "update_time": post.update_time,
+                        "writer_image": image,
+                    }
+                    return post_dict
+
         except Exception as e:
             print("오류 발생:", e)
             return None
