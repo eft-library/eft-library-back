@@ -142,7 +142,7 @@ class BoardService:
 
         except Exception as e:
             print("오류 발생:", e)
-            return None
+            return {"type": addPost.type}
 
     @staticmethod
     def change_user_like_post(likeOrDis: LikeOrDisPost, user_email: str):
