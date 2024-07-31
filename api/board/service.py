@@ -229,7 +229,7 @@ class BoardService:
                     1 if total_count % page_size > 0 else 0
                 )
                 post_list = (
-                    s.query(board_class, User.email, User.image)
+                    s.query(board_class, User.email, User.image, User.nick_name)
                     .join(User, User.email == board_class.writer)  # join 조건 수정
                     .order_by(desc(board_class.create_time))
                     .limit(page_size)
@@ -237,7 +237,7 @@ class BoardService:
                     .all()
                 )
                 result = []
-                for post, email, image in post_list:
+                for post, email, image, nick_name in post_list:
                     post_dict = {
                         "id": post.id,
                         "title": post.title,
@@ -251,6 +251,7 @@ class BoardService:
                         "create_time": post.create_time,
                         "update_time": post.update_time,
                         "image": image,
+                        "nick_name": nick_name,
                     }
                     result.append(post_dict)
                 return {
@@ -271,12 +272,12 @@ class BoardService:
             board_class = get_post_type(board_type)
             with session() as s:
                 posts = (
-                    s.query(board_class, User.email, User.image)
+                    s.query(board_class, User.email, User.image, User.nick_name)
                     .join(User, User.email == board_class.writer)
                     .filter(board_class.id == board_id)
                     .all()
                 )
-                for post, email, image in posts:
+                for post, email, image, nick_name in posts:
                     post_dict = {
                         "id": post.id,
                         "title": post.title,
@@ -290,6 +291,7 @@ class BoardService:
                         "create_time": post.create_time,
                         "update_time": post.update_time,
                         "image": image,
+                        "nick_name": nick_name,
                     }
                     return post_dict
 
