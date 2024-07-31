@@ -27,6 +27,7 @@ load_dotenv()
 
 
 def get_post_type(board_type: str):
+    # 각 게시물 유형에 해당하는 클래스를 매핑하는 딕셔너리
     board_classes = {
         "arena": ArenaBoard,
         "pvp": PvpBoard,
@@ -41,19 +42,9 @@ def get_post_type(board_type: str):
 
 
 def valid_post_type(addPost: AddPost, user_email: str):
-    # 각 게시물 유형에 해당하는 클래스를 매핑하는 딕셔너리
-    board_classes = {
-        "Arena": ArenaBoard,
-        "Pvp": PvpBoard,
-        "Pve": PveBoard,
-        "Question": QuestionBoard,
-        "Notice": NoticeBoard,
-        "Tip": TipBoard,
-        "Forum": ForumBoard,
-    }
-
     # 게시물 생성에 필요한 공통 필드
     common_fields = {
+        "id": uuid4(),
         "title": addPost.title,
         "contents": remove_video_delete_button(addPost.contents),
         "writer": user_email,
@@ -72,7 +63,7 @@ def valid_post_type(addPost: AddPost, user_email: str):
         common_fields.update(specific_fields)
 
     # 선택한 클래스에 따라 객체를 생성
-    board_class = board_classes.get(addPost.type, ForumBoard)  # 기본값은 ForumBoard
+    board_class = get_post_type(addPost.type)  # 기본값은 ForumBoard
     new_post = board_class(**common_fields)
 
     return new_post
