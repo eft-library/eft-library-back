@@ -3,14 +3,16 @@ import os
 import subprocess
 from uuid import uuid4
 from dotenv import load_dotenv
-from sqlalchemy import select, text
+from sqlalchemy import select, text, func
 
 from api.board.board_res_models import (
     ForumBoard,
-    HumorBoard,
+    PvpBoard,
+    PveBoard,
     TipBoard,
     NoticeBoard,
-    IncidentBoard,
+    ArenaBoard,
+    QuestionBoard,
     Issue,
     PostLike,
 )
@@ -23,12 +25,28 @@ import re
 load_dotenv()
 
 
+def get_post_type(board_type: str):
+    board_classes = {
+        "arena": ArenaBoard,
+        "pvp": PvpBoard,
+        "pve": PveBoard,
+        "question": QuestionBoard,
+        "notice": NoticeBoard,
+        "tip": TipBoard,
+        "forum": ForumBoard,
+    }
+    board_class = board_classes.get(board_type, ForumBoard)
+    return board_class
+
+
 def valid_post_type(addPost: AddPost, user_email: str):
     # 각 게시물 유형에 해당하는 클래스를 매핑하는 딕셔너리
     board_classes = {
-        "Humor": HumorBoard,
+        "Arena": ArenaBoard,
+        "Pvp": PvpBoard,
+        "Pve": PveBoard,
+        "Question": QuestionBoard,
         "Notice": NoticeBoard,
-        "Incident": IncidentBoard,
         "Tip": TipBoard,
         "Forum": ForumBoard,
     }
@@ -43,7 +61,7 @@ def valid_post_type(addPost: AddPost, user_email: str):
     }
 
     # 유형에 따라 추가 필드를 설정
-    if addPost.type in ["Humor", "Incident", "Tip", "Forum"]:
+    if addPost.type in ["Arena", "Pvp", "Pve", "Question", "Tip", "Forum"]:
         specific_fields = {
             "thumbnail": extract_thumbnail_img(addPost.contents),
             "like_count": 0,
@@ -53,8 +71,8 @@ def valid_post_type(addPost: AddPost, user_email: str):
         common_fields.update(specific_fields)
 
     # 선택한 클래스에 따라 객체를 생성
-    BoardClass = board_classes.get(addPost.type, ForumBoard)  # 기본값은 ForumBoard
-    new_post = BoardClass(**common_fields)
+    board_class = board_classes.get(addPost.type, ForumBoard)  # 기본값은 ForumBoard
+    new_post = board_class(**common_fields)
 
     return new_post
 
@@ -176,13 +194,17 @@ class BoardService:
                     """
                     SELECT COUNT(*)
                     FROM (
-                        SELECT id FROM tkl_forum
+                        SELECT id FROM tkl_board_forum
                         UNION ALL
-                        SELECT id FROM tkl_tip
+                        SELECT id FROM tkl_board_arena
                         UNION ALL
-                        SELECT id FROM tkl_incident
+                        SELECT id FROM tkl_board_pve
                         UNION ALL
-                        SELECT id FROM tkl_humor
+                        SELECT id FROM tkl_board_pvp
+                        UNION ALL
+                        SELECT id FROM tkl_board_question
+                        UNION ALL
+                        SELECT id FROM tkl_board_tip
                     ) AS combined
                 """
                 )
@@ -205,16 +227,22 @@ class BoardService:
                     SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
                     FROM (
                         SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
-                        FROM tkl_forum
+                        FROM tkl_board_forum
                         UNION ALL
                         SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
-                        FROM tkl_tip
+                        FROM tkl_board_arena
                         UNION ALL
                         SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
-                        FROM tkl_incident
+                        FROM tkl_board_pve
                         UNION ALL
                         SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
-                        FROM tkl_humor
+                        FROM tkl_board_pvp
+                        UNION ALL
+                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
+                        FROM tkl_board_question
+                        UNION ALL
+                        SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
+                        FROM tkl_board_tip
                     ) AS combined
                     ORDER BY update_time DESC
                     LIMIT :limit OFFSET :offset
@@ -233,6 +261,48 @@ class BoardService:
                     "current_page": page,
                 }
 
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_type_post(page: int, page_size: int, board_type: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            board_class = get_post_type(board_type)
+            offset = (page - 1) * page_size
+            with session() as s:
+                total_count = s.query(func.count(board_class.id)).scalar()
+                max_pages = (total_count // page_size) + (
+                    1 if total_count % page_size > 0 else 0
+                )
+                post_list = (
+                    s.query(board_class)
+                    .order_by(board_class.create_time)
+                    .limit(page_size)
+                    .offset(offset)
+                    .all()
+                )
+
+                return {
+                    "data": post_list,
+                    "total_count": total_count,
+                    "max_pages": max_pages,
+                    "current_page": page,
+                }
+
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_post_by_id(board_id: str, board_type: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            board_class = get_post_type(board_type)
+            with session() as s:
+                post = s.query(board_class).filter(board_class.id == board_id).first()
+                return post
         except Exception as e:
             print("오류 발생:", e)
             return None

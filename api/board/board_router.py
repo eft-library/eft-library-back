@@ -60,3 +60,19 @@ def get_posts(page: int, page_size: int):
     if posts is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
     return CustomResponse.response(posts, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/{board_type}")
+def get_posts(board_type: str, page: int, page_size: int):
+    posts = BoardService.get_type_post(page, page_size, board_type)
+    if posts is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
+    return CustomResponse.response(posts, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/{board_type}/detail")
+def get_post_by_id(board_type: str, board_id: str):
+    post = BoardService.get_post_by_id(board_id, board_type)
+    if post is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
+    return CustomResponse.response(post, HTTPCode.OK, Message.SUCCESS)
