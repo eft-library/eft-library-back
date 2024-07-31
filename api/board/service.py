@@ -53,7 +53,7 @@ def valid_post_type(addPost: AddPost, user_email: str):
     }
 
     # 유형에 따라 추가 필드를 설정
-    if addPost.type in ["Arena", "Pvp", "Pve", "Question", "Tip", "Forum"]:
+    if addPost.type in ["arena", "pvp", "pve", "question", "tip", "forum"]:
         specific_fields = {
             "thumbnail": extract_thumbnail_img(addPost.contents),
             "like_count": 0,
