@@ -3,7 +3,7 @@ import os
 import subprocess
 from uuid import uuid4
 from dotenv import load_dotenv
-from sqlalchemy import text, func
+from sqlalchemy import text, func, desc
 
 from api.board.board_res_models import (
     ForumBoard,
@@ -236,7 +236,7 @@ class BoardService:
                         SELECT id, title, contents, thumbnail, writer, like_count, dislike_count, view_count, type, create_time, update_time
                         FROM tkl_board_tip
                     ) AS combined
-                    ORDER BY update_time DESC
+                    ORDER BY create_time DESC
                     LIMIT :limit OFFSET :offset
                 """
                 )
@@ -270,7 +270,7 @@ class BoardService:
                 )
                 post_list = (
                     s.query(board_class)
-                    .order_by(board_class.create_time)
+                    .order_by(desc(board_class.create_time))
                     .limit(page_size)
                     .offset(offset)
                     .all()
