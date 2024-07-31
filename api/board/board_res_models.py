@@ -160,3 +160,17 @@ class Issue(DataBaseConnector.Base):
     board_id = Column(BIGINT, primary_key=True)
     writer = Column(TEXT)
     update_time = Column(TIMESTAMP)
+
+
+class BoardType(DataBaseConnector.Base):
+    """
+    Board Type
+    """
+
+    __tablename__ = "tkl_board_type"
+
+    id = Column(TEXT, primary_key=True)
+    name_en = Column(TEXT)
+    name_kr = Column(TEXT)
+    order = Column(Integer)
+    value = Column(TEXT)

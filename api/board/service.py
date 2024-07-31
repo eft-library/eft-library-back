@@ -3,7 +3,7 @@ import os
 import subprocess
 from uuid import uuid4
 from dotenv import load_dotenv
-from sqlalchemy import select, text, func
+from sqlalchemy import text, func
 
 from api.board.board_res_models import (
     ForumBoard,
@@ -13,6 +13,7 @@ from api.board.board_res_models import (
     NoticeBoard,
     ArenaBoard,
     QuestionBoard,
+    BoardType,
     Issue,
     PostLike,
 )
@@ -303,6 +304,17 @@ class BoardService:
             with session() as s:
                 post = s.query(board_class).filter(board_class.id == board_id).first()
                 return post
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_board_type():
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                board_type = s.query(BoardType).order_by(BoardType.order).all()
+                return board_type
         except Exception as e:
             print("오류 발생:", e)
             return None

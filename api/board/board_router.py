@@ -5,11 +5,7 @@ from api.constants import Message
 from api.board.service import BoardService
 from api.board.board_req_models import AddPost, LikeOrDisPost
 from api.user.util import UserUtil
-from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
-import os
-
-load_dotenv()
 
 
 router = APIRouter(tags=["Board"])
@@ -60,6 +56,14 @@ def get_posts(page: int, page_size: int):
     if posts is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
     return CustomResponse.response(posts, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/all/categories")
+def get_board_type():
+    board_type = BoardService.get_board_type()
+    if board_type is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.BOARD_TYPE_NOT_FOUND)
+    return CustomResponse.response(board_type, HTTPCode.OK, Message.SUCCESS)
 
 
 @router.get("/{board_type}")
