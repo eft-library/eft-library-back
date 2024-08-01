@@ -20,6 +20,7 @@ class BossService:
                     .options(
                         subqueryload(Boss.sub_followers).subqueryload(Followers.loot)
                     )
+                    .order_by(Boss.order)
                     .all()
                 )
 
