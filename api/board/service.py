@@ -204,9 +204,7 @@ class BoardService:
             with session() as s:
                 board_class = get_post_type(likeOrDis.board_type)
                 post = (
-                    s.query(board_class, User.email, User.image, User.nick_name)
-                    .filter(board_class.id == likeOrDis.id)
-                    .first()
+                    s.query(board_class).filter(board_class.id == likeOrDis.id).first()
                 )
 
                 user_like_info = (

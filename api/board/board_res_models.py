@@ -9,7 +9,7 @@ class ForumBoard(DataBaseConnector.Base):
 
     __tablename__ = "tkl_board_forum"
 
-    id = Column(BIGINT, primary_key=True)
+    id = Column(TEXT, primary_key=True)
     title = Column(TEXT)
     contents = Column(TEXT)
     thumbnail = Column(TEXT)
@@ -29,7 +29,7 @@ class TipBoard(DataBaseConnector.Base):
 
     __tablename__ = "tkl_board_tip"
 
-    id = Column(BIGINT, primary_key=True)
+    id = Column(TEXT, primary_key=True)
     title = Column(TEXT)
     contents = Column(TEXT)
     thumbnail = Column(TEXT)
@@ -49,7 +49,7 @@ class PvpBoard(DataBaseConnector.Base):
 
     __tablename__ = "tkl_board_pvp"
 
-    id = Column(BIGINT, primary_key=True)
+    id = Column(TEXT, primary_key=True)
     title = Column(TEXT)
     contents = Column(TEXT)
     thumbnail = Column(TEXT)
@@ -69,7 +69,7 @@ class PveBoard(DataBaseConnector.Base):
 
     __tablename__ = "tkl_board_pve"
 
-    id = Column(BIGINT, primary_key=True)
+    id = Column(TEXT, primary_key=True)
     title = Column(TEXT)
     contents = Column(TEXT)
     thumbnail = Column(TEXT)
@@ -89,7 +89,7 @@ class ArenaBoard(DataBaseConnector.Base):
 
     __tablename__ = "tkl_board_arena"
 
-    id = Column(BIGINT, primary_key=True)
+    id = Column(TEXT, primary_key=True)
     title = Column(TEXT)
     contents = Column(TEXT)
     thumbnail = Column(TEXT)
@@ -109,7 +109,7 @@ class QuestionBoard(DataBaseConnector.Base):
 
     __tablename__ = "tkl_board_question"
 
-    id = Column(BIGINT, primary_key=True)
+    id = Column(TEXT, primary_key=True)
     title = Column(TEXT)
     contents = Column(TEXT)
     thumbnail = Column(TEXT)
@@ -145,7 +145,7 @@ class PostLike(DataBaseConnector.Base):
 
     __tablename__ = "tkl_post_like"
 
-    board_id = Column(BIGINT, primary_key=True)
+    board_id = Column(TEXT, primary_key=True)
     user_email = Column(TEXT, primary_key=True)
     update_time = Column(TIMESTAMP)
 
@@ -157,7 +157,7 @@ class PostDisLike(DataBaseConnector.Base):
 
     __tablename__ = "tkl_post_dislike"
 
-    board_id = Column(BIGINT, primary_key=True)
+    board_id = Column(TEXT, primary_key=True)
     user_email = Column(TEXT, primary_key=True)
     update_time = Column(TIMESTAMP)
 
@@ -169,7 +169,7 @@ class Issue(DataBaseConnector.Base):
 
     __tablename__ = "tkl_issue"
 
-    board_id = Column(BIGINT, primary_key=True)
+    board_id = Column(TEXT, primary_key=True)
     writer = Column(TEXT)
     update_time = Column(TIMESTAMP)
 
