@@ -16,6 +16,7 @@ from api.board.board_res_models import (
     BoardType,
     Issue,
     PostLike,
+    PostDisLike,
 )
 from api.board.board_req_models import AddPost, LikeOrDisPost
 from database import DataBaseConnector
@@ -85,6 +86,58 @@ def extract_thumbnail_img(html):
     return None
 
 
+def handle_like(session, post, user_like_info, user_dislike_info, post_id, user_email):
+    if user_like_info:
+        session.delete(user_like_info)
+        post.like_count -= 1
+    elif user_dislike_info:
+        session.delete(user_dislike_info)
+        post.like_count += 1
+        post.dislike_count -= 1
+        new_like_user = PostLike(
+            board_id=post_id,
+            user_email=user_email,
+            update_time=datetime.now(),
+        )
+        session.add(new_like_user)
+    else:
+        new_like_user = PostLike(
+            board_id=post_id,
+            user_email=user_email,
+            update_time=datetime.now(),
+        )
+        session.add(new_like_user)
+        post.like_count += 1
+    session.commit()
+
+
+def handle_dislike(
+    session, post, user_like_info, user_dislike_info, post_id, user_email
+):
+    if user_like_info:
+        session.delete(user_like_info)
+        post.like_count -= 1
+        post.dislike_count += 1
+        new_dislike_user = PostDisLike(
+            board_id=post_id,
+            user_email=user_email,
+            update_time=datetime.now(),
+        )
+        session.add(new_dislike_user)
+    elif user_dislike_info:
+        session.delete(user_dislike_info)
+        post.dislike_count -= 1
+    else:
+        new_dislike_user = PostDisLike(
+            board_id=post_id,
+            user_email=user_email,
+            update_time=datetime.now(),
+        )
+        session.add(new_dislike_user)
+        post.dislike_count += 1
+    session.commit()
+
+
 class BoardService:
     @staticmethod
     def save_file(file, filename):
@@ -145,10 +198,17 @@ class BoardService:
             return None
 
     @staticmethod
-    def change_user_like_post(likeOrDis: LikeOrDisPost, user_email: str):
+    def user_like_post(likeOrDis: LikeOrDisPost, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
+                board_class = get_post_type(likeOrDis.board_type)
+                post = (
+                    s.query(board_class, User.email, User.image, User.nick_name)
+                    .filter(board_class.id == likeOrDis.id)
+                    .first()
+                )
+
                 user_like_info = (
                     s.query(PostLike)
                     .filter(
@@ -158,17 +218,34 @@ class BoardService:
                     .first()
                 )
 
-                if user_like_info:
-                    s.delete(user_like_info)
-                    s.commit()
-                else:
-                    new_like_user = PostLike(
-                        board_id=likeOrDis.id,
-                        user_email=user_email,
-                        update_time=datetime.now(),
+                user_dislike_info = (
+                    s.query(PostDisLike)
+                    .filter(
+                        PostDisLike.user_email == user_email
+                        and PostDisLike.board_id == likeOrDis.id
                     )
-                    s.add(new_like_user)
-                    s.commit()
+                    .first()
+                )
+
+                if likeOrDis.type == "like":
+                    handle_like(
+                        s,
+                        post,
+                        user_like_info,
+                        user_dislike_info,
+                        likeOrDis.id,
+                        user_email,
+                    )
+                else:
+                    handle_dislike(
+                        s,
+                        post,
+                        user_like_info,
+                        user_dislike_info,
+                        likeOrDis.id,
+                        user_email,
+                    )
+
                 return True
 
         except Exception as e:

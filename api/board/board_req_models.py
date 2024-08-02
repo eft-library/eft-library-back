@@ -18,3 +18,5 @@ class LikeOrDisPost(BaseModel):
     """
 
     id: str
+    type: str
+    board_type: str

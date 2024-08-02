@@ -35,12 +35,10 @@ def add_board(addPost: AddPost, token: str = Depends(oauth2_scheme)):
 
 
 @router.post("/like")
-def change_user_like_post(
-    likeOrDisPost: LikeOrDisPost, token: str = Depends(oauth2_scheme)
-):
+def user_like_post(likeOrDisPost: LikeOrDisPost, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        user = BoardService.change_user_like_post(likeOrDisPost, user_email)
+        user = BoardService.user_like_post(likeOrDisPost, user_email)
         if user is None:
             return CustomResponse.response(
                 None, HTTPCode.OK, Message.POST_LIKE_CHANGE_FAIL

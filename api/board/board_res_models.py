@@ -150,6 +150,18 @@ class PostLike(DataBaseConnector.Base):
     update_time = Column(TIMESTAMP)
 
 
+class PostDisLike(DataBaseConnector.Base):
+    """
+    Post Dislike
+    """
+
+    __tablename__ = "tkl_post_dislike"
+
+    board_id = Column(BIGINT, primary_key=True)
+    user_email = Column(TEXT, primary_key=True)
+    update_time = Column(TIMESTAMP)
+
+
 class Issue(DataBaseConnector.Base):
     """
     Issue
