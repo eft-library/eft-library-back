@@ -7,7 +7,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 
 load_dotenv()
 
-app = FastAPI(title="tarkov-library-back")
+app = FastAPI(title="eft-library-back")
 
 
 # Swagger UI 제공을 위한 엔드포인트
@@ -18,12 +18,7 @@ async def custom_swagger_ui_html():
         title="Swagger UI",
     )
 
-
 app.include_router(api_router, prefix=os.getenv("API_PREFIX"))
-
-
-# React 애플리케이션의 index.html을 반환하는 라우터 추가
-
 
 # CORS 미들웨어 추가
 app.add_middleware(
