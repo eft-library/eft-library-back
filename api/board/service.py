@@ -251,6 +251,39 @@ class BoardService:
             return None
 
     @staticmethod
+    def is_user_like_post(likeOrDis: LikeOrDisPost, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_like_info = (
+                    s.query(PostLike)
+                    .filter(
+                        PostLike.user_email == user_email
+                        and PostLike.board_id == likeOrDis.id
+                    )
+                    .first()
+                )
+                user_dislike_info = (
+                    s.query(PostDisLike)
+                    .filter(
+                        PostDisLike.user_email == user_email
+                        and PostDisLike.board_id == likeOrDis.id
+                    )
+                    .first()
+                )
+
+                if user_like_info:
+                    return 1
+                elif user_dislike_info:
+                    return 2
+                else:
+                    return 3
+
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
     def get_post(page: int, page_size: int):
         session_factory = DataBaseConnector.create_session_factory()
 

@@ -48,6 +48,22 @@ def user_like_post(likeOrDisPost: LikeOrDisPost, token: str = Depends(oauth2_sch
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
+@router.post("/user/like")
+def is_user_like_post(
+    likeOrDisPost: LikeOrDisPost, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        user = BoardService.is_user_like_post(likeOrDisPost, user_email)
+        if user is None:
+            return CustomResponse.response(
+                None, HTTPCode.OK, Message.POST_LIKE_CHANGE_FAIL
+            )
+        return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
 @router.get("/all")
 def get_posts(page: int, page_size: int):
     posts = BoardService.get_post(page, page_size)
