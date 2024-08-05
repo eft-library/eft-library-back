@@ -6,136 +6,16 @@ from dotenv import load_dotenv
 from sqlalchemy import text, func, desc
 from api.board.util import BoardUtil
 from api.board.board_res_models import (
-    ForumBoard,
-    PvpBoard,
-    PveBoard,
-    TipBoard,
-    NoticeBoard,
-    ArenaBoard,
-    QuestionBoard,
     BoardType,
-    Issue,
     PostLike,
     PostDisLike,
 )
 from api.board.board_req_models import AddPost, LikeOrDisPost
 from database import DataBaseConnector
 from api.user.user_res_models import User
-from datetime import datetime
-import re
+from api.board.board_function import BoardFunction
 
 load_dotenv()
-
-
-def get_post_type(board_type: str):
-    # 각 게시물 유형에 해당하는 클래스를 매핑하는 딕셔너리
-    board_classes = {
-        "arena": ArenaBoard,
-        "pvp": PvpBoard,
-        "pve": PveBoard,
-        "question": QuestionBoard,
-        "notice": NoticeBoard,
-        "tip": TipBoard,
-        "forum": ForumBoard,
-    }
-    board_class = board_classes.get(board_type, ForumBoard)
-    return board_class
-
-
-def valid_post_type(addPost: AddPost, user_email: str):
-    # 게시물 생성에 필요한 공통 필드
-    common_fields = {
-        "id": uuid4(),
-        "title": addPost.title,
-        "contents": remove_video_delete_button(addPost.contents),
-        "writer": user_email,
-        "view_count": 0,
-        "create_time": datetime.now(),
-    }
-
-    # 유형에 따라 추가 필드를 설정
-    if addPost.type in ["arena", "pvp", "pve", "question", "tip", "forum"]:
-        specific_fields = {
-            "thumbnail": extract_thumbnail_img(addPost.contents),
-            "like_count": 0,
-            "dislike_count": 0,
-            "type": addPost.type,
-        }
-        common_fields.update(specific_fields)
-
-    # 선택한 클래스에 따라 객체를 생성
-    board_class = get_post_type(addPost.type)  # 기본값은 ForumBoard
-    new_post = board_class(**common_fields)
-
-    return new_post
-
-
-def remove_video_delete_button(html):
-    # 정규 표현식을 사용하여 <button class="ql-video-delete"> 태그를 제거합니다.
-    cleaned_html = re.sub(
-        r'<button class="ql-video-delete"[^>]*>.*?</button>', "", html, flags=re.DOTALL
-    )
-    return cleaned_html
-
-
-def extract_thumbnail_img(html):
-    # 정규 표현식을 사용하여 첫 번째 <img> 태그의 src 값을 찾습니다.
-    match = re.search(r'<img[^>]+src="([^"]+)"', html)
-    if match:
-        return match.group(1)
-    return None
-
-
-def handle_like(session, post, user_like_info, user_dislike_info, post_id, user_email):
-    if user_like_info:
-        session.delete(user_like_info)
-        post.like_count -= 1
-    elif user_dislike_info:
-        session.delete(user_dislike_info)
-        post.like_count += 1
-        post.dislike_count -= 1
-        new_like_user = PostLike(
-            board_id=post_id,
-            user_email=user_email,
-            update_time=datetime.now(),
-        )
-        session.add(new_like_user)
-    else:
-        new_like_user = PostLike(
-            board_id=post_id,
-            user_email=user_email,
-            update_time=datetime.now(),
-        )
-        session.add(new_like_user)
-        post.like_count += 1
-    session.commit()
-
-
-def handle_dislike(
-    session, post, user_like_info, user_dislike_info, post_id, user_email
-):
-    if user_like_info:
-        session.delete(user_like_info)
-        post.like_count -= 1
-        post.dislike_count += 1
-        new_dislike_user = PostDisLike(
-            board_id=post_id,
-            user_email=user_email,
-            update_time=datetime.now(),
-        )
-        session.add(new_dislike_user)
-    elif user_dislike_info:
-        session.delete(user_dislike_info)
-        post.dislike_count -= 1
-    else:
-        new_dislike_user = PostDisLike(
-            board_id=post_id,
-            user_email=user_email,
-            update_time=datetime.now(),
-        )
-        session.add(new_dislike_user)
-        post.dislike_count += 1
-    session.commit()
 
 
 class BoardService:
@@ -188,7 +68,7 @@ class BoardService:
                 check_user = s.query(User).filter(User.email == user_email).first()
 
                 if check_user:
-                    new_post = valid_post_type(addPost, user_email)
+                    new_post = BoardFunction.valid_post_type(addPost, user_email)
                     s.add(new_post)
                     s.commit()
                     return {"type": addPost.type}
@@ -202,7 +82,7 @@ class BoardService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                board_class = get_post_type(likeOrDis.board_type)
+                board_class = BoardFunction.get_post_type(likeOrDis.board_type)
                 post = (
                     s.query(board_class).filter(board_class.id == likeOrDis.id).first()
                 )
@@ -226,7 +106,7 @@ class BoardService:
                 )
 
                 if likeOrDis.type == "like":
-                    handle_like(
+                    BoardFunction.handle_like(
                         s,
                         post,
                         user_like_info,
@@ -235,7 +115,7 @@ class BoardService:
                         user_email,
                     )
                 else:
-                    handle_dislike(
+                    BoardFunction.handle_dislike(
                         s,
                         post,
                         user_like_info,
@@ -329,7 +209,7 @@ class BoardService:
     def get_type_post(page: int, page_size: int, board_type: str):
         try:
             session = DataBaseConnector.create_session_factory()
-            board_class = get_post_type(board_type)
+            board_class = BoardFunction.get_post_type(board_type)
             offset = (page - 1) * page_size
             with session() as s:
                 total_count = s.query(func.count(board_class.id)).scalar()
@@ -337,7 +217,7 @@ class BoardService:
                     1 if total_count % page_size > 0 else 0
                 )
                 post_list = (
-                    s.query(board_class, User.email, User.image, User.nick_name)
+                    s.query(board_class, User.email, User.icon, User.nick_name)
                     .join(User, User.email == board_class.writer)  # join 조건 수정
                     .order_by(desc(board_class.create_time))
                     .limit(page_size)
@@ -345,7 +225,7 @@ class BoardService:
                     .all()
                 )
                 result = []
-                for post, email, image, nick_name in post_list:
+                for post, email, icon, nick_name in post_list:
                     post_dict = {
                         "id": post.id,
                         "title": post.title,
@@ -358,7 +238,7 @@ class BoardService:
                         "type": post.type,
                         "create_time": post.create_time,
                         "update_time": post.update_time,
-                        "image": image,
+                        "icon": icon,
                         "nick_name": nick_name,
                     }
                     result.append(post_dict)
@@ -377,15 +257,15 @@ class BoardService:
     def get_post_by_id(board_id: str, board_type: str):
         try:
             session = DataBaseConnector.create_session_factory()
-            board_class = get_post_type(board_type)
+            board_class = BoardFunction.get_post_type(board_type)
             with session() as s:
                 posts = (
-                    s.query(board_class, User.email, User.image, User.nick_name)
+                    s.query(board_class, User.email, User.icon, User.nick_name)
                     .join(User, User.email == board_class.writer)
                     .filter(board_class.id == board_id)
                     .all()
                 )
-                for post, email, image, nick_name in posts:
+                for post, email, icon, nick_name in posts:
                     post_dict = {
                         "id": post.id,
                         "title": post.title,
@@ -398,7 +278,7 @@ class BoardService:
                         "type": post.type,
                         "create_time": post.create_time,
                         "update_time": post.update_time,
-                        "image": image,
+                        "icon": icon,
                         "nick_name": nick_name,
                     }
                     return post_dict

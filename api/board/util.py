@@ -17,7 +17,7 @@ class BoardUtil:
                            combined.type,
                            combined.create_time,
                            combined.update_time,
-                           tkl_user.image,
+                           tkl_user.icon,
                            tkl_user.nick_name
                     FROM (SELECT id,
                                  title,

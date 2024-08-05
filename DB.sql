@@ -1209,23 +1209,31 @@ COMMENT ON COLUMN TKL_ISSUE.WRITER IS '이슈 게시글 작성자 이메일';
 COMMENT ON COLUMN TKL_ISSUE.UPDATE_TIME IS '이슈 게시글 업데이트 시간';
 
 -- notice
-CREATE TABLE TKL_NOTICE
+CREATE TABLE TKL_BOARD_NOTICE
 (
     ID TEXT PRIMARY KEY,
     TITLE TEXT,
     CONTENTS TEXT,
+    THUMBNAIL TEXT,
     WRITER TEXT,
+    LIKE_COUNT INTEGER,
+    DISLIKE_COUNT INTEGER,
     VIEW_COUNT INTEGER,
+    TYPE TEXT,
     CREATE_TIME timestamp with time zone default now(),
     UPDATE_TIME timestamp
 );
-COMMENT ON COLUMN TKL_NOTICE.ID IS '공지 자동 생성 ID';
-COMMENT ON COLUMN TKL_NOTICE.TITLE IS '공지 제목';
-COMMENT ON COLUMN TKL_NOTICE.CONTENTS IS '공지 내용';
-COMMENT ON COLUMN TKL_NOTICE.WRITER IS '공지 작성자';
-COMMENT ON COLUMN TKL_NOTICE.VIEW_COUNT IS '공지 조회수';
-COMMENT ON COLUMN TKL_NOTICE.CREATE_TIME IS '공지 생성 시간';
-COMMENT ON COLUMN TKL_NOTICE.UPDATE_TIME IS '공지 수정 시간';
+COMMENT ON COLUMN TKL_BOARD_NOTICE.ID IS '게시글 자동 생성 ID';
+COMMENT ON COLUMN TKL_BOARD_NOTICE.TITLE IS '게시글 제목';
+COMMENT ON COLUMN TKL_BOARD_NOTICE.CONTENTS IS '게시글 내용';
+COMMENT ON COLUMN TKL_BOARD_NOTICE.THUMBNAIL IS '게시글 썸네일';
+COMMENT ON COLUMN TKL_BOARD_NOTICE.WRITER IS '게시글 작성자';
+COMMENT ON COLUMN TKL_BOARD_NOTICE.LIKE_COUNT IS '게시글 좋아요 수';
+COMMENT ON COLUMN TKL_BOARD_NOTICE.DISLIKE_COUNT IS '게시글 싫어요 수';
+COMMENT ON COLUMN TKL_BOARD_NOTICE.VIEW_COUNT IS '게시글 조회수';
+COMMENT ON COLUMN TKL_BOARD_NOTICE.TYPE IS '게시글 타입';
+COMMENT ON COLUMN TKL_BOARD_NOTICE.CREATE_TIME IS '게시글 생성 시간';
+COMMENT ON COLUMN TKL_BOARD_NOTICE.UPDATE_TIME IS '게시글 수정 시간';
 
 -- forum
 CREATE TABLE TKL_BOARD_FORUM
@@ -1458,31 +1466,22 @@ COMMENT ON COLUMN TKL_COMMENTS.IS_DELETE IS '댓글 삭제 여부';
 -- index 추가
 CREATE INDEX idx_parent_id ON TKL_COMMENTS(PARENT_ID);
 
-1. 사용자 밴 테이블 만들기
- - 사용자 이메일, 밴 시작 날짜, 밴 종료 날짜, 사유
- - 로그인 시 조인 해서 전달
- - 밴 당하면 해당 테이블에 정보 추가
- - 화면에서 글이랑 댓글 못쓰게 막기
-
-3. 사용자 탈퇴 테이블 만들기
-- 컬럼은 사용자 컬럼 + 탈퇴 날짜
-- 사용자가 회원탈퇴 할 경우 이곳으로 사용자 정보 이동
-- 30일 뒤에 계정 삭제, 30일 전에 다시 로그인 하면 기존 사용자 테이블로 복구
-
-4. 사용자 수정
+1. 사용자 추가 기능
 - 포인트 도박 기능
-- 등급 경계 정하기
 - 이모티콘 구매
 
-4. 이슈 게시판 만들기
+1-1. 이모티콘 테이블 만들고 구매 페이지 연동하기
+- 아이디, 이모티콘 주소, 가격
+
+2. 이슈 게시판 만들기
 - 한 시간 단위로 갱신, 10이상 시 추가, 내려가면 제거
 - 10 이상 흰 별, 30이상 노란 별
 - 전체 게시글용, 개별 게시글용 api 2개 필요
 
-5. 공지 사항
+3. 공지 사항
 - 제목, 날짜, 내용만 있게 구현
 
-6. 커뮤니티 수정 사항
+4. 커뮤니티 수정 사항
 - 밴 당한 사용자는 댓글과 게시글 작성 불가
 - 게시글, 댓글에 밴 및 신고 버튼 추가
 - 게시글, 댓글에 관리자 삭제 버튼 추가

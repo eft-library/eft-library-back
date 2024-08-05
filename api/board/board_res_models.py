@@ -1,5 +1,5 @@
 from database import DataBaseConnector
-from sqlalchemy import Column, Integer, TIMESTAMP, ARRAY, TEXT, Boolean, BIGINT
+from sqlalchemy import Column, Integer, TIMESTAMP, TEXT
 
 
 class ForumBoard(DataBaseConnector.Base):
@@ -127,13 +127,17 @@ class NoticeBoard(DataBaseConnector.Base):
     Notice
     """
 
-    __tablename__ = "tkl_notice"
+    __tablename__ = "tkl_board_notice"
 
-    id = Column(BIGINT, primary_key=True)
+    id = Column(TEXT, primary_key=True)
     title = Column(TEXT)
     contents = Column(TEXT)
+    thumbnail = Column(TEXT)
     writer = Column(TEXT)
+    like_count = Column(Integer)
+    dislike_count = Column(Integer)
     view_count = Column(Integer)
+    type = Column(TEXT)
     create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
 
