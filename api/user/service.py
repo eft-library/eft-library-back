@@ -6,9 +6,8 @@ from database import DataBaseConnector
 from dotenv import load_dotenv
 import os
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import pytz
-from sqlalchemy.orm import subqueryload
 
 load_dotenv()
 
@@ -26,7 +25,33 @@ class UserService:
                 )
 
                 if check_user:
-                    # 출석일 수 관련 쿼리 추가
+                    # 출석일 수 관련
+                    today = date.today()
+                    tz = pytz.timezone("Asia/Seoul")  # 필요한 타임존으로 변경
+
+                    # 오프셋 정보를 포함하여 datetime 객체 생성
+                    start_of_today = tz.localize(
+                        datetime.combine(today, datetime.min.time())
+                    )
+                    end_of_today = tz.localize(
+                        datetime.combine(today, datetime.max.time())
+                    )
+
+                    # check_user.attendance_time이 오프셋 정보를 포함하고 있는지 확인하고, 없으면 로컬라이즈
+                    if check_user.attendance_time.tzinfo is None:
+                        check_user.attendance_time = tz.localize(
+                            check_user.attendance_time
+                        )
+
+                    # 사용자가 처음 출석하거나 오늘 처음 출석하는 경우
+                    if not (
+                        start_of_today <= check_user.attendance_time <= end_of_today
+                    ):
+                        check_user.attendance_count += 1
+                        check_user.attendance_time = datetime.now(tz)
+                        check_user.point += 10
+                        s.commit()  # 변경 사항을 커밋
+
                     return True
                 else:
                     new_user = User(
@@ -35,7 +60,7 @@ class UserService:
                         email=addUserReq.email,
                         icon="/tkl_user/icon/newbie.gif",
                         nick_name=uuid_v5[:10],
-                        point=0,
+                        point=10,
                         is_admin=False,
                         attendance_count=1,
                         create_time=datetime.now(),
@@ -48,7 +73,8 @@ class UserService:
                     )
                     s.add(new_user_quest)
                     new_icon_list = UserIconList(
-                        user_email=addUserReq.email, icon_list=[]
+                        user_email=addUserReq.email,
+                        icon_list=["/tkl_user/icon/newbie.gif"],
                     )
                     s.add(new_icon_list)
                     s.commit()
