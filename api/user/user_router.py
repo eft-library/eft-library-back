@@ -8,8 +8,7 @@ from api.user.user_req_models import (
     AddUserReq,
     ChangeUserNickname,
     ChangeUserIcon,
-    UserQuestUpdate,
-    UserQuestDelete,
+    UserQuestList,
 )
 from api.user.util import UserUtil
 
@@ -53,12 +52,10 @@ def get_user_quest(token: str = Depends(oauth2_scheme)):
 
 
 @router.post("/quest/update")
-def get_user_quest(
-    userQuestUpdate: UserQuestUpdate, token: str = Depends(oauth2_scheme)
-):
+def get_user_quest(userQuestList: UserQuestList, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = UserService.update_user_quest(userQuestUpdate, user_email)
+        result = UserService.update_user_quest(userQuestList, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.USER_ADD_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -68,11 +65,11 @@ def get_user_quest(
 
 @router.post("/quest/delete")
 def delete_user_quest(
-    userQuestDelete: UserQuestDelete, token: str = Depends(oauth2_scheme)
+    userQuestList: UserQuestList, token: str = Depends(oauth2_scheme)
 ):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = UserService.delete_user_quest(userQuestDelete, user_email)
+        result = UserService.delete_user_quest(userQuestList, user_email)
         if result is None:
             return CustomResponse.response(
                 None, HTTPCode.OK, Message.SUCCESS_QUEST_FAIL

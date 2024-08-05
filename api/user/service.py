@@ -4,8 +4,7 @@ from api.user.user_res_models import (
 )
 from api.user.user_req_models import (
     AddUserReq,
-    UserQuestUpdate,
-    UserQuestDelete,
+    UserQuestList,
 )
 from database import DataBaseConnector
 from dotenv import load_dotenv
@@ -38,15 +37,13 @@ class UserService:
                         id=addUserReq.id,
                         name=addUserReq.name,
                         email=addUserReq.email,
-                        image="/tkl_user/icon/newbie.gif",
-                        image_list=["/tkl_user/icon/newbie.gif"],
+                        icon="/tkl_user/icon/newbie.gif",
                         nick_name=uuid_v5[:10],
                         point=0,
-                        is_ban=False,
-                        is_delete=False,
                         is_admin=False,
-                        grade="뉴비",
+                        attendance_count=1,
                         create_time=datetime.now(),
+                        attendance_date=datetime.now(),
                     )
                     s.add(new_user)
                     new_user_quest = UserQuest(
@@ -84,12 +81,12 @@ class UserService:
             return None
 
     @staticmethod
-    def update_user_quest(userQuestAdd: UserQuestUpdate, user_email: str):
+    def update_user_quest(userQuestList: UserQuestList, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
-                user_quest.quest_id = userQuestAdd.userQuestList
+                user_quest.quest_id = userQuestList.userQuestList
                 s.commit()
                 query = text(UserUtil.user_quest_query())
 
@@ -111,12 +108,12 @@ class UserService:
             return None
 
     @staticmethod
-    def delete_user_quest(userQuestDelete: UserQuestDelete, user_email: str):
+    def delete_user_quest(userQuestList: UserQuestList, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
-                user_quest.quest_id = userQuestDelete.userQuestList
+                user_quest.quest_id = userQuestList.userQuestList
                 s.commit()
                 query = text(UserUtil.user_quest_query())
                 result = s.execute(query, {"user_email": user_email})
@@ -195,7 +192,7 @@ class UserService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user = s.query(User).filter(User.email == user_email).first()
-                user.image = new_icon
+                user.icon = new_icon
                 s.commit()
 
                 new_user = s.query(User).filter(User.email == user_email).first()

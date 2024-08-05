@@ -2,17 +2,9 @@ from pydantic import BaseModel
 from typing import List
 
 
-class UserQuestDelete(BaseModel):
+class UserQuestList(BaseModel):
     """
-    사용자 퀘스트 삭제시
-    """
-
-    userQuestList: List[str]
-
-
-class UserQuestUpdate(BaseModel):
-    """
-    사용자 퀘스트 수정
+    사용자 퀘스트
     """
 
     userQuestList: List[str]

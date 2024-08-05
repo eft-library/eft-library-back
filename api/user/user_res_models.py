@@ -12,18 +12,14 @@ class User(DataBaseConnector.Base):
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)
     email = Column(TEXT)
-    image = Column(TEXT)
-    image_list = Column(ARRAY(TEXT))
+    icon = Column(TEXT)
     nick_name = Column(TEXT)
     point = Column(BIGINT)
-    is_ban = Column(Boolean)
-    is_delete = Column(Boolean)
     is_admin = Column(Boolean)
-    grade = Column(TEXT)
+    attendance_count = Column(Integer)
     create_time = Column(TIMESTAMP)
+    attendance_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
-    ban_end_time = Column(TIMESTAMP)
-    delete_time = Column(TIMESTAMP)
 
 
 class UserQuest(DataBaseConnector.Base):

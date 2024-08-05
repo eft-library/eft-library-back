@@ -18,6 +18,7 @@ async def custom_swagger_ui_html():
         title="Swagger UI",
     )
 
+
 app.include_router(api_router, prefix=os.getenv("API_PREFIX"))
 
 # CORS 미들웨어 추가
