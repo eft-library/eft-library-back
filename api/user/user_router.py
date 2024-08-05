@@ -89,7 +89,6 @@ def change_user_nickname(
         result = UserService.change_user_nickname(
             changeUserNickname.nickname, user_email
         )
-        print(result)
         if result == 2:
             # 30일이 지나지 않은 경우
             return CustomResponse.response(
@@ -119,6 +118,19 @@ def change_user_icon(
         result = UserService.change_user_icon(changeUserIcon.icon, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.USER_ADD_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/delete")
+def delete_user(token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+
+    if user_email:
+        result = UserService.user_delete(user_email)
+        if result is False:
+            return CustomResponse.response(None, HTTPCode.OK, Message.USER_DELETE_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)

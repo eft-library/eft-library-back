@@ -67,6 +67,27 @@ class UserBan(DataBaseConnector.Base):
     ban_end_time = Column(TIMESTAMP)
 
 
+class UserDelete(DataBaseConnector.Base):
+    """
+    user delete
+    """
+
+    __tablename__ = "tkl_user_delete"
+
+    id = Column(TEXT, primary_key=True)
+    name = Column(TEXT)
+    email = Column(TEXT)
+    icon = Column(TEXT)
+    nick_name = Column(TEXT)
+    point = Column(BIGINT)
+    is_admin = Column(Boolean)
+    attendance_count = Column(Integer)
+    create_time = Column(TIMESTAMP)
+    attendance_time = Column(TIMESTAMP)
+    update_time = Column(TIMESTAMP)
+    delete_end_time = Column(TIMESTAMP)
+
+
 class UserQuest(DataBaseConnector.Base):
     """
     User quest

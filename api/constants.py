@@ -37,6 +37,7 @@ class Message(Enum):
     ARM_BAND_NOT_FOUND = "Arm band not found"
     HIDEOUT_NOT_FOUND = "Hideout not found"
     USER_ADD_FAIL = "User add fail"
+    USER_DELETE_FAIL = "User delete fail"
     INVALID_USER = "Invalid User"
     SUCCESS_QUEST_FAIL = "Success quest fail"
     NICKNAME_DUPLICATE = "Nickname is duplicate"

@@ -1,7 +1,12 @@
-from api.user.user_res_models import User, UserQuest, UserGrade, UserIcon, UserBan
-from api.user.user_req_models import (
-    AddUserReq,
+from api.user.user_res_models import (
+    User,
+    UserQuest,
+    UserGrade,
+    UserIcon,
+    UserBan,
+    UserDelete,
 )
+from api.user.user_req_models import AddUserReq
 from database import DataBaseConnector
 from dotenv import load_dotenv
 import os
@@ -10,6 +15,10 @@ from datetime import datetime, timedelta, date
 import pytz
 
 load_dotenv()
+
+
+default_icon = "/tkl_user/icon/newbie.gif"
+default_grade = "뉴비"
 
 
 class UserService:
@@ -58,7 +67,7 @@ class UserService:
                         id=addUserReq.id,
                         name=addUserReq.name,
                         email=addUserReq.email,
-                        icon="/tkl_user/icon/newbie.gif",
+                        icon=default_icon,
                         nick_name=uuid_v5[:10],
                         point=10,
                         is_admin=False,
@@ -74,7 +83,7 @@ class UserService:
                     s.add(new_user_quest)
                     new_icon_list = UserIcon(
                         user_email=addUserReq.email,
-                        icon_list=["/tkl_user/icon/newbie.gif"],
+                        icon_list=[default_icon],
                     )
                     s.add(new_icon_list)
                     s.commit()
@@ -96,12 +105,11 @@ class UserService:
         )
         icon_list = s.query(UserIcon).filter(user.email == UserIcon.user_email).first()
         user_ban = s.query(UserBan).filter(user.email == UserBan.user_email).first()
+        is_delete = s.query(UserDelete).filter(user.email == UserDelete.email).first()
         user_data = {
             "user": user,
-            "grade": grade.value if grade else "뉴비",
-            "icon_list": (
-                icon_list.icon_list if icon_list else ["/tkl_user/icon/newbie.gif"]
-            ),
+            "grade": grade.value if grade else default_grade,
+            "icon_list": (icon_list.icon_list if icon_list else [default_icon]),
             "ban": (
                 user_ban
                 if user_ban
@@ -112,6 +120,7 @@ class UserService:
                     "ban_end_time": None,
                 }
             ),
+            "is_delete": True if is_delete else False,
         }
         return user_data
 
@@ -177,6 +186,37 @@ class UserService:
                     s.commit()
                 user_data = UserService.get_user_data(s, user_email)
                 return user_data
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def user_delete(user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user = s.query(User).filter(User.email == user_email).first()
+                if user:
+                    new_delete_user = UserDelete(
+                        id=user.id,
+                        name=user.name,
+                        email=user.email,
+                        icon=user.icon,
+                        nick_name=user.nick_name,
+                        point=user.point,
+                        is_admin=user.is_admin,
+                        attendance_count=user.attendance_count,
+                        create_time=user.create_time,
+                        update_time=user.update_time,
+                        attendance_time=user.attendance_time,
+                        delete_end_time=datetime.now() + timedelta(days=30),
+                    )
+                    s.add(new_delete_user)
+                    s.delete(user)
+                    s.commit()
+                    return True
+                else:
+                    return False
         except Exception as e:
             print("오류 발생:", e)
             return None
