@@ -1,5 +1,6 @@
 from database import DataBaseConnector
-from sqlalchemy import Column, Integer, TIMESTAMP, TEXT
+from sqlalchemy import Column, Integer, TIMESTAMP, TEXT, ForeignKey
+from sqlalchemy.orm import relationship
 
 
 class ForumBoard(DataBaseConnector.Base):
@@ -17,9 +18,10 @@ class ForumBoard(DataBaseConnector.Base):
     like_count = Column(Integer)
     dislike_count = Column(Integer)
     view_count = Column(Integer)
-    type = Column(TEXT)
+    type = Column(TEXT, ForeignKey("tkl_board_type.value"))
     create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
+    type_kr = relationship("BoardType", backref="forum")
 
 
 class TipBoard(DataBaseConnector.Base):
@@ -37,9 +39,10 @@ class TipBoard(DataBaseConnector.Base):
     like_count = Column(Integer)
     dislike_count = Column(Integer)
     view_count = Column(Integer)
-    type = Column(TEXT)
+    type = Column(TEXT, ForeignKey("tkl_board_type.value"))
     create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
+    type_kr = relationship("BoardType", backref="tip")
 
 
 class PvpBoard(DataBaseConnector.Base):
@@ -57,9 +60,10 @@ class PvpBoard(DataBaseConnector.Base):
     like_count = Column(Integer)
     dislike_count = Column(Integer)
     view_count = Column(Integer)
-    type = Column(TEXT)
+    type = Column(TEXT, ForeignKey("tkl_board_type.value"))
     create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
+    type_kr = relationship("BoardType", backref="pvp")
 
 
 class PveBoard(DataBaseConnector.Base):
@@ -77,9 +81,10 @@ class PveBoard(DataBaseConnector.Base):
     like_count = Column(Integer)
     dislike_count = Column(Integer)
     view_count = Column(Integer)
-    type = Column(TEXT)
+    type = Column(TEXT, ForeignKey("tkl_board_type.value"))
     create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
+    type_kr = relationship("BoardType", backref="pve")
 
 
 class ArenaBoard(DataBaseConnector.Base):
@@ -97,9 +102,10 @@ class ArenaBoard(DataBaseConnector.Base):
     like_count = Column(Integer)
     dislike_count = Column(Integer)
     view_count = Column(Integer)
-    type = Column(TEXT)
+    type = Column(TEXT, ForeignKey("tkl_board_type.value"))
     create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
+    type_kr = relationship("BoardType", backref="arena")
 
 
 class QuestionBoard(DataBaseConnector.Base):
@@ -117,9 +123,10 @@ class QuestionBoard(DataBaseConnector.Base):
     like_count = Column(Integer)
     dislike_count = Column(Integer)
     view_count = Column(Integer)
-    type = Column(TEXT)
+    type = Column(TEXT, ForeignKey("tkl_board_type.value"))
     create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
+    type_kr = relationship("BoardType", backref="question")
 
 
 class NoticeBoard(DataBaseConnector.Base):
@@ -137,9 +144,10 @@ class NoticeBoard(DataBaseConnector.Base):
     like_count = Column(Integer)
     dislike_count = Column(Integer)
     view_count = Column(Integer)
-    type = Column(TEXT)
+    type = Column(TEXT, ForeignKey("tkl_board_type.value"))
     create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
+    type_kr = relationship("BoardType", backref="notice")
 
 
 class PostLike(DataBaseConnector.Base):

@@ -14,6 +14,7 @@ from api.board.board_req_models import AddPost, LikeOrDisPost
 from database import DataBaseConnector
 from api.user.user_res_models import User
 from api.board.board_function import BoardFunction
+from sqlalchemy.orm import subqueryload
 
 load_dotenv()
 
@@ -261,11 +262,13 @@ class BoardService:
             with session() as s:
                 posts = (
                     s.query(board_class, User.email, User.icon, User.nick_name)
+                    .options(subqueryload(board_class.type_kr))
                     .join(User, User.email == board_class.writer)
                     .filter(board_class.id == board_id)
                     .all()
                 )
                 for post, email, icon, nick_name in posts:
+                    print(post.type_kr.name_kr)
                     post_dict = {
                         "id": post.id,
                         "title": post.title,
@@ -276,6 +279,7 @@ class BoardService:
                         "dislike_count": post.dislike_count,
                         "view_count": post.view_count,
                         "type": post.type,
+                        "type_kr": post.type_kr.name_kr,
                         "create_time": post.create_time,
                         "update_time": post.update_time,
                         "icon": icon,
