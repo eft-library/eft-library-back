@@ -1,4 +1,4 @@
-from api.user.user_res_models import User, UserQuest, UserGrade
+from api.user.user_res_models import User, UserQuest, UserGrade, UserIconList
 from api.user.user_req_models import (
     AddUserReq,
 )
@@ -47,6 +47,10 @@ class UserService:
                         quest_id=[],
                     )
                     s.add(new_user_quest)
+                    new_icon_list = UserIconList(
+                        user_email=addUserReq.email, icon_list=[]
+                    )
+                    s.add(new_icon_list)
                     s.commit()
                     return True
         except Exception as e:
@@ -54,20 +58,34 @@ class UserService:
             return None
 
     @staticmethod
+    def get_user_data(s, user_email: str):
+        user = s.query(User).filter(User.email == user_email).first()
+        grade = (
+            s.query(UserGrade)
+            .filter(
+                UserGrade.min_point <= user.point,
+                UserGrade.max_point >= user.point,
+            )
+            .first()
+        )
+        icon_list = (
+            s.query(UserIconList).filter(user.email == UserIconList.user_email).first()
+        )
+        user_data = {
+            "user": user,
+            "grade": grade.value if grade else "뉴비",
+            "icon_list": (
+                icon_list.icon_list if icon_list else ["/tkl_user/icon/newbie.gif"]
+            ),
+        }
+        return user_data
+
+    @staticmethod
     def get_user(user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                user = s.query(User).filter(User.email == user_email).first()
-                grade = (
-                    s.query(UserGrade)
-                    .filter(
-                        UserGrade.min_point <= user.point,
-                        UserGrade.max_point >= user.point,
-                    )
-                    .first()
-                )
-                user_data = {"user": user, "grade": grade.value if grade else "뉴비"}
+                user_data = UserService.get_user_data(s, user_email)
                 return user_data
         except Exception as e:
             print("오류 발생:", e)
@@ -104,10 +122,8 @@ class UserService:
                         user.update_time = datetime.now()
                         s.commit()
 
-                        change_user = (
-                            s.query(User).filter(User.email == user_email).first()
-                        )
-                        return change_user
+                        user_data = UserService.get_user_data(s, user_email)
+                        return user_data
                 else:
                     # 30일 안 되었음
                     return 2
@@ -121,11 +137,11 @@ class UserService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user = s.query(User).filter(User.email == user_email).first()
-                user.icon = new_icon
-                s.commit()
-
-                new_user = s.query(User).filter(User.email == user_email).first()
-                return new_user
+                if user:
+                    user.icon = new_icon
+                    s.commit()
+                user_data = UserService.get_user_data(s, user_email)
+                return user_data
         except Exception as e:
             print("오류 발생:", e)
             return None

@@ -1003,6 +1003,18 @@ COMMENT ON COLUMN TKL_USER_GRADE.MIN_POINT IS '사용자 포인트 최소 값 �
 COMMENT ON COLUMN TKL_USER_GRADE.MAX_POINT IS '사용자 포인트 최대 값 범위';
 COMMENT ON COLUMN TKL_USER_GRADE.VALUE IS '사용자 포인트에 해당하는 등급';
 
+-- user icon list
+CREATE TABLE TKL_USER_ICON_LIST
+(
+    USER_EMAIL TEXT primary key,
+    ICON_LIST TEXT[],
+    UPDATE_TIME timestamp with time zone default now()
+);
+COMMENT ON COLUMN TKL_USER_ICON_LIST.USER_EMAIL IS '사용자 이메일';
+COMMENT ON COLUMN TKL_USER_ICON_LIST.ICON_LIST IS '사용자 아이콘 목록';
+COMMENT ON COLUMN TKL_USER_ICON_LIST.UPDATE_TIME IS '사용자 아이콘 목록 수정 날짜';
+
+
 
 -- User quest
 CREATE TABLE TKL_USER_QUEST

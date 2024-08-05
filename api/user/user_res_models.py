@@ -44,6 +44,18 @@ class UserGrade(DataBaseConnector.Base):
     value = Column(TEXT)
 
 
+class UserIconList(DataBaseConnector.Base):
+    """
+    user icon list
+    """
+
+    __tablename__ = "tkl_user_icon_list"
+
+    user_email = Column(TEXT, primary_key=True)
+    icon_list = Column(ARRAY(TEXT))
+    update_time = Column(TIMESTAMP)
+
+
 class UserQuest(DataBaseConnector.Base):
     """
     User quest
