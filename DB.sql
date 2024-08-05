@@ -1003,18 +1003,29 @@ COMMENT ON COLUMN TKL_USER_GRADE.MIN_POINT IS '사용자 포인트 최소 값 �
 COMMENT ON COLUMN TKL_USER_GRADE.MAX_POINT IS '사용자 포인트 최대 값 범위';
 COMMENT ON COLUMN TKL_USER_GRADE.VALUE IS '사용자 포인트에 해당하는 등급';
 
--- user icon list
-CREATE TABLE TKL_USER_ICON_LIST
+-- user icon
+CREATE TABLE TKL_USER_ICON
 (
     USER_EMAIL TEXT primary key,
     ICON_LIST TEXT[],
     UPDATE_TIME timestamp with time zone default now()
 );
-COMMENT ON COLUMN TKL_USER_ICON_LIST.USER_EMAIL IS '사용자 이메일';
-COMMENT ON COLUMN TKL_USER_ICON_LIST.ICON_LIST IS '사용자 아이콘 목록';
-COMMENT ON COLUMN TKL_USER_ICON_LIST.UPDATE_TIME IS '사용자 아이콘 목록 수정 날짜';
+COMMENT ON COLUMN TKL_USER_ICON.USER_EMAIL IS '사용자 이메일';
+COMMENT ON COLUMN TKL_USER_ICON.ICON_LIST IS '사용자 아이콘 목록';
+COMMENT ON COLUMN TKL_USER_ICON.UPDATE_TIME IS '사용자 아이콘 목록 수정 날짜';
 
-
+-- user ban
+CREATE TABLE TKL_USER_BAN
+(
+    USER_EMAIL TEXT primary key,
+    BAN_REASON TEXT,
+    BAN_START_TIME timestamp with time zone,
+    BAN_END_TIME timestamp with time zone
+);
+COMMENT ON COLUMN TKL_USER_BAN.USER_EMAIL IS '사용자 이메일';
+COMMENT ON COLUMN TKL_USER_BAN.BAN_REASON IS '사용자 밴 사유';
+COMMENT ON COLUMN TKL_USER_BAN.BAN_START_TIME IS '사용자 밴 시작 날짜';
+COMMENT ON COLUMN TKL_USER_BAN.BAN_END_TIME IS '사용자 밴 종료 날짜';
 
 -- User quest
 CREATE TABLE TKL_USER_QUEST
@@ -1423,9 +1434,6 @@ CREATE INDEX idx_parent_id ON TKL_COMMENTS(PARENT_ID);
  - 로그인 시 조인 해서 전달
  - 밴 당하면 해당 테이블에 정보 추가
  - 화면에서 글이랑 댓글 못쓰게 막기
-
-2. 사용자 테이블에 출석일 수, 최신 출석 날짜 컬럼 추가하기
- - 로그인 시 최신 출석 날짜 확인, 년월일만 확인해서 오늘과 다르면 update 후 1일 추가, 같으면 그대로 유지
 
 3. 사용자 탈퇴 테이블 만들기
 - 컬럼은 사용자 컬럼 + 탈퇴 날짜

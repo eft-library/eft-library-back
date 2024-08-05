@@ -1,4 +1,4 @@
-from api.user.user_res_models import User, UserQuest, UserGrade, UserIconList
+from api.user.user_res_models import User, UserQuest, UserGrade, UserIcon, UserBan
 from api.user.user_req_models import (
     AddUserReq,
 )
@@ -72,7 +72,7 @@ class UserService:
                         quest_id=[],
                     )
                     s.add(new_user_quest)
-                    new_icon_list = UserIconList(
+                    new_icon_list = UserIcon(
                         user_email=addUserReq.email,
                         icon_list=["/tkl_user/icon/newbie.gif"],
                     )
@@ -94,14 +94,23 @@ class UserService:
             )
             .first()
         )
-        icon_list = (
-            s.query(UserIconList).filter(user.email == UserIconList.user_email).first()
-        )
+        icon_list = s.query(UserIcon).filter(user.email == UserIcon.user_email).first()
+        user_ban = s.query(UserBan).filter(user.email == UserBan.user_email).first()
         user_data = {
             "user": user,
             "grade": grade.value if grade else "뉴비",
             "icon_list": (
                 icon_list.icon_list if icon_list else ["/tkl_user/icon/newbie.gif"]
+            ),
+            "ban": (
+                user_ban
+                if user_ban
+                else {
+                    "user_email": user.email,
+                    "ban_reason": None,
+                    "ban_start_time": None,
+                    "ban_end_time": None,
+                }
             ),
         }
         return user_data

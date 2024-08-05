@@ -7,9 +7,7 @@ from sqlalchemy import (
     TEXT,
     Boolean,
     BIGINT,
-    ForeignKey,
 )
-from sqlalchemy.orm import relationship
 
 
 class User(DataBaseConnector.Base):
@@ -44,16 +42,29 @@ class UserGrade(DataBaseConnector.Base):
     value = Column(TEXT)
 
 
-class UserIconList(DataBaseConnector.Base):
+class UserIcon(DataBaseConnector.Base):
     """
-    user icon list
+    user icon
     """
 
-    __tablename__ = "tkl_user_icon_list"
+    __tablename__ = "tkl_user_icon"
 
     user_email = Column(TEXT, primary_key=True)
     icon_list = Column(ARRAY(TEXT))
     update_time = Column(TIMESTAMP)
+
+
+class UserBan(DataBaseConnector.Base):
+    """
+    user ban
+    """
+
+    __tablename__ = "tkl_user_ban"
+
+    user_email = Column(TEXT, primary_key=True)
+    ban_reason = Column(TEXT)
+    ban_start_time = Column(TIMESTAMP)
+    ban_end_time = Column(TIMESTAMP)
 
 
 class UserQuest(DataBaseConnector.Base):
