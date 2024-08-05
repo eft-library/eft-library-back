@@ -1,19 +1,14 @@
-from api.user.user_res_models import (
-    User,
-    UserQuest,
-)
+from api.user.user_res_models import User, UserQuest, UserGrade
 from api.user.user_req_models import (
     AddUserReq,
-    UserQuestList,
 )
 from database import DataBaseConnector
 from dotenv import load_dotenv
 import os
 import uuid
-from sqlalchemy import text
-from api.user.util import UserUtil
 from datetime import datetime, timedelta
 import pytz
+from sqlalchemy.orm import subqueryload
 
 load_dotenv()
 
@@ -31,6 +26,7 @@ class UserService:
                 )
 
                 if check_user:
+                    # 출석일 수 관련 쿼리 추가
                     return True
                 else:
                     new_user = User(
@@ -43,7 +39,7 @@ class UserService:
                         is_admin=False,
                         attendance_count=1,
                         create_time=datetime.now(),
-                        attendance_date=datetime.now(),
+                        attendance_time=datetime.now(),
                     )
                     s.add(new_user)
                     new_user_quest = UserQuest(
@@ -58,88 +54,21 @@ class UserService:
             return None
 
     @staticmethod
-    def get_user_quest(user_email: str):
-        try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
-                query = text(UserUtil.user_quest_query())
-                result = s.execute(query, {"user_email": user_email})
-                user_quests = []
-                for row in result:
-                    quest_dict = {
-                        "npc_id": row[0],
-                        "npc_name_kr": row[1],
-                        "npc_name_en": row[2],
-                        "npc_image": row[3],
-                        "quest_info": row[4],
-                    }
-                    user_quests.append(quest_dict)
-
-                return user_quests
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
-    def update_user_quest(userQuestList: UserQuestList, user_email: str):
-        try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
-                user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
-                user_quest.quest_id = userQuestList.userQuestList
-                s.commit()
-                query = text(UserUtil.user_quest_query())
-
-                result = s.execute(query, {"user_email": user_email})
-                new_user_quests = []
-                for row in result:
-                    quest_dict = {
-                        "npc_id": row[0],
-                        "npc_name_kr": row[1],
-                        "npc_name_en": row[2],
-                        "npc_image": row[3],
-                        "quest_info": row[4],
-                    }
-                    new_user_quests.append(quest_dict)
-
-                return new_user_quests
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
-    def delete_user_quest(userQuestList: UserQuestList, user_email: str):
-        try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
-                user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
-                user_quest.quest_id = userQuestList.userQuestList
-                s.commit()
-                query = text(UserUtil.user_quest_query())
-                result = s.execute(query, {"user_email": user_email})
-                new_user_quests = []
-                for row in result:
-                    quest_dict = {
-                        "npc_id": row[0],
-                        "npc_name_kr": row[1],
-                        "npc_name_en": row[2],
-                        "npc_image": row[3],
-                        "quest_info": row[4],
-                    }
-                    new_user_quests.append(quest_dict)
-
-                return new_user_quests
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
     def get_user(user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user = s.query(User).filter(User.email == user_email).first()
-                return user
+                grade = (
+                    s.query(UserGrade)
+                    .filter(
+                        UserGrade.min_point <= user.point,
+                        UserGrade.max_point >= user.point,
+                    )
+                    .first()
+                )
+                user_data = {"user": user, "grade": grade.value if grade else "뉴비"}
+                return user_data
         except Exception as e:
             print("오류 발생:", e)
             return None

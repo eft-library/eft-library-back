@@ -11,6 +11,7 @@ from api.user.user_req_models import (
     UserQuestList,
 )
 from api.user.util import UserUtil
+from api.user.user_quest_service import UserQuestService
 
 router = APIRouter(tags=["User"])
 
@@ -43,7 +44,7 @@ def get_user(token: str = Depends(oauth2_scheme)):
 def get_user_quest(token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = UserService.get_user_quest(user_email)
+        result = UserQuestService.get_user_quest(user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.USER_ADD_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -55,7 +56,7 @@ def get_user_quest(token: str = Depends(oauth2_scheme)):
 def get_user_quest(userQuestList: UserQuestList, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = UserService.update_user_quest(userQuestList, user_email)
+        result = UserQuestService.update_user_quest(userQuestList, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.USER_ADD_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -69,7 +70,7 @@ def delete_user_quest(
 ):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = UserService.delete_user_quest(userQuestList, user_email)
+        result = UserQuestService.delete_user_quest(userQuestList, user_email)
         if result is None:
             return CustomResponse.response(
                 None, HTTPCode.OK, Message.SUCCESS_QUEST_FAIL

@@ -967,7 +967,7 @@ COMMENT ON COLUMN TKL_FOLLOWERS_LOOT.UPDATE_TIME IS '추종자 전리품 업데�
 -- User
 CREATE TABLE TKL_USER
 (
-  ID TEXT primary key ,
+  ID TEXT primary key,
   NAME TEXT,
   EMAIL TEXT,
   ICON TEXT,
@@ -990,6 +990,18 @@ COMMENT ON COLUMN TKL_USER.ATTENDANCE_COUNT IS '사용자 출석일 수';
 COMMENT ON COLUMN TKL_USER.CREATE_TIME IS '사용자 생성일';
 COMMENT ON COLUMN TKL_USER.ATTENDANCE_TIME IS '사용자 최근 출석 날짜';
 COMMENT ON COLUMN TKL_USER.UPDATE_TIME IS '사용자 수정일';
+
+-- user grade
+CREATE TABLE TKL_USER_GRADE
+(
+    MIN_POINT BIGINT,
+    MAX_POINT BIGINT,
+    VALUE TEXT,
+    primary key (MIN_POINT, MAX_POINT)
+);
+COMMENT ON COLUMN TKL_USER_GRADE.MIN_POINT IS '사용자 포인트 최소 값 범위';
+COMMENT ON COLUMN TKL_USER_GRADE.MAX_POINT IS '사용자 포인트 최대 값 범위';
+COMMENT ON COLUMN TKL_USER_GRADE.VALUE IS '사용자 포인트에 해당하는 등급';
 
 
 -- User quest
