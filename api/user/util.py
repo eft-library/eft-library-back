@@ -111,5 +111,5 @@ class UserUtil:
                 from tkl_board_question
                 where writer = :email
                 ORDER BY create_time DESC
-                LIMIT 10 OFFSET 1
+                LIMIT 5 OFFSET 1
                 """
