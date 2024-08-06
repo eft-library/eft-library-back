@@ -79,3 +79,37 @@ class UserUtil:
                 group by tkl_npc.id, tkl_npc.name_kr, tkl_npc.name_en
                 order by tkl_npc.id
                 """
+
+    @staticmethod
+    def get_user_posts():
+        """
+        사용자 작성글 조회
+        """
+
+        return """
+                select *
+                from tkl_board_pvp
+                where writer = :email
+                union all
+                select *
+                from tkl_board_pve
+                where writer = :email
+                union all
+                select *
+                from tkl_board_tip
+                where writer = :email
+                union all
+                select *
+                from tkl_board_arena
+                where writer = :email
+                union all
+                select *
+                from tkl_board_forum
+                where writer = :email
+                union all
+                select *
+                from tkl_board_question
+                where writer = :email
+                ORDER BY create_time DESC
+                LIMIT 10 OFFSET 1
+                """

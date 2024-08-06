@@ -14,17 +14,7 @@ class HideoutService:
             with session() as s:
                 query = text(HideoutUtil.get_hideout_query())
                 result = s.execute(query)
-                hideouts = []
-                for row in result:
-                    hideout_dict = {
-                        "master_id": row[0],
-                        "master_name_en": row[1],
-                        "master_name_kr": row[2],
-                        "image": row[3],
-                        "data": row[4],
-                    }
-                    hideouts.append(hideout_dict)
-
+                hideouts = [dict(row) for row in result.mappings()]
                 return hideouts
         except Exception as e:
             print("오류 발생:", e)

@@ -1,3 +1,5 @@
+from sqlalchemy import text
+
 from api.user.user_res_models import (
     User,
     UserQuest,
@@ -9,6 +11,7 @@ from api.user.user_res_models import (
 from api.user.user_req_models import AddUserReq
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, date
+from api.user.util import UserUtil
 import pytz
 
 load_dotenv()
@@ -170,6 +173,11 @@ class UserFunction:
         is_delete = (
             session.query(UserDelete).filter(user.email == UserDelete.email).first()
         )
+        user_posts = session.execute(
+            text(UserUtil.get_user_posts()), {"email": user_email}
+        )
+        user_posts_list = [dict(row) for row in user_posts.mappings()]
+
         user_data = {
             "user": user,
             "grade": grade.value if grade else default_grade,
@@ -185,5 +193,6 @@ class UserFunction:
                 }
             ),
             "is_delete": True if is_delete else False,
+            "user_posts": user_posts_list,
         }
         return user_data

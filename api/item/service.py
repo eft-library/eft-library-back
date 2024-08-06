@@ -116,20 +116,7 @@ class ItemService:
             with session() as s:
                 query = text(ItemUtil.get_key_query())
                 result = s.execute(query)
-                key = []
-                for row in result:
-                    key_dict = {
-                        "id": row[0],
-                        "name": row[1],
-                        "short_name": row[2],
-                        "uses": row[3],
-                        "use_map_en": row[4],
-                        "use_map_kr": row[5],
-                        "map_value": row[6],
-                        "image": row[7],
-                        "related_quests": row[8],
-                    }
-                    key.append(key_dict)
+                key = [dict(row) for row in result.mappings()]
                 return key
         except Exception as e:
             print("오류 발생:", e)
@@ -174,21 +161,7 @@ class ItemService:
             with session() as s:
                 query = text(ItemUtil.get_provisions_query())
                 result = s.execute(query)
-                provisions = []
-                for row in result:
-                    provision_dict = {
-                        "id": row[0],
-                        "name_en": row[1],
-                        "name_kr": row[2],
-                        "short_name": row[3],
-                        "category": row[4],
-                        "energy": row[5],
-                        "hydration": row[6],
-                        "stim_effects": row[7],
-                        "image": row[8],
-                        "related_quests": row[9],
-                    }
-                    provisions.append(provision_dict)
+                provisions = [dict(row) for row in result.mappings()]
                 return provisions
         except Exception as e:
             print("오류 발생:", e)
@@ -232,19 +205,7 @@ class ItemService:
             with session() as s:
                 query = text(ItemUtil.get_loot_query())
                 result = s.execute(query)
-                loot = []
-                for row in result:
-                    loot_dict = {
-                        "id": row[0],
-                        "name_en": row[1],
-                        "name_kr": row[2],
-                        "short_name": row[3],
-                        "category": row[4],
-                        "image": row[5],
-                        "related_quests": row[6],
-                        "related_hideout": row[7],
-                    }
-                    loot.append(loot_dict)
+                loot = [dict(row) for row in result.mappings()]
                 return loot
         except Exception as e:
             print("오류 발생:", e)
@@ -305,22 +266,9 @@ class ItemService:
                 query = text(ItemUtil.get_glasses_query())
 
                 result = s.execute(query)
-                glasses = []
-                for row in result:
-                    glasses_dict = {
-                        "id": row[0],
-                        "name": row[1],
-                        "short_name": row[2],
-                        "class_value": row[3],
-                        "durability": row[4],
-                        "blindness_protection": row[5],
-                        "image": row[6],
-                        "related_quests": row[7],
-                    }
-                    glasses.append(glasses_dict)
+                glasses = [dict(row) for row in result.mappings()]
 
             class_glasses = []
-
             no_class_glasses = []
 
             for glass in glasses:

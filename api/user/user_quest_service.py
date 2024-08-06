@@ -20,17 +20,7 @@ class UserQuestService:
             with session() as s:
                 query = text(UserUtil.user_quest_query())
                 result = s.execute(query, {"user_email": user_email})
-                user_quests = []
-                for row in result:
-                    quest_dict = {
-                        "npc_id": row[0],
-                        "npc_name_kr": row[1],
-                        "npc_name_en": row[2],
-                        "npc_image": row[3],
-                        "quest_info": row[4],
-                    }
-                    user_quests.append(quest_dict)
-
+                user_quests = [dict(row) for row in result.mappings()]
                 return user_quests
         except Exception as e:
             print("오류 발생:", e)
@@ -47,17 +37,7 @@ class UserQuestService:
                 query = text(UserUtil.user_quest_query())
 
                 result = s.execute(query, {"user_email": user_email})
-                new_user_quests = []
-                for row in result:
-                    quest_dict = {
-                        "npc_id": row[0],
-                        "npc_name_kr": row[1],
-                        "npc_name_en": row[2],
-                        "npc_image": row[3],
-                        "quest_info": row[4],
-                    }
-                    new_user_quests.append(quest_dict)
-
+                new_user_quests = [dict(row) for row in result.mappings()]
                 return new_user_quests
         except Exception as e:
             print("오류 발생:", e)
@@ -73,17 +53,7 @@ class UserQuestService:
                 s.commit()
                 query = text(UserUtil.user_quest_query())
                 result = s.execute(query, {"user_email": user_email})
-                new_user_quests = []
-                for row in result:
-                    quest_dict = {
-                        "npc_id": row[0],
-                        "npc_name_kr": row[1],
-                        "npc_name_en": row[2],
-                        "npc_image": row[3],
-                        "quest_info": row[4],
-                    }
-                    new_user_quests.append(quest_dict)
-
+                new_user_quests = [dict(row) for row in result.mappings()]
                 return new_user_quests
         except Exception as e:
             print("오류 발생:", e)

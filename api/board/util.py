@@ -148,6 +148,38 @@ class BoardUtil:
         """
 
     @staticmethod
+    def get_user_max_cnt_query():
+        """
+        직상힌 글 전체 개수
+        """
+        return """
+                select count(*)
+                from (select *
+                      from tkl_board_pvp
+                      where writer = :email
+                      union all
+                      select *
+                      from tkl_board_pve
+                      where writer = :email
+                      union all
+                      select *
+                      from tkl_board_tip
+                      where writer = :email
+                      union all
+                      select *
+                      from tkl_board_arena
+                      where writer = :email
+                      union all
+                      select *
+                      from tkl_board_forum
+                      where writer = :email
+                      union all
+                      select *
+                      from tkl_board_question
+                      where writer = :email) as a
+                """
+
+    @staticmethod
     def get_issue_post_query():
         """
         커뮤니티 이슈글 전체 조회 쿼리
@@ -267,3 +299,37 @@ class BoardUtil:
                         ORDER BY create_time DESC
                         LIMIT :limit OFFSET :offset
                     """
+
+    @staticmethod
+    def get_user_posts():
+        """
+        사용자 작성글 조회
+        """
+
+        return """
+                select *
+                from tkl_board_pvp
+                where writer = :email
+                union all
+                select *
+                from tkl_board_pve
+                where writer = :email
+                union all
+                select *
+                from tkl_board_tip
+                where writer = :email
+                union all
+                select *
+                from tkl_board_arena
+                where writer = :email
+                union all
+                select *
+                from tkl_board_forum
+                where writer = :email
+                union all
+                select *
+                from tkl_board_question
+                where writer = :email
+                ORDER BY create_time DESC
+                LIMIT :limit OFFSET :offset
+                """

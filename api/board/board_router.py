@@ -64,6 +64,20 @@ def is_user_like_post(
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
+@router.get("/user/write")
+def get_user_write_post(page: int, page_size: int, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        user = BoardService.get_user_posts(page, page_size, user_email)
+        if user is None:
+            return CustomResponse.response(
+                None, HTTPCode.OK, Message.USER_POSTS_NOT_FOUND
+            )
+        return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
 @router.get("/all")
 def get_posts(page: int, page_size: int):
     posts = BoardService.get_post(page, page_size)
