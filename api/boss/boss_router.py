@@ -7,7 +7,7 @@ from api.constants import Message
 router = APIRouter(tags=["Boss"])
 
 
-@router.get("/all")
+@router.get("/all", deprecated=True)
 def get_all_boss():
     boss_list = BossService.get_all_boss()
     if boss_list is None:

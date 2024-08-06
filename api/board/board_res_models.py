@@ -179,11 +179,11 @@ class Issue(DataBaseConnector.Base):
     Issue
     """
 
-    __tablename__ = "tkl_issue"
+    __tablename__ = "tkl_board_issue"
 
     board_id = Column(TEXT, primary_key=True)
-    writer = Column(TEXT)
-    update_time = Column(TIMESTAMP)
+    board_type = Column(TEXT)
+    create_time = Column(TIMESTAMP)
 
 
 class BoardType(DataBaseConnector.Base):

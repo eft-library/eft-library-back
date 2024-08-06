@@ -301,3 +301,45 @@ class BoardService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_issue_board(page: int, page_size: int):
+        session_factory = DataBaseConnector.create_session_factory()
+
+        try:
+            with session_factory() as session:
+                # 전체 데이터 수를 구하는 쿼리
+                max_cnt_query = text(BoardUtil.get_issue_max_cnt_query())
+
+                # OFFSET 계산
+                offset = (page - 1) * page_size
+
+                # 전체 데이터 수 조회
+                result = session.execute(max_cnt_query)
+                real_total_count = result.scalar()
+
+                # 총 페이지 수 계산
+                max_pages = (real_total_count // page_size) + (
+                    1 if real_total_count % page_size > 0 else 0
+                )
+
+                # 실제 데이터 조회 쿼리
+                query = text(BoardUtil.get_issue_post_query())
+
+                # 데이터 조회
+                params = {"limit": page_size, "offset": offset}
+                result = session.execute(query, params).fetchall()
+
+                # 컬럼 이름과 값을 매핑하여 딕셔너리로 변환
+                posts = [dict(row._mapping) for row in result]
+
+                return {
+                    "data": posts,
+                    "total_count": real_total_count,
+                    "max_pages": max_pages,
+                    "current_page": page,
+                }
+
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
