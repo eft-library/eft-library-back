@@ -72,6 +72,14 @@ def get_posts(page: int, page_size: int):
     return CustomResponse.response(posts, HTTPCode.OK, Message.SUCCESS)
 
 
+@router.get("/issue")
+def get_issue_posts(page: int, page_size: int):
+    posts = BoardService.get_issue_board(page, page_size)
+    if posts is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
+    return CustomResponse.response(posts, HTTPCode.OK, Message.SUCCESS)
+
+
 @router.get("/all/categories")
 def get_board_type():
     board_type = BoardService.get_board_type()
@@ -94,11 +102,3 @@ def get_post_by_id(board_type: str, board_id: str):
     if post is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
     return CustomResponse.response(post, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/issue")
-def get_issue_posts(page: int, page_size: int):
-    posts = BoardService.get_issue_post(page, page_size)
-    if posts is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
-    return CustomResponse.response(posts, HTTPCode.OK, Message.SUCCESS)
