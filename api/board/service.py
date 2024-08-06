@@ -343,3 +343,52 @@ class BoardService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_type_issue_post(page: int, page_size: int, board_type: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            board_class = BoardFunction.get_post_type(board_type)
+            offset = (page - 1) * page_size
+            with session() as s:
+                total_count = s.query(func.count(board_class.id)).scalar()
+                max_pages = (total_count // page_size) + (
+                    1 if total_count % page_size > 0 else 0
+                )
+                post_list = (
+                    s.query(board_class, User.email, User.icon, User.nick_name)
+                    .join(User, User.email == board_class.writer)  # join 조건 수정
+                    .filter(board_class.like_count >= 10)
+                    .order_by(desc(board_class.create_time))
+                    .limit(page_size)
+                    .offset(offset)
+                    .all()
+                )
+                result = []
+                for post, email, icon, nick_name in post_list:
+                    post_dict = {
+                        "id": post.id,
+                        "title": post.title,
+                        "contents": post.contents,
+                        "thumbnail": post.thumbnail,
+                        "writer": post.writer,
+                        "like_count": post.like_count,
+                        "dislike_count": post.dislike_count,
+                        "view_count": post.view_count,
+                        "type": post.type,
+                        "create_time": post.create_time,
+                        "update_time": post.update_time,
+                        "icon": icon,
+                        "nick_name": nick_name,
+                    }
+                    result.append(post_dict)
+                return {
+                    "data": result,
+                    "total_count": total_count,
+                    "max_pages": max_pages,
+                    "current_page": page,
+                }
+
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
