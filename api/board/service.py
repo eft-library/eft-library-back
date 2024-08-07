@@ -262,7 +262,7 @@ class BoardService:
                 posts = (
                     s.query(board_class, User.email, User.icon, User.nick_name)
                     .options(subqueryload(board_class.type_kr))
-                    .join(User, User.email == board_class.writer)
+                    .outerjoin(User, User.email == board_class.writer)
                     .filter(board_class.id == board_id)
                     .all()
                 )
@@ -355,7 +355,7 @@ class BoardService:
                 )
                 post_list = (
                     s.query(board_class, User.email, User.icon, User.nick_name)
-                    .join(User, User.email == board_class.writer)  # join 조건 수정
+                    .outerjoin(User, User.email == board_class.writer)  # join 조건 수정
                     .filter(board_class.like_count >= 10)
                     .order_by(desc(board_class.create_time))
                     .limit(page_size)
