@@ -219,7 +219,7 @@ class BoardService:
                 )
                 post_list = (
                     s.query(board_class, User.email, User.icon, User.nick_name)
-                    .join(User, User.email == board_class.writer)  # join 조건 수정
+                    .outerjoin(User, board_class.writer == User.email)  # join 조건 수정
                     .order_by(desc(board_class.create_time))
                     .limit(page_size)
                     .offset(offset)
