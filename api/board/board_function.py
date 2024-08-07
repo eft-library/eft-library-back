@@ -56,7 +56,6 @@ class BoardFunction:
             specific_fields = {
                 "thumbnail": BoardFunction.extract_thumbnail_img(addPost.contents),
                 "like_count": 0,
-                "dislike_count": 0,
                 "type": addPost.type,
             }
             common_fields.update(specific_fields)
@@ -94,8 +93,7 @@ class BoardFunction:
             post.like_count -= 1
         elif user_dislike_info:
             session.delete(user_dislike_info)
-            post.like_count += 1
-            post.dislike_count -= 1
+            post.like_count += 2
             new_like_user = PostLike(
                 board_id=post_id,
                 user_email=user_email,
@@ -118,8 +116,7 @@ class BoardFunction:
     ):
         if user_like_info:
             session.delete(user_like_info)
-            post.like_count -= 1
-            post.dislike_count += 1
+            post.like_count -= 2
             new_dislike_user = PostDisLike(
                 board_id=post_id,
                 user_email=user_email,
@@ -128,7 +125,7 @@ class BoardFunction:
             session.add(new_dislike_user)
         elif user_dislike_info:
             session.delete(user_dislike_info)
-            post.dislike_count -= 1
+            post.like_count += 1
         else:
             new_dislike_user = PostDisLike(
                 board_id=post_id,
@@ -136,5 +133,5 @@ class BoardFunction:
                 update_time=datetime.now(),
             )
             session.add(new_dislike_user)
-            post.dislike_count += 1
+            post.like_count -= 1
         session.commit()
