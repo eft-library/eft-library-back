@@ -23,6 +23,7 @@ class User(DataBaseConnector.Base):
     icon = Column(TEXT)
     nick_name = Column(TEXT)
     point = Column(BIGINT)
+    grade = Column(Integer)
     is_admin = Column(Boolean)
     attendance_count = Column(Integer)
     create_time = Column(TIMESTAMP)
@@ -80,6 +81,7 @@ class UserDelete(DataBaseConnector.Base):
     icon = Column(TEXT)
     nick_name = Column(TEXT)
     point = Column(BIGINT)
+    grade = Column(Integer)
     is_admin = Column(Boolean)
     attendance_count = Column(Integer)
     create_time = Column(TIMESTAMP)
@@ -97,3 +99,15 @@ class UserQuest(DataBaseConnector.Base):
 
     user_email = Column(TEXT, primary_key=True)
     quest_id = Column(ARRAY(TEXT))
+
+
+class UserPostStatistics(DataBaseConnector.Base):
+    """
+    User post statistics
+    """
+
+    __tablename__ = "tkl_user_post_statistics"
+
+    user_email = Column(TEXT, primary_key=True)
+    post_count = Column(BIGINT)
+    comment_count = Column(BIGINT)

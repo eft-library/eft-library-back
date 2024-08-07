@@ -7,6 +7,7 @@ from api.user.user_res_models import (
     UserIcon,
     UserBan,
     UserDelete,
+    UserPostStatistics,
 )
 from api.user.user_req_models import AddUserReq
 from dotenv import load_dotenv
@@ -68,6 +69,7 @@ class UserFunction:
             icon=user_delete.icon,
             nick_name=user_delete.nick_name,
             point=user_delete.point,
+            grade=user_delete.grade,
             is_admin=user_delete.is_admin,
             attendance_count=user_delete.attendance_count,
             create_time=user_delete.create_time,
@@ -87,6 +89,7 @@ class UserFunction:
             icon=user.icon,
             nick_name=user.nick_name,
             point=user.point,
+            grade=user.grade,
             is_admin=user.is_admin,
             attendance_count=user.attendance_count,
             create_time=user.create_time,
@@ -107,6 +110,7 @@ class UserFunction:
             icon=default_icon,
             nick_name=uuid_v5[:10],
             point=10,
+            grade=1,
             is_admin=False,
             attendance_count=1,
             create_time=datetime.now(),
@@ -177,6 +181,11 @@ class UserFunction:
             text(UserUtil.get_user_posts()), {"email": user_email}
         )
         user_posts_list = [dict(row) for row in user_posts.mappings()]
+        user_post_statistics = (
+            session.query(UserPostStatistics)
+            .filter(user.email == UserPostStatistics.user_email)
+            .first()
+        )
 
         user_data = {
             "user": user,
@@ -194,5 +203,10 @@ class UserFunction:
             ),
             "is_delete": True if is_delete else False,
             "user_posts": user_posts_list,
+            "user_post_statistics": (
+                user_post_statistics
+                if user_post_statistics
+                else {"user_email": user.email, "post_count": 0, "comment_count": 0}
+            ),
         }
         return user_data
