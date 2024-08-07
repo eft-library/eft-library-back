@@ -38,8 +38,8 @@ class UserGrade(DataBaseConnector.Base):
 
     __tablename__ = "tkl_user_grade"
 
-    max_point = Column(BIGINT, primary_key=True)
-    min_point = Column(BIGINT)
+    id = Column(Integer, primary_key=True)
+    score = Column(BIGINT)
     value = Column(TEXT)
 
 

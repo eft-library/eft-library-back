@@ -19,7 +19,6 @@ load_dotenv()
 
 
 default_icon = "/tkl_user/icon/newbie.gif"
-default_grade = "뉴비"
 
 
 class UserFunction:
@@ -160,14 +159,7 @@ class UserFunction:
     @staticmethod
     def _get_user_data(session, user_email: str):
         user = session.query(User).filter(User.email == user_email).first()
-        grade = (
-            session.query(UserGrade)
-            .filter(
-                UserGrade.min_point <= user.point,
-                UserGrade.max_point >= user.point,
-            )
-            .first()
-        )
+        grade = session.query(UserGrade).filter(UserGrade.id == user.grade).first()
         icon_list = (
             session.query(UserIcon).filter(user.email == UserIcon.user_email).first()
         )
@@ -189,7 +181,7 @@ class UserFunction:
 
         user_data = {
             "user": user,
-            "grade": grade.value if grade else default_grade,
+            "grade": grade.value,
             "icon_list": (icon_list.icon_list if icon_list else [default_icon]),
             "ban": (
                 user_ban
