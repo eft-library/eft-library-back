@@ -15,6 +15,7 @@ from api.user import user_router
 from api.event import event_router
 from api.patch_notes import patch_notes_router
 from api.board import board_router
+from api.comment import comment_router
 
 api_router = APIRouter()
 
@@ -34,3 +35,4 @@ api_router.include_router(user_router.router, prefix="/user")
 api_router.include_router(event_router.router, prefix="/event")
 api_router.include_router(patch_notes_router.router, prefix="/patch_notes")
 api_router.include_router(board_router.router, prefix="/board")
+api_router.include_router(comment_router.router, prefix="/comment")

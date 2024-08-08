@@ -173,8 +173,8 @@ class BoardService:
                 offset = (page - 1) * page_size
 
                 # 전체 데이터 수 조회
-                result = session.execute(max_cnt_query)
-                real_total_count = result.scalar()
+                count_result = session.execute(max_cnt_query)
+                real_total_count = count_result.scalar()
 
                 # 총 페이지 수 계산
                 max_pages = BoardFunction._get_max_pages(real_total_count, page_size)
