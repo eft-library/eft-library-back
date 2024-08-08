@@ -20,3 +20,13 @@ class LikeOrDisPost(BaseModel):
     id: str
     type: str
     board_type: str
+
+
+class ReportBoard(BaseModel):
+    """
+    게시글 신고
+    """
+
+    board_id: str
+    board_type: str
+    reason: str

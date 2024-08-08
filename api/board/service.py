@@ -5,12 +5,8 @@ from uuid import uuid4
 from dotenv import load_dotenv
 from sqlalchemy import text, func, desc
 from api.board.util import BoardUtil
-from api.board.board_res_models import (
-    BoardType,
-    PostLike,
-    PostDisLike,
-)
-from api.board.board_req_models import AddPost, LikeOrDisPost
+from api.board.board_res_models import BoardType, PostLike, PostDisLike, BoardReport
+from api.board.board_req_models import AddPost, LikeOrDisPost, ReportBoard
 from database import DataBaseConnector
 from api.user.user_res_models import User
 from api.board.board_function import BoardFunction
@@ -429,6 +425,19 @@ class BoardService:
                     "current_page": page,
                 }
 
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def report_board(reportBoard: ReportBoard, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                new_report = BoardFunction.create_board_report(reportBoard, user_email)
+                s.add(new_report)
+                s.commit()
+                return True
         except Exception as e:
             print("오류 발생:", e)
             return None

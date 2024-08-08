@@ -191,3 +191,17 @@ class BoardType(DataBaseConnector.Base):
     name_kr = Column(TEXT)
     order = Column(Integer)
     value = Column(TEXT)
+
+
+class BoardReport(DataBaseConnector.Base):
+    """
+    Board report
+    """
+
+    __tablename__ = "tkl_board_report"
+
+    board_id = Column(TEXT, primary_key=True)
+    board_type = Column(TEXT)
+    report_user = Column(TEXT)
+    report_reason = Column(TEXT)
+    create_time = Column(TIMESTAMP)

@@ -9,8 +9,9 @@ from api.board.board_res_models import (
     QuestionBoard,
     PostLike,
     PostDisLike,
+    BoardReport,
 )
-from api.board.board_req_models import AddPost
+from api.board.board_req_models import AddPost, ReportBoard
 from datetime import datetime
 import re
 
@@ -135,3 +136,14 @@ class BoardFunction:
             session.add(new_dislike_user)
             post.like_count -= 1
         session.commit()
+
+    @staticmethod
+    def create_board_report(reportBoard: ReportBoard, user_email: str):
+        new_report = BoardReport(
+            board_id=reportBoard.board_id,
+            board_type=reportBoard.board_type,
+            report_reason=reportBoard.reason,
+            report_user=user_email,
+            create_time=datetime.now(),
+        )
+        return new_report
