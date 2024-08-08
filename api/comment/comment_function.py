@@ -21,7 +21,7 @@ class CommentFunction:
             board_type=addComment.board_type,
             parent_id=addComment.parent_id,
             contents=addComment.contents,
-            depth=addComment.parent_depth + 1,
+            depth=addComment.depth,
             create_time=datetime.now(),
             is_delete_by_admin=False,
             is_delete_by_user=False,
