@@ -26,7 +26,7 @@ class CommentUtil:
                     tkl_comments.CREATE_TIME AS root_create_time,
                     a.nick_name,
                     a.icon,
-                    b.nick_name
+                    b.nick_name as parent_nick_name
                 FROM TKL_COMMENTS
                 LEFT JOIN TKL_USER a on tkl_comments.user_email = a.email
                 LEFT JOIN TKL_USER b on tkl_comments.parent_user_email = b.email
@@ -51,7 +51,7 @@ class CommentUtil:
                     ct.root_create_time,
                     a.nick_name,
                     a.icon,
-                    b.nick_name
+                    b.nick_name as parent_nick_name
                 FROM TKL_COMMENTS c
                 INNER JOIN comment_tree ct ON c.PARENT_ID = ct.ID
                 LEFT JOIN TKL_USER a on c.user_email = a.email
