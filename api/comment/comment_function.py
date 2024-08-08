@@ -27,5 +27,6 @@ class CommentFunction:
             is_delete_by_user=False,
             like_count=0,
             dislike_count=0,
+            parent_user_email=addComment.parent_user_email,
         )
         return new_comment

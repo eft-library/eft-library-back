@@ -27,3 +27,4 @@ class Comments(DataBaseConnector.Base):
     is_delete_by_user = Column(Boolean)
     like_count = Column(Integer)
     dislike_count = Column(Integer)
+    parent_user_email = Column(TEXT)

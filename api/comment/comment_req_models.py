@@ -11,3 +11,4 @@ class AddComment(BaseModel):
     board_type: str
     board_id: str
     parent_depth: int
+    parent_user_email: str
