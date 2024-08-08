@@ -5,8 +5,8 @@ from uuid import uuid4
 from dotenv import load_dotenv
 from sqlalchemy import text, func, desc
 from api.board.util import BoardUtil
-from api.board.board_res_models import BoardType, PostLike, PostDisLike, BoardReport
-from api.board.board_req_models import AddPost, LikeOrDisPost, ReportBoard
+from api.board.board_res_models import BoardType, PostLike, PostDisLike, DeleteBoard
+from api.board.board_req_models import AddPost, LikeOrDisPost, ReportBoard, DeletePost
 from database import DataBaseConnector
 from api.user.user_res_models import User
 from api.board.board_function import BoardFunction
@@ -65,7 +65,7 @@ class BoardService:
                 check_user = s.query(User).filter(User.email == user_email).first()
 
                 if check_user:
-                    new_post = BoardFunction.valid_post_type(addPost, user_email)
+                    new_post = BoardFunction._valid_post_type(addPost, user_email)
                     s.add(new_post)
                     s.commit()
                     return {"type": addPost.type}
@@ -79,7 +79,7 @@ class BoardService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                board_class = BoardFunction.get_post_type(likeOrDis.board_type)
+                board_class = BoardFunction._get_post_type(likeOrDis.board_type)
                 post = (
                     s.query(board_class).filter(board_class.id == likeOrDis.id).first()
                 )
@@ -103,7 +103,7 @@ class BoardService:
                 )
 
                 if likeOrDis.type == "like":
-                    BoardFunction.handle_like(
+                    BoardFunction._handle_like(
                         s,
                         post,
                         user_like_info,
@@ -112,7 +112,7 @@ class BoardService:
                         user_email,
                     )
                 else:
-                    BoardFunction.handle_dislike(
+                    BoardFunction._handle_dislike(
                         s,
                         post,
                         user_like_info,
@@ -177,9 +177,7 @@ class BoardService:
                 real_total_count = result.scalar()
 
                 # 총 페이지 수 계산
-                max_pages = (real_total_count // page_size) + (
-                    1 if real_total_count % page_size > 0 else 0
-                )
+                max_pages = BoardFunction._get_max_pages(real_total_count, page_size)
 
                 # 실제 데이터 조회 쿼리
                 query = text(BoardUtil.get_post_query())
@@ -206,13 +204,11 @@ class BoardService:
     def get_type_post(page: int, page_size: int, board_type: str):
         try:
             session = DataBaseConnector.create_session_factory()
-            board_class = BoardFunction.get_post_type(board_type)
+            board_class = BoardFunction._get_post_type(board_type)
             offset = (page - 1) * page_size
             with session() as s:
                 total_count = s.query(func.count(board_class.id)).scalar()
-                max_pages = (total_count // page_size) + (
-                    1 if total_count % page_size > 0 else 0
-                )
+                max_pages = BoardFunction._get_max_pages(total_count, page_size)
                 post_list = (
                     s.query(board_class, User.email, User.icon, User.nick_name)
                     .outerjoin(User, board_class.writer == User.email)  # join 조건 수정
@@ -221,23 +217,8 @@ class BoardService:
                     .offset(offset)
                     .all()
                 )
-                result = []
-                for post, email, icon, nick_name in post_list:
-                    post_dict = {
-                        "id": post.id,
-                        "title": post.title,
-                        "contents": post.contents,
-                        "thumbnail": post.thumbnail,
-                        "writer": post.writer,
-                        "like_count": post.like_count,
-                        "view_count": post.view_count,
-                        "type": post.type,
-                        "create_time": post.create_time,
-                        "update_time": post.update_time,
-                        "icon": icon,
-                        "nick_name": nick_name,
-                    }
-                    result.append(post_dict)
+                result = BoardFunction._get_post_list(post_list)
+
                 return {
                     "data": result,
                     "total_count": total_count,
@@ -253,7 +234,7 @@ class BoardService:
     def get_post_by_id(board_id: str, board_type: str):
         try:
             session = DataBaseConnector.create_session_factory()
-            board_class = BoardFunction.get_post_type(board_type)
+            board_class = BoardFunction._get_post_type(board_type)
             with session() as s:
                 posts = (
                     s.query(board_class, User.email, User.icon, User.nick_name)
@@ -263,7 +244,6 @@ class BoardService:
                     .all()
                 )
                 for post, email, icon, nick_name in posts:
-                    print(post.type_kr.name_kr)
                     post_dict = {
                         "id": post.id,
                         "title": post.title,
@@ -313,9 +293,7 @@ class BoardService:
                 real_total_count = result.scalar()
 
                 # 총 페이지 수 계산
-                max_pages = (real_total_count // page_size) + (
-                    1 if real_total_count % page_size > 0 else 0
-                )
+                max_pages = BoardFunction._get_max_pages(real_total_count, page_size)
 
                 # 실제 데이터 조회 쿼리
                 query = text(BoardUtil.get_issue_post_query())
@@ -342,13 +320,11 @@ class BoardService:
     def get_type_issue_post(page: int, page_size: int, board_type: str):
         try:
             session = DataBaseConnector.create_session_factory()
-            board_class = BoardFunction.get_post_type(board_type)
+            board_class = BoardFunction._get_post_type(board_type)
             offset = (page - 1) * page_size
             with session() as s:
                 total_count = s.query(func.count(board_class.id)).scalar()
-                max_pages = (total_count // page_size) + (
-                    1 if total_count % page_size > 0 else 0
-                )
+                max_pages = BoardFunction._get_max_pages(total_count, page_size)
                 post_list = (
                     s.query(board_class, User.email, User.icon, User.nick_name)
                     .outerjoin(User, User.email == board_class.writer)  # join 조건 수정
@@ -358,23 +334,7 @@ class BoardService:
                     .offset(offset)
                     .all()
                 )
-                result = []
-                for post, email, icon, nick_name in post_list:
-                    post_dict = {
-                        "id": post.id,
-                        "title": post.title,
-                        "contents": post.contents,
-                        "thumbnail": post.thumbnail,
-                        "writer": post.writer,
-                        "like_count": post.like_count,
-                        "view_count": post.view_count,
-                        "type": post.type,
-                        "create_time": post.create_time,
-                        "update_time": post.update_time,
-                        "icon": icon,
-                        "nick_name": nick_name,
-                    }
-                    result.append(post_dict)
+                result = BoardFunction._get_post_list(post_list)
                 return {
                     "data": result,
                     "total_count": total_count,
@@ -404,9 +364,7 @@ class BoardService:
                 real_total_count = result.scalar()
 
                 # 총 페이지 수 계산
-                max_pages = (real_total_count // page_size) + (
-                    1 if real_total_count % page_size > 0 else 0
-                )
+                max_pages = BoardFunction._get_max_pages(real_total_count, page_size)
 
                 # 실제 데이터 조회 쿼리
                 query = text(BoardUtil.get_user_posts())
@@ -434,10 +392,31 @@ class BoardService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                new_report = BoardFunction.create_board_report(reportBoard, user_email)
+                new_report = BoardFunction._create_board_report(reportBoard, user_email)
                 s.add(new_report)
                 s.commit()
                 return True
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def delete_board(deletePost: DeletePost, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                board_class = BoardFunction._get_post_type(deletePost.board_type)
+                post = (
+                    s.query(board_class)
+                    .filter(board_class.id == deletePost.board_id)
+                    .first()
+                )
+                new_delete = BoardFunction._create_board_delete(post, user_email)
+                s.add(new_delete)
+                s.delete(post)
+                s.commit()
+
+                return post
         except Exception as e:
             print("오류 발생:", e)
             return None

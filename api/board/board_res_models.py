@@ -143,6 +143,28 @@ class NoticeBoard(DataBaseConnector.Base):
     type_kr = relationship("BoardType", backref="notice")
 
 
+class DeleteBoard(DataBaseConnector.Base):
+    """
+    Delete
+    """
+
+    __tablename__ = "tkl_board_delete"
+
+    id = Column(TEXT, primary_key=True)
+    title = Column(TEXT)
+    contents = Column(TEXT)
+    thumbnail = Column(TEXT)
+    writer = Column(TEXT)
+    like_count = Column(Integer)
+    view_count = Column(Integer)
+    type = Column(TEXT, ForeignKey("tkl_board_type.value"))
+    create_time = Column(TIMESTAMP)
+    update_time = Column(TIMESTAMP)
+    delete_user = Column(TIMESTAMP)
+    delete_time = Column(TIMESTAMP)
+    type_kr = relationship("BoardType", backref="delete_board")
+
+
 class PostLike(DataBaseConnector.Base):
     """
     Post like

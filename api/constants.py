@@ -46,3 +46,4 @@ class Message(Enum):
     POST_LIKE_CHANGE_FAIL = "Post like change fail"
     USER_POSTS_NOT_FOUND = "User posts not found"
     REPORT_FAIL = "Report fail"
+    BOARD_DELETE_FAIL = "Board delete fail"

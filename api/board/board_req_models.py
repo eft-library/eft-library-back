@@ -30,3 +30,12 @@ class ReportBoard(BaseModel):
     board_id: str
     board_type: str
     reason: str
+
+
+class DeletePost(BaseModel):
+    """
+    게시글 삭제
+    """
+
+    board_id: str
+    board_type: str
