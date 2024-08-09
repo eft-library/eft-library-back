@@ -54,8 +54,8 @@ class CommentUtil:
                     b.nick_name as parent_nick_name
                 FROM TKL_COMMENTS c
                 INNER JOIN comment_tree ct ON c.PARENT_ID = ct.ID
-                LEFT JOIN TKL_USER a on c.user_email = a.email
-                LEFT JOIN TKL_USER b on c.parent_user_email = b.email
+                INNER JOIN TKL_USER a on c.user_email = a.email
+                INNER JOIN TKL_USER b on c.parent_user_email = b.email
                 WHERE c.board_id = :board_id
             )
             SELECT *
