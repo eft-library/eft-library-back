@@ -12,3 +12,12 @@ class AddComment(BaseModel):
     board_id: str
     depth: int
     parent_user_email: str
+
+
+class DeleteComment(BaseModel):
+    """
+    댓글 삭제
+    """
+
+    delete_by_user: bool
+    comment_id: str

@@ -45,6 +45,7 @@ class Message(Enum):
     NICKNAME_CHANGE_NOT_AVAILABLE = "Available after 30 days."
     ADD_BOARD_FAIL = "Add board fail"
     ADD_COMMENT_FAIL = "Add comment fail"
+    DELETE_COMMENT_FAIL = "Delete comment fail"
     POST_LIKE_CHANGE_FAIL = "Post like change fail"
     USER_POSTS_NOT_FOUND = "User posts not found"
     REPORT_FAIL = "Report fail"

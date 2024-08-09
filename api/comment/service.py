@@ -1,9 +1,7 @@
-import datetime
-from uuid import uuid4
-from sqlalchemy import text, func, desc
+from sqlalchemy import text
 from api.comment.comment_res_models import Comments
 from database import DataBaseConnector
-from api.comment.comment_req_models import AddComment
+from api.comment.comment_req_models import AddComment, DeleteComment
 from api.comment.util import CommentUtil
 from api.comment.comment_function import CommentFunction
 
@@ -45,6 +43,26 @@ class CommentService:
                     "current_page": page,
                 }
 
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def delete_comment(deleteComment: DeleteComment):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                comment = (
+                    s.query(Comments)
+                    .filter(Comments.id == deleteComment.comment_id)
+                    .first()
+                )
+                if deleteComment.delete_by_user:
+                    comment.is_delete_by_user = True
+                else:
+                    comment.is_delete_by_admin = True
+                s.commit()
+                return True
         except Exception as e:
             print("오류 발생:", e)
             return None

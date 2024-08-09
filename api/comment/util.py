@@ -13,7 +13,11 @@ class CommentUtil:
                     tkl_comments.USER_EMAIL,
                     tkl_comments.BOARD_TYPE,
                     tkl_comments.PARENT_ID,
-                    tkl_comments.CONTENTS,
+                    CASE
+                        WHEN tkl_comments.is_delete_by_admin THEN '<p>해당 댓글은 관리 규정에 따라 삭제되었습니다.</p>'
+                        WHEN tkl_comments.is_delete_by_user THEN '<p>해당 댓글은 작성자에 의해 삭제되었습니다.</p>'
+                        ELSE tkl_comments.CONTENTS
+                    END AS CONTENTS,
                     tkl_comments.DEPTH,
                     tkl_comments.CREATE_TIME,
                     tkl_comments.UPDATE_TIME,
@@ -38,7 +42,11 @@ class CommentUtil:
                     c.USER_EMAIL,
                     c.BOARD_TYPE,
                     c.PARENT_ID,
-                    c.CONTENTS,
+                    CASE
+                        WHEN c.is_delete_by_admin THEN '<p>해당 댓글은 관리 규정에 따라 삭제되었습니다.</p>'
+                        WHEN c.is_delete_by_user THEN '<p>해당 댓글은 작성자에 의해 삭제되었습니다.</p>'
+                        ELSE c.CONTENTS
+                    END AS CONTENTS,
                     c.DEPTH,
                     c.CREATE_TIME,
                     c.UPDATE_TIME,
