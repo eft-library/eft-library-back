@@ -28,3 +28,27 @@ class Comments(DataBaseConnector.Base):
     like_count = Column(Integer)
     dislike_count = Column(Integer)
     parent_user_email = Column(TEXT)
+
+
+class CommentLike(DataBaseConnector.Base):
+    """
+    Comment like
+    """
+
+    __tablename__ = "tkl_comment_like"
+
+    comment_id = Column(TEXT, primary_key=True)
+    user_email = Column(TEXT, primary_key=True)
+    update_time = Column(TIMESTAMP)
+
+
+class CommentDisLike(DataBaseConnector.Base):
+    """
+    Comment Dislike
+    """
+
+    __tablename__ = "tkl_comment_dislike"
+
+    comment_id = Column(TEXT, primary_key=True)
+    user_email = Column(TEXT, primary_key=True)
+    update_time = Column(TIMESTAMP)

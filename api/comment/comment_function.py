@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from api.comment.comment_res_models import Comments
+from api.comment.comment_res_models import Comments, CommentLike, CommentDisLike
 from api.comment.comment_req_models import AddComment
 from datetime import datetime
 
@@ -30,3 +30,57 @@ class CommentFunction:
             parent_user_email=addComment.parent_user_email,
         )
         return new_comment
+
+    @staticmethod
+    def _handle_like(
+        s, comment, likeOrDisComment, like_comment, dislike_comment, user_email
+    ):
+        if like_comment:
+            comment.like_count -= 1
+            s.delete(like_comment)
+        elif dislike_comment:
+            comment.like_count += 1
+            comment.dislike_count -= 1
+            s.delete(dislike_comment)
+            new_like_comment = CommentLike(
+                comment_id=likeOrDisComment.id,
+                user_email=user_email,
+                update_time=datetime.now(),
+            )
+            s.add(new_like_comment)
+        else:
+            comment.like_count += 1
+            new_like_comment = CommentLike(
+                comment_id=likeOrDisComment.id,
+                user_email=user_email,
+                update_time=datetime.now(),
+            )
+            s.add(new_like_comment)
+        s.commit()
+
+    @staticmethod
+    def _handle_dislike(
+        s, comment, likeOrDisComment, like_comment, dislike_comment, user_email
+    ):
+        if like_comment:
+            comment.like_count -= 1
+            comment.dislike_count += 1
+            new_dislike_comment = CommentDisLike(
+                comment_id=likeOrDisComment.id,
+                user_email=user_email,
+                update_time=datetime.now(),
+            )
+            s.delete(like_comment)
+            s.add(new_dislike_comment)
+        elif dislike_comment:
+            comment.dislike_count -= 1
+            s.delete(dislike_comment)
+        else:
+            comment.dislike_count += 1
+            new_dislike_comment = CommentDisLike(
+                comment_id=likeOrDisComment.id,
+                user_email=user_email,
+                update_time=datetime.now(),
+            )
+            s.add(new_dislike_comment)
+        s.commit()

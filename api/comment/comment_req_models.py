@@ -21,3 +21,12 @@ class DeleteComment(BaseModel):
 
     delete_by_user: bool
     comment_id: str
+
+
+class LikeOrDisComment(BaseModel):
+    """
+    좋아요, 싫어요
+    """
+
+    id: str
+    type: str

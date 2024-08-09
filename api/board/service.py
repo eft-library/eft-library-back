@@ -3,7 +3,7 @@ import os
 import subprocess
 from uuid import uuid4
 from dotenv import load_dotenv
-from sqlalchemy import text, func, desc
+from sqlalchemy import text, func, desc, and_
 from api.board.util import BoardUtil
 from api.board.board_res_models import BoardType, PostLike, PostDisLike, DeleteBoard
 from api.board.board_req_models import AddPost, LikeOrDisPost, ReportBoard, DeletePost
@@ -135,16 +135,20 @@ class BoardService:
                 user_like_info = (
                     s.query(PostLike)
                     .filter(
-                        PostLike.user_email == user_email
-                        and PostLike.board_id == likeOrDis.id
+                        and_(
+                            PostLike.user_email == user_email,
+                            PostLike.board_id == likeOrDis.id,
+                        )
                     )
                     .first()
                 )
                 user_dislike_info = (
                     s.query(PostDisLike)
                     .filter(
-                        PostDisLike.user_email == user_email
-                        and PostDisLike.board_id == likeOrDis.id
+                        and_(
+                            PostDisLike.user_email == user_email,
+                            PostDisLike.board_id == likeOrDis.id,
+                        )
                     )
                     .first()
                 )

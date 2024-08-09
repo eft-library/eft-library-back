@@ -1,7 +1,7 @@
-from sqlalchemy import text
-from api.comment.comment_res_models import Comments
+from sqlalchemy import text, and_
+from api.comment.comment_res_models import Comments, CommentLike, CommentDisLike
 from database import DataBaseConnector
-from api.comment.comment_req_models import AddComment, DeleteComment
+from api.comment.comment_req_models import AddComment, DeleteComment, LikeOrDisComment
 from api.comment.util import CommentUtil
 from api.comment.comment_function import CommentFunction
 
@@ -62,6 +62,61 @@ class CommentService:
                 else:
                     comment.is_delete_by_admin = True
                 s.commit()
+                return True
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def like_or_dis_comment(likeOrDisComment: LikeOrDisComment, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                comment = (
+                    s.query(Comments).filter(Comments.id == likeOrDisComment.id).first()
+                )
+
+                like_comment = (
+                    s.query(CommentLike)
+                    .filter(
+                        and_(
+                            CommentLike.user_email == user_email,
+                            CommentLike.comment_id == likeOrDisComment.id,
+                        )
+                    )
+                    .first()
+                )
+
+                dislike_comment = (
+                    s.query(CommentDisLike)
+                    .filter(
+                        and_(
+                            CommentDisLike.user_email == user_email,
+                            CommentDisLike.comment_id == likeOrDisComment.id,
+                        )
+                    )
+                    .first()
+                )
+
+                if likeOrDisComment.type == "like":
+                    CommentFunction._handle_like(
+                        s,
+                        comment,
+                        likeOrDisComment,
+                        like_comment,
+                        dislike_comment,
+                        user_email,
+                    )
+                else:
+                    CommentFunction._handle_dislike(
+                        s,
+                        comment,
+                        likeOrDisComment,
+                        like_comment,
+                        dislike_comment,
+                        user_email,
+                    )
+
                 return True
         except Exception as e:
             print("오류 발생:", e)
