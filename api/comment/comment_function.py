@@ -1,7 +1,12 @@
 from uuid import uuid4
 
-from api.comment.comment_res_models import Comments, CommentLike, CommentDisLike
-from api.comment.comment_req_models import AddComment
+from api.comment.comment_res_models import (
+    Comments,
+    CommentLike,
+    CommentDisLike,
+    CommentReport,
+)
+from api.comment.comment_req_models import AddComment, ReportComment
 from datetime import datetime
 
 
@@ -84,3 +89,13 @@ class CommentFunction:
             )
             s.add(new_dislike_comment)
         s.commit()
+
+    @staticmethod
+    def _create_comment_report(reportComment: ReportComment, user_email: str):
+        new_report = CommentReport(
+            comment_id=reportComment.comment_id,
+            report_reason=reportComment.reason,
+            report_user=user_email,
+            create_time=datetime.now(),
+        )
+        return new_report

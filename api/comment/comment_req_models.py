@@ -30,3 +30,12 @@ class LikeOrDisComment(BaseModel):
 
     id: str
     type: str
+
+
+class ReportComment(BaseModel):
+    """
+    댓글 신고
+    """
+
+    comment_id: str
+    reason: str

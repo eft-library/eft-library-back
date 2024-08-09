@@ -46,6 +46,7 @@ class Message(Enum):
     ADD_BOARD_FAIL = "Add board fail"
     ADD_COMMENT_FAIL = "Add comment fail"
     DELETE_COMMENT_FAIL = "Delete comment fail"
+    REPORT_COMMENT_FAIL = "Report comment fail"
     LIKE_OR_DIS_COMMENT_FAIL = "Like or dis comment fail"
     POST_LIKE_CHANGE_FAIL = "Post like change fail"
     USER_POSTS_NOT_FOUND = "User posts not found"

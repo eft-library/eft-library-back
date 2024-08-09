@@ -1,7 +1,17 @@
 from sqlalchemy import text, and_
-from api.comment.comment_res_models import Comments, CommentLike, CommentDisLike
+from api.comment.comment_res_models import (
+    Comments,
+    CommentLike,
+    CommentDisLike,
+    CommentReport,
+)
 from database import DataBaseConnector
-from api.comment.comment_req_models import AddComment, DeleteComment, LikeOrDisComment
+from api.comment.comment_req_models import (
+    AddComment,
+    DeleteComment,
+    LikeOrDisComment,
+    ReportComment,
+)
 from api.comment.util import CommentUtil
 from api.comment.comment_function import CommentFunction
 
@@ -122,6 +132,21 @@ class CommentService:
                         user_email,
                     )
 
+                return True
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def report_comment(reportComment: ReportComment, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                new_report = CommentFunction._create_comment_report(
+                    reportComment, user_email
+                )
+                s.add(new_report)
+                s.commit()
                 return True
         except Exception as e:
             print("오류 발생:", e)

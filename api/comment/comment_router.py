@@ -4,7 +4,12 @@ from util.constants import HTTPCode
 from api.constants import Message
 from api.user.util import UserUtil
 from fastapi.security import OAuth2PasswordBearer
-from api.comment.comment_req_models import AddComment, DeleteComment, LikeOrDisComment
+from api.comment.comment_req_models import (
+    AddComment,
+    DeleteComment,
+    LikeOrDisComment,
+    ReportComment,
+)
 from api.comment.service import CommentService
 
 router = APIRouter(tags=["Comment"])
@@ -45,6 +50,20 @@ def delete_comment(deleteComment: DeleteComment, token: str = Depends(oauth2_sch
         if comment is None:
             return CustomResponse.response(
                 None, HTTPCode.OK, Message.DELETE_COMMENT_FAIL
+            )
+        return CustomResponse.response(comment, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/report")
+def report_comment(reportComment: ReportComment, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        comment = CommentService.report_comment(reportComment, user_email)
+        if comment is None:
+            return CustomResponse.response(
+                None, HTTPCode.OK, Message.REPORT_COMMENT_FAIL
             )
         return CustomResponse.response(comment, HTTPCode.OK, Message.SUCCESS)
     else:

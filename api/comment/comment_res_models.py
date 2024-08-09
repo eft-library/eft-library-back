@@ -52,3 +52,16 @@ class CommentDisLike(DataBaseConnector.Base):
     comment_id = Column(TEXT, primary_key=True)
     user_email = Column(TEXT, primary_key=True)
     update_time = Column(TIMESTAMP)
+
+
+class CommentReport(DataBaseConnector.Base):
+    """
+    Comment report
+    """
+
+    __tablename__ = "tkl_comment_report"
+
+    comment_id = Column(TEXT, primary_key=True)
+    report_user = Column(TEXT)
+    report_reason = Column(TEXT)
+    create_time = Column(TIMESTAMP)
