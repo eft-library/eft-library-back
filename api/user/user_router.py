@@ -9,6 +9,7 @@ from api.user.user_req_models import (
     ChangeUserNickname,
     ChangeUserIcon,
     UserQuestList,
+    BanUser,
 )
 from api.user.util import UserUtil
 from api.user.user_quest_service import UserQuestService
@@ -36,6 +37,18 @@ def get_user(token: str = Depends(oauth2_scheme)):
         if user is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
         return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/ban")
+def ban_user(banUser: BanUser, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = UserService.user_ban(banUser)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.USER_BAN_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 

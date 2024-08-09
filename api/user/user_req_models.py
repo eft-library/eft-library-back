@@ -35,3 +35,13 @@ class ChangeUserIcon(BaseModel):
     """
 
     icon: str
+
+
+class BanUser(BaseModel):
+    """
+    사용자 정지
+    """
+
+    ban_time: int
+    ban_reason: str
+    user_email: str

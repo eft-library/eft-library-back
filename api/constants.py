@@ -41,6 +41,7 @@ class Message(Enum):
     USER_DELETE_FAIL = "User delete fail"
     INVALID_USER = "Invalid User"
     SUCCESS_QUEST_FAIL = "Success quest fail"
+    USER_BAN_FAIL = "User ban fail"
     NICKNAME_DUPLICATE = "Nickname is duplicate"
     NICKNAME_CHANGE_NOT_AVAILABLE = "Available after 30 days."
     ADD_BOARD_FAIL = "Add board fail"

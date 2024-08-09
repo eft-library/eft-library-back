@@ -1,4 +1,4 @@
-from api.user.user_req_models import AddUserReq
+from api.user.user_req_models import AddUserReq, BanUser
 from database import DataBaseConnector
 from dotenv import load_dotenv
 import os
@@ -87,6 +87,19 @@ class UserService:
                     return True
                 else:
                     return False
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def user_ban(banUser: BanUser):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                new_ban_user = UserFunction._create_ban_user(banUser)
+                s.add(new_ban_user)
+                s.commit()
+                return True
         except Exception as e:
             print("오류 발생:", e)
             return None

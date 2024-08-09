@@ -9,7 +9,7 @@ from api.user.user_res_models import (
     UserDelete,
     UserPostStatistics,
 )
-from api.user.user_req_models import AddUserReq
+from api.user.user_req_models import AddUserReq, BanUser
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, date
 from api.user.util import UserUtil
@@ -134,6 +134,16 @@ class UserFunction:
             icon_list=[default_icon],
         )
         session.add(new_icon_list)
+
+    @staticmethod
+    def _create_ban_user(banUser: BanUser):
+        new_ban_user = UserBan(
+            user_email=banUser.user_email,
+            ban_reason=banUser.ban_reason,
+            ban_start_time=datetime.now(),
+            ban_end_time=datetime.now() + timedelta(days=banUser.ban_time),
+        )
+        return new_ban_user
 
     @staticmethod
     def _is_nickname_change_allowed(user: User) -> bool:
