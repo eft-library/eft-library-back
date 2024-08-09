@@ -66,8 +66,25 @@ class CommentUtil:
                 INNER JOIN TKL_USER b on c.parent_user_email = b.email
                 WHERE c.board_id = :board_id
             )
-            SELECT *
-            FROM comment_tree
-            ORDER BY root_create_time, path
+            SELECT
+                ct.*,
+                CASE
+                    WHEN tcl.comment_id IS NOT NULL THEN true
+                    ELSE false
+                END AS is_liked_by_user,
+                CASE
+                    WHEN tcdl.comment_id IS NOT NULL THEN true
+                    ELSE false
+                END AS is_disliked_by_user
+            FROM
+                comment_tree ct
+            LEFT JOIN
+                tkl_comment_like tcl
+                ON ct.id = tcl.comment_id AND tcl.user_email = :user_email
+            LEFT JOIN
+                tkl_comment_dislike tcdl
+                ON ct.id = tcdl.comment_id AND tcdl.user_email = :user_email
+            ORDER BY
+                ct.root_create_time, ct.path
             LIMIT :limit OFFSET :offset; 
             """

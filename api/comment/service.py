@@ -22,7 +22,7 @@ class CommentService:
             return None
 
     @staticmethod
-    def get_comment_by_id(page: int, page_size: int, board_id: str):
+    def get_comment_by_id(page: int, page_size: int, board_id: str, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
@@ -31,7 +31,12 @@ class CommentService:
                 )
                 offset = (page - 1) * page_size
                 query = text(CommentUtil.get_comment_query())
-                params = {"limit": page_size, "offset": offset, "board_id": board_id}
+                params = {
+                    "limit": page_size,
+                    "offset": offset,
+                    "board_id": board_id,
+                    "user_email": user_email,
+                }
                 result = s.execute(query, params).fetchall()
                 max_pages = CommentFunction._get_max_pages(max_count, page_size)
                 comments = [dict(row._mapping) for row in result]

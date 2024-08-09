@@ -14,10 +14,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 @router.get("/all")
-def get_comments(page: int, page_size: int, board_id: str):
-    comments = CommentService.get_comment_by_id(page, page_size, board_id)
+def get_comments(
+    page: int, page_size: int, board_id: str, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token) or ""
+    comments = CommentService.get_comment_by_id(page, page_size, board_id, user_email)
+
     if comments is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.COMMENTS_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.ADD_COMMENT_FAIL)
     return CustomResponse.response(comments, HTTPCode.OK, Message.SUCCESS)
 
 
