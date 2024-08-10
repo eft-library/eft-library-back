@@ -7,7 +7,7 @@ class CommentUtil:
 
         return """
                 WITH RECURSIVE comment_tree AS (
-                 SELECT
+                SELECT
                     tkl_comments.ID,
                     tkl_comments.BOARD_ID,
                     tkl_comments.USER_EMAIL,
@@ -32,9 +32,9 @@ class CommentUtil:
                     a.icon,
                     b.nick_name as parent_nick_name
                 FROM TKL_COMMENTS
-                LEFT JOIN TKL_USER a on tkl_comments.user_email = a.email
-                LEFT JOIN TKL_USER b on tkl_comments.parent_user_email = b.email
-                WHERE DEPTH = 1 and board_id = :board_id
+                LEFT JOIN TKL_USER a ON tkl_comments.user_email = a.email
+                LEFT JOIN TKL_USER b ON tkl_comments.parent_user_email = b.email
+                WHERE DEPTH = 1 AND board_id = :board_id
                 UNION ALL
                 SELECT
                     c.ID,
@@ -62,8 +62,8 @@ class CommentUtil:
                     b.nick_name as parent_nick_name
                 FROM TKL_COMMENTS c
                 INNER JOIN comment_tree ct ON c.PARENT_ID = ct.ID
-                INNER JOIN TKL_USER a on c.user_email = a.email
-                INNER JOIN TKL_USER b on c.parent_user_email = b.email
+                INNER JOIN TKL_USER a ON c.user_email = a.email
+                INNER JOIN TKL_USER b ON c.parent_user_email = b.email
                 WHERE c.board_id = :board_id
             )
             SELECT
@@ -75,7 +75,10 @@ class CommentUtil:
                 CASE
                     WHEN tcdl.comment_id IS NOT NULL THEN true
                     ELSE false
-                END AS is_disliked_by_user
+                END AS is_disliked_by_user,
+                b.ban_reason,
+                b.ban_start_time,
+                b.ban_end_time
             FROM
                 comment_tree ct
             LEFT JOIN
@@ -84,6 +87,9 @@ class CommentUtil:
             LEFT JOIN
                 tkl_comment_dislike tcdl
                 ON ct.id = tcdl.comment_id AND tcdl.user_email = :user_email
+            LEFT JOIN
+                tkl_user_ban b
+                ON ct.user_email = b.user_email
             ORDER BY
                 ct.root_create_time, ct.path
             LIMIT :limit OFFSET :offset; 
