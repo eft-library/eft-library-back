@@ -53,7 +53,7 @@ class NoticeService:
                 result = s.execute(notice_group_query, param)
                 notice_group = [dict(row._mapping) for row in result]
 
-                result_dict = {"notice": notice, "notice_group": notice_group}
+                result_dict = {"information": notice, "information_group": notice_group}
 
                 return result_dict
         except Exception as e:

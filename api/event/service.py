@@ -54,8 +54,8 @@ class EventService:
                 event_group = [dict(row._mapping) for row in result]
 
                 result_dict = {
-                    "event": event,
-                    "event_group": event_group,
+                    "information": event,
+                    "information_group": event_group,
                 }
 
                 return result_dict

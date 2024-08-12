@@ -56,8 +56,8 @@ class PatchNotesService:
                 patch_notes_group = [dict(row._mapping) for row in result]
 
                 result_dict = {
-                    "patch_notes": patch_notes,
-                    "patch_notes_group": patch_notes_group,
+                    "information": patch_notes,
+                    "information_group": patch_notes_group,
                 }
 
                 return result_dict
