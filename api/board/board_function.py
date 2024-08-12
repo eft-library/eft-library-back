@@ -76,6 +76,7 @@ class BoardFunction:
         )
         return cleaned_html
 
+    @staticmethod
     def _extract_thumbnail_img(html):
         # 정규 표현식을 사용하여 첫 번째 <img> 태그의 src 값을 찾습니다.
         match = re.search(r'<img[^>]+src="([^"]+)"', html)

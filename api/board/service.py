@@ -90,8 +90,16 @@ class BoardService:
                 post = (
                     s.query(board_class).filter(board_class.id == updatePost.id).first()
                 )
+                clean_html = BoardFunction._remove_video_delete_button(
+                    updatePost.contents
+                )
+                new_thumbnail = BoardFunction._extract_thumbnail_img(
+                    updatePost.contents
+                )
+
                 post.title = updatePost.title
-                post.contents = updatePost.contents
+                post.thumbnail = new_thumbnail
+                post.contents = clean_html
                 post.update_time = datetime.now()
                 s.commit()
                 return True
