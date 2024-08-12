@@ -8,6 +8,7 @@ from api.comment.comment_res_models import (
 )
 from api.comment.comment_req_models import AddComment, ReportComment
 from datetime import datetime
+from api.board.board_function import BoardFunction
 
 
 class CommentFunction:
@@ -19,13 +20,14 @@ class CommentFunction:
 
     @staticmethod
     def _make_comment(addComment: AddComment, user_email: str):
+        clean_html = BoardFunction._remove_video_delete_button(addComment.contents)
         new_comment = Comments(
             id=uuid4(),
             board_id=addComment.board_id,
             user_email=user_email,
             board_type=addComment.board_type,
             parent_id=addComment.parent_id,
-            contents=addComment.contents,
+            contents=clean_html,
             depth=addComment.depth,
             create_time=datetime.now(),
             is_delete_by_admin=False,
