@@ -49,7 +49,7 @@ class CommentService:
                 comment.update_time = datetime.now()
                 s.commit()
 
-                return {"new_comment": clean_html}
+                return clean_html
         except Exception as e:
             print("오류 발생:", e)
             return None
