@@ -1,7 +1,8 @@
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, text
 
 from api.patch_notes.models import PatchNotes
 from database import DataBaseConnector
+from api.patch_notes.util import PatchNotesUtil
 
 
 class PatchNotesService:
@@ -35,6 +36,31 @@ class PatchNotesService:
                     "max_pages": max_pages,
                     "current_page": page,
                 }
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_patch_notes_by_id(patch_notes_id: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+
+                # 현재 페이지의 데이터 조회
+                patch_notes = (
+                    s.query(PatchNotes).filter(PatchNotes.id == patch_notes_id).first()
+                )
+                patch_notes_group_query = text(PatchNotesUtil.get_patch_notes_group())
+                param = {"id": patch_notes_id}
+                result = s.execute(patch_notes_group_query, param)
+                patch_notes_group = [dict(row._mapping) for row in result]
+
+                result_dict = {
+                    "patch_notes": patch_notes,
+                    "patch_notes_group": patch_notes_group,
+                }
+
+                return result_dict
         except Exception as e:
             print("오류 발생:", e)
             return None
