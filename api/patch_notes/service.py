@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func, desc
 
 from api.patch_notes.models import PatchNotes
 from database import DataBaseConnector
@@ -23,7 +23,7 @@ class PatchNotesService:
                 # 현재 페이지의 데이터 조회
                 notice_list = (
                     s.query(PatchNotes)
-                    .order_by(PatchNotes.update_time)
+                    .order_by(desc(PatchNotes.update_time))
                     .limit(page_size)
                     .offset(offset)
                     .all()

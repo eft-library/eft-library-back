@@ -14,6 +14,7 @@ class Message(Enum):
     BOARD_TYPE_NOT_FOUND = "Board type not found"
     IMAGE_UPLOAD_FAIL = "Image upload fail"
     PATCH_NOTES_NOT_FOUND = "Patch notes not found"
+    NOTICE_NOT_FOUND = "Notice not found"
     WEAPON_NOT_FOUND = "Weapon not found"
     MAIN_INFO_NOT_FOUND = "Main info not found"
     BOSS_NOT_FOUND = "Boss not found"

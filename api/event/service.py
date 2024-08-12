@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import func, desc
 
 from api.event.models import Event
 from database import DataBaseConnector
@@ -24,7 +24,7 @@ class EventService:
                 # 현재 페이지의 데이터 조회
                 event_list = (
                     s.query(Event)
-                    .order_by(Event.update_time)
+                    .order_by(desc(Event.update_time))
                     .limit(page_size)
                     .offset(offset)
                     .all()
