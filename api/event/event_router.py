@@ -13,3 +13,11 @@ def get_event_quest(page: int, page_size: int):
     if event_list is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.EVENT_NOT_FOUND)
     return CustomResponse.response(event_list, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/detail/{event_id}")
+def get_event_by_id(event_id: str):
+    event = EventService.get_event_by_id(event_id)
+    if event is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.EVENT_NOT_FOUND)
+    return CustomResponse.response(event, HTTPCode.OK, Message.SUCCESS)

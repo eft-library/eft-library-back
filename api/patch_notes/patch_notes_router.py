@@ -17,7 +17,7 @@ def get_notice(page: int, page_size: int):
 
 @router.get("/detail/{patch_notes_id}")
 def get_patch_notes_by_id(patch_notes_id: str):
-    notice_list = PatchNotesService.get_patch_notes_by_id(patch_notes_id)
-    if notice_list is None:
+    patch_notes = PatchNotesService.get_patch_notes_by_id(patch_notes_id)
+    if patch_notes is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.PATCH_NOTES_NOT_FOUND)
-    return CustomResponse.response(notice_list, HTTPCode.OK, Message.SUCCESS)
+    return CustomResponse.response(patch_notes, HTTPCode.OK, Message.SUCCESS)

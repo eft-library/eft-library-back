@@ -17,7 +17,7 @@ def get_notice(page: int, page_size: int):
 
 @router.get("/detail/{notice_id}")
 def get_notice_by_id(notice_id: str):
-    notice_list = NoticeService.get_notice_by_id(notice_id)
-    if notice_list is None:
+    notice = NoticeService.get_notice_by_id(notice_id)
+    if notice is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.NOTICE_NOT_FOUND)
-    return CustomResponse.response(notice_list, HTTPCode.OK, Message.SUCCESS)
+    return CustomResponse.response(notice, HTTPCode.OK, Message.SUCCESS)
