@@ -4,7 +4,6 @@ from api.board.board_res_models import (
     PvpBoard,
     PveBoard,
     TipBoard,
-    NoticeBoard,
     ArenaBoard,
     QuestionBoard,
     PostLike,
@@ -26,7 +25,6 @@ class BoardFunction:
             "pvp": PvpBoard,
             "pve": PveBoard,
             "question": QuestionBoard,
-            "notice": NoticeBoard,
             "tip": TipBoard,
             "forum": ForumBoard,
         }
@@ -53,7 +51,6 @@ class BoardFunction:
             "question",
             "tip",
             "forum",
-            "notice",
         ]:
             specific_fields = {
                 "thumbnail": BoardFunction._extract_thumbnail_img(addPost.contents),
