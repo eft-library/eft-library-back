@@ -1,3 +1,4 @@
+from datetime import datetime
 import shutil
 import os
 import subprocess
@@ -5,8 +6,14 @@ from uuid import uuid4
 from dotenv import load_dotenv
 from sqlalchemy import text, func, desc, and_
 from api.board.util import BoardUtil
-from api.board.board_res_models import BoardType, PostLike, PostDisLike, DeleteBoard
-from api.board.board_req_models import AddPost, LikeOrDisPost, ReportBoard, DeletePost
+from api.board.board_res_models import BoardType, PostLike, PostDisLike
+from api.board.board_req_models import (
+    AddPost,
+    LikeOrDisPost,
+    ReportBoard,
+    DeletePost,
+    UpdatePost,
+)
 from database import DataBaseConnector
 from api.user.user_res_models import User
 from api.board.board_function import BoardFunction
@@ -70,6 +77,24 @@ class BoardService:
                     s.commit()
                     return {"type": addPost.type}
 
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def update_post(updatePost: UpdatePost):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                board_class = BoardFunction._get_post_type(updatePost.type)
+                post = (
+                    s.query(board_class).filter(board_class.id == updatePost.id).first()
+                )
+                post.title = updatePost.title
+                post.contents = updatePost.contents
+                post.update_time = datetime.now()
+                s.commit()
+                return True
         except Exception as e:
             print("오류 발생:", e)
             return None

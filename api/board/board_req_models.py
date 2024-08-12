@@ -12,6 +12,17 @@ class AddPost(BaseModel):
     type: str
 
 
+class UpdatePost(BaseModel):
+    """
+    작성글 수정
+    """
+
+    id: str
+    title: str
+    contents: str
+    type: str
+
+
 class LikeOrDisPost(BaseModel):
     """
     좋아요, 싫어요
