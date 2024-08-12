@@ -9,6 +9,7 @@ from api.comment.comment_req_models import (
     DeleteComment,
     LikeOrDisComment,
     ReportComment,
+    UpdateComment,
 )
 from api.comment.service import CommentService
 
@@ -37,6 +38,20 @@ def add_comment(addComment: AddComment, token: str = Depends(oauth2_scheme)):
         user = CommentService.add_comment(addComment, user_email)
         if user is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.ADD_COMMENT_FAIL)
+        return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/update")
+def update_comment(updateComment: UpdateComment, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        user = CommentService.update_comment(updateComment)
+        if user is None:
+            return CustomResponse.response(
+                None, HTTPCode.OK, Message.UPDATE_COMMENT_FAIL
+            )
         return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)

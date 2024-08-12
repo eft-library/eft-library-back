@@ -23,6 +23,7 @@ class Comments(DataBaseConnector.Base):
     contents = Column(TEXT)
     depth = Column(Integer)
     create_time = Column(TIMESTAMP)
+    update_time = Column(TIMESTAMP)
     is_delete_by_admin = Column(Boolean)
     is_delete_by_user = Column(Boolean)
     like_count = Column(Integer)

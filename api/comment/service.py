@@ -1,9 +1,10 @@
+from datetime import datetime
+
 from sqlalchemy import text, and_
 from api.comment.comment_res_models import (
     Comments,
     CommentLike,
     CommentDisLike,
-    CommentReport,
 )
 from database import DataBaseConnector
 from api.comment.comment_req_models import (
@@ -11,9 +12,11 @@ from api.comment.comment_req_models import (
     DeleteComment,
     LikeOrDisComment,
     ReportComment,
+    UpdateComment,
 )
 from api.comment.util import CommentUtil
 from api.comment.comment_function import CommentFunction
+from api.board.board_function import BoardFunction
 
 
 class CommentService:
@@ -24,6 +27,26 @@ class CommentService:
             with session() as s:
                 new_comment = CommentFunction._make_comment(addComment, user_email)
                 s.add(new_comment)
+                s.commit()
+
+                return True
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def update_comment(updateComment: UpdateComment):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                comment = (
+                    s.query(Comments).filter(Comments.id == updateComment.id).first()
+                )
+                clean_html = BoardFunction._remove_video_delete_button(
+                    updateComment.contents
+                )
+                comment.contents = clean_html
+                comment.update_time = datetime.now()
                 s.commit()
 
                 return True

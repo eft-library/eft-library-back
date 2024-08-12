@@ -48,6 +48,7 @@ class Message(Enum):
     ADD_BOARD_FAIL = "Add board fail"
     UPDATE_BOARD_FAIL = "Update board fail"
     ADD_COMMENT_FAIL = "Add comment fail"
+    UPDATE_COMMENT_FAIL = "Update comment fail"
     DELETE_COMMENT_FAIL = "Delete comment fail"
     REPORT_COMMENT_FAIL = "Report comment fail"
     LIKE_OR_DIS_COMMENT_FAIL = "Like or dis comment fail"

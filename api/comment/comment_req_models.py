@@ -14,6 +14,15 @@ class AddComment(BaseModel):
     parent_user_email: str
 
 
+class UpdateComment(BaseModel):
+    """
+    댓글 수정
+    """
+
+    id: str
+    contents: str
+
+
 class DeleteComment(BaseModel):
     """
     댓글 삭제
