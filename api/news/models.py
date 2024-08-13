@@ -15,3 +15,15 @@ class News(DataBaseConnector.Base):
     event_link = Column(TEXT)
     youtube_id = Column(TEXT)
     next_update = Column(TEXT)
+
+
+class Popup(DataBaseConnector.Base):
+    """
+    popup
+    """
+
+    __tablename__ = "tkl_popup"
+
+    id = Column(TEXT, primary_key=True)
+    contents = Column(TEXT)
+    create_time = Column(TIMESTAMP)
