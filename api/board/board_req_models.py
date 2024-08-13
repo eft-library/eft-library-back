@@ -50,3 +50,12 @@ class DeletePost(BaseModel):
 
     board_id: str
     board_type: str
+
+
+class AddBoardViewCount(BaseModel):
+    """
+    게시글 조회수 증가
+    """
+
+    board_id: str
+    board_type: str

@@ -4,7 +4,7 @@ import os
 import subprocess
 from uuid import uuid4
 from dotenv import load_dotenv
-from sqlalchemy import text, func, desc, and_
+from sqlalchemy import text, and_
 from api.board.util import BoardUtil
 from api.board.board_res_models import BoardType, PostLike, PostDisLike
 from api.board.board_req_models import (
@@ -13,6 +13,7 @@ from api.board.board_req_models import (
     ReportBoard,
     DeletePost,
     UpdatePost,
+    AddBoardViewCount,
 )
 from database import DataBaseConnector
 from api.user.user_res_models import User
@@ -380,6 +381,24 @@ class BoardService:
                 s.commit()
 
                 return post
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def add_board_view_count(addBoardViewCount: AddBoardViewCount):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                board_class = BoardFunction._get_post_type(addBoardViewCount.board_type)
+                post = (
+                    s.query(board_class)
+                    .filter(board_class.id == addBoardViewCount.board_id)
+                    .first()
+                )
+                post.view_count += 1
+                s.commit()
+                return True
         except Exception as e:
             print("오류 발생:", e)
             return None

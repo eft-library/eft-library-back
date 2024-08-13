@@ -9,6 +9,7 @@ from api.board.board_req_models import (
     ReportBoard,
     DeletePost,
     UpdatePost,
+    AddBoardViewCount,
 )
 from api.user.util import UserUtil
 from fastapi.security import OAuth2PasswordBearer
@@ -35,6 +36,22 @@ def add_board(addPost: AddPost, token: str = Depends(oauth2_scheme)):
         user = BoardService.add_new_post(addPost, user_email)
         if user is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.ADD_BOARD_FAIL)
+        return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/view")
+def add_board_view_count(
+    addBoardViewCount: AddBoardViewCount, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        user = BoardService.add_board_view_count(addBoardViewCount)
+        if user is None:
+            return CustomResponse.response(
+                None, HTTPCode.OK, Message.ADD_BOARD_VIEW_COUNT
+            )
         return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)

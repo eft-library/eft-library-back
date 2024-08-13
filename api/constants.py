@@ -46,6 +46,7 @@ class Message(Enum):
     NICKNAME_DUPLICATE = "Nickname is duplicate"
     NICKNAME_CHANGE_NOT_AVAILABLE = "Available after 30 days."
     ADD_BOARD_FAIL = "Add board fail"
+    ADD_BOARD_VIEW_COUNT = "Add board view count fail"
     UPDATE_BOARD_FAIL = "Update board fail"
     ADD_COMMENT_FAIL = "Add comment fail"
     UPDATE_COMMENT_FAIL = "Update comment fail"
