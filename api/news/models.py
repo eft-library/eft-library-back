@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, TIMESTAMP, TEXT
+from sqlalchemy import Column, String, TIMESTAMP, TEXT, Boolean
 from database import DataBaseConnector
 
 
@@ -26,4 +26,5 @@ class Popup(DataBaseConnector.Base):
 
     id = Column(TEXT, primary_key=True)
     contents = Column(TEXT)
+    is_use = Column(Boolean)
     create_time = Column(TIMESTAMP)
