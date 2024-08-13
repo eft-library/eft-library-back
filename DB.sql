@@ -1538,7 +1538,7 @@ COMMENT ON COLUMN TKL_COMMENT_LIKE.UPDATE_TIME IS '좋아요 누른 날짜';
 -- comment report
 CREATE TABLE TKL_COMMENT_REPORT
 (
-  COMMENT_ID TEXT,
+  COMMENT_ID TEXT primary key,
   REPORT_USER TEXT,
   REPORT_REASON TEXT,
   CREATE_TIME timestamp with time zone default now()
@@ -1551,7 +1551,7 @@ COMMENT ON COLUMN TKL_COMMENT_REPORT.CREATE_TIME IS '댓글 신고 날짜';
 -- popup
 CREATE TABLE TKL_POPUP
 (
-  ID TEXT,
+  ID TEXT primary key,
   CONTENTS TEXT,
   IS_USE BOOLEAN,
   CREATE_TIME timestamp with time zone default now()
