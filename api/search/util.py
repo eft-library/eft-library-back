@@ -5,23 +5,6 @@ class SearchUtil:
         sitemap 조회 쿼리
         """
         return """
-                    WITH total_count_event AS (SELECT COUNT(*) AS total_count
-                                               FROM tkl_event),
-                         event_page_info AS (SELECT (total_count / 5) + CASE WHEN total_count % 5 > 0 THEN 1 ELSE 0 END AS max_pages
-                                             FROM total_count_event),
-                         event_page_numbers AS (SELECT generate_series(1, (SELECT max_pages FROM event_page_info)) AS page_number),
-                         total_count_patch_notes AS (SELECT COUNT(*) AS total_count
-                                                     FROM tkl_patch_notes),
-                         patch_notes_page_info AS (SELECT (total_count / 10) + CASE WHEN total_count % 10 > 0 THEN 1 ELSE 0 END AS max_pages
-                                                   FROM total_count_patch_notes),
-                         patch_notes_page_numbers
-                             AS (SELECT generate_series(1, (SELECT max_pages FROM patch_notes_page_info)) AS page_number)
-                    SELECT CONCAT('/event?id=', page_number) AS tkl_link
-                    FROM event_page_numbers
-                    UNION ALL
-                    SELECT CONCAT('/patch-notes?id=', page_number) AS tkl_link
-                    FROM patch_notes_page_numbers
-                    union all
                     select '/map-of-tarkov/' || id as tkl_link
                     from tkl_map_parent
                     union all
@@ -121,5 +104,32 @@ class SearchUtil:
                     union all
                     select '/glasses?id=' || id as tkl_link
                     from tkl_glasses
+                    union all
+                    select '/notice/detail/' || id as tkl_link
+                    from tkl_notice
+                    union all
+                    select '/patch-notes/detail/' || id as tkl_link
+                    from tkl_patch_notes
+                    union all
+                    select '/event/detail/' || id as tkl_link
+                    from tkl_event
+                    union all
+                    select '/board/forum/detail/' || id as tkl_link
+                    from tkl_board_forum
+                    union all
+                    select '/board/arena/detail/' || id as tkl_link
+                    from tkl_board_arena
+                    union all
+                    select '/board/pvp/detail/' || id as tkl_link
+                    from tkl_board_pvp
+                    union all
+                    select '/board/pve/detail/' || id as tkl_link
+                    from tkl_board_pve
+                    union all
+                    select '/board/question/detail/' || id as tkl_link
+                    from tkl_board_question
+                    union all
+                    select '/board/tip/detail/' || id as tkl_link
+                    from tkl_board_tip
                     order by tkl_link
                     """
