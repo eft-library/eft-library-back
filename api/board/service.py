@@ -211,16 +211,22 @@ class BoardService:
             with session_factory() as session:
                 # 전체 데이터 수를 구하는 쿼리
                 count_queries = BoardFunction._get_post_count_query(board_type)
+                count_join_clause = BoardFunction._get_post_count_issue_clause(issue)
+                count_where_clause = BoardFunction._get_post_count_where_clause(
+                    search_type
+                )
                 max_count_query = BoardUtil.get_post_max_cnt_query_v2()
                 max_count_query = text(
-                    max_count_query.format(count_all_query=count_queries)
+                    max_count_query.format(
+                        count_all_query=count_queries,
+                        count_join_clause=count_join_clause,
+                        count_where_clause=count_where_clause,
+                    )
                 )
 
-                # OFFSET 계산
-                offset = (page - 1) * page_size
-
                 # 전체 데이터 수 조회
-                count_result = session.execute(max_count_query)
+                count_param = {"word": f"%{word}%"}
+                count_result = session.execute(max_count_query, count_param)
                 total_count = count_result.scalar()
 
                 # 총 페이지 수 계산
@@ -239,6 +245,7 @@ class BoardService:
                 all_post_query = text(all_post_query)
 
                 # 데이터 조회
+                offset = (page - 1) * page_size
                 params = {"limit": page_size, "offset": offset, "word": f"%{word}%"}
                 result = session.execute(all_post_query, params).fetchall()
 
