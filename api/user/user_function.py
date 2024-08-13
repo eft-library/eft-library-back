@@ -1,4 +1,4 @@
-from sqlalchemy import text
+from sqlalchemy import text, desc
 
 from api.user.user_res_models import (
     User,
@@ -10,6 +10,7 @@ from api.user.user_res_models import (
     UserPostStatistics,
 )
 from api.user.user_req_models import AddUserReq, BanUser
+from api.comment.comment_res_models import Comments
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, date
 from api.user.util import UserUtil
@@ -182,6 +183,13 @@ class UserFunction:
         user_posts = session.execute(
             text(UserUtil.get_user_posts()), {"email": user_email}
         )
+        user_comments = (
+            session.query(Comments)
+            .filter(user.email == Comments.user_email)
+            .order_by(desc(Comments.create_time))
+            .limit(5)
+            .all()
+        )
         user_posts_list = [dict(row) for row in user_posts.mappings()]
         user_post_statistics = (
             session.query(UserPostStatistics)
@@ -205,6 +213,7 @@ class UserFunction:
             ),
             "is_delete": True if is_delete else False,
             "user_posts": user_posts_list,
+            "user_comments": user_comments,
             "user_post_statistics": (
                 user_post_statistics
                 if user_post_statistics

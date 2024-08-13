@@ -198,66 +198,55 @@ class BoardService:
             return None
 
     @staticmethod
-    def get_post(page: int, page_size: int):
+    def get_post_v2(
+        page: int,
+        page_size: int,
+        board_type: str,
+        issue: bool,
+        word: str,
+        search_type: str,
+    ):
         session_factory = DataBaseConnector.create_session_factory()
-
         try:
             with session_factory() as session:
                 # 전체 데이터 수를 구하는 쿼리
-                max_cnt_query = text(BoardUtil.get_post_max_cnt_query())
+                count_queries = BoardFunction._get_post_count_query(board_type)
+                max_count_query = BoardUtil.get_post_max_cnt_query_v2()
+                max_count_query = text(
+                    max_count_query.format(count_all_query=count_queries)
+                )
 
                 # OFFSET 계산
                 offset = (page - 1) * page_size
 
                 # 전체 데이터 수 조회
-                count_result = session.execute(max_cnt_query)
-                real_total_count = count_result.scalar()
+                count_result = session.execute(max_count_query)
+                total_count = count_result.scalar()
 
                 # 총 페이지 수 계산
-                max_pages = BoardFunction._get_max_pages(real_total_count, page_size)
+                max_pages = BoardFunction._get_max_pages(total_count, page_size)
 
                 # 실제 데이터 조회 쿼리
-                query = text(BoardUtil.get_post_query())
+                post_queries = BoardFunction._get_post_query(board_type)
+                join_clause = BoardFunction._get_post_issue_clause(issue)
+                where_clause = BoardFunction._get_post_where_clause(search_type)
+                all_post_query = BoardUtil.get_post_query_v2()
+                all_post_query = all_post_query.format(
+                    union_all_query=post_queries,
+                    join_clause=join_clause,
+                    where_clause=where_clause,
+                )
+                all_post_query = text(all_post_query)
 
                 # 데이터 조회
-                params = {"limit": page_size, "offset": offset}
-                result = session.execute(query, params).fetchall()
+                params = {"limit": page_size, "offset": offset, "word": f"%{word}%"}
+                result = session.execute(all_post_query, params).fetchall()
 
                 # 컬럼 이름과 값을 매핑하여 딕셔너리로 변환
                 posts = [dict(row._mapping) for row in result]
 
                 return {
                     "data": posts,
-                    "total_count": real_total_count,
-                    "max_pages": max_pages,
-                    "current_page": page,
-                }
-
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
-    def get_type_post(page: int, page_size: int, board_type: str):
-        try:
-            session = DataBaseConnector.create_session_factory()
-            board_class = BoardFunction._get_post_type(board_type)
-            offset = (page - 1) * page_size
-            with session() as s:
-                total_count = s.query(func.count(board_class.id)).scalar()
-                max_pages = BoardFunction._get_max_pages(total_count, page_size)
-                post_list = (
-                    s.query(board_class, User.email, User.icon, User.nick_name)
-                    .outerjoin(User, board_class.writer == User.email)  # join 조건 수정
-                    .order_by(desc(board_class.create_time))
-                    .limit(page_size)
-                    .offset(offset)
-                    .all()
-                )
-                result = BoardFunction._get_post_list(post_list)
-
-                return {
-                    "data": result,
                     "total_count": total_count,
                     "max_pages": max_pages,
                     "current_page": page,
@@ -309,76 +298,6 @@ class BoardService:
             with session() as s:
                 board_type = s.query(BoardType).order_by(BoardType.order).all()
                 return board_type
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
-    def get_issue_board(page: int, page_size: int):
-        session_factory = DataBaseConnector.create_session_factory()
-
-        try:
-            with session_factory() as session:
-                # 전체 데이터 수를 구하는 쿼리
-                max_cnt_query = text(BoardUtil.get_issue_max_cnt_query())
-
-                # OFFSET 계산
-                offset = (page - 1) * page_size
-
-                # 전체 데이터 수 조회
-                result = session.execute(max_cnt_query)
-                real_total_count = result.scalar()
-
-                # 총 페이지 수 계산
-                max_pages = BoardFunction._get_max_pages(real_total_count, page_size)
-
-                # 실제 데이터 조회 쿼리
-                query = text(BoardUtil.get_issue_post_query())
-
-                # 데이터 조회
-                params = {"limit": page_size, "offset": offset}
-                result = session.execute(query, params).fetchall()
-
-                # 컬럼 이름과 값을 매핑하여 딕셔너리로 변환
-                posts = [dict(row._mapping) for row in result]
-
-                return {
-                    "data": posts,
-                    "total_count": real_total_count,
-                    "max_pages": max_pages,
-                    "current_page": page,
-                }
-
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
-    def get_type_issue_post(page: int, page_size: int, board_type: str):
-        try:
-            session = DataBaseConnector.create_session_factory()
-            board_class = BoardFunction._get_post_type(board_type)
-            offset = (page - 1) * page_size
-            with session() as s:
-                total_count = s.query(func.count(board_class.id)).scalar()
-                max_pages = BoardFunction._get_max_pages(total_count, page_size)
-                post_list = (
-                    s.query(board_class, User.email, User.icon, User.nick_name)
-                    .outerjoin(User, User.email == board_class.writer)  # join 조건 수정
-                    .filter(board_class.like_count >= 10)
-                    .order_by(desc(board_class.create_time))
-                    .limit(page_size)
-                    .offset(offset)
-                    .all()
-                )
-                result = BoardFunction._get_post_list(post_list)
-                return {
-                    "data": result,
-                    "total_count": total_count,
-                    "max_pages": max_pages,
-                    "current_page": page,
-                }
-
         except Exception as e:
             print("오류 발생:", e)
             return None

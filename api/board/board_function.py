@@ -166,10 +166,8 @@ class BoardFunction:
         return new_delete
 
     @staticmethod
-    def _get_max_pages(real_total_count, page_size):
-        return (real_total_count // page_size) + (
-            1 if real_total_count % page_size > 0 else 0
-        )
+    def _get_max_pages(total_count, page_size):
+        return (total_count // page_size) + (1 if total_count % page_size > 0 else 0)
 
     @staticmethod
     def _get_post_list(post_list):
@@ -191,3 +189,86 @@ class BoardFunction:
             }
             result.append(post_dict)
         return result
+
+    @staticmethod
+    def _get_post_count_query(board_type: str):
+        count_queries = ""
+        if "forum" == board_type:
+            count_queries = "SELECT COUNT(*) FROM tkl_board_forum"
+        elif "arena" == board_type:
+            count_queries = "SELECT COUNT(*) FROM tkl_board_arena"
+        elif "pve" == board_type:
+            count_queries = "SELECT COUNT(*) FROM tkl_board_pve"
+        elif "pvp" == board_type:
+            count_queries = "SELECT COUNT(*) FROM tkl_board_pvp"
+        elif "question" == board_type:
+            count_queries = "SELECT COUNT(*) FROM tkl_board_question"
+        elif "tip" == board_type:
+            count_queries = "SELECT COUNT(*) FROM tkl_board_tip"
+        else:
+            count_queries = """
+                    SELECT COUNT(*) FROM tkl_board_forum
+                    UNION ALL
+                    SELECT COUNT(*) FROM tkl_board_arena
+                    UNION ALL
+                    SELECT COUNT(*) FROM tkl_board_pve
+                    UNION ALL
+                    SELECT COUNT(*) FROM tkl_board_pvp
+                    UNION ALL
+                    SELECT COUNT(*) FROM tkl_board_question
+                    UNION ALL
+                    SELECT COUNT(*) FROM tkl_board_tip
+                """
+        return count_queries
+
+    @staticmethod
+    def _get_post_query(board_type: str):
+        post_queries = ""
+        if "forum" == board_type:
+            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_forum"
+        elif "arena" == board_type:
+            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_arena"
+        elif "pve" == board_type:
+            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pve"
+        elif "pvp" == board_type:
+            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pvp"
+        elif "question" == board_type:
+            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_question"
+        elif "tip" == board_type:
+            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_tip"
+        else:
+            post_queries = """
+                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_forum
+                UNION ALL
+                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_arena
+                UNION ALL
+                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pve
+                UNION ALL
+                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pvp
+                UNION ALL
+                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_question
+                UNION ALL
+                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_tip
+            """
+        return post_queries
+
+    @staticmethod
+    def _get_post_issue_clause(issue: bool):
+        return (
+            "JOIN tkl_board_issue ON board.id = tkl_board_issue.board_id"
+            if issue
+            else ""
+        )
+
+    @staticmethod
+    def _get_post_where_clause(search_type: str):
+        where_clause = ""
+        if search_type == "contents":
+            where_clause = "WHERE contents LIKE :word"
+        elif search_type == "contents_title":
+            where_clause = "WHERE contents LIKE :word OR title LIKE :word"
+        elif search_type == "title":
+            where_clause = "WHERE title LIKE :word"
+        elif search_type == "nickname":
+            where_clause = "WHERE nick_name LIKE :word"
+        return where_clause
