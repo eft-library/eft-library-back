@@ -94,3 +94,37 @@ class CommentUtil:
                 ct.root_create_time, ct.path
             LIMIT :limit OFFSET :offset; 
             """
+
+    @staticmethod
+    def get_issue_comment_query():
+        """
+        인기 댓글 조회 로직
+        """
+        return """
+                select tkl_comments.id,
+                       tkl_comments.board_id,
+                       tkl_comments.user_email,
+                       tkl_comments.board_type,
+                       tkl_comments.parent_id,
+                       tkl_comments.contents,
+                       tkl_comments.depth,
+                       tkl_comments.create_time,
+                       tkl_comments.update_time,
+                       tkl_comments.is_delete_by_admin,
+                       tkl_comments.is_delete_by_user,
+                       tkl_comments.like_count,
+                       tkl_comments.dislike_count,
+                       tkl_comments.parent_user_email,
+                       tkl_user.nick_name,
+                       tkl_user_ban.ban_end_time
+                from tkl_comments
+                         left join tkl_user on tkl_comments.user_email = tkl_user.email
+                         left join tkl_user_ban on tkl_comments.user_email = tkl_user_ban.user_email
+                where tkl_comments.like_count >= 1
+                  and board_id = :board_id
+                  and tkl_user_ban.ban_end_time is null
+                  and is_delete_by_user = false
+                  and is_delete_by_admin = false
+                order by tkl_comments.create_time desc
+                limit 3
+        """
