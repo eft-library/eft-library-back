@@ -63,6 +63,7 @@ class UserBan(DataBaseConnector.Base):
     __tablename__ = "tkl_user_ban"
 
     user_email = Column(TEXT, primary_key=True)
+    admin_email = Column(TEXT)
     ban_reason = Column(TEXT)
     ban_start_time = Column(TIMESTAMP)
     ban_end_time = Column(TIMESTAMP)

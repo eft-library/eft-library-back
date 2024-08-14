@@ -43,5 +43,6 @@ class BanUser(BaseModel):
     """
 
     ban_time: int
+    admin_email: str
     ban_reason: str
     user_email: str
