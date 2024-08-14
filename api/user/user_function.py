@@ -137,9 +137,10 @@ class UserFunction:
         session.add(new_icon_list)
 
     @staticmethod
-    def _create_ban_user(banUser: BanUser):
+    def _create_ban_user(banUser: BanUser, user_email: str):
         new_ban_user = UserBan(
             user_email=banUser.user_email,
+            admin_email=user_email,
             ban_reason=banUser.ban_reason,
             ban_start_time=datetime.now(),
             ban_end_time=datetime.now() + timedelta(days=banUser.ban_time),

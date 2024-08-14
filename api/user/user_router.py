@@ -45,7 +45,7 @@ def get_user(token: str = Depends(oauth2_scheme)):
 def ban_user(banUser: BanUser, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = UserService.user_ban(banUser)
+        result = UserService.user_ban(banUser, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.USER_BAN_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

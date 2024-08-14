@@ -92,11 +92,11 @@ class UserService:
             return None
 
     @staticmethod
-    def user_ban(banUser: BanUser):
+    def user_ban(banUser: BanUser, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                new_ban_user = UserFunction._create_ban_user(banUser)
+                new_ban_user = UserFunction._create_ban_user(banUser, user_email)
                 s.add(new_ban_user)
                 s.commit()
                 return True
