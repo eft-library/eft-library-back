@@ -8,7 +8,7 @@ class SearchUtil:
                     select '/map-of-tarkov/' || id as tkl_link
                     from tkl_map_parent
                     union all
-                    select '/privacy' as tkl_link
+                    select '/privacy-policy' as tkl_link
                     union all
                     select '/terms' as tkl_link
                     union all
