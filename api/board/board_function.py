@@ -253,6 +253,8 @@ class BoardFunction:
             return "WHERE title LIKE :word"
         elif search_type == "nickname":
             return "WHERE nick_name LIKE :word"
+        else:
+            return ""
 
     @staticmethod
     def _get_post_count_where_clause(search_type: str):
@@ -264,3 +266,5 @@ class BoardFunction:
             return "WHERE title LIKE :word"
         elif search_type == "nickname":
             return "WHERE nick_name LIKE :word"
+        else:
+            return ""
