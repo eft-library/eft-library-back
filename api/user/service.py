@@ -116,11 +116,13 @@ class UserService:
                 posts_query = text(posts_query)
                 posts_param = {"user_email": user_email}
                 posts = s.execute(posts_query, posts_param)
+                posts = [dict(row) for row in posts.mappings()]
 
                 user_query = UserUtil.get_user_info()
                 user_query = text(user_query)
                 user_param = {"user_email": user_email}
                 user_info = s.execute(user_query, user_param)
+                user_info = [dict(row) for row in user_info.mappings()]
 
                 result = {"posts": posts, "user_info": user_info}
 
@@ -138,11 +140,13 @@ class UserService:
                 comments_query = text(comments_query)
                 comments_param = {"user_email": user_email}
                 comments = s.execute(comments_query, comments_param)
+                comments = [dict(row) for row in comments.mappings()]
 
                 user_query = UserUtil.get_user_info()
                 user_query = text(user_query)
                 user_param = {"user_email": user_email}
                 user_info = s.execute(user_query, user_param)
+                user_info = [dict(row) for row in user_info.mappings()]
 
                 result = {"comments": comments, "user_info": user_info}
 
