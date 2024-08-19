@@ -237,9 +237,12 @@ class UserUtil:
                tkl_user.nick_name,
                tkl_user_grade.value,
                tkl_user_post_statistics.post_count,
-               tkl_user_post_statistics.comment_count
+               tkl_user_post_statistics.comment_count,
+               tkl_user_ban.ban_reason,
+               tkl_user_ban.ban_end_time
         from tkl_user
         left join tkl_user_post_statistics on tkl_user.email = tkl_user_post_statistics.user_email
         left join tkl_user_grade on tkl_user.grade = tkl_user_grade.id
+        left join tkl_user_ban on tkl_user.email = tkl_user_ban.user_email
         where email = :user_email
         """

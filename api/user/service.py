@@ -122,7 +122,7 @@ class UserService:
                 user_query = text(user_query)
                 user_param = {"user_email": user_email}
                 user_info = s.execute(user_query, user_param)
-                user_info = [dict(row) for row in user_info.mappings()]
+                user_info = user_info.mappings().fetchone()
 
                 result = {"posts": posts, "user_info": user_info}
 
@@ -146,7 +146,7 @@ class UserService:
                 user_query = text(user_query)
                 user_param = {"user_email": user_email}
                 user_info = s.execute(user_query, user_param)
-                user_info = [dict(row) for row in user_info.mappings()]
+                user_info = user_info.mappings().fetchone()
 
                 result = {"comments": comments, "user_info": user_info}
 
