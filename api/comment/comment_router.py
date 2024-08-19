@@ -27,7 +27,29 @@ def get_comments(
     comments = CommentService.get_comment_by_id(page, page_size, board_id, user_email)
 
     if comments is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.ADD_COMMENT_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.GET_COMMENT_FAIL)
+    return CustomResponse.response(comments, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/issue_comment")
+def get_issue_comments(board_id: str, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token) or ""
+    comments = CommentService.get_issue_comment_by_id(board_id, user_email)
+
+    if comments is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.GET_COMMENT_FAIL)
+    return CustomResponse.response(comments, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/issue_comment_page")
+def get_issue_comment_page(
+    board_id: str, comment_id: str, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token) or ""
+    comments = CommentService.get_issue_comment_page(board_id, comment_id, user_email)
+
+    if comments is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.ISSUE_COMMENT_FAIL)
     return CustomResponse.response(comments, HTTPCode.OK, Message.SUCCESS)
 
 

@@ -50,6 +50,8 @@ class Message(Enum):
     ADD_BOARD_VIEW_COUNT = "Add board view count fail"
     UPDATE_BOARD_FAIL = "Update board fail"
     ADD_COMMENT_FAIL = "Add comment fail"
+    GET_COMMENT_FAIL = "Get comment fail"
+    ISSUE_COMMENT_FAIL = "Issue comment fail"
     UPDATE_COMMENT_FAIL = "Update comment fail"
     DELETE_COMMENT_FAIL = "Delete comment fail"
     REPORT_COMMENT_FAIL = "Report comment fail"

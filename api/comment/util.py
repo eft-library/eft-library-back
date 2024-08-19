@@ -90,41 +90,20 @@ class CommentUtil:
             LEFT JOIN
                 tkl_user_ban b
                 ON ct.user_email = b.user_email
-            ORDER BY
-                ct.create_time, ct.path
-            LIMIT :limit OFFSET :offset; 
+            {where_clause}
             """
 
     @staticmethod
-    def get_issue_comment_query():
-        """
-        인기 댓글 조회 로직
-        """
+    def get_issue_comment_rank_query():
         return """
-                select tkl_comments.id,
-                       tkl_comments.board_id,
-                       tkl_comments.user_email,
-                       tkl_comments.board_type,
-                       tkl_comments.parent_id,
-                       tkl_comments.contents,
-                       tkl_comments.depth,
-                       tkl_comments.create_time,
-                       tkl_comments.update_time,
-                       tkl_comments.is_delete_by_admin,
-                       tkl_comments.is_delete_by_user,
-                       tkl_comments.like_count,
-                       tkl_comments.dislike_count,
-                       tkl_comments.parent_user_email,
-                       tkl_user.nick_name,
-                       tkl_user_ban.ban_end_time
-                from tkl_comments
-                         left join tkl_user on tkl_comments.user_email = tkl_user.email
-                         left join tkl_user_ban on tkl_comments.user_email = tkl_user_ban.user_email
-                where tkl_comments.like_count >= 1
-                  and board_id = :board_id
-                  and tkl_user_ban.ban_end_time is null
-                  and is_delete_by_user = false
-                  and is_delete_by_admin = false
-                order by tkl_comments.create_time desc
-                limit 3
-        """
+        WITH OrderedComments AS (
+            SELECT
+                id,
+                ROW_NUMBER() OVER (ORDER BY create_time) AS row_num
+            FROM tkl_comments
+            WHERE board_id = :board_id
+        )
+        SELECT row_num AS comment_offset
+        FROM OrderedComments
+        WHERE id = :comment_id
+                """

@@ -171,23 +171,20 @@ class BoardFunction:
 
     @staticmethod
     def _get_post_count_query(board_type: str):
-        count_queries = ""
         if "forum" == board_type:
-            count_queries = "SELECT id, contents, title, writer FROM tkl_board_forum"
+            return "SELECT id, contents, title, writer FROM tkl_board_forum"
         elif "arena" == board_type:
-            count_queries = "SELECT id, contents, title, writer  FROM tkl_board_arena"
+            return "SELECT id, contents, title, writer  FROM tkl_board_arena"
         elif "pve" == board_type:
-            count_queries = "SELECT id, contents, title, writer  FROM tkl_board_pve"
+            return "SELECT id, contents, title, writer  FROM tkl_board_pve"
         elif "pvp" == board_type:
-            count_queries = "SELECT id, contents, title, writer  FROM tkl_board_pvp"
+            return "SELECT id, contents, title, writer  FROM tkl_board_pvp"
         elif "question" == board_type:
-            count_queries = (
-                "SELECT id, contents, title, writer  FROM tkl_board_question"
-            )
+            return "SELECT id, contents, title, writer  FROM tkl_board_question"
         elif "tip" == board_type:
-            count_queries = "SELECT id, contents, title, writer  FROM tkl_board_tip"
+            return "SELECT id, contents, title, writer  FROM tkl_board_tip"
         else:
-            count_queries = """
+            return """
                     SELECT id, contents, title, writer  FROM tkl_board_forum
                     UNION ALL
                     SELECT id, contents, title, writer  FROM tkl_board_arena
@@ -200,7 +197,6 @@ class BoardFunction:
                     UNION ALL
                     SELECT id, contents, title, writer  FROM tkl_board_tip
                 """
-        return count_queries
 
     @staticmethod
     def _get_post_count_issue_clause(issue: bool):
@@ -212,21 +208,20 @@ class BoardFunction:
 
     @staticmethod
     def _get_post_query(board_type: str):
-        post_queries = ""
         if "forum" == board_type:
-            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_forum"
+            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_forum"
         elif "arena" == board_type:
-            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_arena"
+            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_arena"
         elif "pve" == board_type:
-            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pve"
+            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pve"
         elif "pvp" == board_type:
-            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pvp"
+            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pvp"
         elif "question" == board_type:
-            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_question"
+            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_question"
         elif "tip" == board_type:
-            post_queries = "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_tip"
+            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_tip"
         else:
-            post_queries = """
+            return """
                 SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_forum
                 UNION ALL
                 SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_arena
@@ -239,7 +234,6 @@ class BoardFunction:
                 UNION ALL
                 SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_tip
             """
-        return post_queries
 
     @staticmethod
     def _get_post_issue_clause(issue: bool):
@@ -251,26 +245,22 @@ class BoardFunction:
 
     @staticmethod
     def _get_post_where_clause(search_type: str):
-        where_clause = ""
         if search_type == "contents":
-            where_clause = "WHERE contents LIKE :word"
+            return "WHERE contents LIKE :word"
         elif search_type == "contents_title":
-            where_clause = "WHERE contents LIKE :word OR title LIKE :word"
+            return "WHERE contents LIKE :word OR title LIKE :word"
         elif search_type == "title":
-            where_clause = "WHERE title LIKE :word"
+            return "WHERE title LIKE :word"
         elif search_type == "nickname":
-            where_clause = "WHERE nick_name LIKE :word"
-        return where_clause
+            return "WHERE nick_name LIKE :word"
 
     @staticmethod
     def _get_post_count_where_clause(search_type: str):
-        count_where_clause = ""
         if search_type == "contents":
-            count_where_clause = "WHERE contents LIKE :word"
+            return "WHERE contents LIKE :word"
         elif search_type == "contents_title":
-            count_where_clause = "WHERE contents LIKE :word OR title LIKE :word"
+            return "WHERE contents LIKE :word OR title LIKE :word"
         elif search_type == "title":
-            count_where_clause = "WHERE title LIKE :word"
+            return "WHERE title LIKE :word"
         elif search_type == "nickname":
-            count_where_clause = "WHERE nick_name LIKE :word"
-        return count_where_clause
+            return "WHERE nick_name LIKE :word"
