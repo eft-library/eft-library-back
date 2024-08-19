@@ -8,8 +8,6 @@ load_dotenv()
 class ServerService:
     @staticmethod
     def rebuild_front():
-        subprocess.run(
-            [os.getenv("BUILD_PATH")], capture_output=True, text=True, shell=True
-        )
+        subprocess.run([os.getenv("BUILD_PATH")], text=True, shell=True)
 
         return True
