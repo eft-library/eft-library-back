@@ -91,7 +91,7 @@ class CommentUtil:
                 tkl_user_ban b
                 ON ct.user_email = b.user_email
             ORDER BY
-                ct.root_create_time, ct.path
+                ct.create_time, ct.path
             LIMIT :limit OFFSET :offset; 
             """
 
