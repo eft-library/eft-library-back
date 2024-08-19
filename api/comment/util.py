@@ -96,14 +96,11 @@ class CommentUtil:
     @staticmethod
     def get_issue_comment_rank_query():
         return """
-        WITH OrderedComments AS (
-            SELECT
-                id,
-                ROW_NUMBER() OVER (ORDER BY create_time) AS row_num
-            FROM tkl_comments
-            WHERE board_id = :board_id
-        )
-        SELECT row_num AS comment_offset
-        FROM OrderedComments
-        WHERE id = :comment_id
+                WITH OrderedComments AS (SELECT id,
+                                                ROW_NUMBER() OVER (ORDER BY create_time) AS row_num
+                                         FROM tkl_comments
+                                         WHERE board_id = :board_id)
+                SELECT row_num AS comment_offset
+                FROM OrderedComments
+                WHERE id = :comment_id
                 """

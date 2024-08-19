@@ -217,9 +217,9 @@ class CommentService:
                     "comment_id": comment_id,
                     "board_id": board_id,
                 }
-                rank_result = session.execute(comment_rank_query, rank_params)
+                comment_rank_query = text(comment_rank_query)
+                rank_result = s.execute(comment_rank_query, rank_params)
                 comment_rank = rank_result.scalar()
-
                 page = (comment_rank - 1) // limit_count + 1
                 offset = (page - 1) * limit_count
 
