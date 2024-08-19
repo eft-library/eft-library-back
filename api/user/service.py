@@ -1,9 +1,12 @@
+from sqlalchemy import text
+
 from api.user.user_req_models import AddUserReq, BanUser
 from database import DataBaseConnector
 from dotenv import load_dotenv
 import os
 import uuid
 from api.user.user_function import UserFunction
+from api.user.util import UserUtil
 
 load_dotenv()
 
@@ -100,6 +103,50 @@ class UserService:
                 s.add(new_ban_user)
                 s.commit()
                 return True
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_user_post_detail(user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                posts_query = UserUtil.get_user_post_detail()
+                posts_query = text(posts_query)
+                posts_param = {"user_email": user_email}
+                posts = s.execute(posts_query, posts_param)
+
+                user_query = UserUtil.get_user_info()
+                user_query = text(user_query)
+                user_param = {"user_email": user_email}
+                user_info = s.execute(user_query, user_param)
+
+                result = {"posts": posts, "user_info": user_info}
+
+                return result
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_user_comment_detail(user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                comments_query = UserUtil.get_user_comment_detail()
+                comments_query = text(comments_query)
+                comments_param = {"user_email": user_email}
+                comments = s.execute(comments_query, comments_param)
+
+                user_query = UserUtil.get_user_info()
+                user_query = text(user_query)
+                user_param = {"user_email": user_email}
+                user_info = s.execute(user_query, user_param)
+
+                result = {"comments": comments, "user_info": user_info}
+
+                return result
         except Exception as e:
             print("오류 발생:", e)
             return None

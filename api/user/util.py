@@ -113,3 +113,133 @@ class UserUtil:
                 ORDER BY create_time DESC
                 LIMIT 5 OFFSET 1
                 """
+
+    @staticmethod
+    def get_user_post_detail():
+        return """
+        select post.id,
+               post.title,
+               post.contents,
+               post.thumbnail,
+               post.writer,
+               post.like_count,
+               post.view_count,
+               post.type,
+               post.create_time,
+               post.update_time
+        from (select tkl_board_pvp.id,
+                     tkl_board_pvp.title,
+                     tkl_board_pvp.contents,
+                     tkl_board_pvp.thumbnail,
+                     tkl_board_pvp.writer,
+                     tkl_board_pvp.like_count,
+                     tkl_board_pvp.view_count,
+                     tkl_board_pvp.type,
+                     tkl_board_pvp.create_time,
+                     tkl_board_pvp.update_time
+              from tkl_board_pvp
+              where writer = :user_email
+              union all
+              select id,
+                     title,
+                     contents,
+                     thumbnail,
+                     writer,
+                     like_count,
+                     view_count,
+                     type,
+                     create_time,
+                     update_time
+              from tkl_board_pve
+              where writer = :user_email
+              union all
+              select tkl_board_tip.id,
+                     tkl_board_tip.title,
+                     tkl_board_tip.contents,
+                     tkl_board_tip.thumbnail,
+                     tkl_board_tip.writer,
+                     tkl_board_tip.like_count,
+                     tkl_board_tip.view_count,
+                     tkl_board_tip.type,
+                     tkl_board_tip.create_time,
+                     tkl_board_tip.update_time
+              from tkl_board_tip
+              where writer = :user_email
+              union all
+              select tkl_board_arena.id,
+                     tkl_board_arena.title,
+                     tkl_board_arena.contents,
+                     tkl_board_arena.thumbnail,
+                     tkl_board_arena.writer,
+                     tkl_board_arena.like_count,
+                     tkl_board_arena.view_count,
+                     tkl_board_arena.type,
+                     tkl_board_arena.create_time,
+                     tkl_board_arena.update_time
+              from tkl_board_arena
+              where writer = :user_email
+              union all
+              select tkl_board_forum.id,
+                     tkl_board_forum.title,
+                     tkl_board_forum.contents,
+                     tkl_board_forum.thumbnail,
+                     tkl_board_forum.writer,
+                     tkl_board_forum.like_count,
+                     tkl_board_forum.view_count,
+                     tkl_board_forum.type,
+                     tkl_board_forum.create_time,
+                     tkl_board_forum.update_time
+              from tkl_board_forum
+              where writer = :user_email
+              union all
+              select tkl_board_question.id,
+                     tkl_board_question.title,
+                     tkl_board_question.contents,
+                     tkl_board_question.thumbnail,
+                     tkl_board_question.writer,
+                     tkl_board_question.like_count,
+                     tkl_board_question.view_count,
+                     tkl_board_question.type,
+                     tkl_board_question.create_time,
+                     tkl_board_question.update_time
+              from tkl_board_question
+              where writer = :user_email) as post
+        ORDER BY post.create_time DESC
+        """
+
+    @staticmethod
+    def get_user_comment_detail():
+        return """
+        select tkl_comments.id,
+               tkl_comments.board_id,
+               tkl_comments.user_email,
+               tkl_comments.board_type,
+               tkl_comments.parent_id,
+               tkl_comments.contents,
+               tkl_comments.depth,
+               tkl_comments.create_time,
+               tkl_comments.update_time,
+               tkl_comments.is_delete_by_admin,
+               tkl_comments.is_delete_by_user,
+               tkl_comments.like_count,
+               tkl_comments.dislike_count,
+               tkl_comments.parent_user_email
+        from tkl_comments
+        where tkl_comments.user_email = :user_email
+        order by tkl_comments.create_time desc
+        """
+
+    @staticmethod
+    def get_user_info():
+        return """
+        select
+               tkl_user.icon,
+               tkl_user.nick_name,
+               tkl_user_grade.value,
+               tkl_user_post_statistics.post_count,
+               tkl_user_post_statistics.comment_count
+        from tkl_user
+        left join tkl_user_post_statistics on tkl_user.email = tkl_user_post_statistics.user_email
+        left join tkl_user_grade on tkl_user.grade = tkl_user_grade.id
+        where email = :user_email
+        """

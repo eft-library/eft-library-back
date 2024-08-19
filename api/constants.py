@@ -40,6 +40,8 @@ class Message(Enum):
     ARM_BAND_NOT_FOUND = "Arm band not found"
     HIDEOUT_NOT_FOUND = "Hideout not found"
     USER_ADD_FAIL = "User add fail"
+    GET_USER_POST_DETAIL_FAIL = "Get user post detail fail"
+    GET_USER_COMMENT_DETAIL_FAIL = "Get user comment detail fail"
     USER_DELETE_FAIL = "User delete fail"
     INVALID_USER = "Invalid User"
     SUCCESS_QUEST_FAIL = "Success quest fail"

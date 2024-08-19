@@ -46,3 +46,11 @@ class BanUser(BaseModel):
     admin_email: str
     ban_reason: str
     user_email: str
+
+
+class UserPostCommentDetail(BaseModel):
+    """
+    사용자 작성글 또는 댓글 조회
+    """
+
+    user_email: str
