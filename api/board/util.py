@@ -18,7 +18,8 @@ class BoardUtil:
                combined.update_time,
                combined.name_kr as type_kr,
                tkl_user.icon,
-               tkl_user.nick_name
+               tkl_user.nick_name,
+               combined.comment_cnt
         FROM (
             SELECT board.id,
                    board.type,
@@ -30,12 +31,15 @@ class BoardUtil:
                    board.like_count,
                    board.view_count,
                    board.update_time,
-                   tkl_board_type.name_kr
+                   tkl_board_type.name_kr,
+                   count(tkl_comments.id) as comment_cnt
             FROM (
                 {union_all_query}
             ) as board
             {join_clause}
             LEFT JOIN tkl_board_type ON board.type = tkl_board_type.value
+            LEFT join tkl_comments on board.id = tkl_comments.board_id
+            group by board.id, board.type, board.create_time, board.title, board.contents, board.thumbnail, board.writer, board.like_count, board.view_count, board.update_time, tkl_board_type.name_kr
         ) as combined
         LEFT JOIN tkl_user ON combined.writer = tkl_user.email
         {where_clause}
