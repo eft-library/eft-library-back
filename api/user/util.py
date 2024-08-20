@@ -239,7 +239,8 @@ class UserUtil:
                tkl_user_post_statistics.post_count,
                tkl_user_post_statistics.comment_count,
                tkl_user_ban.ban_reason,
-               tkl_user_ban.ban_end_time
+               tkl_user_ban.ban_end_time,
+               tkl_user.attendance_count
         from tkl_user
         left join tkl_user_post_statistics on tkl_user.email = tkl_user_post_statistics.user_email
         left join tkl_user_grade on tkl_user.grade = tkl_user_grade.id
