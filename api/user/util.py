@@ -97,9 +97,11 @@ class UserUtil:
                        tkl_board_pvp.type,
                        tkl_board_pvp.create_time,
                        tkl_board_pvp.update_time,
-                       count(tkl_comments.id) as comment_cnt
+                       count(tkl_comments.id) as comment_cnt,
+                       tkl_board_type.name_kr as type_kr
                 from tkl_board_pvp
                          left join tkl_comments on tkl_board_pvp.id = tkl_comments.board_id
+                         left join tkl_board_type on tkl_board_pvp.type = tkl_board_type.value
                 where writer = :email
                   and tkl_comments.is_delete_by_user = false
                   and tkl_comments.is_delete_by_admin = false
@@ -115,9 +117,11 @@ class UserUtil:
                        tkl_board_pve.type,
                        tkl_board_pve.create_time,
                        tkl_board_pve.update_time,
-                       count(tkl_comments.id) as comment_cnt
+                       count(tkl_comments.id) as comment_cnt,
+                       tkl_board_type.name_kr as type_kr
                 from tkl_board_pve
                          left join tkl_comments on tkl_board_pve.id = tkl_comments.board_id
+                         left join tkl_board_type on tkl_board_pve.type = tkl_board_type.value
                 where writer = :email
                   and tkl_comments.is_delete_by_user = false
                   and tkl_comments.is_delete_by_admin = false
@@ -133,9 +137,11 @@ class UserUtil:
                        tkl_board_tip.type,
                        tkl_board_tip.create_time,
                        tkl_board_tip.update_time,
-                       count(tkl_comments.id) as comment_cnt
+                       count(tkl_comments.id) as comment_cnt,
+                       tkl_board_type.name_kr as type_kr
                 from tkl_board_tip
                          left join tkl_comments on tkl_board_tip.id = tkl_comments.board_id
+                         left join tkl_board_type on tkl_board_tip.type = tkl_board_type.value
                 where writer = :email
                 group by tkl_board_tip.id
                 union all
@@ -149,9 +155,11 @@ class UserUtil:
                        tkl_board_arena.type,
                        tkl_board_arena.create_time,
                        tkl_board_arena.update_time,
-                       count(tkl_comments.id) as comment_cnt
+                       count(tkl_comments.id) as comment_cnt,
+                       tkl_board_type.name_kr as type_kr
                 from tkl_board_arena
                          left join tkl_comments on tkl_board_arena.id = tkl_comments.board_id
+                         left join tkl_board_type on tkl_board_arena.type = tkl_board_type.value
                 where writer = :email
                 group by tkl_board_arena.id
                 union all
@@ -165,9 +173,11 @@ class UserUtil:
                        tkl_board_forum.type,
                        tkl_board_forum.create_time,
                        tkl_board_forum.update_time,
-                       count(tkl_comments.id) as comment_cnt
+                       count(tkl_comments.id) as comment_cnt,
+                       tkl_board_type.name_kr as type_kr
                 from tkl_board_forum
                          left join tkl_comments on tkl_board_forum.id = tkl_comments.board_id
+                         left join tkl_board_type on tkl_board_forum.type = tkl_board_type.value
                 where writer = :email
                 group by tkl_board_forum.id
                 union all
@@ -181,9 +191,11 @@ class UserUtil:
                        tkl_board_question.type,
                        tkl_board_question.create_time,
                        tkl_board_question.update_time,
-                       count(tkl_comments.id) as comment_cnt
+                       count(tkl_comments.id) as comment_cnt,
+                       tkl_board_type.name_kr as type_kr
                 from tkl_board_question
                          left join tkl_comments on tkl_board_question.id = tkl_comments.board_id
+                         left join tkl_board_type on tkl_board_question.type = tkl_board_type.value
                 where writer = :email
                 group by tkl_board_question.id
                 ORDER BY create_time DESC
