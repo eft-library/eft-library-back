@@ -10,6 +10,7 @@ from api.board.board_res_models import (
     PostDisLike,
     BoardReport,
     DeleteBoard,
+    TrashBoard,
 )
 from api.board.board_req_models import AddPost, ReportBoard
 from datetime import datetime
@@ -27,6 +28,7 @@ class BoardFunction:
             "question": QuestionBoard,
             "tip": TipBoard,
             "forum": ForumBoard,
+            "trash": TrashBoard,
         }
         board_class = board_classes.get(board_type, ForumBoard)
         return board_class
@@ -41,23 +43,10 @@ class BoardFunction:
             "writer": user_email,
             "view_count": 0,
             "create_time": datetime.now(),
+            "thumbnail": BoardFunction._extract_thumbnail_img(addPost.contents),
+            "like_count": 0,
+            "type": addPost.type,
         }
-
-        # 유형에 따라 추가 필드를 설정
-        if addPost.type in [
-            "arena",
-            "pvp",
-            "pve",
-            "question",
-            "tip",
-            "forum",
-        ]:
-            specific_fields = {
-                "thumbnail": BoardFunction._extract_thumbnail_img(addPost.contents),
-                "like_count": 0,
-                "type": addPost.type,
-            }
-            common_fields.update(specific_fields)
 
         # 선택한 클래스에 따라 객체를 생성
         board_class = BoardFunction._get_post_type(addPost.type)  # 기본값은 ForumBoard
@@ -183,6 +172,8 @@ class BoardFunction:
             return "SELECT id, contents, title, writer  FROM tkl_board_question"
         elif "tip" == board_type:
             return "SELECT id, contents, title, writer  FROM tkl_board_tip"
+        elif "trash" == board_type:
+            return "SELECT id, contents, title, writer  FROM tkl_board_trash"
         else:
             return """
                     SELECT id, contents, title, writer  FROM tkl_board_forum
@@ -220,6 +211,8 @@ class BoardFunction:
             return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_question"
         elif "tip" == board_type:
             return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_tip"
+        elif "trash" == board_type:
+            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_trash"
         else:
             return """
                 SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_forum

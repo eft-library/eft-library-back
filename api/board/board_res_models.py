@@ -23,6 +23,26 @@ class ForumBoard(DataBaseConnector.Base):
     type_kr = relationship("BoardType", backref="forum")
 
 
+class TrashBoard(DataBaseConnector.Base):
+    """
+    Trash
+    """
+
+    __tablename__ = "tkl_board_trash"
+
+    id = Column(TEXT, primary_key=True)
+    title = Column(TEXT)
+    contents = Column(TEXT)
+    thumbnail = Column(TEXT)
+    writer = Column(TEXT)
+    like_count = Column(Integer)
+    view_count = Column(Integer)
+    type = Column(TEXT, ForeignKey("tkl_board_type.value"))
+    create_time = Column(TIMESTAMP)
+    update_time = Column(TIMESTAMP)
+    type_kr = relationship("BoardType", backref="trash")
+
+
 class TipBoard(DataBaseConnector.Base):
     """
     Tip
