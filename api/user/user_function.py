@@ -222,3 +222,7 @@ class UserFunction:
             ),
         }
         return user_data
+
+    @staticmethod
+    def _get_max_pages(total_count, page_size):
+        return (total_count // page_size) + (1 if total_count % page_size > 0 else 0)

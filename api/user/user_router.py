@@ -30,8 +30,12 @@ def add_user(addUserReq: AddUserReq):
 
 
 @router.post("/post_detail")
-def get_user_post_detail(userPostCommentDetail: UserPostCommentDetail):
-    result = UserService.get_user_post_detail(userPostCommentDetail.user_email)
+def get_user_post_detail(
+    userPostCommentDetail: UserPostCommentDetail, page: int, page_size: int
+):
+    result = UserService.get_user_post_detail(
+        userPostCommentDetail.user_email, page, page_size
+    )
     if result is None:
         return CustomResponse.response(
             None, HTTPCode.OK, Message.GET_USER_POST_DETAIL_FAIL
@@ -40,8 +44,12 @@ def get_user_post_detail(userPostCommentDetail: UserPostCommentDetail):
 
 
 @router.post("/comment_detail")
-def get_user_comment_detail(userPostCommentDetail: UserPostCommentDetail):
-    result = UserService.get_user_comment_detail(userPostCommentDetail.user_email)
+def get_user_comment_detail(
+    userPostCommentDetail: UserPostCommentDetail, page: int, page_size: int
+):
+    result = UserService.get_user_comment_detail(
+        userPostCommentDetail.user_email, page, page_size
+    )
     if result is None:
         return CustomResponse.response(
             None, HTTPCode.OK, Message.GET_USER_COMMENT_DETAIL_FAIL

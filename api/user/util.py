@@ -115,6 +115,35 @@ class UserUtil:
                 """
 
     @staticmethod
+    def get_user_post_detail_max_count():
+        return """
+        select count(*)
+        from (select tkl_board_pvp.id
+              from tkl_board_pvp
+              where writer = :user_email
+              union all
+              select id
+              from tkl_board_pve
+              where writer = :user_email
+              union all
+              select tkl_board_tip.id
+              from tkl_board_tip
+              where writer = :user_email
+              union all
+              select tkl_board_arena.id
+              from tkl_board_arena
+              where writer = :user_email
+              union all
+              select tkl_board_forum.id
+              from tkl_board_forum
+              where writer = :user_email
+              union all
+              select tkl_board_question.id
+              from tkl_board_question
+              where writer = :user_email) as post
+        """
+
+    @staticmethod
     def get_user_post_detail():
         return """
         select post.id,
@@ -205,6 +234,15 @@ class UserUtil:
               from tkl_board_question
               where writer = :user_email) as post
         ORDER BY post.create_time DESC
+        LIMIT :limit OFFSET :offset
+        """
+
+    @staticmethod
+    def get_user_comment_detail_max_count():
+        return """
+        select count(*)
+        from tkl_comments
+        where tkl_comments.user_email = :user_email
         """
 
     @staticmethod
@@ -244,6 +282,7 @@ class UserUtil:
         left join tkl_board_question on tkl_comments.board_id = tkl_board_question.id
         where tkl_comments.user_email = :user_email
         order by tkl_comments.create_time desc
+        LIMIT :limit OFFSET :offset
         """
 
     @staticmethod
