@@ -64,7 +64,7 @@ class CommentService:
                 )
                 offset = (page - 1) * page_size
 
-                where_clause = CommentFunction._comment_where_clause(False)
+                where_clause = CommentUtil.comment_where_clause(False)
                 query = CommentUtil.get_comment_query()
                 query = query.format(where_clause=where_clause)
                 query = text(query)
@@ -185,7 +185,7 @@ class CommentService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                where_clause = CommentFunction._comment_where_clause(True)
+                where_clause = CommentUtil.comment_where_clause(True)
                 query = CommentUtil.get_comment_query()
                 query = query.format(where_clause=where_clause)
                 query = text(query)
@@ -227,7 +227,7 @@ class CommentService:
                     s.query(Comments).filter(Comments.board_id == board_id).count()
                 )
 
-                where_clause = CommentFunction._comment_where_clause(False)
+                where_clause = CommentUtil.comment_where_clause(False)
                 query = CommentUtil.get_comment_query()
                 query = query.format(where_clause=where_clause)
                 query = text(query)

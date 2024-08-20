@@ -1,12 +1,9 @@
-from sqlalchemy import text
-
 from api.user.user_req_models import AddUserReq, BanUser
 from database import DataBaseConnector
 from dotenv import load_dotenv
 import os
 import uuid
 from api.user.user_function import UserFunction
-from api.user.util import UserUtil
 
 load_dotenv()
 
@@ -112,36 +109,10 @@ class UserService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                cnt_params = {"user_email": user_email}
-                max_cnt_query = text(UserUtil.get_user_post_detail_max_count())
-                offset = (page - 1) * page_size
-                result = s.execute(max_cnt_query, cnt_params)
-                real_total_count = result.scalar()
-                max_pages = UserFunction._get_max_pages(real_total_count, page_size)
-
-                posts_query = UserUtil.get_user_post_detail()
-                posts_query = text(posts_query)
-                posts_param = {
-                    "limit": page_size,
-                    "offset": offset,
-                    "user_email": user_email,
-                }
-                posts = s.execute(posts_query, posts_param)
-                posts = [dict(row) for row in posts.mappings()]
-
-                user_query = UserUtil.get_user_info()
-                user_query = text(user_query)
-                user_param = {"user_email": user_email}
-                user_info = s.execute(user_query, user_param)
-                user_info = user_info.mappings().fetchone()
-
-                return {
-                    "data": posts,
-                    "user_info": user_info,
-                    "total_count": real_total_count,
-                    "max_pages": max_pages,
-                    "current_page": page,
-                }
+                user_post_detail = UserFunction._get_user_post_detail(
+                    s, user_email, page, page_size
+                )
+                return user_post_detail
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -151,36 +122,10 @@ class UserService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                cnt_params = {"user_email": user_email}
-                max_cnt_query = text(UserUtil.get_user_comment_detail_max_count())
-                offset = (page - 1) * page_size
-                result = s.execute(max_cnt_query, cnt_params)
-                real_total_count = result.scalar()
-                max_pages = UserFunction._get_max_pages(real_total_count, page_size)
-
-                comments_query = UserUtil.get_user_comment_detail()
-                comments_query = text(comments_query)
-                comments_param = {
-                    "limit": page_size,
-                    "offset": offset,
-                    "user_email": user_email,
-                }
-                comments = s.execute(comments_query, comments_param)
-                comments = [dict(row) for row in comments.mappings()]
-
-                user_query = UserUtil.get_user_info()
-                user_query = text(user_query)
-                user_param = {"user_email": user_email}
-                user_info = s.execute(user_query, user_param)
-                user_info = user_info.mappings().fetchone()
-
-                return {
-                    "data": comments,
-                    "user_info": user_info,
-                    "total_count": real_total_count,
-                    "max_pages": max_pages,
-                    "current_page": page,
-                }
+                user_comment_detail = UserFunction._get_user_comment_detail(
+                    s, user_email, page, page_size
+                )
+                return user_comment_detail
         except Exception as e:
             print("오류 발생:", e)
             return None
