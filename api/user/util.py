@@ -278,7 +278,10 @@ class UserUtil:
                        WHEN tkl_comments.board_type = 'question' THEN tkl_board_question.title
                    END,
                    '삭제된 게시글'
-               ) AS title
+               ) AS title,
+               tua.nick_name as parent_nick_name,
+               tub.icon,
+               tub.nick_name
         from tkl_comments
         left join tkl_board_tip on tkl_comments.board_id = tkl_board_tip.id
         left join tkl_board_arena on tkl_comments.board_id = tkl_board_arena.id
@@ -286,6 +289,8 @@ class UserUtil:
         left join tkl_board_pve on tkl_comments.board_id = tkl_board_pve.id
         left join tkl_board_forum on tkl_comments.board_id = tkl_board_forum.id
         left join tkl_board_question on tkl_comments.board_id = tkl_board_question.id
+        left join tkl_user tua on tkl_comments.parent_user_email = tua.email
+        left join tkl_user tub on tkl_comments.user_email = tub.email
         where tkl_comments.user_email = :user_email
         order by tkl_comments.create_time desc
         LIMIT :limit OFFSET :offset
