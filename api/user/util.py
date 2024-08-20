@@ -223,8 +223,25 @@ class UserUtil:
                tkl_comments.is_delete_by_user,
                tkl_comments.like_count,
                tkl_comments.dislike_count,
-               tkl_comments.parent_user_email
+               tkl_comments.parent_user_email,
+               COALESCE(
+                   CASE
+                       WHEN tkl_comments.board_type = 'forum' THEN tkl_board_forum.title
+                       WHEN tkl_comments.board_type = 'arena' THEN tkl_board_arena.title
+                       WHEN tkl_comments.board_type = 'tip' THEN tkl_board_tip.title
+                       WHEN tkl_comments.board_type = 'pvp' THEN tkl_board_pvp.title
+                       WHEN tkl_comments.board_type = 'pve' THEN tkl_board_pve.title
+                       WHEN tkl_comments.board_type = 'question' THEN tkl_board_question.title
+                   END,
+                   '삭제된 게시글'
+               ) AS dynamic_column
         from tkl_comments
+        left join tkl_board_tip on tkl_comments.board_id = tkl_board_tip.id
+        left join tkl_board_arena on tkl_comments.board_id = tkl_board_arena.id
+        left join tkl_board_pvp on tkl_comments.board_id = tkl_board_pvp.id
+        left join tkl_board_pve on tkl_comments.board_id = tkl_board_pve.id
+        left join tkl_board_forum on tkl_comments.board_id = tkl_board_forum.id
+        left join tkl_board_question on tkl_comments.board_id = tkl_board_question.id
         where tkl_comments.user_email = :user_email
         order by tkl_comments.create_time desc
         """
