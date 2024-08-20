@@ -246,7 +246,8 @@ class UserUtil:
                post.update_time,
                tkl_user.nick_name,
                tkl_user.icon,
-               count(tkl_comments.board_id) as comment_cnt
+               count(tkl_comments.board_id) as comment_cnt,
+               tkl_board_type.name_kr as type_kr
         from (select tkl_board_pvp.id,
                      tkl_board_pvp.title,
                      tkl_board_pvp.contents,
@@ -326,7 +327,8 @@ class UserUtil:
               where writer = :user_email) as post
         left join tkl_user on post.writer = tkl_user.email
         left join tkl_comments on post.id = tkl_comments.board_id
-        group by tkl_user.icon, tkl_user.nick_name, post.title, post.contents, post.thumbnail, post.writer, post.like_count, post.view_count, post.type, post.create_time, post.update_time, post.id, tkl_user.icon
+        left join tkl_board_type on post.type = tkl_board_type.value
+        group by tkl_user.icon, tkl_user.nick_name, post.title, post.contents, post.thumbnail, post.writer, post.like_count, post.view_count, post.type, post.create_time, post.update_time, post.id, tkl_user.icon, tkl_board_type.name_kr
         ORDER BY post.create_time DESC
         LIMIT :limit OFFSET :offset
         """
