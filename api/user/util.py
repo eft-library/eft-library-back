@@ -155,7 +155,10 @@ class UserUtil:
                post.view_count,
                post.type,
                post.create_time,
-               post.update_time
+               post.update_time,
+               tkl_user.nick_name,
+               tkl_user.icon,
+               count(tkl_comments.board_id) as comment_cnt
         from (select tkl_board_pvp.id,
                      tkl_board_pvp.title,
                      tkl_board_pvp.contents,
@@ -233,6 +236,9 @@ class UserUtil:
                      tkl_board_question.update_time
               from tkl_board_question
               where writer = :user_email) as post
+        left join tkl_user on post.writer = tkl_user.email
+        left join tkl_comments on post.id = tkl_comments.board_id
+        group by tkl_user.icon, tkl_user.nick_name, post.title, post.contents, post.thumbnail, post.writer, post.like_count, post.view_count, post.type, post.create_time, post.update_time, post.id, tkl_user.icon
         ORDER BY post.create_time DESC
         LIMIT :limit OFFSET :offset
         """
@@ -272,7 +278,7 @@ class UserUtil:
                        WHEN tkl_comments.board_type = 'question' THEN tkl_board_question.title
                    END,
                    '삭제된 게시글'
-               ) AS dynamic_column
+               ) AS title
         from tkl_comments
         left join tkl_board_tip on tkl_comments.board_id = tkl_board_tip.id
         left join tkl_board_arena on tkl_comments.board_id = tkl_board_arena.id
