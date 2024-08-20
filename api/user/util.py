@@ -105,7 +105,7 @@ class UserUtil:
                 where writer = :email
                   and tkl_comments.is_delete_by_user = false
                   and tkl_comments.is_delete_by_admin = false
-                group by tkl_board_pvp.id
+                group by tkl_board_pvp.id, tkl_board_type.name_kr, tkl_board_type.name_kr
                 union all
                 select tkl_board_pve.id,
                        tkl_board_pve.title,
@@ -125,7 +125,7 @@ class UserUtil:
                 where writer = :email
                   and tkl_comments.is_delete_by_user = false
                   and tkl_comments.is_delete_by_admin = false
-                group by tkl_board_pve.id
+                group by tkl_board_pve.id, tkl_board_type.name_kr
                 union all
                 select tkl_board_tip.id,
                        tkl_board_tip.title,
@@ -143,7 +143,7 @@ class UserUtil:
                          left join tkl_comments on tkl_board_tip.id = tkl_comments.board_id
                          left join tkl_board_type on tkl_board_tip.type = tkl_board_type.value
                 where writer = :email
-                group by tkl_board_tip.id
+                group by tkl_board_tip.id, tkl_board_type.name_kr
                 union all
                 select tkl_board_arena.id,
                        tkl_board_arena.title,
@@ -161,7 +161,7 @@ class UserUtil:
                          left join tkl_comments on tkl_board_arena.id = tkl_comments.board_id
                          left join tkl_board_type on tkl_board_arena.type = tkl_board_type.value
                 where writer = :email
-                group by tkl_board_arena.id
+                group by tkl_board_arena.id, tkl_board_type.name_kr
                 union all
                 select tkl_board_forum.id,
                        tkl_board_forum.title,
@@ -179,7 +179,7 @@ class UserUtil:
                          left join tkl_comments on tkl_board_forum.id = tkl_comments.board_id
                          left join tkl_board_type on tkl_board_forum.type = tkl_board_type.value
                 where writer = :email
-                group by tkl_board_forum.id
+                group by tkl_board_forum.id, tkl_board_type.name_kr
                 union all
                 select tkl_board_question.id,
                        tkl_board_question.title,
@@ -197,7 +197,7 @@ class UserUtil:
                          left join tkl_comments on tkl_board_question.id = tkl_comments.board_id
                          left join tkl_board_type on tkl_board_question.type = tkl_board_type.value
                 where writer = :email
-                group by tkl_board_question.id
+                group by tkl_board_question.id, tkl_board_type.name_kr
                 ORDER BY create_time DESC
                 LIMIT 5
                 """
