@@ -109,7 +109,7 @@ class CommentUtil:
     def comment_where_clause(is_issue: bool):
         if is_issue:
             return """
-                WHERE ct.like_count > 2
+                WHERE ct.like_count > 2 AND ct.is_delete_by_admin = false AND ct.is_delete_by_user = false
                 ORDER BY
                     ct.like_count desc, ct.path
                 LIMIT 3;
