@@ -17,7 +17,8 @@ class SearchUtil:
                     select '/map/' || id as tkl_link
                     from tkl_map_parent
                     union all
-                    select '/boss' as tkl_link
+                    select '/boss/' || id as tkl_link
+                    from tkl_boss
                     union all
                     select '/hideout' as tkl_link
                     union all
