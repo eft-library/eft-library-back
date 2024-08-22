@@ -8,7 +8,9 @@ class SearchUtil:
                     select '/map-of-tarkov/' || id as tkl_link
                     from tkl_map_parent
                     union all
-                    select '/privacy-policy' as tkl_link
+                    select '/privacy-policy-kr' as tkl_link
+                    union all
+                    select '/privacy-policy-en' as tkl_link
                     union all
                     select '/terms' as tkl_link
                     union all
@@ -26,84 +28,33 @@ class SearchUtil:
                     union all
                     select '/weapon' as tkl_link
                     union all
-                    select '/weapon?id=' || id as tkl_link
-                    from tkl_weapon
-                    union all
-                    select '/weapon?id=' || id as tkl_link
-                    from tkl_throwable
-                    union all
-                    select '/weapon?id=' || id as tkl_link
-                    from tkl_knife
-                    union all
                     select '/ammo' as tkl_link
-                    union all
-                    select '/ammo?id=' || id as tkl_link
-                    from tkl_ammo
                     union all
                     select '/head-wear' as tkl_link
                     union all
-                    select '/head-wear?id=' || id as tkl_link
-                    from tkl_headwear
-                    union all
                     select '/rig' as tkl_link
-                    union all
-                    select '/rig?id=' || id as tkl_link
-                    from tkl_rig
                     union all
                     select '/armor-vest' as tkl_link
                     union all
-                    select '/armor-vest?id=' || id as tkl_link
-                    from tkl_armor_vest
-                    union all
                     select '/headset' as tkl_link
-                    union all
-                    select '/headset?id=' || id as tkl_link
-                    from tkl_headset
                     union all
                     select '/backpack' as tkl_link
                     union all
-                    select '/backpack?id=' || id as tkl_link
-                    from tkl_backpack
-                    union all
                     select '/medical' as tkl_link
-                    union all
-                    select '/medical?id=' || id as tkl_link
-                    from tkl_medical
                     union all
                     select '/container' as tkl_link
                     union all
-                    select '/container?id=' || id as tkl_link
-                    from tkl_container
-                    union all
                     select '/key' as tkl_link
-                    union all
-                    select '/key?id=' || id as tkl_link
-                    from tkl_key
                     union all
                     select '/provisions' as tkl_link
                     union all
-                    select '/provisions?id=' || id as tkl_link
-                    from tkl_provisions
-                    union all
                     select '/loot' as tkl_link
-                    union all
-                    select '/loot?id=' || id as tkl_link
-                    from tkl_loot
                     union all
                     select '/face-cover' as tkl_link
                     union all
-                    select '/face-cover?id=' || id as tkl_link
-                    from tkl_face_cover
-                    union all
                     select '/arm-band' as tkl_link
                     union all
-                    select '/arm-band?id=' || id as tkl_link
-                    from tkl_arm_band
-                    union all
                     select '/glasses' as tkl_link
-                    union all
-                    select '/glasses?id=' || id as tkl_link
-                    from tkl_glasses
                     union all
                     select '/notice/detail/' || id as tkl_link
                     from tkl_notice
