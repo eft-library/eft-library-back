@@ -34,7 +34,7 @@ class BoardUtil:
                    tkl_board_type.name_kr,
                    count(tkl_comments.id) as comment_cnt
             FROM (
-                {union_all_query}
+                {union_clause}
             ) as board
             {join_clause}
             LEFT JOIN tkl_board_type ON board.type = tkl_board_type.value
@@ -67,30 +67,9 @@ class BoardUtil:
         직상힌 글 전체 개수
         """
         return """
-                select count(*)
-                from (select *
-                      from tkl_board_pvp
-                      where writer = :email
-                      union all
-                      select *
-                      from tkl_board_pve
-                      where writer = :email
-                      union all
-                      select *
-                      from tkl_board_tip
-                      where writer = :email
-                      union all
-                      select *
-                      from tkl_board_arena
-                      where writer = :email
-                      union all
-                      select *
-                      from tkl_board_forum
-                      where writer = :email
-                      union all
-                      select *
-                      from tkl_board_question
-                      where writer = :email) as a
+                select count(*) 
+                from tkl_board_union
+                where writer = :email
                 """
 
     @staticmethod
@@ -101,27 +80,7 @@ class BoardUtil:
 
         return """
                 select *
-                from tkl_board_pvp
-                where writer = :email
-                union all
-                select *
-                from tkl_board_pve
-                where writer = :email
-                union all
-                select *
-                from tkl_board_tip
-                where writer = :email
-                union all
-                select *
-                from tkl_board_arena
-                where writer = :email
-                union all
-                select *
-                from tkl_board_forum
-                where writer = :email
-                union all
-                select *
-                from tkl_board_question
+                from tkl_board_union
                 where writer = :email
                 ORDER BY create_time DESC
                 LIMIT :limit OFFSET :offset
@@ -129,34 +88,19 @@ class BoardUtil:
 
     @staticmethod
     def get_post_count_query(board_type: str):
-        if "forum" == board_type:
-            return "SELECT id, contents, title, writer FROM tkl_board_forum"
-        elif "arena" == board_type:
-            return "SELECT id, contents, title, writer  FROM tkl_board_arena"
-        elif "pve" == board_type:
-            return "SELECT id, contents, title, writer  FROM tkl_board_pve"
-        elif "pvp" == board_type:
-            return "SELECT id, contents, title, writer  FROM tkl_board_pvp"
-        elif "question" == board_type:
-            return "SELECT id, contents, title, writer  FROM tkl_board_question"
-        elif "tip" == board_type:
-            return "SELECT id, contents, title, writer  FROM tkl_board_tip"
-        elif "trash" == board_type:
-            return "SELECT id, contents, title, writer  FROM tkl_board_trash"
+        board_type_list = ["forum", "arena", "pvp", "pve", "question", "tip"]
+        if board_type in board_type_list:
+            return f"SELECT id, contents, title, writer FROM tkl_board_union where type = '{board_type}'"
         else:
-            return """
-                    SELECT id, contents, title, writer  FROM tkl_board_forum
-                    UNION ALL
-                    SELECT id, contents, title, writer  FROM tkl_board_arena
-                    UNION ALL
-                    SELECT id, contents, title, writer  FROM tkl_board_pve
-                    UNION ALL
-                    SELECT id, contents, title, writer  FROM tkl_board_pvp
-                    UNION ALL
-                    SELECT id, contents, title, writer  FROM tkl_board_question
-                    UNION ALL
-                    SELECT id, contents, title, writer  FROM tkl_board_tip
-                """
+            return "SELECT id, contents, title, writer FROM tkl_board_union"
+
+    @staticmethod
+    def get_post_query(board_type: str):
+        board_type_list = ["forum", "arena", "pvp", "pve", "question", "tip"]
+        if board_type in board_type_list:
+            return f"SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_union where type = '{board_type}'"
+        else:
+            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_union"
 
     @staticmethod
     def get_post_count_issue_clause(issue: bool):
@@ -165,37 +109,6 @@ class BoardUtil:
             if issue
             else ""
         )
-
-    @staticmethod
-    def get_post_query(board_type: str):
-        if "forum" == board_type:
-            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_forum"
-        elif "arena" == board_type:
-            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_arena"
-        elif "pve" == board_type:
-            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pve"
-        elif "pvp" == board_type:
-            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pvp"
-        elif "question" == board_type:
-            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_question"
-        elif "tip" == board_type:
-            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_tip"
-        elif "trash" == board_type:
-            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_trash"
-        else:
-            return """
-                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_forum
-                UNION ALL
-                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_arena
-                UNION ALL
-                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pve
-                UNION ALL
-                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_pvp
-                UNION ALL
-                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_question
-                UNION ALL
-                SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_tip
-            """
 
     @staticmethod
     def get_post_issue_clause(issue: bool):

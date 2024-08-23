@@ -87,274 +87,83 @@ class UserUtil:
         """
 
         return """
-                select tkl_board_pvp.id,
-                       tkl_board_pvp.title,
-                       tkl_board_pvp.contents,
-                       tkl_board_pvp.thumbnail,
-                       tkl_board_pvp.writer,
-                       tkl_board_pvp.like_count,
-                       tkl_board_pvp.view_count,
-                       tkl_board_pvp.type,
-                       tkl_board_pvp.create_time,
-                       tkl_board_pvp.update_time,
+                select tkl_board_union.id,
+                       tkl_board_union.title,
+                       tkl_board_union.contents,
+                       tkl_board_union.thumbnail,
+                       tkl_board_union.writer,
+                       tkl_board_union.like_count,
+                       tkl_board_union.view_count,
+                       tkl_board_union.type,
+                       tkl_board_union.create_time,
+                       tkl_board_union.update_time,
                        count(tkl_comments.id) as comment_cnt,
                        tkl_board_type.name_kr as type_kr
-                from tkl_board_pvp
-                         left join tkl_comments on tkl_board_pvp.id = tkl_comments.board_id
-                         left join tkl_board_type on tkl_board_pvp.type = tkl_board_type.value
+                from tkl_board_union
+                         left join tkl_comments on tkl_board_union.id = tkl_comments.board_id
+                         left join tkl_board_type on tkl_board_union.type = tkl_board_type.value
                 where writer = :email
-                  and tkl_comments.is_delete_by_user = false
-                  and tkl_comments.is_delete_by_admin = false
-                group by tkl_board_pvp.id, tkl_board_type.name_kr, tkl_board_type.name_kr
-                union all
-                select tkl_board_pve.id,
-                       tkl_board_pve.title,
-                       tkl_board_pve.contents,
-                       tkl_board_pve.thumbnail,
-                       tkl_board_pve.writer,
-                       tkl_board_pve.like_count,
-                       tkl_board_pve.view_count,
-                       tkl_board_pve.type,
-                       tkl_board_pve.create_time,
-                       tkl_board_pve.update_time,
-                       count(tkl_comments.id) as comment_cnt,
-                       tkl_board_type.name_kr as type_kr
-                from tkl_board_pve
-                         left join tkl_comments on tkl_board_pve.id = tkl_comments.board_id
-                         left join tkl_board_type on tkl_board_pve.type = tkl_board_type.value
-                where writer = :email
-                  and tkl_comments.is_delete_by_user = false
-                  and tkl_comments.is_delete_by_admin = false
-                group by tkl_board_pve.id, tkl_board_type.name_kr
-                union all
-                select tkl_board_tip.id,
-                       tkl_board_tip.title,
-                       tkl_board_tip.contents,
-                       tkl_board_tip.thumbnail,
-                       tkl_board_tip.writer,
-                       tkl_board_tip.like_count,
-                       tkl_board_tip.view_count,
-                       tkl_board_tip.type,
-                       tkl_board_tip.create_time,
-                       tkl_board_tip.update_time,
-                       count(tkl_comments.id) as comment_cnt,
-                       tkl_board_type.name_kr as type_kr
-                from tkl_board_tip
-                         left join tkl_comments on tkl_board_tip.id = tkl_comments.board_id
-                         left join tkl_board_type on tkl_board_tip.type = tkl_board_type.value
-                where writer = :email
-                group by tkl_board_tip.id, tkl_board_type.name_kr
-                union all
-                select tkl_board_arena.id,
-                       tkl_board_arena.title,
-                       tkl_board_arena.contents,
-                       tkl_board_arena.thumbnail,
-                       tkl_board_arena.writer,
-                       tkl_board_arena.like_count,
-                       tkl_board_arena.view_count,
-                       tkl_board_arena.type,
-                       tkl_board_arena.create_time,
-                       tkl_board_arena.update_time,
-                       count(tkl_comments.id) as comment_cnt,
-                       tkl_board_type.name_kr as type_kr
-                from tkl_board_arena
-                         left join tkl_comments on tkl_board_arena.id = tkl_comments.board_id
-                         left join tkl_board_type on tkl_board_arena.type = tkl_board_type.value
-                where writer = :email
-                group by tkl_board_arena.id, tkl_board_type.name_kr
-                union all
-                select tkl_board_forum.id,
-                       tkl_board_forum.title,
-                       tkl_board_forum.contents,
-                       tkl_board_forum.thumbnail,
-                       tkl_board_forum.writer,
-                       tkl_board_forum.like_count,
-                       tkl_board_forum.view_count,
-                       tkl_board_forum.type,
-                       tkl_board_forum.create_time,
-                       tkl_board_forum.update_time,
-                       count(tkl_comments.id) as comment_cnt,
-                       tkl_board_type.name_kr as type_kr
-                from tkl_board_forum
-                         left join tkl_comments on tkl_board_forum.id = tkl_comments.board_id
-                         left join tkl_board_type on tkl_board_forum.type = tkl_board_type.value
-                where writer = :email
-                group by tkl_board_forum.id, tkl_board_type.name_kr
-                union all
-                select tkl_board_question.id,
-                       tkl_board_question.title,
-                       tkl_board_question.contents,
-                       tkl_board_question.thumbnail,
-                       tkl_board_question.writer,
-                       tkl_board_question.like_count,
-                       tkl_board_question.view_count,
-                       tkl_board_question.type,
-                       tkl_board_question.create_time,
-                       tkl_board_question.update_time,
-                       count(tkl_comments.id) as comment_cnt,
-                       tkl_board_type.name_kr as type_kr
-                from tkl_board_question
-                         left join tkl_comments on tkl_board_question.id = tkl_comments.board_id
-                         left join tkl_board_type on tkl_board_question.type = tkl_board_type.value
-                where writer = :email
-                group by tkl_board_question.id, tkl_board_type.name_kr
-                ORDER BY create_time DESC
+                group by tkl_board_union.id, tkl_board_type.name_kr, tkl_board_union.title, tkl_board_union.contents,
+                         tkl_board_union.thumbnail, tkl_board_union.writer, tkl_board_union.like_count, tkl_board_union.view_count,
+                         tkl_board_union.type, tkl_board_union.create_time, tkl_board_union.update_time
+                ORDER BY tkl_board_union.create_time DESC
                 LIMIT 5
                 """
 
     @staticmethod
     def get_user_post_detail_max_count():
         return """
-        select count(*)
-        from (select tkl_board_pvp.id
-              from tkl_board_pvp
-              where writer = :user_email
-              union all
-              select id
-              from tkl_board_pve
-              where writer = :user_email
-              union all
-              select tkl_board_tip.id
-              from tkl_board_tip
-              where writer = :user_email
-              union all
-              select tkl_board_arena.id
-              from tkl_board_arena
-              where writer = :user_email
-              union all
-              select tkl_board_forum.id
-              from tkl_board_forum
-              where writer = :user_email
-              union all
-              select tkl_board_question.id
-              from tkl_board_question
-              where writer = :user_email) as post
+            select count(*)
+            from tkl_board_union
+            where writer = :user_email
         """
 
     @staticmethod
     def get_user_post_detail():
         return """
-        select post.id,
-               post.title,
-               post.contents,
-               post.thumbnail,
-               post.writer,
-               post.like_count,
-               post.view_count,
-               post.type,
-               post.create_time,
-               post.update_time,
-               tkl_user.nick_name,
-               tkl_user.icon,
-               count(tkl_comments.board_id) as comment_cnt,
-               tkl_board_type.name_kr as type_kr
-        from (select tkl_board_pvp.id,
-                     tkl_board_pvp.title,
-                     tkl_board_pvp.contents,
-                     tkl_board_pvp.thumbnail,
-                     tkl_board_pvp.writer,
-                     tkl_board_pvp.like_count,
-                     tkl_board_pvp.view_count,
-                     tkl_board_pvp.type,
-                     tkl_board_pvp.create_time,
-                     tkl_board_pvp.update_time
-              from tkl_board_pvp
-              where writer = :user_email
-              union all
-              select id,
-                     title,
-                     contents,
-                     thumbnail,
-                     writer,
-                     like_count,
-                     view_count,
-                     type,
-                     create_time,
-                     update_time
-              from tkl_board_pve
-              where writer = :user_email
-              union all
-              select tkl_board_tip.id,
-                     tkl_board_tip.title,
-                     tkl_board_tip.contents,
-                     tkl_board_tip.thumbnail,
-                     tkl_board_tip.writer,
-                     tkl_board_tip.like_count,
-                     tkl_board_tip.view_count,
-                     tkl_board_tip.type,
-                     tkl_board_tip.create_time,
-                     tkl_board_tip.update_time
-              from tkl_board_tip
-              where writer = :user_email
-              union all
-              select tkl_board_arena.id,
-                     tkl_board_arena.title,
-                     tkl_board_arena.contents,
-                     tkl_board_arena.thumbnail,
-                     tkl_board_arena.writer,
-                     tkl_board_arena.like_count,
-                     tkl_board_arena.view_count,
-                     tkl_board_arena.type,
-                     tkl_board_arena.create_time,
-                     tkl_board_arena.update_time
-              from tkl_board_arena
-              where writer = :user_email
-              union all
-              select tkl_board_forum.id,
-                     tkl_board_forum.title,
-                     tkl_board_forum.contents,
-                     tkl_board_forum.thumbnail,
-                     tkl_board_forum.writer,
-                     tkl_board_forum.like_count,
-                     tkl_board_forum.view_count,
-                     tkl_board_forum.type,
-                     tkl_board_forum.create_time,
-                     tkl_board_forum.update_time
-              from tkl_board_forum
-              where writer = :user_email
-              union all
-              select tkl_board_question.id,
-                     tkl_board_question.title,
-                     tkl_board_question.contents,
-                     tkl_board_question.thumbnail,
-                     tkl_board_question.writer,
-                     tkl_board_question.like_count,
-                     tkl_board_question.view_count,
-                     tkl_board_question.type,
-                     tkl_board_question.create_time,
-                     tkl_board_question.update_time
-              from tkl_board_question
-              where writer = :user_email) as post
-        left join tkl_user on post.writer = tkl_user.email
-        left join tkl_comments on post.id = tkl_comments.board_id
-        left join tkl_board_type on post.type = tkl_board_type.value
-        group by tkl_user.icon, tkl_user.nick_name, post.title, post.contents, post.thumbnail, post.writer, post.like_count, post.view_count, post.type, post.create_time, post.update_time, post.id, tkl_user.icon, tkl_board_type.name_kr
-        ORDER BY post.create_time DESC
-        LIMIT :limit OFFSET :offset
+            select tkl_board_union.id,
+                   tkl_board_union.title,
+                   tkl_board_union.contents,
+                   tkl_board_union.thumbnail,
+                   tkl_board_union.writer,
+                   tkl_board_union.like_count,
+                   tkl_board_union.view_count,
+                   tkl_board_union.type,
+                   tkl_board_union.create_time,
+                   tkl_board_union.update_time,
+                   tkl_user.nick_name,
+                   tkl_user.icon,
+                   count(tkl_comments.board_id) as comment_cnt,
+                   tkl_board_type.name_kr       as type_kr
+            from tkl_board_union
+                     left join tkl_user on tkl_board_union.writer = tkl_user.email
+                     left join tkl_comments on tkl_board_union.id = tkl_comments.board_id
+                     left join tkl_board_type on tkl_board_union.type = tkl_board_type.value
+            where writer = :user_email
+            group by tkl_user.icon, tkl_user.nick_name, tkl_board_union.title, tkl_board_union.contents,
+                     tkl_board_union.thumbnail, tkl_board_union.writer, tkl_board_union.like_count,
+                     tkl_board_union.view_count, tkl_board_union.type, tkl_board_union.create_time,
+                     tkl_board_union.update_time, tkl_board_union.id, tkl_user.icon, tkl_board_type.name_kr
+            ORDER BY tkl_board_union.create_time DESC
+            LIMIT :limit OFFSET :offset
         """
 
     @staticmethod
     def get_user_comment_detail_max_count():
         return """
-        select count(*)
-        from (select tkl_comments.id,
-                     CASE
-                         WHEN tkl_comments.board_type = 'forum' THEN tkl_board_forum.id
-                         WHEN tkl_comments.board_type = 'arena' THEN tkl_board_arena.id
-                         WHEN tkl_comments.board_type = 'tip' THEN tkl_board_tip.id
-                         WHEN tkl_comments.board_type = 'pvp' THEN tkl_board_pvp.id
-                         WHEN tkl_comments.board_type = 'pve' THEN tkl_board_pve.id
-                         WHEN tkl_comments.board_type = 'question' THEN tkl_board_question.id
-                         END AS post_id
-              from tkl_comments
-                       left join tkl_board_tip on tkl_comments.board_id = tkl_board_tip.id
-                       left join tkl_board_arena on tkl_comments.board_id = tkl_board_arena.id
-                       left join tkl_board_pvp on tkl_comments.board_id = tkl_board_pvp.id
-                       left join tkl_board_pve on tkl_comments.board_id = tkl_board_pve.id
-                       left join tkl_board_forum on tkl_comments.board_id = tkl_board_forum.id
-                       left join tkl_board_question on tkl_comments.board_id = tkl_board_question.id
-              where tkl_comments.user_email = :user_email and tkl_comments.is_delete_by_admin = false and tkl_comments.is_delete_by_user = false) as a
-        where a.post_id is not null
+        SELECT COUNT(*)
+        FROM (
+            SELECT tkl_comments.id,
+                   tkl_board_union.id AS post_id
+            FROM tkl_comments
+            LEFT JOIN tkl_board_union
+            ON tkl_comments.board_id = tkl_board_union.id
+               AND tkl_comments.board_type = tkl_board_union.type
+            WHERE tkl_comments.user_email = :user_email
+              AND tkl_comments.is_delete_by_admin = false
+              AND tkl_comments.is_delete_by_user = false
+        ) AS a
+        WHERE a.post_id IS NOT NULL;
         """
 
     @staticmethod
@@ -375,30 +184,18 @@ class UserUtil:
                tkl_comments.like_count,
                tkl_comments.dislike_count,
                tkl_comments.parent_user_email,
-               CASE
-                   WHEN tkl_comments.board_type = 'forum' THEN tkl_board_forum.title
-                   WHEN tkl_comments.board_type = 'arena' THEN tkl_board_arena.title
-                   WHEN tkl_comments.board_type = 'tip' THEN tkl_board_tip.title
-                   WHEN tkl_comments.board_type = 'pvp' THEN tkl_board_pvp.title
-                   WHEN tkl_comments.board_type = 'pve' THEN tkl_board_pve.title
-                   WHEN tkl_comments.board_type = 'question' THEN tkl_board_question.title
-               END AS title,
+               tkl_board_union.title,
                tua.nick_name as parent_nick_name,
                tub.icon,
                tub.nick_name
         from tkl_comments
-        left join tkl_board_tip on tkl_comments.board_id = tkl_board_tip.id
-        left join tkl_board_arena on tkl_comments.board_id = tkl_board_arena.id
-        left join tkl_board_pvp on tkl_comments.board_id = tkl_board_pvp.id
-        left join tkl_board_pve on tkl_comments.board_id = tkl_board_pve.id
-        left join tkl_board_forum on tkl_comments.board_id = tkl_board_forum.id
-        left join tkl_board_question on tkl_comments.board_id = tkl_board_question.id
+        left join tkl_board_union on tkl_comments.board_id = tkl_board_union.id
         left join tkl_user tua on tkl_comments.parent_user_email = tua.email
         left join tkl_user tub on tkl_comments.user_email = tub.email
         where tkl_comments.user_email = :user_email and tkl_comments.is_delete_by_admin = false and tkl_comments.is_delete_by_user = false 
         order by tkl_comments.create_time desc) as a
         where a.title is not null
-        LIMIT :limit OFFSET :offset
+        limit 5
         """
 
     @staticmethod

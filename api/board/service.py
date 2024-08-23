@@ -232,12 +232,12 @@ class BoardService:
                 max_pages = BoardFunction._get_max_pages(total_count, page_size)
 
                 # 실제 데이터 조회 쿼리
-                post_queries = BoardUtil.get_post_query(board_type)
+                union_clause = BoardUtil.get_post_query(board_type)
                 join_clause = BoardUtil.get_post_issue_clause(issue)
                 where_clause = BoardUtil.get_post_where_clause(search_type)
                 all_post_query = BoardUtil.get_post_query_v2()
                 all_post_query = all_post_query.format(
-                    union_all_query=post_queries,
+                    union_clause=union_clause,
                     join_clause=join_clause,
                     where_clause=where_clause,
                 )
