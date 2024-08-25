@@ -75,6 +75,7 @@ class BoardService:
                 if check_user:
                     new_post = BoardFunction._valid_post_type(addPost, user_email)
                     s.add(new_post)
+                    check_user.point += 20
                     s.commit()
                     return {"type": addPost.type}
 
@@ -374,6 +375,8 @@ class BoardService:
                     .first()
                 )
                 new_delete = BoardFunction._create_board_delete(post, user_email)
+                user = s.query(User).filter(User.email == user_email).first()
+                user.point -= post.like_count + 20
                 s.add(new_delete)
                 s.delete(post)
                 s.commit()

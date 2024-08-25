@@ -6,6 +6,7 @@ from api.comment.comment_res_models import (
     CommentLike,
     CommentDisLike,
 )
+from api.user.user_res_models import User
 from database import DataBaseConnector
 from api.comment.comment_req_models import (
     AddComment,
@@ -25,6 +26,8 @@ class CommentService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
+                user = s.query(User).filter(User.email == user_email).first()
+                user.point += 5
                 new_comment = CommentFunction._make_comment(addComment, user_email)
                 s.add(new_comment)
                 s.commit()
