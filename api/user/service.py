@@ -92,14 +92,40 @@ class UserService:
             return None
 
     @staticmethod
-    def user_ban(banUser: BanUser):
+    def user_ban(banUser: BanUser, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                new_ban_user = UserFunction._create_ban_user(banUser)
+                new_ban_user = UserFunction._create_ban_user(banUser, user_email)
                 s.add(new_ban_user)
                 s.commit()
                 return True
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_user_post_detail(user_email: str, page: int, page_size: int):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_post_detail = UserFunction._get_user_post_detail(
+                    s, user_email, page, page_size
+                )
+                return user_post_detail
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_user_comment_detail(user_email: str, page: int, page_size: int):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_comment_detail = UserFunction._get_user_comment_detail(
+                    s, user_email, page, page_size
+                )
+                return user_comment_detail
         except Exception as e:
             print("오류 발생:", e)
             return None

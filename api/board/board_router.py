@@ -3,7 +3,14 @@ from api.response import CustomResponse
 from util.constants import HTTPCode
 from api.constants import Message
 from api.board.service import BoardService
-from api.board.board_req_models import AddPost, LikeOrDisPost, ReportBoard, DeletePost
+from api.board.board_req_models import (
+    AddPost,
+    LikeOrDisPost,
+    ReportBoard,
+    DeletePost,
+    UpdatePost,
+    AddBoardViewCount,
+)
 from api.user.util import UserUtil
 from fastapi.security import OAuth2PasswordBearer
 
@@ -30,6 +37,34 @@ def add_board(addPost: AddPost, token: str = Depends(oauth2_scheme)):
         if user is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.ADD_BOARD_FAIL)
         return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/view")
+def add_board_view_count(
+    addBoardViewCount: AddBoardViewCount, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        user = BoardService.add_board_view_count(addBoardViewCount)
+        if user is None:
+            return CustomResponse.response(
+                None, HTTPCode.OK, Message.ADD_BOARD_VIEW_COUNT
+            )
+        return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/update")
+def update_board(updatePost: UpdatePost, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = BoardService.update_post(updatePost)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.UPDATE_BOARD_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
@@ -102,17 +137,11 @@ def get_user_write_post(page: int, page_size: int, token: str = Depends(oauth2_s
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.get("/all")
-def get_posts(page: int, page_size: int):
-    posts = BoardService.get_post(page, page_size)
-    if posts is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
-    return CustomResponse.response(posts, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/issue")
-def get_issue_posts(page: int, page_size: int):
-    posts = BoardService.get_issue_board(page, page_size)
+@router.get("/posts")
+def get_posts_v2(
+    page: int, page_size: int, type: str, issue: bool, word: str, search_type: str
+):
+    posts = BoardService.get_post_v2(page, page_size, type, issue, word, search_type)
     if posts is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
     return CustomResponse.response(posts, HTTPCode.OK, Message.SUCCESS)
@@ -124,22 +153,6 @@ def get_board_type():
     if board_type is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.BOARD_TYPE_NOT_FOUND)
     return CustomResponse.response(board_type, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/{board_type}")
-def get_posts(board_type: str, page: int, page_size: int):
-    posts = BoardService.get_type_post(page, page_size, board_type)
-    if posts is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
-    return CustomResponse.response(posts, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/{board_type}/issue")
-def get_issue_type_posts(board_type: str, page: int, page_size: int):
-    posts = BoardService.get_type_issue_post(page, page_size, board_type)
-    if posts is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.POSTS_NOT_FOUND)
-    return CustomResponse.response(posts, HTTPCode.OK, Message.SUCCESS)
 
 
 @router.get("/{board_type}/detail")

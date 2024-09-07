@@ -1,12 +1,20 @@
+from datetime import datetime
 import shutil
 import os
 import subprocess
 from uuid import uuid4
 from dotenv import load_dotenv
-from sqlalchemy import text, func, desc, and_
+from sqlalchemy import text, and_
 from api.board.util import BoardUtil
-from api.board.board_res_models import BoardType, PostLike, PostDisLike, DeleteBoard
-from api.board.board_req_models import AddPost, LikeOrDisPost, ReportBoard, DeletePost
+from api.board.board_res_models import BoardType, PostLike, PostDisLike
+from api.board.board_req_models import (
+    AddPost,
+    LikeOrDisPost,
+    ReportBoard,
+    DeletePost,
+    UpdatePost,
+    AddBoardViewCount,
+)
 from database import DataBaseConnector
 from api.user.user_res_models import User
 from api.board.board_function import BoardFunction
@@ -67,9 +75,36 @@ class BoardService:
                 if check_user:
                     new_post = BoardFunction._valid_post_type(addPost, user_email)
                     s.add(new_post)
+                    check_user.point += 20
                     s.commit()
                     return {"type": addPost.type}
 
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def update_post(updatePost: UpdatePost):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                board_class = BoardFunction._get_post_type(updatePost.type)
+                post = (
+                    s.query(board_class).filter(board_class.id == updatePost.id).first()
+                )
+                clean_html = BoardFunction._remove_video_delete_button(
+                    updatePost.contents
+                )
+                new_thumbnail = BoardFunction._extract_thumbnail_img(
+                    updatePost.contents
+                )
+
+                post.title = updatePost.title
+                post.thumbnail = new_thumbnail
+                post.contents = clean_html
+                post.update_time = datetime.now()
+                s.commit()
+                return True
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -165,66 +200,60 @@ class BoardService:
             return None
 
     @staticmethod
-    def get_post(page: int, page_size: int):
+    def get_post_v2(
+        page: int,
+        page_size: int,
+        board_type: str,
+        issue: bool,
+        word: str,
+        search_type: str,
+    ):
         session_factory = DataBaseConnector.create_session_factory()
-
         try:
             with session_factory() as session:
                 # 전체 데이터 수를 구하는 쿼리
-                max_cnt_query = text(BoardUtil.get_post_max_cnt_query())
-
-                # OFFSET 계산
-                offset = (page - 1) * page_size
+                count_queries = BoardUtil.get_post_count_query(board_type)
+                count_join_clause = BoardUtil.get_post_count_issue_clause(issue)
+                count_where_clause = BoardUtil.get_post_count_where_clause(search_type)
+                max_count_query = BoardUtil.get_post_max_cnt_query_v2()
+                max_count_query = text(
+                    max_count_query.format(
+                        count_all_query=count_queries,
+                        count_join_clause=count_join_clause,
+                        count_where_clause=count_where_clause,
+                    )
+                )
 
                 # 전체 데이터 수 조회
-                count_result = session.execute(max_cnt_query)
-                real_total_count = count_result.scalar()
+                count_param = {"word": f"%{word}%"}
+                count_result = session.execute(max_count_query, count_param)
+                total_count = count_result.scalar()
 
                 # 총 페이지 수 계산
-                max_pages = BoardFunction._get_max_pages(real_total_count, page_size)
+                max_pages = BoardFunction._get_max_pages(total_count, page_size)
 
                 # 실제 데이터 조회 쿼리
-                query = text(BoardUtil.get_post_query())
+                union_clause = BoardUtil.get_post_query(board_type)
+                join_clause = BoardUtil.get_post_issue_clause(issue)
+                where_clause = BoardUtil.get_post_where_clause(search_type)
+                all_post_query = BoardUtil.get_post_query_v2()
+                all_post_query = all_post_query.format(
+                    union_clause=union_clause,
+                    join_clause=join_clause,
+                    where_clause=where_clause,
+                )
+                all_post_query = text(all_post_query)
 
                 # 데이터 조회
-                params = {"limit": page_size, "offset": offset}
-                result = session.execute(query, params).fetchall()
+                offset = (page - 1) * page_size
+                params = {"limit": page_size, "offset": offset, "word": f"%{word}%"}
+                result = session.execute(all_post_query, params).fetchall()
 
                 # 컬럼 이름과 값을 매핑하여 딕셔너리로 변환
                 posts = [dict(row._mapping) for row in result]
 
                 return {
                     "data": posts,
-                    "total_count": real_total_count,
-                    "max_pages": max_pages,
-                    "current_page": page,
-                }
-
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
-    def get_type_post(page: int, page_size: int, board_type: str):
-        try:
-            session = DataBaseConnector.create_session_factory()
-            board_class = BoardFunction._get_post_type(board_type)
-            offset = (page - 1) * page_size
-            with session() as s:
-                total_count = s.query(func.count(board_class.id)).scalar()
-                max_pages = BoardFunction._get_max_pages(total_count, page_size)
-                post_list = (
-                    s.query(board_class, User.email, User.icon, User.nick_name)
-                    .outerjoin(User, board_class.writer == User.email)  # join 조건 수정
-                    .order_by(desc(board_class.create_time))
-                    .limit(page_size)
-                    .offset(offset)
-                    .all()
-                )
-                result = BoardFunction._get_post_list(post_list)
-
-                return {
-                    "data": result,
                     "total_count": total_count,
                     "max_pages": max_pages,
                     "current_page": page,
@@ -276,76 +305,6 @@ class BoardService:
             with session() as s:
                 board_type = s.query(BoardType).order_by(BoardType.order).all()
                 return board_type
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
-    def get_issue_board(page: int, page_size: int):
-        session_factory = DataBaseConnector.create_session_factory()
-
-        try:
-            with session_factory() as session:
-                # 전체 데이터 수를 구하는 쿼리
-                max_cnt_query = text(BoardUtil.get_issue_max_cnt_query())
-
-                # OFFSET 계산
-                offset = (page - 1) * page_size
-
-                # 전체 데이터 수 조회
-                result = session.execute(max_cnt_query)
-                real_total_count = result.scalar()
-
-                # 총 페이지 수 계산
-                max_pages = BoardFunction._get_max_pages(real_total_count, page_size)
-
-                # 실제 데이터 조회 쿼리
-                query = text(BoardUtil.get_issue_post_query())
-
-                # 데이터 조회
-                params = {"limit": page_size, "offset": offset}
-                result = session.execute(query, params).fetchall()
-
-                # 컬럼 이름과 값을 매핑하여 딕셔너리로 변환
-                posts = [dict(row._mapping) for row in result]
-
-                return {
-                    "data": posts,
-                    "total_count": real_total_count,
-                    "max_pages": max_pages,
-                    "current_page": page,
-                }
-
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
-    def get_type_issue_post(page: int, page_size: int, board_type: str):
-        try:
-            session = DataBaseConnector.create_session_factory()
-            board_class = BoardFunction._get_post_type(board_type)
-            offset = (page - 1) * page_size
-            with session() as s:
-                total_count = s.query(func.count(board_class.id)).scalar()
-                max_pages = BoardFunction._get_max_pages(total_count, page_size)
-                post_list = (
-                    s.query(board_class, User.email, User.icon, User.nick_name)
-                    .outerjoin(User, User.email == board_class.writer)  # join 조건 수정
-                    .filter(board_class.like_count >= 10)
-                    .order_by(desc(board_class.create_time))
-                    .limit(page_size)
-                    .offset(offset)
-                    .all()
-                )
-                result = BoardFunction._get_post_list(post_list)
-                return {
-                    "data": result,
-                    "total_count": total_count,
-                    "max_pages": max_pages,
-                    "current_page": page,
-                }
-
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -416,11 +375,31 @@ class BoardService:
                     .first()
                 )
                 new_delete = BoardFunction._create_board_delete(post, user_email)
+                user = s.query(User).filter(User.email == user_email).first()
+                user.point -= post.like_count + 20
                 s.add(new_delete)
                 s.delete(post)
                 s.commit()
 
                 return post
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def add_board_view_count(addBoardViewCount: AddBoardViewCount):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                board_class = BoardFunction._get_post_type(addBoardViewCount.board_type)
+                post = (
+                    s.query(board_class)
+                    .filter(board_class.id == addBoardViewCount.board_id)
+                    .first()
+                )
+                post.view_count += 1
+                s.commit()
+                return True
         except Exception as e:
             print("오류 발생:", e)
             return None

@@ -16,6 +16,8 @@ from api.event import event_router
 from api.patch_notes import patch_notes_router
 from api.board import board_router
 from api.comment import comment_router
+from api.notice import notice_router
+from api.server import server_router
 
 api_router = APIRouter()
 
@@ -34,5 +36,7 @@ api_router.include_router(hideout_router.router, prefix="/hideout")
 api_router.include_router(user_router.router, prefix="/user")
 api_router.include_router(event_router.router, prefix="/event")
 api_router.include_router(patch_notes_router.router, prefix="/patch_notes")
+api_router.include_router(notice_router.router, prefix="/notice")
 api_router.include_router(board_router.router, prefix="/board")
 api_router.include_router(comment_router.router, prefix="/comment")
+api_router.include_router(server_router.router, prefix="/server")

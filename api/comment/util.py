@@ -90,7 +90,33 @@ class CommentUtil:
             LEFT JOIN
                 tkl_user_ban b
                 ON ct.user_email = b.user_email
-            ORDER BY
-                ct.root_create_time, ct.path
-            LIMIT :limit OFFSET :offset; 
+            {where_clause}
             """
+
+    @staticmethod
+    def get_issue_comment_rank_query():
+        return """
+                WITH OrderedComments AS (SELECT id,
+                                                ROW_NUMBER() OVER (ORDER BY create_time) AS row_num
+                                         FROM tkl_comments
+                                         WHERE board_id = :board_id)
+                SELECT row_num AS comment_offset
+                FROM OrderedComments
+                WHERE id = :comment_id
+                """
+
+    @staticmethod
+    def comment_where_clause(is_issue: bool):
+        if is_issue:
+            return """
+                WHERE ct.like_count > 2 AND ct.is_delete_by_admin = false AND ct.is_delete_by_user = false
+                ORDER BY
+                    ct.like_count desc, ct.path
+                LIMIT 3;
+                """
+        else:
+            return """
+                ORDER BY 
+                    ct.create_time, ct.path
+                LIMIT :limit OFFSET :offset; 
+                """

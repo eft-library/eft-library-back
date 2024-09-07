@@ -13,3 +13,11 @@ def get_news():
     if news is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.NEWS_NOT_FOUND)
     return CustomResponse.response(news, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/popup")
+def get_popup():
+    popup = NewsService.get_popup()
+    if popup is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.POPUP_NOT_FOUND)
+    return CustomResponse.response(popup, HTTPCode.OK, Message.SUCCESS)

@@ -1,20 +1,20 @@
 from sqlalchemy import func, desc, text
 
-from api.patch_notes.models import PatchNotes
+from api.notice.models import Notice
 from database import DataBaseConnector
-from api.patch_notes.util import PatchNotesUtil
+from api.notice.util import NoticeUtil
 
 
-class PatchNotesService:
+class NoticeService:
 
     @staticmethod
-    def get_patch_notes(page: int, page_size: int):
+    def get_notice(page: int, page_size: int):
         try:
             session = DataBaseConnector.create_session_factory()
             offset = (page - 1) * page_size
             with session() as s:
                 # 전체 행 수 조회
-                total_count = s.query(func.count(PatchNotes.id)).scalar()
+                total_count = s.query(func.count(Notice.id)).scalar()
 
                 # 최대 페이지 수 계산
                 max_pages = (total_count // page_size) + (
@@ -23,8 +23,8 @@ class PatchNotesService:
 
                 # 현재 페이지의 데이터 조회
                 notice_list = (
-                    s.query(PatchNotes)
-                    .order_by(desc(PatchNotes.update_time))
+                    s.query(Notice)
+                    .order_by(desc(Notice.update_time))
                     .limit(page_size)
                     .offset(offset)
                     .all()
@@ -41,24 +41,19 @@ class PatchNotesService:
             return None
 
     @staticmethod
-    def get_patch_notes_by_id(patch_notes_id: str):
+    def get_notice_by_id(notice_id: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
 
                 # 현재 페이지의 데이터 조회
-                patch_notes = (
-                    s.query(PatchNotes).filter(PatchNotes.id == patch_notes_id).first()
-                )
-                patch_notes_group_query = text(PatchNotesUtil.get_patch_notes_group())
-                param = {"id": patch_notes_id}
-                result = s.execute(patch_notes_group_query, param)
-                patch_notes_group = [dict(row._mapping) for row in result]
+                notice = s.query(Notice).filter(Notice.id == notice_id).first()
+                notice_group_query = text(NoticeUtil.get_notice_group())
+                param = {"id": notice_id}
+                result = s.execute(notice_group_query, param)
+                notice_group = [dict(row._mapping) for row in result]
 
-                result_dict = {
-                    "information": patch_notes,
-                    "information_group": patch_notes_group,
-                }
+                result_dict = {"information": notice, "information_group": notice_group}
 
                 return result_dict
         except Exception as e:

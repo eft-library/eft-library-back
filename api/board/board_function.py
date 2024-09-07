@@ -4,13 +4,13 @@ from api.board.board_res_models import (
     PvpBoard,
     PveBoard,
     TipBoard,
-    NoticeBoard,
     ArenaBoard,
     QuestionBoard,
     PostLike,
     PostDisLike,
     BoardReport,
     DeleteBoard,
+    TrashBoard,
 )
 from api.board.board_req_models import AddPost, ReportBoard
 from datetime import datetime
@@ -26,9 +26,9 @@ class BoardFunction:
             "pvp": PvpBoard,
             "pve": PveBoard,
             "question": QuestionBoard,
-            "notice": NoticeBoard,
             "tip": TipBoard,
             "forum": ForumBoard,
+            "trash": TrashBoard,
         }
         board_class = board_classes.get(board_type, ForumBoard)
         return board_class
@@ -43,24 +43,10 @@ class BoardFunction:
             "writer": user_email,
             "view_count": 0,
             "create_time": datetime.now(),
+            "thumbnail": BoardFunction._extract_thumbnail_img(addPost.contents),
+            "like_count": 0,
+            "type": addPost.type,
         }
-
-        # 유형에 따라 추가 필드를 설정
-        if addPost.type in [
-            "arena",
-            "pvp",
-            "pve",
-            "question",
-            "tip",
-            "forum",
-            "notice",
-        ]:
-            specific_fields = {
-                "thumbnail": BoardFunction._extract_thumbnail_img(addPost.contents),
-                "like_count": 0,
-                "type": addPost.type,
-            }
-            common_fields.update(specific_fields)
 
         # 선택한 클래스에 따라 객체를 생성
         board_class = BoardFunction._get_post_type(addPost.type)  # 기본값은 ForumBoard
@@ -79,6 +65,7 @@ class BoardFunction:
         )
         return cleaned_html
 
+    @staticmethod
     def _extract_thumbnail_img(html):
         # 정규 표현식을 사용하여 첫 번째 <img> 태그의 src 값을 찾습니다.
         match = re.search(r'<img[^>]+src="([^"]+)"', html)
@@ -168,28 +155,5 @@ class BoardFunction:
         return new_delete
 
     @staticmethod
-    def _get_max_pages(real_total_count, page_size):
-        return (real_total_count // page_size) + (
-            1 if real_total_count % page_size > 0 else 0
-        )
-
-    @staticmethod
-    def _get_post_list(post_list):
-        result = []
-        for post, email, icon, nick_name in post_list:
-            post_dict = {
-                "id": post.id,
-                "title": post.title,
-                "contents": post.contents,
-                "thumbnail": post.thumbnail,
-                "writer": post.writer,
-                "like_count": post.like_count,
-                "view_count": post.view_count,
-                "type": post.type,
-                "create_time": post.create_time,
-                "update_time": post.update_time,
-                "icon": icon,
-                "nick_name": nick_name,
-            }
-            result.append(post_dict)
-        return result
+    def _get_max_pages(total_count, page_size):
+        return (total_count // page_size) + (1 if total_count % page_size > 0 else 0)

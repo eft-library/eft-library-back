@@ -10,6 +10,7 @@ from api.user.user_req_models import (
     ChangeUserIcon,
     UserQuestList,
     BanUser,
+    UserPostCommentDetail,
 )
 from api.user.util import UserUtil
 from api.user.user_quest_service import UserQuestService
@@ -25,6 +26,34 @@ def add_user(addUserReq: AddUserReq):
     result = UserService.add_new_user(addUserReq)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.USER_ADD_FAIL)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.post("/post_detail")
+def get_user_post_detail(
+    userPostCommentDetail: UserPostCommentDetail, page: int, page_size: int
+):
+    result = UserService.get_user_post_detail(
+        userPostCommentDetail.user_email, page, page_size
+    )
+    if result is None:
+        return CustomResponse.response(
+            None, HTTPCode.OK, Message.GET_USER_POST_DETAIL_FAIL
+        )
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.post("/comment_detail")
+def get_user_comment_detail(
+    userPostCommentDetail: UserPostCommentDetail, page: int, page_size: int
+):
+    result = UserService.get_user_comment_detail(
+        userPostCommentDetail.user_email, page, page_size
+    )
+    if result is None:
+        return CustomResponse.response(
+            None, HTTPCode.OK, Message.GET_USER_COMMENT_DETAIL_FAIL
+        )
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -45,7 +74,7 @@ def get_user(token: str = Depends(oauth2_scheme)):
 def ban_user(banUser: BanUser, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = UserService.user_ban(banUser)
+        result = UserService.user_ban(banUser, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.USER_BAN_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

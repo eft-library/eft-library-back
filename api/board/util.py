@@ -1,143 +1,64 @@
 class BoardUtil:
     @staticmethod
-    def get_post_query():
+    def get_post_query_v2():
         """
-        커뮤니티 전체 조회 쿼리
+        커뮤니티 검색, 이슈, 타입별 전체 조회 쿼리 v2
         """
 
         return """
-                    SELECT combined.id,
-                           combined.title,
-                           combined.contents,
-                           combined.thumbnail,
-                           combined.writer,
-                           combined.like_count,
-                           combined.view_count,
-                           combined.type,
-                           combined.create_time,
-                           combined.update_time,
-                           combined.name_kr as type_kr,
-                           tkl_user.icon,
-                           tkl_user.nick_name
-                    FROM (SELECT tkl_board_forum.id,
-                                 tkl_board_forum.title,
-                                 tkl_board_forum.contents,
-                                 tkl_board_forum.thumbnail,
-                                 tkl_board_forum.writer,
-                                 tkl_board_forum.like_count,
-                                 tkl_board_forum.view_count,
-                                 tkl_board_forum.type,
-                                 tkl_board_forum.create_time,
-                                 tkl_board_forum.update_time,
-                                 tkl_board_type.name_kr
-                          FROM tkl_board_forum
-                                   left join tkl_board_type on tkl_board_forum.type = tkl_board_type.value
-                          UNION ALL
-                          SELECT tkl_board_arena.id,
-                                 tkl_board_arena.title,
-                                 tkl_board_arena.contents,
-                                 tkl_board_arena.thumbnail,
-                                 tkl_board_arena.writer,
-                                 tkl_board_arena.like_count,
-                                 tkl_board_arena.view_count,
-                                 tkl_board_arena.type,
-                                 tkl_board_arena.create_time,
-                                 tkl_board_arena.update_time,
-                                 tkl_board_type.name_kr
-                          FROM tkl_board_arena
-                                   left join tkl_board_type on tkl_board_arena.type = tkl_board_type.value
-                          UNION ALL
-                          SELECT tkl_board_pve.id,
-                                 tkl_board_pve.title,
-                                 tkl_board_pve.contents,
-                                 tkl_board_pve.thumbnail,
-                                 tkl_board_pve.writer,
-                                 tkl_board_pve.like_count,
-                                 tkl_board_pve.view_count,
-                                 tkl_board_pve.type,
-                                 tkl_board_pve.create_time,
-                                 tkl_board_pve.update_time,
-                                 tkl_board_type.name_kr
-                          FROM tkl_board_pve
-                                   left join tkl_board_type on tkl_board_pve.type = tkl_board_type.value
-                          UNION ALL
-                          SELECT tkl_board_pvp.id,
-                                 tkl_board_pvp.title,
-                                 tkl_board_pvp.contents,
-                                 tkl_board_pvp.thumbnail,
-                                 tkl_board_pvp.writer,
-                                 tkl_board_pvp.like_count,
-                                 tkl_board_pvp.view_count,
-                                 tkl_board_pvp.type,
-                                 tkl_board_pvp.create_time,
-                                 tkl_board_pvp.update_time,
-                                 tkl_board_type.name_kr
-                          FROM tkl_board_pvp
-                                   left join tkl_board_type on tkl_board_pvp.type = tkl_board_type.value
-                          UNION ALL
-                          SELECT tkl_board_question.id,
-                                 tkl_board_question.title,
-                                 tkl_board_question.contents,
-                                 tkl_board_question.thumbnail,
-                                 tkl_board_question.writer,
-                                 tkl_board_question.like_count,
-                                 tkl_board_question.view_count,
-                                 tkl_board_question.type,
-                                 tkl_board_question.create_time,
-                                 tkl_board_question.update_time,
-                                 tkl_board_type.name_kr
-                          FROM tkl_board_question
-                                   left join tkl_board_type on tkl_board_question.type = tkl_board_type.value
-                          UNION ALL
-                          SELECT tkl_board_tip.id,
-                                 tkl_board_tip.title,
-                                 tkl_board_tip.contents,
-                                 tkl_board_tip.thumbnail,
-                                 tkl_board_tip.writer,
-                                 tkl_board_tip.like_count,
-                                 tkl_board_tip.view_count,
-                                 tkl_board_tip.type,
-                                 tkl_board_tip.create_time,
-                                 tkl_board_tip.update_time,
-                                 tkl_board_type.name_kr
-                          FROM tkl_board_tip
-                                   left join tkl_board_type on tkl_board_tip.type = tkl_board_type.value) AS combined
-                             left join tkl_user on combined.writer = tkl_user.email
-                    ORDER BY create_time DESC
-                    LIMIT :limit OFFSET :offset
-                """
+        SELECT combined.id,
+               combined.title,
+               combined.contents,
+               combined.thumbnail,
+               combined.writer,
+               combined.like_count,
+               combined.view_count,
+               combined.type,
+               combined.create_time,
+               combined.update_time,
+               combined.name_kr as type_kr,
+               tkl_user.icon,
+               tkl_user.nick_name,
+               combined.comment_cnt
+        FROM (
+            SELECT board.id,
+                   board.type,
+                   board.create_time,
+                   board.title,
+                   board.contents,
+                   board.thumbnail,
+                   board.writer,
+                   board.like_count,
+                   board.view_count,
+                   board.update_time,
+                   tkl_board_type.name_kr,
+                   count(tkl_comments.id) as comment_cnt
+            FROM (
+                {union_clause}
+            ) as board
+            {join_clause}
+            LEFT JOIN tkl_board_type ON board.type = tkl_board_type.value
+            LEFT join tkl_comments on board.id = tkl_comments.board_id
+            group by board.id, board.type, board.create_time, board.title, board.contents, board.thumbnail, board.writer, board.like_count, board.view_count, board.update_time, tkl_board_type.name_kr
+        ) as combined
+        LEFT JOIN tkl_user ON combined.writer = tkl_user.email
+        {where_clause}
+        ORDER BY create_time DESC
+        LIMIT :limit OFFSET :offset        
+        """
 
     @staticmethod
-    def get_post_max_cnt_query():
+    def get_post_max_cnt_query_v2():
         """
-        커뮤니티 전체 데이터 수 조회 쿼리
+        커뮤니티 전체 데이터 수 조회 쿼리 v2
         """
-
         return """
-                    SELECT COUNT(*)
-                    FROM (
-                        SELECT id FROM tkl_board_forum
-                        UNION ALL
-                        SELECT id FROM tkl_board_arena
-                        UNION ALL
-                        SELECT id FROM tkl_board_pve
-                        UNION ALL
-                        SELECT id FROM tkl_board_pvp
-                        UNION ALL
-                        SELECT id FROM tkl_board_question
-                        UNION ALL
-                        SELECT id FROM tkl_board_tip
-                    ) AS combined
-                """
-
-    @staticmethod
-    def get_issue_max_cnt_query():
-        """
-        issue 전체 개수
-        """
-
-        return """
-        SELECT COUNT(*) from tkl_board_issue
+        select count(*)
+        from (SELECT *
+              FROM ({count_all_query}) AS combined
+                       join tkl_user on writer = tkl_user.email
+                       {count_join_clause}
+                       {count_where_clause}) as a
         """
 
     @staticmethod
@@ -146,145 +67,10 @@ class BoardUtil:
         직상힌 글 전체 개수
         """
         return """
-                select count(*)
-                from (select *
-                      from tkl_board_pvp
-                      where writer = :email
-                      union all
-                      select *
-                      from tkl_board_pve
-                      where writer = :email
-                      union all
-                      select *
-                      from tkl_board_tip
-                      where writer = :email
-                      union all
-                      select *
-                      from tkl_board_arena
-                      where writer = :email
-                      union all
-                      select *
-                      from tkl_board_forum
-                      where writer = :email
-                      union all
-                      select *
-                      from tkl_board_question
-                      where writer = :email) as a
+                select count(*) 
+                from tkl_board_union
+                where writer = :email
                 """
-
-    @staticmethod
-    def get_issue_post_query():
-        """
-        커뮤니티 이슈글 전체 조회 쿼리
-        """
-
-        return """
-                        SELECT combined.id,
-                               combined.title,
-                               combined.contents,
-                               combined.thumbnail,
-                               combined.writer,
-                               combined.like_count,
-                               combined.view_count,
-                               combined.type,
-                               combined.create_time,
-                               combined.update_time,
-                               combined.name_kr as type_kr,
-                               tkl_user.icon,
-                               tkl_user.nick_name
-                        from (select tkl_board_issue.board_id as id,
-                                     tkl_board_forum.type,
-                                     tkl_board_forum.create_time,
-                                     tkl_board_forum.title,
-                                     tkl_board_forum.contents,
-                                     tkl_board_forum.thumbnail,
-                                     tkl_board_forum.writer,
-                                     tkl_board_forum.like_count,
-                                     tkl_board_forum.view_count,
-                                     tkl_board_forum.update_time,
-                                     tkl_board_type.name_kr
-                              from tkl_board_issue
-                                       join tkl_board_forum on tkl_board_issue.board_id = tkl_board_forum.id
-                                       left join tkl_board_type on tkl_board_forum.type = tkl_board_type.value
-                              union all
-                              select tkl_board_issue.board_id,
-                                     tkl_board_question.type,
-                                     tkl_board_issue.create_time,
-                                     tkl_board_question.title,
-                                     tkl_board_question.contents,
-                                     tkl_board_question.thumbnail,
-                                     tkl_board_question.writer,
-                                     tkl_board_question.like_count,
-                                     tkl_board_question.view_count,
-                                     tkl_board_question.update_time,
-                                     tkl_board_type.name_kr
-                              from tkl_board_issue
-                                       join tkl_board_question on tkl_board_issue.board_id = tkl_board_question.id
-                                       left join tkl_board_type on tkl_board_question.type = tkl_board_type.value
-                              union all
-                              select tkl_board_issue.board_id as id,
-                                     tkl_board_arena.type,
-                                     tkl_board_issue.create_time,
-                                     tkl_board_arena.title,
-                                     tkl_board_arena.contents,
-                                     tkl_board_arena.thumbnail,
-                                     tkl_board_arena.writer,
-                                     tkl_board_arena.like_count,
-                                     tkl_board_arena.view_count,
-                                     tkl_board_arena.update_time,
-                                     tkl_board_type.name_kr
-                              from tkl_board_issue
-                                       join tkl_board_arena on tkl_board_issue.board_id = tkl_board_arena.id
-                                       left join tkl_board_type on tkl_board_arena.type = tkl_board_type.value
-                              union all
-                              select tkl_board_issue.board_id as id,
-                                     tkl_board_tip.type,
-                                     tkl_board_issue.create_time,
-                                     tkl_board_tip.title,
-                                     tkl_board_tip.contents,
-                                     tkl_board_tip.thumbnail,
-                                     tkl_board_tip.writer,
-                                     tkl_board_tip.like_count,
-                                     tkl_board_tip.view_count,
-                                     tkl_board_tip.update_time,
-                                     tkl_board_type.name_kr
-                              from tkl_board_issue
-                                       join tkl_board_tip on tkl_board_issue.board_id = tkl_board_tip.id
-                                       left join tkl_board_type on tkl_board_tip.type = tkl_board_type.value
-                              union all
-                              select tkl_board_issue.board_id as id,
-                                     tkl_board_pvp.type,
-                                     tkl_board_issue.create_time,
-                                     tkl_board_pvp.title,
-                                     tkl_board_pvp.contents,
-                                     tkl_board_pvp.thumbnail,
-                                     tkl_board_pvp.writer,
-                                     tkl_board_pvp.like_count,
-                                     tkl_board_pvp.view_count,
-                                     tkl_board_pvp.update_time,
-                                     tkl_board_type.name_kr
-                              from tkl_board_issue
-                                       join tkl_board_pvp on tkl_board_issue.board_id = tkl_board_pvp.id
-                                       left join tkl_board_type on tkl_board_pvp.type = tkl_board_type.value
-                              union all
-                              select tkl_board_issue.board_id as id,
-                                     tkl_board_pve.type,
-                                     tkl_board_issue.create_time,
-                                     tkl_board_pve.title,
-                                     tkl_board_pve.contents,
-                                     tkl_board_pve.thumbnail,
-                                     tkl_board_pve.writer,
-                                     tkl_board_pve.like_count,
-                                     tkl_board_pve.view_count,
-                                     tkl_board_pve.update_time,
-                                     tkl_board_type.name_kr
-                              from tkl_board_issue
-                                       join tkl_board_pve on tkl_board_issue.board_id = tkl_board_pve.id
-                                       left join tkl_board_type on tkl_board_pve.type = tkl_board_type.value) as combined
-                                 left join tkl_user on combined.writer = tkl_user.email
-                        ORDER BY create_time DESC
-                        LIMIT :limit OFFSET :offset
-                    """
 
     @staticmethod
     def get_user_posts():
@@ -294,28 +80,66 @@ class BoardUtil:
 
         return """
                 select *
-                from tkl_board_pvp
-                where writer = :email
-                union all
-                select *
-                from tkl_board_pve
-                where writer = :email
-                union all
-                select *
-                from tkl_board_tip
-                where writer = :email
-                union all
-                select *
-                from tkl_board_arena
-                where writer = :email
-                union all
-                select *
-                from tkl_board_forum
-                where writer = :email
-                union all
-                select *
-                from tkl_board_question
+                from tkl_board_union
                 where writer = :email
                 ORDER BY create_time DESC
                 LIMIT :limit OFFSET :offset
                 """
+
+    @staticmethod
+    def get_post_count_query(board_type: str):
+        board_type_list = ["forum", "arena", "pvp", "pve", "question", "tip"]
+        if board_type in board_type_list:
+            return f"SELECT id, contents, title, writer FROM tkl_board_union where type = '{board_type}'"
+        else:
+            return "SELECT id, contents, title, writer FROM tkl_board_union"
+
+    @staticmethod
+    def get_post_query(board_type: str):
+        board_type_list = ["forum", "arena", "pvp", "pve", "question", "tip"]
+        if board_type in board_type_list:
+            return f"SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_union where type = '{board_type}'"
+        else:
+            return "SELECT id, title, contents, thumbnail, writer, like_count, view_count, type, create_time, update_time FROM tkl_board_union"
+
+    @staticmethod
+    def get_post_count_issue_clause(issue: bool):
+        return (
+            "join tkl_board_issue on tkl_board_issue.board_id = combined.id"
+            if issue
+            else ""
+        )
+
+    @staticmethod
+    def get_post_issue_clause(issue: bool):
+        return (
+            "JOIN tkl_board_issue ON board.id = tkl_board_issue.board_id"
+            if issue
+            else ""
+        )
+
+    @staticmethod
+    def get_post_where_clause(search_type: str):
+        if search_type == "contents":
+            return "WHERE contents LIKE :word"
+        elif search_type == "contents_title":
+            return "WHERE contents LIKE :word OR title LIKE :word"
+        elif search_type == "title":
+            return "WHERE title LIKE :word"
+        elif search_type == "nickname":
+            return "WHERE nick_name LIKE :word"
+        else:
+            return ""
+
+    @staticmethod
+    def get_post_count_where_clause(search_type: str):
+        if search_type == "contents":
+            return "WHERE contents LIKE :word"
+        elif search_type == "contents_title":
+            return "WHERE contents LIKE :word OR title LIKE :word"
+        elif search_type == "title":
+            return "WHERE title LIKE :word"
+        elif search_type == "nickname":
+            return "WHERE nick_name LIKE :word"
+        else:
+            return ""

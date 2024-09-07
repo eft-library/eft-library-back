@@ -1,4 +1,4 @@
-from sqlalchemy import text
+from sqlalchemy import text, desc
 
 from api.user.user_res_models import (
     User,
@@ -10,6 +10,7 @@ from api.user.user_res_models import (
     UserPostStatistics,
 )
 from api.user.user_req_models import AddUserReq, BanUser
+from api.comment.comment_res_models import Comments
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, date
 from api.user.util import UserUtil
@@ -136,9 +137,10 @@ class UserFunction:
         session.add(new_icon_list)
 
     @staticmethod
-    def _create_ban_user(banUser: BanUser):
+    def _create_ban_user(banUser: BanUser, user_email: str):
         new_ban_user = UserBan(
             user_email=banUser.user_email,
+            admin_email=user_email,
             ban_reason=banUser.ban_reason,
             ban_start_time=datetime.now(),
             ban_end_time=datetime.now() + timedelta(days=banUser.ban_time),
@@ -182,6 +184,16 @@ class UserFunction:
         user_posts = session.execute(
             text(UserUtil.get_user_posts()), {"email": user_email}
         )
+        comments_query = UserUtil.get_user_comment_detail()
+        comments_query = text(comments_query)
+        comments_param = {
+            "limit": 5,
+            "offset": 0,
+            "user_email": user_email,
+        }
+        comments = session.execute(comments_query, comments_param)
+        comments = [dict(row) for row in comments.mappings()]
+
         user_posts_list = [dict(row) for row in user_posts.mappings()]
         user_post_statistics = (
             session.query(UserPostStatistics)
@@ -205,6 +217,7 @@ class UserFunction:
             ),
             "is_delete": True if is_delete else False,
             "user_posts": user_posts_list,
+            "user_comments": comments,
             "user_post_statistics": (
                 user_post_statistics
                 if user_post_statistics
@@ -212,3 +225,73 @@ class UserFunction:
             ),
         }
         return user_data
+
+    @staticmethod
+    def _get_max_pages(total_count, page_size):
+        return (total_count // page_size) + (1 if total_count % page_size > 0 else 0)
+
+    @staticmethod
+    def _get_user_post_detail(session, user_email: str, page: int, page_size: int):
+        cnt_params = {"user_email": user_email}
+        max_cnt_query = text(UserUtil.get_user_post_detail_max_count())
+        offset = (page - 1) * page_size
+        result = session.execute(max_cnt_query, cnt_params)
+        real_total_count = result.scalar()
+        max_pages = UserFunction._get_max_pages(real_total_count, page_size)
+
+        posts_query = UserUtil.get_user_post_detail()
+        posts_query = text(posts_query)
+        posts_param = {
+            "limit": page_size,
+            "offset": offset,
+            "user_email": user_email,
+        }
+        posts = session.execute(posts_query, posts_param)
+        posts = [dict(row) for row in posts.mappings()]
+
+        user_query = UserUtil.get_user_info()
+        user_query = text(user_query)
+        user_param = {"user_email": user_email}
+        user_info = session.execute(user_query, user_param)
+        user_info = user_info.mappings().fetchone()
+
+        return {
+            "data": posts,
+            "user_info": user_info,
+            "total_count": real_total_count,
+            "max_pages": max_pages,
+            "current_page": page,
+        }
+
+    @staticmethod
+    def _get_user_comment_detail(session, user_email: str, page: int, page_size: int):
+        cnt_params = {"user_email": user_email}
+        max_cnt_query = text(UserUtil.get_user_comment_detail_max_count())
+        offset = (page - 1) * page_size
+        result = session.execute(max_cnt_query, cnt_params)
+        real_total_count = result.scalar()
+        max_pages = UserFunction._get_max_pages(real_total_count, page_size)
+
+        comments_query = UserUtil.get_user_comment_detail()
+        comments_query = text(comments_query)
+        comments_param = {
+            "limit": page_size,
+            "offset": offset,
+            "user_email": user_email,
+        }
+        comments = session.execute(comments_query, comments_param)
+        comments = [dict(row) for row in comments.mappings()]
+
+        user_query = UserUtil.get_user_info()
+        user_query = text(user_query)
+        user_param = {"user_email": user_email}
+        user_info = session.execute(user_query, user_param)
+        user_info = user_info.mappings().fetchone()
+
+        return {
+            "data": comments,
+            "user_info": user_info,
+            "total_count": real_total_count,
+            "max_pages": max_pages,
+            "current_page": page,
+        }

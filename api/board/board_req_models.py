@@ -12,6 +12,17 @@ class AddPost(BaseModel):
     type: str
 
 
+class UpdatePost(BaseModel):
+    """
+    작성글 수정
+    """
+
+    id: str
+    title: str
+    contents: str
+    type: str
+
+
 class LikeOrDisPost(BaseModel):
     """
     좋아요, 싫어요
@@ -35,6 +46,15 @@ class ReportBoard(BaseModel):
 class DeletePost(BaseModel):
     """
     게시글 삭제
+    """
+
+    board_id: str
+    board_type: str
+
+
+class AddBoardViewCount(BaseModel):
+    """
+    게시글 조회수 증가
     """
 
     board_id: str

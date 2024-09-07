@@ -2,12 +2,12 @@ from database import DataBaseConnector
 from sqlalchemy import Column, String, ARRAY, TEXT, TIMESTAMP
 
 
-class PatchNotes(DataBaseConnector.Base):
+class Notice(DataBaseConnector.Base):
     """
-    PatchNotes
+    Notice
     """
 
-    __tablename__ = "tkl_patch_notes"
+    __tablename__ = "tkl_notice"
 
     id = Column("id", TEXT, primary_key=True)
     name_en = Column(String)

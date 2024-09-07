@@ -9,6 +9,7 @@ from api.comment.comment_req_models import (
     DeleteComment,
     LikeOrDisComment,
     ReportComment,
+    UpdateComment,
 )
 from api.comment.service import CommentService
 
@@ -26,7 +27,29 @@ def get_comments(
     comments = CommentService.get_comment_by_id(page, page_size, board_id, user_email)
 
     if comments is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.ADD_COMMENT_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.GET_COMMENT_FAIL)
+    return CustomResponse.response(comments, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/issue_comment")
+def get_issue_comments(board_id: str, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token) or ""
+    comments = CommentService.get_issue_comment_by_id(board_id, user_email)
+
+    if comments is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.GET_COMMENT_FAIL)
+    return CustomResponse.response(comments, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/issue_comment_page")
+def get_issue_comment_page(
+    board_id: str, comment_id: str, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token) or ""
+    comments = CommentService.get_issue_comment_page(board_id, comment_id, user_email)
+
+    if comments is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.ISSUE_COMMENT_FAIL)
     return CustomResponse.response(comments, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -37,6 +60,20 @@ def add_comment(addComment: AddComment, token: str = Depends(oauth2_scheme)):
         user = CommentService.add_comment(addComment, user_email)
         if user is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.ADD_COMMENT_FAIL)
+        return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/update")
+def update_comment(updateComment: UpdateComment, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        user = CommentService.update_comment(updateComment)
+        if user is None:
+            return CustomResponse.response(
+                None, HTTPCode.OK, Message.UPDATE_COMMENT_FAIL
+            )
         return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
