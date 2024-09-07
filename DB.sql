@@ -503,7 +503,8 @@ CREATE TABLE TKL_SEARCH
   TYPE TEXT,
   PAGE_VALUE TEXT,
   "order" INTEGER,
-  UPDATE_TIME timestamp with time zone default now()
+  UPDATE_TIME timestamp with time zone default now(),
+  primary key (VALUE, PAGE_VALUE)
 );
 COMMENT ON COLUMN TKL_SEARCH.VALUE IS '검색 드롭다운 표시 값';
 COMMENT ON COLUMN TKL_SEARCH.LINK IS '검색 연동 링크';
