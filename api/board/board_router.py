@@ -42,19 +42,9 @@ def add_board(addPost: AddPost, token: str = Depends(oauth2_scheme)):
 
 
 @router.post("/view")
-def add_board_view_count(
-    addBoardViewCount: AddBoardViewCount, token: str = Depends(oauth2_scheme)
-):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        user = BoardService.add_board_view_count(addBoardViewCount)
-        if user is None:
-            return CustomResponse.response(
-                None, HTTPCode.OK, Message.ADD_BOARD_VIEW_COUNT
-            )
-        return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+def add_board_view_count(addBoardViewCount: AddBoardViewCount):
+    BoardService.add_board_view_count(addBoardViewCount)
+    return CustomResponse.response(None, HTTPCode.OK, Message.SUCCESS)
 
 
 @router.post("/update")
