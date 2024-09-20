@@ -44,6 +44,8 @@ class QuestPreview(DataBaseConnector.Base):
     rewards_en = Column(ARRAY(String))
     rewards_kr = Column(ARRAY(String))
     required_kappa = Column(Boolean)
+    requirements_en = Column(ARRAY(String))
+    requirements_kr = Column(ARRAY(String))
     update_time = Column(TIMESTAMP)
     order = Column(Integer)
     guide = Column(TEXT)
@@ -72,4 +74,3 @@ class RelatedQuest(DataBaseConnector.Base):
     item_image = Column(TEXT)
     desc_text = Column(ARRAY(TEXT))
     item_link = Column(TEXT)
-
