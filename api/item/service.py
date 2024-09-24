@@ -189,7 +189,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                ammo = s.query(Ammo).order_by(Ammo.armor_damage).all()
+                ammo = s.query(Ammo).order_by(Ammo.penetration_power).all()
                 return ammo
         except Exception as e:
             print("오류 발생:", e)
