@@ -19,7 +19,7 @@ import pytz
 load_dotenv()
 
 
-default_icon = "/tkl_user/icon/newbie.gif"
+default_icon = "/tkl_user/icon/cat.png"
 
 
 class UserFunction:
