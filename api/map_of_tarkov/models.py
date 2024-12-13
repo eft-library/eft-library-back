@@ -21,3 +21,23 @@ class Extraction(DataBaseConnector.Base):
     map = Column(String)
     image_thumbnail = Column(TEXT)
     update_time = Column(TIMESTAMP)
+
+
+class Transits(DataBaseConnector.Base):
+    """
+    Transits info
+    """
+
+    __tablename__ = "tkl_transits"
+
+    id = Column(String, primary_key=True)
+    name = Column(TEXT)
+    image = Column(TEXT)
+    faction = Column(String)
+    always_available = Column(BOOLEAN)
+    single_use = Column(BOOLEAN)
+    requirements = Column(JSON)
+    tip = Column(JSON)
+    map = Column(String)
+    image_thumbnail = Column(TEXT)
+    update_time = Column(TIMESTAMP)

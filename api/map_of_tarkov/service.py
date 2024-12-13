@@ -2,7 +2,7 @@ from sqlalchemy.orm import subqueryload
 
 from api.boss.models import Boss
 from api.map.models import ParentMap
-from api.map_of_tarkov.models import Extraction
+from api.map_of_tarkov.models import Extraction, Transits
 from database import DataBaseConnector
 import os
 from dotenv import load_dotenv
@@ -35,6 +35,12 @@ class MapOfTarkovService:
                     .order_by(Extraction.faction, Extraction.name)
                     .all()
                 )
+                transits_info = (
+                    s.query(Transits)
+                    .filter(Transits.map == map_id)
+                    .order_by(Transits.faction, Transits.name)
+                    .all()
+                )
 
             updated_boss_list = []
             for boss in boss_list:
@@ -51,6 +57,7 @@ class MapOfTarkovService:
                 "boss_list": combined_info,
                 "map_info": map_info,
                 "extraction_info": extraction_info,
+                "transits_info": transits_info,
             }
 
             return map_of_tarkov
