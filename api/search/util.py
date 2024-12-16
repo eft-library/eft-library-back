@@ -65,23 +65,5 @@ class SearchUtil:
                     union all
                     select '/event/detail/' || id as tkl_link
                     from tkl_event
-                    union all
-                    select '/board/forum/detail/' || id as tkl_link
-                    from tkl_board_forum
-                    union all
-                    select '/board/arena/detail/' || id as tkl_link
-                    from tkl_board_arena
-                    union all
-                    select '/board/pvp/detail/' || id as tkl_link
-                    from tkl_board_pvp
-                    union all
-                    select '/board/pve/detail/' || id as tkl_link
-                    from tkl_board_pve
-                    union all
-                    select '/board/question/detail/' || id as tkl_link
-                    from tkl_board_question
-                    union all
-                    select '/board/tip/detail/' || id as tkl_link
-                    from tkl_board_tip
                     order by tkl_link
                     """
