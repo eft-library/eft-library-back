@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, TIMESTAMP, TEXT, Boolean
+from sqlalchemy import Column, JSON, TIMESTAMP, TEXT, Boolean
 from database import DataBaseConnector
 
 
@@ -15,6 +15,7 @@ class News(DataBaseConnector.Base):
     event_link = Column(TEXT)
     youtube_id = Column(TEXT)
     next_update = Column(TEXT)
+    user_function = Column(JSON)
 
 
 class Popup(DataBaseConnector.Base):
