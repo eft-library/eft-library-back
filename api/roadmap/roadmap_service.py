@@ -27,7 +27,10 @@ class RoadmapService:
                         .filter(UserRoadmap.user_email == user_email)
                         .first()
                     )
-                    user_roadmap["quest_list"] = user_quest_list
+                    if user_quest_list is not None:
+                        user_roadmap["quest_list"] = user_quest_list.quest_list
+                    else:
+                        user_roadmap["quest_list"] = []
                     return user_roadmap
                 else:
                     user_roadmap["quest_list"] = []
