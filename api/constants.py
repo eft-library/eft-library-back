@@ -62,3 +62,4 @@ class Message(Enum):
     USER_POSTS_NOT_FOUND = "User posts not found"
     REPORT_FAIL = "Report fail"
     BOARD_DELETE_FAIL = "Board delete fail"
+    GET_ROADMAP_FAIL = "Get Roadmap fail"

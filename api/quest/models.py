@@ -26,6 +26,9 @@ class NPC(DataBaseConnector.Base):
     image = Column(String)
     order = Column(Integer)
     update_time = Column(TIMESTAMP)
+    all_quest = relationship(
+        "QuestPreview", backref="npc", order_by="QuestPreview.order"
+    )
 
 
 class QuestPreview(DataBaseConnector.Base):
