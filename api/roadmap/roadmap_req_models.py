@@ -8,3 +8,11 @@ class SaveRoadmap(BaseModel):
     """
 
     questList: List[str]
+
+
+class GetRoadMap(BaseModel):
+    """
+    사용자 roadmap 조회
+    """
+
+    user_email: str
