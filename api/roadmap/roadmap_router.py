@@ -15,6 +15,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 @router.post("/get_quest")
 def get_all_quest(token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
-    return CustomResponse.response(
-        RoadmapService.get_roadmap(user_email), HTTPCode.OK, Message.SUCCESS
-    )
+    if user_email:
+        return CustomResponse.response(
+            RoadmapService.get_roadmap(user_email), HTTPCode.OK, Message.SUCCESS
+        )
+    else:
+        return CustomResponse.response(
+            RoadmapService.get_roadmap(None), HTTPCode.OK, Message.SUCCESS
+        )

@@ -6,7 +6,7 @@ from database import DataBaseConnector
 
 class RoadmapService:
     @staticmethod
-    def get_roadmap(user_email: str):
+    def get_roadmap(user_email: str or None):
         # 여기에서 퀘스트만 전체 조회
         # 밑의 조건에서 사용자 quest list 조회 후 반환
         try:
