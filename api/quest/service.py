@@ -34,7 +34,7 @@ class QuestService:
             return None
 
     @staticmethod
-    def get_quest_by_id(quest_id):
+    def get_quest_by_id(url_mapping):
         try:
             load_dotenv()
             session = DataBaseConnector.create_session_factory()
@@ -43,7 +43,7 @@ class QuestService:
                     s.query(QuestPreview, NPC)
                     .options(subqueryload(QuestPreview.sub))
                     .filter(QuestPreview.npc_value == NPC.id)
-                    .filter(QuestPreview.id == quest_id)
+                    .filter(QuestPreview.url_mapping == url_mapping)
                     .first()
                 )
 

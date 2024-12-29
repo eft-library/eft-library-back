@@ -55,6 +55,7 @@ class QuestPreview(DataBaseConnector.Base):
     requires = Column(JSON)
     next = Column(JSON)
     is_event = Column(Boolean)
+    url_mapping = Column(TEXT)
     sub = relationship("RelatedQuest", backref="quest_preview")
 
 

@@ -12,7 +12,7 @@ class ItemUtil:
                            tkl_key.image,
                            COALESCE(jsonb_agg(distinct
                                     jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
-                                                       tkl_related_quest.in_raid, 'count', tkl_related_quest."count"))
+                                                       tkl_related_quest.in_raid, 'count', tkl_related_quest."count", 'url_mapping', tkl_quest.url_mapping))
                                     FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
                     from tkl_key
                              LEFT JOIN LATERAL unnest(tkl_key.related_quests) AS rq ON true
@@ -36,7 +36,7 @@ class ItemUtil:
                        tkl_provisions.image,
                        COALESCE(jsonb_agg(distinct
                                 jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
-                                                   tkl_related_quest.in_raid, 'count', tkl_related_quest."count"))
+                                                   tkl_related_quest.in_raid, 'count', tkl_related_quest."count", 'url_mapping', tkl_quest.url_mapping))
                                 FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
                 from tkl_provisions
                          LEFT JOIN LATERAL unnest(tkl_provisions.related_quests) AS rq ON true
@@ -58,7 +58,7 @@ class ItemUtil:
                                tkl_loot.image,
                                COALESCE(jsonb_agg(distinct
                                         jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
-                                                           tkl_related_quest.in_raid, 'count', tkl_related_quest."count"))
+                                                           tkl_related_quest.in_raid, 'count', tkl_related_quest."count", 'url_mapping', tkl_quest.url_mapping))
                                         FILTER (WHERE rq IS NOT NULL), '[]'::jsonb)  as quest_notes,
                                COALESCE(jsonb_agg(distinct
                                         jsonb_build_object('item_id', tkl_related_hideout.item_id, 'level_id', hid, 'master_id',
@@ -89,7 +89,7 @@ class ItemUtil:
                            tkl_glasses.image,
                            COALESCE(jsonb_agg(distinct
                                     jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
-                                                       tkl_related_quest.in_raid, 'count', tkl_related_quest."count"))
+                                                       tkl_related_quest.in_raid, 'count', tkl_related_quest."count", 'url_mapping', tkl_quest.url_mapping))
                                     FILTER (WHERE rq IS NOT NULL), '[]'::jsonb) as notes
                     from tkl_glasses
                              LEFT JOIN LATERAL unnest(tkl_glasses.related_quests) AS rq ON true
