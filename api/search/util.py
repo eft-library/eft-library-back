@@ -26,7 +26,7 @@ class SearchUtil:
                     union all
                     select '/quest' as tkl_link
                     union all
-                    select '/quest/detail/' || id as tkl_link
+                    select '/quest/detail/' || url_mapping as tkl_link
                     from tkl_quest
                     union all
                     select '/weapon' as tkl_link
