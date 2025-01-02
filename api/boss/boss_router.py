@@ -13,3 +13,11 @@ def get_boss_by_id(boss_id: str):
     if boss is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.BOSS_NOT_FOUND)
     return CustomResponse.response(boss, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/all")
+def get_all_boss():
+    boss = BossService.get_all_boss()
+    if boss is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.BOSS_NOT_FOUND)
+    return CustomResponse.response(boss, HTTPCode.OK, Message.SUCCESS)

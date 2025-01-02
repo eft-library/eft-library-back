@@ -57,3 +57,49 @@ class BossService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_all_boss():
+        try:
+            priority = {
+                "WEAPON": 1,
+                "AMMO": 2,
+                "HEAD_WEAR": 3,
+                "HEADSET": 4,
+                "FACE_COVER": 5,
+                "GLASSES": 6,
+                "ARMOR_VEST": 7,
+                "RIG": 8,
+                "BACKPACK": 9,
+                "MEDICAL": 10,
+                "PROVISIONS": 11,
+                "KEY": 12,
+                "LOOT": 13,
+            }
+
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                boss_list = (
+                    s.query(Boss)
+                    .options(
+                        subqueryload(Boss.sub_followers).subqueryload(Followers.loot)
+                    )
+                    .order_by(Boss.order)
+                    .all()
+                )
+
+                for boss in boss_list:
+                    if boss.location_guide is not None:
+                        boss.location_guide = boss.location_guide.replace(
+                            "/tkl_quest", os.getenv("NAS_DATA") + "/tkl_quest"
+                        )
+                for boss in boss_list:
+                    for follower in boss.sub_followers:
+                        follower.loot = sorted(
+                            follower.loot, key=lambda x: priority[x.item_type]
+                        )
+
+                return boss_list
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
