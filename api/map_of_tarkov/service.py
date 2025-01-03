@@ -58,9 +58,64 @@ class MapOfTarkovService:
                 "map_info": map_info,
                 "extraction_info": extraction_info,
                 "transits_info": transits_info,
+                "map_id": map_id,
             }
 
             return map_of_tarkov
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_map_of_tarkov():
+        try:
+            load_dotenv()
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                # 모든 지도 정보와 관련 데이터를 한번에 가져오기
+                maps = s.query(ParentMap).options(subqueryload(ParentMap.sub)).all()
+                bosses = s.query(Boss).all()
+                extractions = s.query(Extraction).all()
+                transits = s.query(Transits).all()
+
+            # 지도 ID를 기준으로 데이터 분류
+            boss_dict = {}
+            for boss in bosses:
+                for spawn_map_id in boss.spawn:  # Boss.spawn이 리스트라고 가정
+                    boss_dict.setdefault(spawn_map_id, []).append(boss)
+
+            extraction_dict = {}
+            for extraction in extractions:
+                extraction_dict.setdefault(extraction.map, []).append(extraction)
+
+            transits_dict = {}
+            for transit in transits:
+                transits_dict.setdefault(transit.map, []).append(transit)
+
+            # 최종 결과 구성
+            result = []
+            for map_info in maps:
+                map_id = map_info.id
+
+                updated_boss_list = []
+                for boss in boss_dict.get(map_id, []):
+                    if boss.location_guide is not None:
+                        boss.location_guide = boss.location_guide.replace(
+                            "/tkl_quest", os.getenv("NAS_DATA") + "/tkl_quest"
+                        )
+                    updated_boss_list.append(boss.__dict__)
+
+                map_of_tarkov = {
+                    "boss_list": updated_boss_list,
+                    "map_info": map_info,
+                    "extraction_info": extraction_dict.get(map_id, []),
+                    "transits_info": transits_dict.get(map_id, []),
+                    "map_id": map_id,
+                }
+
+                result.append(map_of_tarkov)
+
+            return result
         except Exception as e:
             print("오류 발생:", e)
             return None
