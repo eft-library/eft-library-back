@@ -25,7 +25,7 @@ class ParentMap(DataBaseConnector.Base):
     mot_image = Column(String)
     map_json = Column(JSON)
     update_time = Column(TIMESTAMP)
-    sub = relationship("Map", backref="parent_map")
+    sub = relationship("Map", backref="parent_map", order_by="Map.order")
 
 
 class Map(DataBaseConnector.Base):
