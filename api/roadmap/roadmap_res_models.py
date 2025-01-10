@@ -36,6 +36,7 @@ class RoadmapNode(DataBaseConnector.Base):
     single_x_coordinate = Column(NUMERIC)
     single_y_coordinate = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
+    url_mapping = Column(TEXT)
     npc_value = Column(TEXT, ForeignKey("tkl_npc.id"))
 
 
