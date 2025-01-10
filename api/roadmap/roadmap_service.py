@@ -13,13 +13,19 @@ class RoadmapService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user_roadmap = {}
-                quest_info = (
+                node_info = (
                     s.query(NPC)
                     .order_by(NPC.order)
                     .options(subqueryload(NPC.all_quest))
                     .all()
                 )
-                user_roadmap["quest_info"] = quest_info
+                user_roadmap["node_info"] = node_info
+
+                edge_info = (
+                    s.query(RoadmapEdge).all()
+                )
+
+                user_roadmap['edge_info'] = edge_info
 
                 if user_email is not None:
                     user_quest_list = (
