@@ -1,6 +1,6 @@
-from api.quest.models import NPC, QuestPreview
+from api.quest.models import NPC
 from sqlalchemy.orm import subqueryload
-from api.roadmap.roadmap_res_models import UserRoadmap
+from api.roadmap.roadmap_res_models import UserRoadmap, RoadmapNode, RoadmapEdge
 from database import DataBaseConnector
 
 

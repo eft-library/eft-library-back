@@ -1,0 +1,5293 @@
+[
+    {
+        "id": "npc-to-657315df034d76585f032e01-f",
+        "source": "PRAPOR",
+        "target": "657315df034d76585f032e01",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-657315df034d76585f032e01",
+        "source": "PRAPOR",
+        "target": "657315df034d76585f032e01",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e657315df034d76585f032e01-5936d90786f7742b1420ba5b",
+        "source": "657315df034d76585f032e01",
+        "target": "5936d90786f7742b1420ba5b",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e657315df034d76585f032e01-addquest1",
+        "source": "657315df034d76585f032e01",
+        "target": "addquest1",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5936d90786f7742b1420ba5b-657315e1dccd301f1301416a",
+        "source": "5936d90786f7742b1420ba5b",
+        "target": "657315e1dccd301f1301416a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5936d90786f7742b1420ba5b-5fd9fad9c1ce6b1a3b486d00",
+        "source": "5936d90786f7742b1420ba5b",
+        "target": "5fd9fad9c1ce6b1a3b486d00",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e657315e1dccd301f1301416a-5936da9e86f7742d65037edf",
+        "source": "657315e1dccd301f1301416a",
+        "target": "5936da9e86f7742d65037edf",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5936da9e86f7742d65037edf-59674cd986f7744ab26e32f2",
+        "source": "5936da9e86f7742d65037edf",
+        "target": "59674cd986f7744ab26e32f2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5936da9e86f7742d65037edf-59674eb386f774539f14813a",
+        "source": "5936da9e86f7742d65037edf",
+        "target": "59674eb386f774539f14813a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59674eb386f774539f14813a-59c124d686f774189b3c843f",
+        "source": "59674eb386f774539f14813a",
+        "target": "59c124d686f774189b3c843f",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59c124d686f774189b3c843f-5ede55112c95834b583f052a",
+        "source": "59c124d686f774189b3c843f",
+        "target": "5ede55112c95834b583f052a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59c124d686f774189b3c843f-5967530a86f77462ba22226b",
+        "source": "59c124d686f774189b3c843f",
+        "target": "5967530a86f77462ba22226b",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ede55112c95834b583f052a-5ede567cfa6dc072ce15d6e3",
+        "source": "5ede55112c95834b583f052a",
+        "target": "5ede567cfa6dc072ce15d6e3",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ede567cfa6dc072ce15d6e3-60896bca6ee58f38c417d4f2",
+        "source": "5ede567cfa6dc072ce15d6e3",
+        "target": "60896bca6ee58f38c417d4f2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5967530a86f77462ba22226b-59675d6c86f7740a842fc482",
+        "source": "5967530a86f77462ba22226b",
+        "target": "59675d6c86f7740a842fc482",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59675d6c86f7740a842fc482-5967725e86f774601a446662",
+        "source": "59675d6c86f7740a842fc482",
+        "target": "5967725e86f774601a446662",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59675d6c86f7740a842fc482-59675ea386f77414b32bded2",
+        "source": "59675d6c86f7740a842fc482",
+        "target": "59675ea386f77414b32bded2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e60896bca6ee58f38c417d4f2-60896b7bfa70fc097863b8f5",
+        "source": "60896bca6ee58f38c417d4f2",
+        "target": "60896b7bfa70fc097863b8f5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e60896b7bfa70fc097863b8f5-special_comms",
+        "source": "60896b7bfa70fc097863b8f5",
+        "target": "special_comms",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59675ea386f77414b32bded2-6391359b9444fb141f4e6ee6",
+        "source": "59675ea386f77414b32bded2",
+        "target": "6391359b9444fb141f4e6ee6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59675ea386f77414b32bded2-596760e186f7741e11214d58",
+        "source": "59675ea386f77414b32bded2",
+        "target": "596760e186f7741e11214d58",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59675ea386f77414b32bded2-possessor",
+        "source": "59675ea386f77414b32bded2",
+        "target": "possessor",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5967725e86f774601a446662-5eda19f0edce541157209cee",
+        "source": "5967725e86f774601a446662",
+        "target": "5eda19f0edce541157209cee",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5967725e86f774601a446662-59c50a9e86f7745fef66f4ff",
+        "source": "5967725e86f774601a446662",
+        "target": "59c50a9e86f7745fef66f4ff",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5967725e86f774601a446662-5c12452c86f7744b83469073",
+        "source": "5967725e86f774601a446662",
+        "target": "5c12452c86f7744b83469073",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59c50a9e86f7745fef66f4ff-59c50c8886f7745fed3193bf",
+        "source": "59c50a9e86f7745fef66f4ff",
+        "target": "59c50c8886f7745fed3193bf",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59c50c8886f7745fed3193bf-59c512ad86f7741f0d09de9b",
+        "source": "59c50c8886f7745fed3193bf",
+        "target": "59c512ad86f7741f0d09de9b",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59c50c8886f7745fed3193bf-6179ac7511973d018217d0b9",
+        "source": "59c50c8886f7745fed3193bf",
+        "target": "6179ac7511973d018217d0b9",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59c512ad86f7741f0d09de9b-59ca264786f77445a80ed044",
+        "source": "59c512ad86f7741f0d09de9b",
+        "target": "59ca264786f77445a80ed044",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59ca264786f77445a80ed044-59ca29fb86f77445ab465c87",
+        "source": "59ca264786f77445a80ed044",
+        "target": "59ca29fb86f77445ab465c87",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59ca264786f77445a80ed044-639136f086e646067c176a8b",
+        "source": "59ca264786f77445a80ed044",
+        "target": "639136f086e646067c176a8b",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59ca29fb86f77445ab465c87-59ca2eb686f77445a80ed049",
+        "source": "59ca29fb86f77445ab465c87",
+        "target": "59ca2eb686f77445a80ed049",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59ca29fb86f77445ab465c87-6179b5b06e9dd54ac275e409",
+        "source": "59ca29fb86f77445ab465c87",
+        "target": "6179b5b06e9dd54ac275e409",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59ca2eb686f77445a80ed049-60e71bb4e456d449cd47ca75",
+        "source": "59ca2eb686f77445a80ed049",
+        "target": "60e71bb4e456d449cd47ca75",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59ca2eb686f77445a80ed049-64e7b99017ab941a6f7bf9d7",
+        "source": "59ca2eb686f77445a80ed049",
+        "target": "64e7b99017ab941a6f7bf9d7",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59ca2eb686f77445a80ed049-60effd818b669d08a35bfad5",
+        "source": "59ca2eb686f77445a80ed049",
+        "target": "60effd818b669d08a35bfad5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59ca2eb686f77445a80ed049-60e71b9bbd90872cb85440f3",
+        "source": "59ca2eb686f77445a80ed049",
+        "target": "60e71b9bbd90872cb85440f3",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59ca2eb686f77445a80ed049-60e71b62a0beca400d69efc4",
+        "source": "59ca2eb686f77445a80ed049",
+        "target": "60e71b62a0beca400d69efc4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59ca2eb686f77445a80ed049-63a9ae24009ffc6a551631a5",
+        "source": "59ca2eb686f77445a80ed049",
+        "target": "63a9ae24009ffc6a551631a5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5eda19f0edce541157209cee-5edac020218d181e29451446",
+        "source": "5eda19f0edce541157209cee",
+        "target": "5edac020218d181e29451446",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5eda19f0edce541157209cee-5f04886a3937dc337a6b8238",
+        "source": "5eda19f0edce541157209cee",
+        "target": "5f04886a3937dc337a6b8238",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5eda19f0edce541157209cee-5edabd13218d181e29451442",
+        "source": "5eda19f0edce541157209cee",
+        "target": "5edabd13218d181e29451442",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-5c0d190cd09282029f5390d8",
+        "source": "PRAPOR",
+        "target": "5c0d190cd09282029f5390d8",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5c0d190cd09282029f5390d8-5c0bd94186f7747a727f09b2",
+        "source": "5c0d190cd09282029f5390d8",
+        "target": "5c0bd94186f7747a727f09b2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5c0bd94186f7747a727f09b2-63a5cf262964a7488f5243ce",
+        "source": "5c0bd94186f7747a727f09b2",
+        "target": "63a5cf262964a7488f5243ce",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63a5cf262964a7488f5243ce-64f5deac39e45b527a7c4232",
+        "source": "63a5cf262964a7488f5243ce",
+        "target": "64f5deac39e45b527a7c4232",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e64f5deac39e45b527a7c4232-6574e0dedc0d635f633a5805",
+        "source": "64f5deac39e45b527a7c4232",
+        "target": "6574e0dedc0d635f633a5805",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6574e0dedc0d635f633a5805-test_drive_-_part_5",
+        "source": "6574e0dedc0d635f633a5805",
+        "target": "test_drive_-_part_5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5979f8bb86f7743ec214c7a6-5d4bec3486f7743cac246665",
+        "source": "5979f8bb86f7743ec214c7a6",
+        "target": "5d4bec3486f7743cac246665",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a171586f77405ba6887d3-59c9392986f7742f6923add2",
+        "source": "597a171586f77405ba6887d3",
+        "target": "59c9392986f7742f6923add2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a171586f77405ba6887d3-59c93e8e86f7742a406989c4",
+        "source": "597a171586f77405ba6887d3",
+        "target": "59c93e8e86f7742a406989c4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a171586f77405ba6887d3-6089743983426423753cd58a",
+        "source": "597a171586f77405ba6887d3",
+        "target": "6089743983426423753cd58a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6179ac7511973d018217d0b9-6179acbdc760af5ad2053585",
+        "source": "6179ac7511973d018217d0b9",
+        "target": "6179acbdc760af5ad2053585",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6179ac7511973d018217d0b9-626bd75c71bd851e971b82a5",
+        "source": "6179ac7511973d018217d0b9",
+        "target": "626bd75c71bd851e971b82a5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6391359b9444fb141f4e6ee6-639135b04ed9512be67647d7",
+        "source": "6391359b9444fb141f4e6ee6",
+        "target": "639135b04ed9512be67647d7",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639135b04ed9512be67647d7-64f5aac4b63b74469b6c14c2",
+        "source": "639135b04ed9512be67647d7",
+        "target": "64f5aac4b63b74469b6c14c2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e64f5aac4b63b74469b6c14c2-6573397ef3f8344c4575cd87",
+        "source": "64f5aac4b63b74469b6c14c2",
+        "target": "6573397ef3f8344c4575cd87",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639136f086e646067c176a8b-63a9ae24009ffc6a551631a5",
+        "source": "639136f086e646067c176a8b",
+        "target": "63a9ae24009ffc6a551631a5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e64e7b99017ab941a6f7bf9d7-64e7b9a4aac4cd0a726562cb",
+        "source": "64e7b99017ab941a6f7bf9d7",
+        "target": "64e7b9a4aac4cd0a726562cb",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e64e7b9a4aac4cd0a726562cb-64e7b9bffd30422ed03dad38",
+        "source": "64e7b9a4aac4cd0a726562cb",
+        "target": "64e7b9bffd30422ed03dad38",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest1-addquest6",
+        "source": "addquest1",
+        "target": "addquest6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest1-addquest4",
+        "source": "addquest1",
+        "target": "addquest4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest2-addquest18",
+        "source": "addquest2",
+        "target": "addquest18",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest3-addquest19",
+        "source": "addquest3",
+        "target": "addquest19",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest4-addquest5",
+        "source": "addquest4",
+        "target": "addquest5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-657315ddab5a49b71f098853-f",
+        "source": "THERAPIST",
+        "target": "657315ddab5a49b71f098853",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-657315ddab5a49b71f098853",
+        "source": "THERAPIST",
+        "target": "657315ddab5a49b71f098853",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e657315ddab5a49b71f098853-5967733e86f774602332fc84",
+        "source": "657315ddab5a49b71f098853",
+        "target": "5967733e86f774602332fc84",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5967733e86f774602332fc84-59689ee586f7740d1570bbd5",
+        "source": "5967733e86f774602332fc84",
+        "target": "59689ee586f7740d1570bbd5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5967733e86f774602332fc84-59689fbd86f7740d137ebfc4",
+        "source": "5967733e86f774602332fc84",
+        "target": "59689fbd86f7740d137ebfc4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59689fbd86f7740d137ebfc4-5968eb3186f7741dde183a4d",
+        "source": "59689fbd86f7740d137ebfc4",
+        "target": "5968eb3186f7741dde183a4d",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e59689ee586f7740d1570bbd5-596a204686f774576d4c95de",
+        "source": "59689ee586f7740d1570bbd5",
+        "target": "596a204686f774576d4c95de",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e596a204686f774576d4c95de-5969f90786f77420d2328015",
+        "source": "596a204686f774576d4c95de",
+        "target": "5969f90786f77420d2328015",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5969f90786f77420d2328015-5969f9e986f7741dde183a50",
+        "source": "5969f90786f77420d2328015",
+        "target": "5969f9e986f7741dde183a50",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5969f9e986f7741dde183a50-639135d89444fb141f4e6eea",
+        "source": "5969f9e986f7741dde183a50",
+        "target": "639135d89444fb141f4e6eea",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5969f9e986f7741dde183a50-596a1e6c86f7741ddc2d3206",
+        "source": "5969f9e986f7741dde183a50",
+        "target": "596a1e6c86f7741ddc2d3206",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5969f9e986f7741dde183a50-5a68661a86f774500f48afb0",
+        "source": "5969f9e986f7741dde183a50",
+        "target": "5a68661a86f774500f48afb0",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5969f9e986f7741dde183a50-596a218586f77420d232807c",
+        "source": "5969f9e986f7741dde183a50",
+        "target": "596a218586f77420d232807c",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5969f9e986f7741dde183a50-60896e28e4a85c72ef3fa301",
+        "source": "5969f9e986f7741dde183a50",
+        "target": "60896e28e4a85c72ef3fa301",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5969f9e986f7741dde183a50-596a0e1686f7741ddf17dbee",
+        "source": "5969f9e986f7741dde183a50",
+        "target": "596a0e1686f7741ddf17dbee",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5969f9e986f7741dde183a50-596a101f86f7741ddb481582",
+        "source": "5969f9e986f7741dde183a50",
+        "target": "596a101f86f7741ddb481582",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e60896e28e4a85c72ef3fa301-6179ad56c760af5ad2053587",
+        "source": "60896e28e4a85c72ef3fa301",
+        "target": "6179ad56c760af5ad2053587",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e596a0e1686f7741ddf17dbee-5d25e2ee86f77443e35162ea",
+        "source": "596a0e1686f7741ddf17dbee",
+        "target": "5d25e2ee86f77443e35162ea",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e596a0e1686f7741ddf17dbee-63ab180c87413d64ae0ac20a",
+        "source": "596a0e1686f7741ddf17dbee",
+        "target": "63ab180c87413d64ae0ac20a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a68661a86f774500f48afb0-5a68663e86f774501078f78a",
+        "source": "5a68661a86f774500f48afb0",
+        "target": "5a68663e86f774501078f78a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a68663e86f774501078f78a-6179afd0bca27a099552e040",
+        "source": "5a68663e86f774501078f78a",
+        "target": "6179afd0bca27a099552e040",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a68663e86f774501078f78a-5a68665c86f774255929b4c7",
+        "source": "5a68663e86f774501078f78a",
+        "target": "5a68665c86f774255929b4c7",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a68665c86f774255929b4c7-5a68667486f7742607157d28",
+        "source": "5a68665c86f774255929b4c7",
+        "target": "5a68667486f7742607157d28",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a68667486f7742607157d28-5d6fb2c086f77449da599c24",
+        "source": "5a68667486f7742607157d28",
+        "target": "5d6fb2c086f77449da599c24",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a68667486f7742607157d28-5c0be5fc86f774467a116593",
+        "source": "5a68667486f7742607157d28",
+        "target": "5c0be5fc86f774467a116593",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a68667486f7742607157d28-5c0d0d5086f774363760aef2",
+        "source": "5a68667486f7742607157d28",
+        "target": "5c0d0d5086f774363760aef2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a68667486f7742607157d28-5a68669a86f774255929b4d4",
+        "source": "5a68667486f7742607157d28",
+        "target": "5a68669a86f774255929b4d4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a68669a86f774255929b4d4-5c0d1c4cd0928202a02a6f5c",
+        "source": "5a68669a86f774255929b4d4",
+        "target": "5c0d1c4cd0928202a02a6f5c",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a68669a86f774255929b4d4-health_care_privacy_-_part_6",
+        "source": "5a68669a86f774255929b4d4",
+        "target": "health_care_privacy_-_part_6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5c0d0d5086f774363760aef2-60e71c48c1bfa3050473b8e5",
+        "source": "5c0d0d5086f774363760aef2",
+        "target": "60e71c48c1bfa3050473b8e5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5c0be5fc86f774467a116593-5c0d1c4cd0928202a02a6f5c",
+        "source": "5c0be5fc86f774467a116593",
+        "target": "5c0d1c4cd0928202a02a6f5c",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e596a1e6c86f7741ddc2d3206-5edab736cc183c769d778bc2",
+        "source": "596a1e6c86f7741ddc2d3206",
+        "target": "5edab736cc183c769d778bc2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edab736cc183c769d778bc2-5f04886a3937dc337a6b8238",
+        "source": "5edab736cc183c769d778bc2",
+        "target": "5f04886a3937dc337a6b8238",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edab736cc183c769d778bc2-5edaba7c0c502106f869bc02",
+        "source": "5edab736cc183c769d778bc2",
+        "target": "5edaba7c0c502106f869bc02",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edaba7c0c502106f869bc02-5edab4b1218d181e29451435",
+        "source": "5edaba7c0c502106f869bc02",
+        "target": "5edab4b1218d181e29451435",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edaba7c0c502106f869bc02-5edac34d0bb72a50635c2bfa",
+        "source": "5edaba7c0c502106f869bc02",
+        "target": "5edac34d0bb72a50635c2bfa",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edac34d0bb72a50635c2bfa-5edac63b930f5454f51e128b",
+        "source": "5edac34d0bb72a50635c2bfa",
+        "target": "5edac63b930f5454f51e128b",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edac34d0bb72a50635c2bfa-60e729cf5698ee7b05057439",
+        "source": "5edac34d0bb72a50635c2bfa",
+        "target": "60e729cf5698ee7b05057439",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a160786f77477531d39d2-59c93e8e86f7742a406989c4",
+        "source": "597a160786f77477531d39d2",
+        "target": "59c93e8e86f7742a406989c4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a160786f77477531d39d2-59ca1a6286f774509a270942",
+        "source": "597a160786f77477531d39d2",
+        "target": "59ca1a6286f774509a270942",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a160786f77477531d39d2-6089743983426423753cd58a",
+        "source": "597a160786f77477531d39d2",
+        "target": "6089743983426423753cd58a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6179afd0bca27a099552e040-626bd75b05f287031503c7f6",
+        "source": "6179afd0bca27a099552e040",
+        "target": "626bd75b05f287031503c7f6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639135d89444fb141f4e6eea-64f731ab83cfca080a361e42",
+        "source": "639135d89444fb141f4e6eea",
+        "target": "64f731ab83cfca080a361e42",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639135d89444fb141f4e6eea-639135e0fa894f0a866afde6",
+        "source": "639135d89444fb141f4e6eea",
+        "target": "639135e0fa894f0a866afde6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639135e0fa894f0a866afde6-64f3176921045e77405d63b5",
+        "source": "639135e0fa894f0a866afde6",
+        "target": "64f3176921045e77405d63b5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639135e0fa894f0a866afde6-64e7b971f9d6fa49d6769b44",
+        "source": "639135e0fa894f0a866afde6",
+        "target": "64e7b971f9d6fa49d6769b44",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e64f731ab83cfca080a361e42-6573387d0b26ed4fde798de3",
+        "source": "64f731ab83cfca080a361e42",
+        "target": "6573387d0b26ed4fde798de3",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6573387d0b26ed4fde798de3-beneath_the_streets",
+        "source": "6573387d0b26ed4fde798de3",
+        "target": "beneath_the_streets",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "ea_healthy_alternative-dragnet",
+        "source": "a_healthy_alternative",
+        "target": "dragnet",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest6-addquest23",
+        "source": "addquest6",
+        "target": "addquest23",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest7-addquest8",
+        "source": "addquest7",
+        "target": "addquest8",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-addquest9-f",
+        "source": "FENCE",
+        "target": "addquest9",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-addquest9",
+        "source": "FENCE",
+        "target": "addquest9",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest9-addquest10",
+        "source": "addquest9",
+        "target": "addquest10",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest10-addquest11",
+        "source": "addquest10",
+        "target": "addquest11",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest11-addquest12",
+        "source": "addquest11",
+        "target": "addquest12",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest12-addquest13",
+        "source": "addquest12",
+        "target": "addquest13",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest13-addquest14",
+        "source": "addquest13",
+        "target": "addquest14",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest15-addquest48",
+        "source": "addquest15",
+        "target": "addquest48",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-Marathon_-_from_beginning_to_end",
+        "source": "FENCE",
+        "target": "Marathon_-_from_beginning_to_end",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-is_this_a_reference",
+        "source": "FENCE",
+        "target": "is_this_a_reference",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-5c51aac186f77432ea65c552",
+        "source": "FENCE",
+        "target": "5c51aac186f77432ea65c552",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-61e6e60223374d168a4576a6",
+        "source": "FENCE",
+        "target": "61e6e60223374d168a4576a6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-61e6e5e0f5b9633f6719ed95",
+        "source": "FENCE",
+        "target": "61e6e5e0f5b9633f6719ed95",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-61e6e60c5ca3b3783662be27",
+        "source": "FENCE",
+        "target": "61e6e60c5ca3b3783662be27",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-61e6e615eea2935bc018a2c5",
+        "source": "FENCE",
+        "target": "61e6e615eea2935bc018a2c5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-61e6e621bfeab00251576265",
+        "source": "FENCE",
+        "target": "61e6e621bfeab00251576265",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-657315e270bb0b8dba00cc48-f",
+        "source": "SKIER",
+        "target": "657315e270bb0b8dba00cc48",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-657315e270bb0b8dba00cc48",
+        "source": "SKIER",
+        "target": "657315e270bb0b8dba00cc48",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e657315e270bb0b8dba00cc48-66058cb22cee99303f1ba067",
+        "source": "657315e270bb0b8dba00cc48",
+        "target": "66058cb22cee99303f1ba067",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e657315e270bb0b8dba00cc48-596b36c586f77450d6045ad2",
+        "source": "657315e270bb0b8dba00cc48",
+        "target": "596b36c586f77450d6045ad2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e596b36c586f77450d6045ad2-596b455186f77457cb50eccb",
+        "source": "596b36c586f77450d6045ad2",
+        "target": "596b455186f77457cb50eccb",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e596b36c586f77450d6045ad2-5a27c99a86f7747d2c6bdd8e",
+        "source": "596b36c586f77450d6045ad2",
+        "target": "5a27c99a86f7747d2c6bdd8e",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e596b36c586f77450d6045ad2-596b43fb86f77457ca186186",
+        "source": "596b36c586f77450d6045ad2",
+        "target": "596b43fb86f77457ca186186",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e596b43fb86f77457ca186186-5979ed3886f77431307dc512",
+        "source": "596b43fb86f77457ca186186",
+        "target": "5979ed3886f77431307dc512",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5979ed3886f77431307dc512-5979eee086f774311955e614",
+        "source": "5979ed3886f77431307dc512",
+        "target": "5979eee086f774311955e614",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5979ed3886f77431307dc512-5d25e48d86f77408251c4bfb",
+        "source": "5979ed3886f77431307dc512",
+        "target": "5d25e48d86f77408251c4bfb",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5979eee086f774311955e614-5979f9ba86f7740f6c3fe9f2",
+        "source": "5979eee086f774311955e614",
+        "target": "5979f9ba86f7740f6c3fe9f2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5979f9ba86f7740f6c3fe9f2-5979f8bb86f7743ec214c7a6",
+        "source": "5979f9ba86f7740f6c3fe9f2",
+        "target": "5979f8bb86f7743ec214c7a6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5979f9ba86f7740f6c3fe9f2-597a0b2986f77426d66c0633",
+        "source": "5979f9ba86f7740f6c3fe9f2",
+        "target": "597a0b2986f77426d66c0633",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a0b2986f77426d66c0633-597a0e5786f77426d66c0636",
+        "source": "597a0b2986f77426d66c0633",
+        "target": "597a0e5786f77426d66c0636",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a0e5786f77426d66c0636-5b478eca86f7744642012254",
+        "source": "597a0e5786f77426d66c0636",
+        "target": "5b478eca86f7744642012254",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a0e5786f77426d66c0636-597a0f5686f774273b74f676",
+        "source": "597a0e5786f77426d66c0636",
+        "target": "597a0f5686f774273b74f676",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a0e5786f77426d66c0636-597a160786f77477531d39d2",
+        "source": "597a0e5786f77426d66c0636",
+        "target": "597a160786f77477531d39d2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a0e5786f77426d66c0636-597a171586f77405ba6887d3",
+        "source": "597a0e5786f77426d66c0636",
+        "target": "597a171586f77405ba6887d3",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a0f5686f774273b74f676-59ca1a6286f774509a270942",
+        "source": "597a0f5686f774273b74f676",
+        "target": "59ca1a6286f774509a270942",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a0f5686f774273b74f676-59c9392986f7742f6923add2",
+        "source": "597a0f5686f774273b74f676",
+        "target": "59c9392986f7742f6923add2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e597a0f5686f774273b74f676-6089743983426423753cd58a",
+        "source": "597a0f5686f774273b74f676",
+        "target": "6089743983426423753cd58a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b478eca86f7744642012254-5b478ff486f7744d184ecbbf",
+        "source": "5b478eca86f7744642012254",
+        "target": "5b478ff486f7744d184ecbbf",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b478ff486f7744d184ecbbf-64f5e20652fc01298e2c61e3",
+        "source": "5b478ff486f7744d184ecbbf",
+        "target": "64f5e20652fc01298e2c61e3",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b478ff486f7744d184ecbbf-6572e876dc0d635f633a5714",
+        "source": "5b478ff486f7744d184ecbbf",
+        "target": "6572e876dc0d635f633a5714",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27c99a86f7747d2c6bdd8e-5a27d2af86f7744e1115b323",
+        "source": "5a27c99a86f7747d2c6bdd8e",
+        "target": "5a27d2af86f7744e1115b323",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27d2af86f7744e1115b323-6193850f60b34236ee0483de",
+        "source": "5a27d2af86f7744e1115b323",
+        "target": "6193850f60b34236ee0483de",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27d2af86f7744e1115b323-5a27b75b86f7742e97191958",
+        "source": "5a27d2af86f7744e1115b323",
+        "target": "5a27b75b86f7742e97191958",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27d2af86f7744e1115b323-5c1234c286f77406fa13baeb",
+        "source": "5a27d2af86f7744e1115b323",
+        "target": "5c1234c286f77406fa13baeb",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27d2af86f7744e1115b323-5b4794cb86f774598100d5d4",
+        "source": "5a27d2af86f7744e1115b323",
+        "target": "5b4794cb86f774598100d5d4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b47926a86f7747ccc057c15-5b4795fb86f7745876267770",
+        "source": "5b47926a86f7747ccc057c15",
+        "target": "5b4795fb86f7745876267770",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b4795fb86f7745876267770-5c0bdb5286f774166e38eed4",
+        "source": "5b4795fb86f7745876267770",
+        "target": "5c0bdb5286f774166e38eed4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b4795fb86f7745876267770-639dbaf17c898a131e1cffff",
+        "source": "5b4795fb86f7745876267770",
+        "target": "639dbaf17c898a131e1cffff",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b4795fb86f7745876267770-658027799634223183395339",
+        "source": "5b4795fb86f7745876267770",
+        "target": "658027799634223183395339",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b4795fb86f7745876267770-5c0bbaa886f7746941031d82",
+        "source": "5b4795fb86f7745876267770",
+        "target": "5c0bbaa886f7746941031d82",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5c0bbaa886f7746941031d82-5c0bc91486f7746ab41857a2",
+        "source": "5c0bbaa886f7746941031d82",
+        "target": "5c0bc91486f7746ab41857a2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5c1234c286f77406fa13baeb-5b47926a86f7747ccc057c15",
+        "source": "5c1234c286f77406fa13baeb",
+        "target": "5b47926a86f7747ccc057c15",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5c0bdb5286f774166e38eed4-irresistible",
+        "source": "5c0bdb5286f774166e38eed4",
+        "target": "irresistible",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b4794cb86f774598100d5d4-5c0d0f1886f77457b8210226",
+        "source": "5b4794cb86f774598100d5d4",
+        "target": "5c0d0f1886f77457b8210226",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e596a101f86f7741ddb481582-5d25e2ee86f77443e35162ea",
+        "source": "596a101f86f7741ddb481582",
+        "target": "5d25e2ee86f77443e35162ea",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e596a101f86f7741ddb481582-63ab180c87413d64ae0ac20a",
+        "source": "596a101f86f7741ddb481582",
+        "target": "63ab180c87413d64ae0ac20a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edabd13218d181e29451442-60e71c11d54b755a3b53eb65",
+        "source": "5edabd13218d181e29451442",
+        "target": "60e71c11d54b755a3b53eb65",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edabd13218d181e29451442-5edab4b1218d181e29451435",
+        "source": "5edabd13218d181e29451442",
+        "target": "5edab4b1218d181e29451435",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edabd13218d181e29451442-5edac34d0bb72a50635c2bfa",
+        "source": "5edabd13218d181e29451442",
+        "target": "5edac34d0bb72a50635c2bfa",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6193850f60b34236ee0483de-6179b4f16e9dd54ac275e407",
+        "source": "6193850f60b34236ee0483de",
+        "target": "6179b4f16e9dd54ac275e407",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6179b4f16e9dd54ac275e407-626bd75d5bef5d7d590bd415",
+        "source": "6179b4f16e9dd54ac275e407",
+        "target": "626bd75d5bef5d7d590bd415",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639135c3744e452011470807-639135cd8ba6894d155e77cb",
+        "source": "639135c3744e452011470807",
+        "target": "639135cd8ba6894d155e77cb",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639dbaf17c898a131e1cffff-639135c3744e452011470807",
+        "source": "639dbaf17c898a131e1cffff",
+        "target": "639135c3744e452011470807",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eexit_here-the_walls_have_eyes",
+        "source": "exit_here",
+        "target": "the_walls_have_eyes",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e64f5e20652fc01298e2c61e3-64f6aafd67e11a7c6206e0d0",
+        "source": "64f5e20652fc01298e2c61e3",
+        "target": "64f6aafd67e11a7c6206e0d0",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eirresistible-dangerous_props",
+        "source": "irresistible",
+        "target": "dangerous_props",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e66058cb22cee99303f1ba067-66058cb5ae4719735349b9e8",
+        "source": "66058cb22cee99303f1ba067",
+        "target": "66058cb5ae4719735349b9e8",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest18-addquest3",
+        "source": "addquest18",
+        "target": "addquest3",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest19-addquest24",
+        "source": "addquest19",
+        "target": "addquest24",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest20-addquest29",
+        "source": "addquest20",
+        "target": "addquest29",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest21-addquest22",
+        "source": "addquest21",
+        "target": "addquest22",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest22-addquest7",
+        "source": "addquest22",
+        "target": "addquest7",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-marathon_-_sightseeing",
+        "source": "SKIER",
+        "target": "marathon_-_sightseeing",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-5a27b75b86f7742e97191958-f",
+        "source": "PEACE_KEEPER",
+        "target": "5a27b75b86f7742e97191958",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27b75b86f7742e97191958-5edac020218d181e29451446",
+        "source": "5a27b75b86f7742e97191958",
+        "target": "5edac020218d181e29451446",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27b75b86f7742e97191958-5a27b7a786f774579c3eb376",
+        "source": "5a27b75b86f7742e97191958",
+        "target": "5a27b7a786f774579c3eb376",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27b7a786f774579c3eb376-5a27b7d686f77460d847e6a6",
+        "source": "5a27b7a786f774579c3eb376",
+        "target": "5a27b7d686f77460d847e6a6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27b7d686f77460d847e6a6-5a27b80086f774429a5d7e20",
+        "source": "5a27b7d686f77460d847e6a6",
+        "target": "5a27b80086f774429a5d7e20",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27b80086f774429a5d7e20-5a27b87686f77460de0252a8",
+        "source": "5a27b80086f774429a5d7e20",
+        "target": "5a27b87686f77460de0252a8",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27b87686f77460de0252a8-5a27b9de86f77464e5044585",
+        "source": "5a27b87686f77460de0252a8",
+        "target": "5a27b9de86f77464e5044585",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27b87686f77460de0252a8-5a03153686f77442d90e2171",
+        "source": "5a27b87686f77460de0252a8",
+        "target": "5a03153686f77442d90e2171",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27b87686f77460de0252a8-6086c852c945025d41566124",
+        "source": "5a27b87686f77460de0252a8",
+        "target": "6086c852c945025d41566124",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27b9de86f77464e5044585-5a27ba1c86f77461ea5a3c56",
+        "source": "5a27b9de86f77464e5044585",
+        "target": "5a27ba1c86f77461ea5a3c56",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a03153686f77442d90e2171-5a03173786f77451cb427172",
+        "source": "5a03153686f77442d90e2171",
+        "target": "5a03173786f77451cb427172",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a03153686f77442d90e2171-6179aff8f57fb279792c60a1",
+        "source": "5a03153686f77442d90e2171",
+        "target": "6179aff8f57fb279792c60a1",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a03173786f77451cb427172-5a0327ba86f77456b9154236",
+        "source": "5a03173786f77451cb427172",
+        "target": "5a0327ba86f77456b9154236",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a0327ba86f77456b9154236-6179b5eabca27a099552e052",
+        "source": "5a0327ba86f77456b9154236",
+        "target": "6179b5eabca27a099552e052",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a0327ba86f77456b9154236-5a03296886f774569778596a",
+        "source": "5a0327ba86f77456b9154236",
+        "target": "5a03296886f774569778596a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a03296886f774569778596a-5a0449d586f77474e66227b7",
+        "source": "5a03296886f774569778596a",
+        "target": "5a0449d586f77474e66227b7",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a0449d586f77474e66227b7-5a27ba9586f7741b543d8e85",
+        "source": "5a0449d586f77474e66227b7",
+        "target": "5a27ba9586f7741b543d8e85",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27ba9586f7741b543d8e85-5a27bafb86f7741c73584017",
+        "source": "5a27ba9586f7741b543d8e85",
+        "target": "5a27bafb86f7741c73584017",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bafb86f7741c73584017-5a27bb8386f7741c770d2d0a",
+        "source": "5a27bafb86f7741c73584017",
+        "target": "5a27bb8386f7741c770d2d0a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bafb86f7741c73584017-5a27bb1e86f7741f27621b7e",
+        "source": "5a27bafb86f7741c73584017",
+        "target": "5a27bb1e86f7741f27621b7e",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bafb86f7741c73584017-639282134ed9512be67647ed",
+        "source": "5a27bafb86f7741c73584017",
+        "target": "639282134ed9512be67647ed",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bafb86f7741c73584017-639136d68ba6894d155e77cf",
+        "source": "5a27bafb86f7741c73584017",
+        "target": "639136d68ba6894d155e77cf",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bb1e86f7741f27621b7e-5a27bb3d86f77411ea361a21",
+        "source": "5a27bb1e86f7741f27621b7e",
+        "target": "5a27bb3d86f77411ea361a21",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bb3d86f77411ea361a21-5a27bb5986f7741dfb660900",
+        "source": "5a27bb3d86f77411ea361a21",
+        "target": "5a27bb5986f7741dfb660900",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bb5986f7741dfb660900-61958c366726521dd96828ec",
+        "source": "5a27bb5986f7741dfb660900",
+        "target": "61958c366726521dd96828ec",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bb8386f7741c770d2d0a-5a27bbf886f774333a418eeb",
+        "source": "5a27bb8386f7741c770d2d0a",
+        "target": "5a27bbf886f774333a418eeb",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bbf886f774333a418eeb-5a27bc1586f7741f6d40fa2f",
+        "source": "5a27bbf886f774333a418eeb",
+        "target": "5a27bc1586f7741f6d40fa2f",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bc1586f7741f6d40fa2f-5a27bc3686f7741c73584026",
+        "source": "5a27bc1586f7741f6d40fa2f",
+        "target": "5a27bc3686f7741c73584026",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bc3686f7741c73584026-5a27bc6986f7741c7358402b",
+        "source": "5a27bc3686f7741c73584026",
+        "target": "5a27bc6986f7741c7358402b",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bc6986f7741c7358402b-63a9b229813bba58a50c9ee5",
+        "source": "5a27bc6986f7741c7358402b",
+        "target": "63a9b229813bba58a50c9ee5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bc6986f7741c7358402b-5a27bc8586f7741b543d8ea4",
+        "source": "5a27bc6986f7741c7358402b",
+        "target": "5a27bc8586f7741b543d8ea4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bc6986f7741c7358402b-5d6fbc2886f77449d825f9d3",
+        "source": "5a27bc6986f7741c7358402b",
+        "target": "5d6fbc2886f77449d825f9d3",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bc8586f7741b543d8ea4-5c0be13186f7746f016734aa",
+        "source": "5a27bc8586f7741b543d8ea4",
+        "target": "5c0be13186f7746f016734aa",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5a27bc8586f7741b543d8ea4-5c0d4e61d09282029f53920e",
+        "source": "5a27bc8586f7741b543d8ea4",
+        "target": "5c0d4e61d09282029f53920e",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5c0d4e61d09282029f53920e-60e71c9ad54b755a3b53eb66",
+        "source": "5c0d4e61d09282029f53920e",
+        "target": "60e71c9ad54b755a3b53eb66",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edac020218d181e29451446-5edac63b930f5454f51e128b",
+        "source": "5edac020218d181e29451446",
+        "target": "5edac63b930f5454f51e128b",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5c0d0f1886f77457b8210226-5c0d4c12d09282029f539173",
+        "source": "5c0d0f1886f77457b8210226",
+        "target": "5c0d4c12d09282029f539173",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6086c852c945025d41566124-60896888e4a85c72ef3fa300",
+        "source": "6086c852c945025d41566124",
+        "target": "60896888e4a85c72ef3fa300",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6086c852c945025d41566124-639135f286e646067c176a87",
+        "source": "6086c852c945025d41566124",
+        "target": "639135f286e646067c176a87",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6086c852c945025d41566124-6179b4d1bca27a099552e04e",
+        "source": "6086c852c945025d41566124",
+        "target": "6179b4d1bca27a099552e04e",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e61958c366726521dd96828ec-5c0bd01e86f7747cdd799e56",
+        "source": "61958c366726521dd96828ec",
+        "target": "5c0bd01e86f7747cdd799e56",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e61958c366726521dd96828ec-639135534b15ca31f76bc317",
+        "source": "61958c366726521dd96828ec",
+        "target": "639135534b15ca31f76bc317",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6179aff8f57fb279792c60a1-a_healthy_alternative",
+        "source": "6179aff8f57fb279792c60a1",
+        "target": "a_healthy_alternative",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6179aff8f57fb279792c60a1-one_less_loose_end",
+        "source": "6179aff8f57fb279792c60a1",
+        "target": "one_less_loose_end",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e60e71ccb5688f6424c7bfec4-60e71ce009d7c801eb0c0ec6",
+        "source": "60e71ccb5688f6424c7bfec4",
+        "target": "60e71ce009d7c801eb0c0ec6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639135f286e646067c176a87-63a9b229813bba58a50c9ee5",
+        "source": "639135f286e646067c176a87",
+        "target": "63a9b229813bba58a50c9ee5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639135f286e646067c176a87-new_day,_new_paths",
+        "source": "639135f286e646067c176a87",
+        "target": "new_day,_new_paths",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eone_less_loose_end-dragnet",
+        "source": "one_less_loose_end",
+        "target": "dragnet",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-657315e4a6af4ab4b50f3459-f",
+        "source": "MECHANIC",
+        "target": "657315e4a6af4ab4b50f3459",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-657315e4a6af4ab4b50f3459",
+        "source": "MECHANIC",
+        "target": "657315e4a6af4ab4b50f3459",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e657315e4a6af4ab4b50f3459-5ac23c6186f7741247042bad",
+        "source": "657315e4a6af4ab4b50f3459",
+        "target": "5ac23c6186f7741247042bad",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d2495a886f77425cd51e403-5d24b81486f77439c92d6ba8",
+        "source": "5d2495a886f77425cd51e403",
+        "target": "5d24b81486f77439c92d6ba8",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac23c6186f7741247042bad-5ac2426c86f774138762edfe",
+        "source": "5ac23c6186f7741247042bad",
+        "target": "5ac2426c86f774138762edfe",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac23c6186f7741247042bad-5ac2428686f77412450b42bf",
+        "source": "5ac23c6186f7741247042bad",
+        "target": "5ac2428686f77412450b42bf",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac23c6186f7741247042bad-5ac345dc86f774288030817f",
+        "source": "5ac23c6186f7741247042bad",
+        "target": "5ac345dc86f774288030817f",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac23c6186f7741247042bad-5d2495a886f77425cd51e403",
+        "source": "5ac23c6186f7741247042bad",
+        "target": "5d2495a886f77425cd51e403",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac2426c86f774138762edfe-639872f9decada40426d3447",
+        "source": "5ac2426c86f774138762edfe",
+        "target": "639872f9decada40426d3447",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac2426c86f774138762edfe-5ac3467986f7741d6224abc2",
+        "source": "5ac2426c86f774138762edfe",
+        "target": "5ac3467986f7741d6224abc2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac2428686f77412450b42bf-639872f9decada40426d3447",
+        "source": "5ac2428686f77412450b42bf",
+        "target": "639872f9decada40426d3447",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac2428686f77412450b42bf-5ac3479086f7742880308199",
+        "source": "5ac2428686f77412450b42bf",
+        "target": "5ac3479086f7742880308199",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639872f9decada40426d3447-5ae3267986f7742a413592fe",
+        "source": "639872f9decada40426d3447",
+        "target": "5ae3267986f7742a413592fe",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae3267986f7742a413592fe-5ae3270f86f77445ba41d4dd",
+        "source": "5ae3267986f7742a413592fe",
+        "target": "5ae3270f86f77445ba41d4dd",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae3270f86f77445ba41d4dd-5ac244eb86f7741356335af1",
+        "source": "5ae3270f86f77445ba41d4dd",
+        "target": "5ac244eb86f7741356335af1",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac244eb86f7741356335af1-5ae3277186f7745973054106",
+        "source": "5ac244eb86f7741356335af1",
+        "target": "5ae3277186f7745973054106",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae3277186f7745973054106-639872fa9b4fb827b200d8e5",
+        "source": "5ae3277186f7745973054106",
+        "target": "639872fa9b4fb827b200d8e5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639872fa9b4fb827b200d8e5-5ae327c886f7745c7b3f2f3f",
+        "source": "639872fa9b4fb827b200d8e5",
+        "target": "5ae327c886f7745c7b3f2f3f",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae327c886f7745c7b3f2f3f-639872fc93ae507d5858c3a6",
+        "source": "5ae327c886f7745c7b3f2f3f",
+        "target": "639872fc93ae507d5858c3a6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639872fc93ae507d5858c3a6-5b47799d86f7746c5d6a5fd8",
+        "source": "639872fc93ae507d5858c3a6",
+        "target": "5b47799d86f7746c5d6a5fd8",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b47799d86f7746c5d6a5fd8-5ac244c486f77413e12cf945",
+        "source": "5b47799d86f7746c5d6a5fd8",
+        "target": "5ac244c486f77413e12cf945",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac244c486f77413e12cf945-639872fe8871e1272b10ccf6",
+        "source": "5ac244c486f77413e12cf945",
+        "target": "639872fe8871e1272b10ccf6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639872fe8871e1272b10ccf6-5ae3280386f7742a41359364",
+        "source": "639872fe8871e1272b10ccf6",
+        "target": "5ae3280386f7742a41359364",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae3280386f7742a41359364-5ac242ab86f77412464f68b4",
+        "source": "5ae3280386f7742a41359364",
+        "target": "5ac242ab86f77412464f68b4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac242ab86f77412464f68b4-5b47749f86f7746c5d6a5fd4",
+        "source": "5ac242ab86f77412464f68b4",
+        "target": "5b47749f86f7746c5d6a5fd4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b47749f86f7746c5d6a5fd4-5b477b6f86f7747290681823",
+        "source": "5b47749f86f7746c5d6a5fd4",
+        "target": "5b477b6f86f7747290681823",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b477b6f86f7747290681823-639873003693c63d86328f25",
+        "source": "5b477b6f86f7747290681823",
+        "target": "639873003693c63d86328f25",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639873003693c63d86328f25-5b477f7686f7744d1b23c4d2",
+        "source": "639873003693c63d86328f25",
+        "target": "5b477f7686f7744d1b23c4d2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b477f7686f7744d1b23c4d2-63987301e11ec11ff5504036",
+        "source": "5b477f7686f7744d1b23c4d2",
+        "target": "63987301e11ec11ff5504036",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63987301e11ec11ff5504036-5b47825886f77468074618d3",
+        "source": "63987301e11ec11ff5504036",
+        "target": "5b47825886f77468074618d3",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b47825886f77468074618d3-64f83bb69878a0569d6ecfbe",
+        "source": "5b47825886f77468074618d3",
+        "target": "64f83bb69878a0569d6ecfbe",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e64f83bb69878a0569d6ecfbe-64f83bcdde58fc437700d8fa",
+        "source": "64f83bb69878a0569d6ecfbe",
+        "target": "64f83bcdde58fc437700d8fa",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e64f83bcdde58fc437700d8fa-64f83bd983cfca080a362c82",
+        "source": "64f83bcdde58fc437700d8fa",
+        "target": "64f83bd983cfca080a362c82",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3467986f7741d6224abc2-5ac3479086f7742880308199",
+        "source": "5ac3467986f7741d6224abc2",
+        "target": "5ac3479086f7742880308199",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3467986f7741d6224abc2-5ac346a886f7744e1b083d67",
+        "source": "5ac3467986f7741d6224abc2",
+        "target": "5ac346a886f7744e1b083d67",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac346a886f7744e1b083d67-5ac3477486f7741d651d6885",
+        "source": "5ac346a886f7744e1b083d67",
+        "target": "5ac3477486f7741d651d6885",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac346a886f7744e1b083d67-5ac346cf86f7741d63233a02",
+        "source": "5ac346a886f7744e1b083d67",
+        "target": "5ac346cf86f7741d63233a02",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3477486f7741d651d6885-6089736efa70fc097863b8f6",
+        "source": "5ac3477486f7741d651d6885",
+        "target": "6089736efa70fc097863b8f6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3477486f7741d651d6885-60c0c018f7afb4354815096a",
+        "source": "5ac3477486f7741d651d6885",
+        "target": "60c0c018f7afb4354815096a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3477486f7741d651d6885-exit_here",
+        "source": "5ac3477486f7741d651d6885",
+        "target": "exit_here",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3477486f7741d651d6885-black_swan",
+        "source": "5ac3477486f7741d651d6885",
+        "target": "black_swan",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eblack_swan-forklift_certified",
+        "source": "black_swan",
+        "target": "forklift_certified",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eforklift_certified-capacity_check",
+        "source": "forklift_certified",
+        "target": "capacity_check",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "ecapacity_check-all_is_revealed",
+        "source": "capacity_check",
+        "target": "all_is_revealed",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "ecapacity_check-secrets_of_polikhim",
+        "source": "capacity_check",
+        "target": "secrets_of_polikhim",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6089736efa70fc097863b8f6-6089732b59b92115597ad789",
+        "source": "6089736efa70fc097863b8f6",
+        "target": "6089732b59b92115597ad789",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac346cf86f7741d63233a02-5ac346e886f7741d6118b99b",
+        "source": "5ac346cf86f7741d63233a02",
+        "target": "5ac346e886f7741d6118b99b",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac346cf86f7741d63233a02-64ee9df4496db64f9b7a4432",
+        "source": "5ac346cf86f7741d63233a02",
+        "target": "64ee9df4496db64f9b7a4432",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac346e886f7741d6118b99b-6578ec473dbd035d04531a8d",
+        "source": "5ac346e886f7741d6118b99b",
+        "target": "6578ec473dbd035d04531a8d",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac345dc86f774288030817f-5ac3460c86f7742880308185",
+        "source": "5ac345dc86f774288030817f",
+        "target": "5ac3460c86f7742880308185",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac345dc86f774288030817f-capacity_check",
+        "source": "5ac345dc86f774288030817f",
+        "target": "capacity_check",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3460c86f7742880308185-5ac3475486f7741d6224abd3",
+        "source": "5ac3460c86f7742880308185",
+        "target": "5ac3475486f7741d6224abd3",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3460c86f7742880308185-5ac3462b86f7741d6118b983",
+        "source": "5ac3460c86f7742880308185",
+        "target": "5ac3462b86f7741d6118b983",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3460c86f7742880308185-626bd75e47ea7f506e5493c5",
+        "source": "5ac3460c86f7742880308185",
+        "target": "626bd75e47ea7f506e5493c5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3462b86f7741d6118b983-5ac3464c86f7741d651d6877",
+        "source": "5ac3462b86f7741d6118b983",
+        "target": "5ac3464c86f7741d651d6877",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3462b86f7741d6118b983-5c0bde0986f77479cf22c2f8",
+        "source": "5ac3462b86f7741d6118b983",
+        "target": "5c0bde0986f77479cf22c2f8",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3462b86f7741d6118b983-6179b3bdc7560e13d23eeb8d",
+        "source": "5ac3462b86f7741d6118b983",
+        "target": "6179b3bdc7560e13d23eeb8d",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3464c86f7741d651d6877-5c1128e386f7746565181106",
+        "source": "5ac3464c86f7741d651d6877",
+        "target": "5c1128e386f7746565181106",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3464c86f7741d651d6877-6179b3a12153c15e937d52bc",
+        "source": "5ac3464c86f7741d651d6877",
+        "target": "6179b3a12153c15e937d52bc",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ac3464c86f7741d651d6877-5c139eb686f7747878361a6f",
+        "source": "5ac3464c86f7741d651d6877",
+        "target": "5c139eb686f7747878361a6f",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5f04886a3937dc337a6b8238-60e71d23c1bfa3050473b8e6",
+        "source": "5f04886a3937dc337a6b8238",
+        "target": "60e71d23c1bfa3050473b8e6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5f04886a3937dc337a6b8238-5edab4b1218d181e29451435",
+        "source": "5f04886a3937dc337a6b8238",
+        "target": "5edab4b1218d181e29451435",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5f04886a3937dc337a6b8238-5edac34d0bb72a50635c2bfa",
+        "source": "5f04886a3937dc337a6b8238",
+        "target": "5edac34d0bb72a50635c2bfa",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e60e71d23c1bfa3050473b8e6-60e71d6d7fcf9c556f325055",
+        "source": "60e71d23c1bfa3050473b8e6",
+        "target": "60e71d6d7fcf9c556f325055",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6179b3bdc7560e13d23eeb8d-639135e8c115f907b14700aa",
+        "source": "6179b3bdc7560e13d23eeb8d",
+        "target": "639135e8c115f907b14700aa",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e626bd75e47ea7f506e5493c5-63913715f8e5dd32bf4e3aaa",
+        "source": "626bd75e47ea7f506e5493c5",
+        "target": "63913715f8e5dd32bf4e3aaa",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63913715f8e5dd32bf4e3aaa-63a511ea30d85e10e375b045",
+        "source": "63913715f8e5dd32bf4e3aaa",
+        "target": "63a511ea30d85e10e375b045",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63913715f8e5dd32bf4e3aaa-639136fa9444fb141f4e6eee",
+        "source": "63913715f8e5dd32bf4e3aaa",
+        "target": "639136fa9444fb141f4e6eee",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63913715f8e5dd32bf4e3aaa-639135e8c115f907b14700aa",
+        "source": "63913715f8e5dd32bf4e3aaa",
+        "target": "639135e8c115f907b14700aa",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639135e8c115f907b14700aa-65733403eefc2c312a759ddb",
+        "source": "639135e8c115f907b14700aa",
+        "target": "65733403eefc2c312a759ddb",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-625d6ff5ddc94657c21a1625",
+        "source": "MECHANIC",
+        "target": "625d6ff5ddc94657c21a1625",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e625d6ff5ddc94657c21a1625-625d6ffaf7308432be1d44c5",
+        "source": "625d6ff5ddc94657c21a1625",
+        "target": "625d6ffaf7308432be1d44c5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e625d6ffaf7308432be1d44c5-625d6ffcaa168e51321d69d7",
+        "source": "625d6ffaf7308432be1d44c5",
+        "target": "625d6ffcaa168e51321d69d7",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e625d6ffcaa168e51321d69d7-625d6fff4149f1149b5b12c9",
+        "source": "625d6ffcaa168e51321d69d7",
+        "target": "625d6fff4149f1149b5b12c9",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e625d6fff4149f1149b5b12c9-625d7001c4874104f230c0c5",
+        "source": "625d6fff4149f1149b5b12c9",
+        "target": "625d7001c4874104f230c0c5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e625d7001c4874104f230c0c5-625d70031ed3bb5bcc5bd9e5",
+        "source": "625d7001c4874104f230c0c5",
+        "target": "625d70031ed3bb5bcc5bd9e5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e625d70031ed3bb5bcc5bd9e5-625d7005a4eb80027c4f2e09",
+        "source": "625d70031ed3bb5bcc5bd9e5",
+        "target": "625d7005a4eb80027c4f2e09",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e625d7005a4eb80027c4f2e09-625d700cc48e6c62a440fab5",
+        "source": "625d7005a4eb80027c4f2e09",
+        "target": "625d700cc48e6c62a440fab5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e625d700cc48e6c62a440fab5-626bd75d5bef5d7d590bd415",
+        "source": "625d700cc48e6c62a440fab5",
+        "target": "626bd75d5bef5d7d590bd415",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e625d700cc48e6c62a440fab5-63966faeea19ac7ed845db2c",
+        "source": "625d700cc48e6c62a440fab5",
+        "target": "63966faeea19ac7ed845db2c",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e65733403eefc2c312a759ddb-6573382e557ff128bf3da536",
+        "source": "65733403eefc2c312a759ddb",
+        "target": "6573382e557ff128bf3da536",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest23-addquest2",
+        "source": "addquest23",
+        "target": "addquest2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest24-addquest20",
+        "source": "addquest24",
+        "target": "addquest20",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-626148251ed3bb5bcc5bd9ed",
+        "source": "MECHANIC",
+        "target": "626148251ed3bb5bcc5bd9ed",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e626148251ed3bb5bcc5bd9ed-6261482fa4eb80027c4f2e11",
+        "source": "626148251ed3bb5bcc5bd9ed",
+        "target": "6261482fa4eb80027c4f2e11",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6261482fa4eb80027c4f2e11-6391d90f4ed9512be67647df",
+        "source": "6261482fa4eb80027c4f2e11",
+        "target": "6391d90f4ed9512be67647df",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-addquest25",
+        "source": "MECHANIC",
+        "target": "addquest25",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest25-addquest26",
+        "source": "addquest25",
+        "target": "addquest26",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest26-6391d90f4ed9512be67647df",
+        "source": "addquest26",
+        "target": "6391d90f4ed9512be67647df",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-addquest27",
+        "source": "MECHANIC",
+        "target": "addquest27",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest27-addquest28",
+        "source": "addquest27",
+        "target": "addquest28",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest28-6391d90f4ed9512be67647df",
+        "source": "addquest28",
+        "target": "6391d90f4ed9512be67647df",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-5ae448a386f7744d3730fff0-f",
+        "source": "RAGMAN",
+        "target": "5ae448a386f7744d3730fff0",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-5ae448a386f7744d3730fff0",
+        "source": "RAGMAN",
+        "target": "5ae448a386f7744d3730fff0",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448a386f7744d3730fff0-5ae448bf86f7744d733e55ee",
+        "source": "5ae448a386f7744d3730fff0",
+        "target": "5ae448bf86f7744d733e55ee",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448a386f7744d3730fff0-5ae448e586f7744dcf0c2a67",
+        "source": "5ae448a386f7744d3730fff0",
+        "target": "5ae448e586f7744dcf0c2a67",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448a386f7744d3730fff0-638fcd23dc65553116701d33",
+        "source": "5ae448a386f7744d3730fff0",
+        "target": "638fcd23dc65553116701d33",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448a386f7744d3730fff0-addquest30",
+        "source": "5ae448a386f7744d3730fff0",
+        "target": "addquest30",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448bf86f7744d733e55ee-5ae448f286f77448d73c0131",
+        "source": "5ae448bf86f7744d733e55ee",
+        "target": "5ae448f286f77448d73c0131",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448bf86f7744d733e55ee-5ae4493486f7744efa289417",
+        "source": "5ae448bf86f7744d733e55ee",
+        "target": "5ae4493486f7744efa289417",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448e586f7744dcf0c2a67-65802b627b44fa5e14638899",
+        "source": "5ae448e586f7744dcf0c2a67",
+        "target": "65802b627b44fa5e14638899",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448e586f7744dcf0c2a67-5ae4493486f7744efa289417",
+        "source": "5ae448e586f7744dcf0c2a67",
+        "target": "5ae4493486f7744efa289417",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448e586f7744dcf0c2a67-5ae448f286f77448d73c0131",
+        "source": "5ae448e586f7744dcf0c2a67",
+        "target": "5ae448f286f77448d73c0131",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e608974d01a66564e74191fc0-608974af4b05530f55550c21",
+        "source": "608974d01a66564e74191fc0",
+        "target": "608974af4b05530f55550c21",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448f286f77448d73c0131-5ae4490786f7744ca822adcc",
+        "source": "5ae448f286f77448d73c0131",
+        "target": "5ae4490786f7744ca822adcc",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448f286f77448d73c0131-608974d01a66564e74191fc0",
+        "source": "5ae448f286f77448d73c0131",
+        "target": "608974d01a66564e74191fc0",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448f286f77448d73c0131-5ae4499a86f77449783815db",
+        "source": "5ae448f286f77448d73c0131",
+        "target": "5ae4499a86f77449783815db",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448f286f77448d73c0131-5b47876e86f7744d1c353205",
+        "source": "5ae448f286f77448d73c0131",
+        "target": "5b47876e86f7744d1c353205",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae448f286f77448d73c0131-5b47891f86f7744d1b23c571",
+        "source": "5ae448f286f77448d73c0131",
+        "target": "5b47891f86f7744d1b23c571",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4490786f7744ca822adcc-5ae449b386f77446d8741719",
+        "source": "5ae4490786f7744ca822adcc",
+        "target": "5ae449b386f77446d8741719",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae449b386f77446d8741719-5b478b1886f7744d1b23c57d",
+        "source": "5ae449b386f77446d8741719",
+        "target": "5b478b1886f7744d1b23c57d",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae449b386f77446d8741719-5ae449c386f7744bde357697",
+        "source": "5ae449b386f77446d8741719",
+        "target": "5ae449c386f7744bde357697",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b478b1886f7744d1b23c57d-5c112d7e86f7740d6f647486",
+        "source": "5b478b1886f7744d1b23c57d",
+        "target": "5c112d7e86f7740d6f647486",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae449c386f7744bde357697-5ae449d986f774453a54a7e1",
+        "source": "5ae449c386f7744bde357697",
+        "target": "5ae449d986f774453a54a7e1",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae449c386f7744bde357697-5d25e2e286f77444001e2e48",
+        "source": "5ae449c386f7744bde357697",
+        "target": "5d25e2e286f77444001e2e48",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4493486f7744efa289417-5ae4493d86f7744b8e15aa8f",
+        "source": "5ae4493486f7744efa289417",
+        "target": "5ae4493d86f7744b8e15aa8f",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4493d86f7744b8e15aa8f-5b478d0f86f7744d190d91b5",
+        "source": "5ae4493d86f7744b8e15aa8f",
+        "target": "5b478d0f86f7744d190d91b5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4493d86f7744b8e15aa8f-5ae449b386f77446d8741719",
+        "source": "5ae4493d86f7744b8e15aa8f",
+        "target": "5ae449b386f77446d8741719",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4493d86f7744b8e15aa8f-5ae4495086f77443c122bc40",
+        "source": "5ae4493d86f7744b8e15aa8f",
+        "target": "5ae4495086f77443c122bc40",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b478d0f86f7744d190d91b5-6613f3007f6666d56807c929",
+        "source": "5b478d0f86f7744d190d91b5",
+        "target": "6613f3007f6666d56807c929",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b478d0f86f7744d190d91b5-639135bbc115f907b14700a6",
+        "source": "5b478d0f86f7744d190d91b5",
+        "target": "639135bbc115f907b14700a6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4495086f77443c122bc40-5b47876e86f7744d1c353205",
+        "source": "5ae4495086f77443c122bc40",
+        "target": "5b47876e86f7744d1c353205",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4495086f77443c122bc40-5ae4495c86f7744e87761355",
+        "source": "5ae4495086f77443c122bc40",
+        "target": "5ae4495c86f7744e87761355",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b47876e86f7744d1c353205-5c10f94386f774227172c572",
+        "source": "5b47876e86f7744d1c353205",
+        "target": "5c10f94386f774227172c572",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5c10f94386f774227172c572-5c1141f386f77430ff393792",
+        "source": "5c10f94386f774227172c572",
+        "target": "5c1141f386f77430ff393792",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5c10f94386f774227172c572-know_your_place",
+        "source": "5c10f94386f774227172c572",
+        "target": "know_your_place",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4495c86f7744e87761355-5ae4496986f774459e77beb6",
+        "source": "5ae4495c86f7744e87761355",
+        "target": "5ae4496986f774459e77beb6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4495c86f7744e87761355-5ae4498786f7744bde357695",
+        "source": "5ae4495c86f7744e87761355",
+        "target": "5ae4498786f7744bde357695",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4498786f7744bde357695-5ae449a586f7744bde357696",
+        "source": "5ae4498786f7744bde357695",
+        "target": "5ae449a586f7744bde357696",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4498786f7744bde357695-5ae449d986f774453a54a7e1",
+        "source": "5ae4498786f7744bde357695",
+        "target": "5ae449d986f774453a54a7e1",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-5dc53acb86f77469c740c893",
+        "source": "RAGMAN",
+        "target": "5dc53acb86f77469c740c893",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae449d986f774453a54a7e1-60e71dc0a94be721b065bbfc",
+        "source": "5ae449d986f774453a54a7e1",
+        "target": "60e71dc0a94be721b065bbfc",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4496986f774459e77beb6-5b47891f86f7744d1b23c571",
+        "source": "5ae4496986f774459e77beb6",
+        "target": "5b47891f86f7744d1b23c571",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4496986f774459e77beb6-5ae4497b86f7744cf402ed00",
+        "source": "5ae4496986f774459e77beb6",
+        "target": "5ae4497b86f7744cf402ed00",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5b47891f86f7744d1b23c571-5c1141f386f77430ff393792",
+        "source": "5b47891f86f7744d1b23c571",
+        "target": "5c1141f386f77430ff393792",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4497b86f7744cf402ed00-5ae4499a86f77449783815db",
+        "source": "5ae4497b86f7744cf402ed00",
+        "target": "5ae4499a86f77449783815db",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5ae4497b86f7744cf402ed00-5e383a6386f77465910ce1f3",
+        "source": "5ae4497b86f7744cf402ed00",
+        "target": "5e383a6386f77465910ce1f3",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5e383a6386f77465910ce1f3-5e4d515e86f77438b2195244",
+        "source": "5e383a6386f77465910ce1f3",
+        "target": "5e4d515e86f77438b2195244",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e60e71dc0a94be721b065bbfc-60e71dc67fcf9c556f325056",
+        "source": "60e71dc0a94be721b065bbfc",
+        "target": "60e71dc67fcf9c556f325056",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e638fcd23dc65553116701d33-639135a7e705511c8a4a1b78",
+        "source": "638fcd23dc65553116701d33",
+        "target": "639135a7e705511c8a4a1b78",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639135a7e705511c8a4a1b78-639135bbc115f907b14700a6",
+        "source": "639135a7e705511c8a4a1b78",
+        "target": "639135bbc115f907b14700a6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639135a7e705511c8a4a1b78-65734c186dc1e402c80dc19e",
+        "source": "639135a7e705511c8a4a1b78",
+        "target": "65734c186dc1e402c80dc19e",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e65734c186dc1e402c80dc19e-6613f307fca4f2f386029409",
+        "source": "65734c186dc1e402c80dc19e",
+        "target": "6613f307fca4f2f386029409",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest30-addquest31",
+        "source": "addquest30",
+        "target": "addquest31",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest31-addquest32",
+        "source": "addquest31",
+        "target": "addquest32",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest32-addquest33",
+        "source": "addquest32",
+        "target": "addquest33",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest33-addquest34",
+        "source": "addquest33",
+        "target": "addquest34",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-5d24b81486f77439c92d6ba8-f",
+        "source": "JAEGER",
+        "target": "5d24b81486f77439c92d6ba8",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d24b81486f77439c92d6ba8-5d25aed386f77442734d25d2",
+        "source": "5d24b81486f77439c92d6ba8",
+        "target": "5d25aed386f77442734d25d2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d24b81486f77439c92d6ba8-5d25e48d86f77408251c4bfb",
+        "source": "5d24b81486f77439c92d6ba8",
+        "target": "5d25e48d86f77408251c4bfb",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d24b81486f77439c92d6ba8-5bc4776586f774512d07cf05",
+        "source": "5d24b81486f77439c92d6ba8",
+        "target": "5bc4776586f774512d07cf05",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d24b81486f77439c92d6ba8-rough_tarkov",
+        "source": "5d24b81486f77439c92d6ba8",
+        "target": "rough_tarkov",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25aed386f77442734d25d2-5d25b6be86f77444001e1b89",
+        "source": "5d25aed386f77442734d25d2",
+        "target": "5d25b6be86f77444001e1b89",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25b6be86f77444001e1b89-5d25bfd086f77442734d3007",
+        "source": "5d25b6be86f77444001e1b89",
+        "target": "5d25bfd086f77442734d3007",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25b6be86f77444001e1b89-63a88045abf76d719f42d715",
+        "source": "5d25b6be86f77444001e1b89",
+        "target": "63a88045abf76d719f42d715",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25bfd086f77442734d3007-5d25c81b86f77443e625dd71",
+        "source": "5d25bfd086f77442734d3007",
+        "target": "5d25c81b86f77443e625dd71",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25c81b86f77443e625dd71-5d25d2c186f77443e35162e5",
+        "source": "5d25c81b86f77443e625dd71",
+        "target": "5d25d2c186f77443e35162e5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25c81b86f77443e625dd71-5d25cf2686f77443e75488d4",
+        "source": "5d25c81b86f77443e625dd71",
+        "target": "5d25cf2686f77443e75488d4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25cf2686f77443e75488d4-5d25e48186f77443e625e386",
+        "source": "5d25cf2686f77443e75488d4",
+        "target": "5d25e48186f77443e625e386",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25cf2686f77443e75488d4-61904daa7d0d857927447b9c",
+        "source": "5d25cf2686f77443e75488d4",
+        "target": "61904daa7d0d857927447b9c",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25cf2686f77443e75488d4-5d25e2b486f77409de05bba0",
+        "source": "5d25cf2686f77443e75488d4",
+        "target": "5d25e2b486f77409de05bba0",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25cf2686f77443e75488d4-5d25e29d86f7740a22516326",
+        "source": "5d25cf2686f77443e75488d4",
+        "target": "5d25e29d86f7740a22516326",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e48186f77443e625e386-5d25e4ad86f77443e625e387",
+        "source": "5d25e48186f77443e625e386",
+        "target": "5d25e4ad86f77443e625e387",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e4ad86f77443e625e387-5d25e4b786f77408251c4bfc",
+        "source": "5d25e4ad86f77443e625e387",
+        "target": "5d25e4b786f77408251c4bfc",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e4ad86f77443e625e387-Forester's_Duty",
+        "source": "5d25e4ad86f77443e625e387",
+        "target": "Forester's_Duty",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e29d86f7740a22516326-5d25e2a986f77409dd5cdf2a",
+        "source": "5d25e29d86f7740a22516326",
+        "target": "5d25e2a986f77409dd5cdf2a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2a986f77409dd5cdf2a-5eaaaa7c93afa0558f3b5a1c",
+        "source": "5d25e2a986f77409dd5cdf2a",
+        "target": "5eaaaa7c93afa0558f3b5a1c",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2b486f77409de05bba0-5d25e45e86f77408251c4bfa",
+        "source": "5d25e2b486f77409de05bba0",
+        "target": "5d25e45e86f77408251c4bfa",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2b486f77409de05bba0-5d25e2ee86f77443e35162ea",
+        "source": "5d25e2b486f77409de05bba0",
+        "target": "5d25e2ee86f77443e35162ea",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2b486f77409de05bba0-5d25e2cc86f77443e47ae019",
+        "source": "5d25e2b486f77409de05bba0",
+        "target": "5d25e2cc86f77443e47ae019",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2b486f77409de05bba0-5d25e2c386f77443e7549029",
+        "source": "5d25e2b486f77409de05bba0",
+        "target": "5d25e2c386f77443e7549029",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2b486f77409de05bba0-5d25e43786f7740a212217fa",
+        "source": "5d25e2b486f77409de05bba0",
+        "target": "5d25e43786f7740a212217fa",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e4d586f77443e625e388-608a768d82e40b3c727fd17d",
+        "source": "5d25e4d586f77443e625e388",
+        "target": "608a768d82e40b3c727fd17d",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2cc86f77443e47ae019-5d25e2d886f77442734d335e",
+        "source": "5d25e2cc86f77443e47ae019",
+        "target": "5d25e2d886f77442734d335e",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2cc86f77443e47ae019-5d25e44386f77409453bce7b",
+        "source": "5d25e2cc86f77443e47ae019",
+        "target": "5d25e44386f77409453bce7b",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2cc86f77443e47ae019-5d25e2e286f77444001e2e48",
+        "source": "5d25e2cc86f77443e47ae019",
+        "target": "5d25e2e286f77444001e2e48",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2cc86f77443e47ae019-64e7b971f9d6fa49d6769b44",
+        "source": "5d25e2cc86f77443e47ae019",
+        "target": "64e7b971f9d6fa49d6769b44",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2cc86f77443e47ae019-60c0c018f7afb4354815096a",
+        "source": "5d25e2cc86f77443e47ae019",
+        "target": "60c0c018f7afb4354815096a",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2cc86f77443e47ae019-639136df4b15ca31f76bc31f",
+        "source": "5d25e2cc86f77443e47ae019",
+        "target": "639136df4b15ca31f76bc31f",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2cc86f77443e47ae019-6179ad0a6e9dd54ac275e3f2",
+        "source": "5d25e2cc86f77443e47ae019",
+        "target": "6179ad0a6e9dd54ac275e3f2",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2cc86f77443e47ae019-60e71ccb5688f6424c7bfec4",
+        "source": "5d25e2cc86f77443e47ae019",
+        "target": "60e71ccb5688f6424c7bfec4",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2cc86f77443e47ae019-claustrophobia",
+        "source": "5d25e2cc86f77443e47ae019",
+        "target": "claustrophobia",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2c386f77443e7549029-626bdcc3a371ee3a7a3514c5",
+        "source": "5d25e2c386f77443e7549029",
+        "target": "626bdcc3a371ee3a7a3514c5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2c386f77443e7549029-60e71e8ed54b755a3b53eb67",
+        "source": "5d25e2c386f77443e7549029",
+        "target": "60e71e8ed54b755a3b53eb67",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2e286f77444001e2e48-60e71e8ed54b755a3b53eb67",
+        "source": "5d25e2e286f77444001e2e48",
+        "target": "60e71e8ed54b755a3b53eb67",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2e286f77444001e2e48-626bdcc3a371ee3a7a3514c5",
+        "source": "5d25e2e286f77444001e2e48",
+        "target": "626bdcc3a371ee3a7a3514c5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2ee86f77443e35162ea-5d25e4ca86f77409dd5cdf2c",
+        "source": "5d25e2ee86f77443e35162ea",
+        "target": "5d25e4ca86f77409dd5cdf2c",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2ee86f77443e35162ea-60e71e8ed54b755a3b53eb67",
+        "source": "5d25e2ee86f77443e35162ea",
+        "target": "60e71e8ed54b755a3b53eb67",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2ee86f77443e35162ea-600302d73b897b11364cd161",
+        "source": "5d25e2ee86f77443e35162ea",
+        "target": "600302d73b897b11364cd161",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e2ee86f77443e35162ea-626bdcc3a371ee3a7a3514c5",
+        "source": "5d25e2ee86f77443e35162ea",
+        "target": "626bdcc3a371ee3a7a3514c5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e60c0c018f7afb4354815096a-60e71e8ed54b755a3b53eb67",
+        "source": "60c0c018f7afb4354815096a",
+        "target": "60e71e8ed54b755a3b53eb67",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e44f86f77443e625e385-5d25e45e86f77408251c4bfa",
+        "source": "5d25e44f86f77443e625e385",
+        "target": "5d25e45e86f77408251c4bfa",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e44f86f77443e625e385-60e71e8ed54b755a3b53eb67",
+        "source": "5d25e44f86f77443e625e385",
+        "target": "60e71e8ed54b755a3b53eb67",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5bc4776586f774512d07cf05-5bc479e586f7747f376c7da3",
+        "source": "5bc4776586f774512d07cf05",
+        "target": "5bc479e586f7747f376c7da3",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5bc479e586f7747f376c7da3-5bc47dbf86f7741ee74e93b9",
+        "source": "5bc479e586f7747f376c7da3",
+        "target": "5bc47dbf86f7741ee74e93b9",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5bc47dbf86f7741ee74e93b9-5d25e2b486f77409de05bba0",
+        "source": "5bc47dbf86f7741ee74e93b9",
+        "target": "5d25e2b486f77409de05bba0",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5bc47dbf86f7741ee74e93b9-5bc480a686f7741af0342e29",
+        "source": "5bc47dbf86f7741ee74e93b9",
+        "target": "5bc480a686f7741af0342e29",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5bc480a686f7741af0342e29-5bc4826c86f774106d22d88b",
+        "source": "5bc480a686f7741af0342e29",
+        "target": "5bc4826c86f774106d22d88b",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5bc4826c86f774106d22d88b-5bc4836986f7740c0152911c",
+        "source": "5bc4826c86f774106d22d88b",
+        "target": "5bc4836986f7740c0152911c",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5bc4836986f7740c0152911c-5bc4856986f77454c317bea7",
+        "source": "5bc4836986f7740c0152911c",
+        "target": "5bc4856986f77454c317bea7",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5bc4856986f77454c317bea7-5bc4893c86f774626f5ebf3e",
+        "source": "5bc4856986f77454c317bea7",
+        "target": "5bc4893c86f774626f5ebf3e",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5d25e48d86f77408251c4bfb-5d25e46e86f77409453bce7c",
+        "source": "5d25e48d86f77408251c4bfb",
+        "target": "5d25e46e86f77409453bce7c",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edab4b1218d181e29451435-5edac63b930f5454f51e128b",
+        "source": "5edab4b1218d181e29451435",
+        "target": "5edac63b930f5454f51e128b",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edab4b1218d181e29451435-60e729cf5698ee7b05057439",
+        "source": "5edab4b1218d181e29451435",
+        "target": "60e729cf5698ee7b05057439",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e5edab4b1218d181e29451435-60e71e8ed54b755a3b53eb67",
+        "source": "5edab4b1218d181e29451435",
+        "target": "60e71e8ed54b755a3b53eb67",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e608a768d82e40b3c727fd17d-5d25e44f86f77443e625e385",
+        "source": "608a768d82e40b3c727fd17d",
+        "target": "5d25e44f86f77443e625e385",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63a88045abf76d719f42d715-5d25e4d586f77443e625e388",
+        "source": "63a88045abf76d719f42d715",
+        "target": "5d25e4d586f77443e625e388",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63a88045abf76d719f42d715-639136e84ed9512be67647db",
+        "source": "63a88045abf76d719f42d715",
+        "target": "639136e84ed9512be67647db",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63a88045abf76d719f42d715-addquest36",
+        "source": "63a88045abf76d719f42d715",
+        "target": "addquest36",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639136e84ed9512be67647db-64f3176921045e77405d63b5",
+        "source": "639136e84ed9512be67647db",
+        "target": "64f3176921045e77405d63b5",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63a511ea30d85e10e375b045-6391372c8ba6894d155e77d7",
+        "source": "63a511ea30d85e10e375b045",
+        "target": "6391372c8ba6894d155e77d7",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6391372c8ba6894d155e77d7-64ee99639878a0569d6ec8c9",
+        "source": "6391372c8ba6894d155e77d7",
+        "target": "64ee99639878a0569d6ec8c9",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6391372c8ba6894d155e77d7-63a9b36cc31b00242d28a99f",
+        "source": "6391372c8ba6894d155e77d7",
+        "target": "63a9b36cc31b00242d28a99f",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639136df4b15ca31f76bc31f-6578eb36e5020875d64645cd",
+        "source": "639136df4b15ca31f76bc31f",
+        "target": "6578eb36e5020875d64645cd",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639136df4b15ca31f76bc31f-63a9b36cc31b00242d28a99f",
+        "source": "639136df4b15ca31f76bc31f",
+        "target": "63a9b36cc31b00242d28a99f",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "erough_tarkov-every_hunter_knows_this",
+        "source": "rough_tarkov",
+        "target": "every_hunter_knows_this",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest36-addquest21",
+        "source": "addquest36",
+        "target": "addquest21",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-event1",
+        "source": "JAEGER",
+        "target": "event1",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-63966faeea19ac7ed845db2c-f",
+        "source": "LIGHT_KEEPER",
+        "target": "63966faeea19ac7ed845db2c",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63966faeea19ac7ed845db2c-63966fbeea19ac7ed845db2e",
+        "source": "63966faeea19ac7ed845db2c",
+        "target": "63966fbeea19ac7ed845db2e",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63966fbeea19ac7ed845db2e-63966fccac6f8f3c677b9d89",
+        "source": "63966fbeea19ac7ed845db2e",
+        "target": "63966fccac6f8f3c677b9d89",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63966fccac6f8f3c677b9d89-63966fe7ea74a47c2d3fc0e6",
+        "source": "63966fccac6f8f3c677b9d89",
+        "target": "63966fe7ea74a47c2d3fc0e6",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63966fe7ea74a47c2d3fc0e6-63966fd9ea19ac7ed845db30",
+        "source": "63966fe7ea74a47c2d3fc0e6",
+        "target": "63966fd9ea19ac7ed845db30",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63966fd9ea19ac7ed845db30-63966ff54c3ef01b6f3ffad8",
+        "source": "63966fd9ea19ac7ed845db30",
+        "target": "63966ff54c3ef01b6f3ffad8",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63966ff54c3ef01b6f3ffad8-639670029113f06a7c3b2377",
+        "source": "63966ff54c3ef01b6f3ffad8",
+        "target": "639670029113f06a7c3b2377",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e639670029113f06a7c3b2377-6396700fea19ac7ed845db32",
+        "source": "639670029113f06a7c3b2377",
+        "target": "6396700fea19ac7ed845db32",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6396700fea19ac7ed845db32-6396701b9113f06a7c3b2379",
+        "source": "6396700fea19ac7ed845db32",
+        "target": "6396701b9113f06a7c3b2379",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e6396701b9113f06a7c3b2379-63967028c4a91c5cb76abd81",
+        "source": "6396701b9113f06a7c3b2379",
+        "target": "63967028c4a91c5cb76abd81",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e63967028c4a91c5cb76abd81-64f1cc571a5f313cb144bf90",
+        "source": "63967028c4a91c5cb76abd81",
+        "target": "64f1cc571a5f313cb144bf90",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e64f1cc571a5f313cb144bf90-64f1d6e732bed22c3e0c7423",
+        "source": "64f1cc571a5f313cb144bf90",
+        "target": "64f1d6e732bed22c3e0c7423",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "npc-to-66058cb5ae4719735349b9e8-f",
+        "source": "REF",
+        "target": "66058cb5ae4719735349b9e8",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e66058cb5ae4719735349b9e8-66058cb7c7f3584787181476",
+        "source": "66058cb5ae4719735349b9e8",
+        "target": "66058cb7c7f3584787181476",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e66058cb7c7f3584787181476-66058cb9e8e4f17985230805",
+        "source": "66058cb7c7f3584787181476",
+        "target": "66058cb9e8e4f17985230805",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e66058cb9e8e4f17985230805-66058cbb06ef1d50a60c1f46",
+        "source": "66058cb9e8e4f17985230805",
+        "target": "66058cbb06ef1d50a60c1f46",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e66058cbb06ef1d50a60c1f46-66058cbd9f59e625462acc8e",
+        "source": "66058cbb06ef1d50a60c1f46",
+        "target": "66058cbd9f59e625462acc8e",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e66058cbd9f59e625462acc8e-66058cbf2f19c31a5a1337ec",
+        "source": "66058cbd9f59e625462acc8e",
+        "target": "66058cbf2f19c31a5a1337ec",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "e66058cbf2f19c31a5a1337ec-addquest43",
+        "source": "66058cbf2f19c31a5a1337ec",
+        "target": "addquest43",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest43-addquest44",
+        "source": "addquest43",
+        "target": "addquest44",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest44-addquest45",
+        "source": "addquest44",
+        "target": "addquest45",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest45-addquest46",
+        "source": "addquest45",
+        "target": "addquest46",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest46-addquest47",
+        "source": "addquest46",
+        "target": "addquest47",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest47-addquest15",
+        "source": "addquest47",
+        "target": "addquest15",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest48-addquest49",
+        "source": "addquest48",
+        "target": "addquest49",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    },
+    {
+        "id": "eaddquest48-addquest16",
+        "source": "addquest48",
+        "target": "addquest16",
+        "type": "smoothstep",
+        "animated": true,
+        "style": {
+            "strokeWidth": 2,
+            "stroke": "#c5d1ea"
+        }
+    }
+]
