@@ -62,6 +62,7 @@ class RoadmapService:
                         update_time=datetime.utcnow()
                     )
                     s.add(new_user_roadmap)
+                    s.commit()
                 return questList
         except Exception as e:
             print("오류 발생:", e)
