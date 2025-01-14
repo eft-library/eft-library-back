@@ -54,7 +54,7 @@ class RoadmapService:
                 if user_roadmap:
                     user_roadmap.quest_list = questList
                     s.commit()
-                return user_roadmap
+                return questList
         except Exception as e:
             print("오류 발생:", e)
             return None
