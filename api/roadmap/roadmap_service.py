@@ -1,5 +1,5 @@
 from typing import List
-
+from datetime import datetime
 from api.quest.models import NPC
 from sqlalchemy.orm import subqueryload
 from api.roadmap.roadmap_res_models import UserRoadmap, RoadmapNode, RoadmapEdge
@@ -53,7 +53,15 @@ class RoadmapService:
                 user_roadmap = s.query(UserRoadmap).filter_by(user_email=user_email).first()
                 if user_roadmap:
                     user_roadmap.quest_list = questList
+                    user_roadmap.update_time = datetime.utcnow()
                     s.commit()
+                else:
+                    new_user_roadmap = UserRoadmap(
+                        user_email=user_email,
+                        quest_list=questList,
+                        update_time=datetime.utcnow()
+                    )
+                    s.add(new_user_roadmap)
                 return questList
         except Exception as e:
             print("오류 발생:", e)
