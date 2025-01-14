@@ -25,17 +25,25 @@ with open(file_path, 'r', encoding='utf-8') as file:
     data = json.load(file)
 
 # 반복문을 통해 JSON 데이터 처리
-for node in data:
-    node_id = node['id']
-    npc_value = node['data']['npc']
+for index, node in enumerate(data):
+    node_id = node["id"]
+    npc_value = node["data"]["npc"]
+    x_value, y_value = node["position"].values()
 
     # 먼저 UPDATE 실행 (해당 id가 있을 경우 업데이트)
     update_query = """
-        UPDATE tkl_roadmap_node
-        SET npc_value = %s
-        WHERE id = %s;
+        INSERT INTO tkl_roadmap_node (id, total_x_coordinate, total_y_coordinate)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (id)
+        DO UPDATE SET
+        total_x_coordinate = EXCLUDED.total_x_coordinate,
+        total_y_coordinate = EXCLUDED.total_y_coordinate
     """
-    cur.execute(update_query, (npc_value, node_id))
+
+    if(npc_value == "MECHANIC"):
+        x_value += 500
+
+    cur.execute(update_query, (node_id, x_value, y_value))
 
 # for edge in data:
 #     edge_id = edge['id']
