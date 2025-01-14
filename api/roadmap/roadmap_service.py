@@ -1,3 +1,5 @@
+from typing import List
+
 from api.quest.models import NPC
 from sqlalchemy.orm import subqueryload
 from api.roadmap.roadmap_res_models import UserRoadmap, RoadmapNode, RoadmapEdge
@@ -7,8 +9,6 @@ from database import DataBaseConnector
 class RoadmapService:
     @staticmethod
     def get_roadmap(user_email: str or None):
-        # 여기에서 퀘스트만 전체 조회
-        # 밑의 조건에서 사용자 quest list 조회 후 반환
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
@@ -41,6 +41,20 @@ class RoadmapService:
                 else:
                     user_roadmap["quest_list"] = []
                     return user_roadmap
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def save_roadmap(questList: List[str], user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_roadmap = s.query(UserRoadmap).filter_by(user_email=user_email).first()
+                if user_roadmap:
+                    user_roadmap.quest_list = questList
+                    s.commit()
+                return user_roadmap
         except Exception as e:
             print("오류 발생:", e)
             return None
