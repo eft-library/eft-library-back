@@ -16,16 +16,3 @@ class News(DataBaseConnector.Base):
     youtube_id = Column(TEXT)
     next_update = Column(TEXT)
     user_function = Column(JSON)
-
-
-class Popup(DataBaseConnector.Base):
-    """
-    popup
-    """
-
-    __tablename__ = "tkl_popup"
-
-    id = Column(TEXT, primary_key=True)
-    contents = Column(TEXT)
-    is_use = Column(Boolean)
-    create_time = Column(TIMESTAMP)
