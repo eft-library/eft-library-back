@@ -20,37 +20,9 @@ class AddUserReq(BaseModel):
     email: str
     image: str
 
-
-class ChangeUserNickname(BaseModel):
+class GetUserQuest(BaseModel):
     """
-    사용자 닉네임 수정
-    """
-
-    nickname: str
-
-
-class ChangeUserIcon(BaseModel):
-    """
-    사용자 아이콘 수정
-    """
-
-    icon: str
-
-
-class BanUser(BaseModel):
-    """
-    사용자 정지
-    """
-
-    ban_time: int
-    admin_email: str
-    ban_reason: str
-    user_email: str
-
-
-class UserPostCommentDetail(BaseModel):
-    """
-    사용자 작성글 또는 댓글 조회
+    사용자 퀘스트 정보 조회
     """
 
     user_email: str

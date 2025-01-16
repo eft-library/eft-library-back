@@ -10,6 +10,8 @@ class SearchUtil:
                     union all
                     select '/roadmap' as tkl_link
                     union all
+                    select '/planner' as tkl_link
+                    union all
                     select '/privacy-policy-kr' as tkl_link
                     union all
                     select '/privacy-policy-en' as tkl_link

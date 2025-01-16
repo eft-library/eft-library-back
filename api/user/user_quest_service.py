@@ -20,8 +20,10 @@ class UserQuestService:
             with session() as s:
                 query = text(UserUtil.user_quest_query())
                 result = s.execute(query, {"user_email": user_email})
-                user_quests = [dict(row) for row in result.mappings()]
-                return user_quests
+                if result:
+                    return [dict(row) for row in result.mappings()]
+                else:
+                    return []
         except Exception as e:
             print("오류 발생:", e)
             return None

@@ -5,14 +5,13 @@ from api.item.models import (
     Rig,
     Backpack,
     Container,
-    Key,
-    Provisions,
+    Throwable,
     Medical,
     Ammo,
-    Loot,
+    Weapon,
     FaceCover,
     ArmBand,
-    Glasses,
+    Knife,
 )
 from api.item.util import ItemUtil
 from database import DataBaseConnector
@@ -30,6 +29,21 @@ class ItemService:
             with session() as s:
                 headset = s.query(Headset).order_by(Headset.name).all()
                 return headset
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_weapon():
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                weapon_list = {
+                    "gun": s.query(Weapon).all(),
+                    "knife": s.query(Knife).all(),
+                    "throwable": s.query(Throwable).all(),
+                }
+            return weapon_list
         except Exception as e:
             print("오류 발생:", e)
             return None

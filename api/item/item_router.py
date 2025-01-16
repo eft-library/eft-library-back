@@ -14,6 +14,13 @@ def get_all_headset():
         return CustomResponse.response(None, HTTPCode.OK, Message.HEADSET_NOT_FOUND)
     return CustomResponse.response(headset, HTTPCode.OK, Message.SUCCESS)
 
+@router.get("/weapon")
+def get_all_weapon():
+    weapon_list = ItemService.get_all_weapon()
+    if weapon_list is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.WEAPON_NOT_FOUND)
+    return CustomResponse.response(weapon_list, HTTPCode.OK, Message.SUCCESS)
+
 
 @router.get("/headwear")
 def get_all_headwear():
