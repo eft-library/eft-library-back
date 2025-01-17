@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 from api.router import api_router
 from fastapi.openapi.docs import get_swagger_ui_html
-from kafka import KafkaProducerService
+# from kafka import KafkaProducerService
 
 load_dotenv()
 
