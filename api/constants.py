@@ -64,3 +64,4 @@ class Message(Enum):
     BOARD_DELETE_FAIL = "Board delete fail"
     GET_ROADMAP_FAIL = "Get Roadmap fail"
     ROADMAP_SAVE_FAIL = "Roadmap save fail"
+    KAFKA_FAIL = "Kafka fail"

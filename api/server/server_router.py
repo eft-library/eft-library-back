@@ -17,3 +17,11 @@ def rebuild_front(rebuildFront: RebuildFront):
     if os.getenv("BUILD_KEY") == rebuildFront.rebuild_key:
         result = ServerService.rebuild_front()
     return CustomResponse.response(True, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.post("/save_footprint")
+def save_footprint():
+    result = ServerService.save_footprint()
+    if result is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.KAFKA_FAIL)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
