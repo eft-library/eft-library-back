@@ -4,13 +4,13 @@ from dotenv import load_dotenv
 import os
 from api.router import api_router
 from fastapi.openapi.docs import get_swagger_ui_html
-# from kafka import KafkaProducerService
+from kafka import KafkaProducerService
 
 load_dotenv()
 
 app = FastAPI(title="eft-library-back")
 
-# kafka_producer_service = KafkaProducerService()
+kafka_producer_service = KafkaProducerService()
 
 
 @app.get("/docs")
@@ -21,16 +21,16 @@ async def custom_swagger_ui_html():
     )
 
 
-# @app.on_event("startup")
-# async def startup():
-#     await kafka_producer_service.start()
-#     print("Kafka Producer started.")
-#
-#
-# @app.on_event("shutdown")
-# async def shutdown():
-#     await kafka_producer_service.stop()
-#     print("Kafka Producer stopped.")
+@app.on_event("startup")
+async def startup():
+    await kafka_producer_service.start()
+    print("Kafka Producer started.")
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await kafka_producer_service.stop()
+    print("Kafka Producer stopped.")
 
 app.include_router(api_router, prefix=os.getenv("API_PREFIX"))
 
