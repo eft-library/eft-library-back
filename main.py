@@ -10,7 +10,7 @@ load_dotenv()
 
 app = FastAPI(title="eft-library-back")
 
-kafka_producer_service = KafkaProducerService()
+# kafka_producer_service = KafkaProducerService()
 
 
 @app.get("/docs")
