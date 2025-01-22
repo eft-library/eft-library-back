@@ -2,8 +2,7 @@ import os
 from dotenv import load_dotenv
 import subprocess
 # from kafka import KafkaProducerService
-#
-# kafka_producer_service = KafkaProducerService()
+
 load_dotenv()
 
 
@@ -16,6 +15,7 @@ class ServerService:
     # @staticmethod
     # async def save_footprint():
     #     try:
+    #         kafka_producer_service = KafkaProducerService()
     #         await kafka_producer_service.send_message("asd")
     #         return True
     #     except Exception as e:

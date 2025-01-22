@@ -1,3 +1,4 @@
+# kafka_producer_service.py
 # from aiokafka import AIOKafkaProducer
 # import os
 # from dotenv import load_dotenv
@@ -9,13 +10,19 @@
 #
 #
 # class KafkaProducerService:
-#     def __init__(self):
-#         self.producer = None
+#     _instance = None
+#     producer = None  # 클래스 변수로 producer 객체 생성
+#
+#     def __new__(cls, *args, **kwargs):
+#         if cls._instance is None:
+#             cls._instance = super(KafkaProducerService, cls).__new__(cls)
+#         return cls._instance
 #
 #     async def start(self):
 #         """Kafka Producer 초기화 및 시작"""
-#         self.producer = AIOKafkaProducer(bootstrap_servers=KAFKA_BROKER)
-#         await self.producer.start()
+#         if not self.producer:
+#             self.producer = AIOKafkaProducer(bootstrap_servers=KAFKA_BROKER)
+#             await self.producer.start()
 #
 #     async def send_message(self, message: str):
 #         """Kafka에 메시지 전송"""
@@ -27,3 +34,4 @@
 #         """Kafka Producer 종료"""
 #         if self.producer:
 #             await self.producer.stop()
+#             self.producer = None  # 종료 후 producer 초기화
