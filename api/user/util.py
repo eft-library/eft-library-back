@@ -37,7 +37,7 @@ class UserUtil:
                                                     tkl_quest.name_kr, 'requirements_kr', tkl_quest.requirements_kr, 'requirements_en',
                                                     tkl_quest.requirements_en, 'objectives_kr', tkl_quest.objectives_kr,
                                                     'objectives_en',
-                                                    tkl_quest.objectives_en, 'next',
+                                                    tkl_quest.objectives_en, 'url_mapping', tkl_quest.url_mapping, 'next',
                                                     COALESCE(tkl_quest.next, jsonb '[]'::jsonb)))                                  as quest_info
                 from tkl_user_quest
                          left join lateral unnest(tkl_user_quest.quest_id) AS rq ON true
