@@ -4,7 +4,8 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
 
 이 페이지는 Backend에 대하여 설명한다.
 
-사진
+![back](https://github.com/user-attachments/assets/9c4a7e00-8d10-4de7-b256-37e2b2e41834)
+
 
 
 ## 주요 사항
@@ -58,20 +59,29 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
 FastAPI를 사용하면서 하는김에 해보자! 로 시작했는데, 어려웠다...
 특히 처음에 DB와 Connection을 만들어서 조회 후 반환을 하는데, 계속 빈 값만 나오는 문제가 있었는데, SQLAlchemy의 Session이 끝난 뒤 값을 반환해서 생기는 문제였다. 
 
-사진
+#### 이전
+<img width="590" alt="3" src="https://github.com/user-attachments/assets/b0902073-41f2-429b-b693-8ec91b80bf2a" />
 
-사진
+#### 수정
+<img width="490" alt="4" src="https://github.com/user-attachments/assets/fcbaecd9-38e6-4595-b0ee-1df9cb28b35d" />
+
 
 **✔ 해결:**  
-- Database Connection 코드 수정
-- 사진
-- 사진
+- Database Connection 코드 수정 및 새로운 로직으로 변경
+
+#### 이전
+![1](https://github.com/user-attachments/assets/5db35002-af3c-480c-b328-bdd755f463a8)
+
+#### 수정
+![2](https://github.com/user-attachments/assets/a8a05856-ba29-4ffb-a0ce-48872942654a)
+
 
 ### 2. 너무 복잡한 쿼리의 경우
 
 어떻게든 ORM을 사용하여 해결해보려 했는데, 구조가 점점 복잡해지면서 유지보수에 한계가 생길 것 같아 text, execute 방식으로 우회 하였다.
 
-사진
+![스크린샷 2025-01-31 오후 3 35 24](https://github.com/user-attachments/assets/ecb540c6-9826-48d0-b04f-954ea5a040a5)
+
 
 **✔ 해결:**  
 - ORM을 사용하지 않고 Query 직접 작성
@@ -206,15 +216,12 @@ ORM을 사용하면 ForeignKey와 relationship을 가지고 하위 항목을 전
 
 조회하면서 정렬도 적용할 수 있고 꽤나 편한 요소인데, 쿼리가 복잡해지면 내 입장에서는 좀 꼬이는 부분이 만ㅇ항서 이런 경우는 Query를 직접 작성하고 가공했었다.
 
+![스크린샷 2025-01-31 오후 3 30 38](https://github.com/user-attachments/assets/4ee9b326-dd14-4e09-88d0-c8899ce675fc)
+
 
 ### FastAPI의 경우는 첫 환경 구성이 어려웠고, 개발은 쉽게 할 수 있었다.
 
 > 다행인거지
-
-
-
-
-
 
 <!--
 pip install 'fastapi[all]'
