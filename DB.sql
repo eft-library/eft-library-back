@@ -1238,12 +1238,13 @@ COMMENT ON COLUMN TKL_ROADMAP_EDGE.UPDATE_TIME IS '로드맵 엣지 업데이트
 -- item price chart
 CREATE TABLE TKL_ITEM_PRICE
 (
-    ID TEXT primary key,
+    ID TEXT,
     NAME_EN TEXT,
     NAME_KR TEXT,
     PRICE INTEGER,
     PRICE_TIME timestamp with time zone default now(),
-    EXECUTE_TIME timestamp with time zone default now()
+    EXECUTE_TIME timestamp with time zone default now(),
+    PRIMARY KEY (ID, PRICE_TIME)
 );
 COMMENT ON COLUMN TKL_ITEM_PRICE.ID IS '아이템 시세 아이템 아이디';
 COMMENT ON COLUMN TKL_ITEM_PRICE.NAME_EN IS '아이템 시세 아이템 영어 이름';
