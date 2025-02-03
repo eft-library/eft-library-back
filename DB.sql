@@ -1234,3 +1234,20 @@ COMMENT ON COLUMN TKL_ROADMAP_EDGE.ID IS '로드맵 엣지 아이디';
 COMMENT ON COLUMN TKL_ROADMAP_EDGE.SOURCE_ID IS '로드맵 엣지 연결 시작 노드 아이디';
 COMMENT ON COLUMN TKL_ROADMAP_EDGE.TARGET_ID IS '로드맵 엣지 연결 끝 노드 아이디';
 COMMENT ON COLUMN TKL_ROADMAP_EDGE.UPDATE_TIME IS '로드맵 엣지 업데이트 날짜';
+
+-- item price chart
+CREATE TABLE TKL_ITEM_PRICE
+(
+    ID TEXT primary key,
+    NAME_EN TEXT,
+    NAME_KR TEXT,
+    PRICE INTEGER,
+    PRICE_TIME timestamp with time zone default now(),
+    EXECUTE_TIME timestamp with time zone default now()
+);
+COMMENT ON COLUMN TKL_ITEM_PRICE.ID IS '아이템 시세 아이템 아이디';
+COMMENT ON COLUMN TKL_ITEM_PRICE.NAME_EN IS '아이템 시세 아이템 영어 이름';
+COMMENT ON COLUMN TKL_ITEM_PRICE.NAME_KR IS '아이템 시세 아이템 한글 이름';
+COMMENT ON COLUMN TKL_ITEM_PRICE.PRICE IS '아이템 시세';
+COMMENT ON COLUMN TKL_ITEM_PRICE.PRICE_TIME IS '아이템 시세 시간대';
+COMMENT ON COLUMN TKL_ITEM_PRICE.EXECUTE_TIME IS '아이템 시세 적재 날짜';
