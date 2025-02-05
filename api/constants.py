@@ -10,6 +10,7 @@ class Message(Enum):
     NPC_NOT_FOUND = "NPC not found"
     QUEST_NOT_FOUND = "Quest not found"
     EVENT_NOT_FOUND = "Event not found"
+    PRICE_NOT_FOUND = "Price not found"
     POSTS_NOT_FOUND = "Posts not found"
     COMMENTS_NOT_FOUND = "Comments not found"
     BOARD_TYPE_NOT_FOUND = "Board type not found"

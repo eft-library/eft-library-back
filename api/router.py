@@ -16,6 +16,7 @@ from api.patch_notes import patch_notes_router
 from api.notice import notice_router
 from api.server import server_router
 from api.roadmap import roadmap_router
+from api.price import price_router
 
 api_router = APIRouter()
 
@@ -36,3 +37,4 @@ api_router.include_router(patch_notes_router.router, prefix="/patch_notes")
 api_router.include_router(notice_router.router, prefix="/notice")
 api_router.include_router(server_router.router, prefix="/server")
 api_router.include_router(roadmap_router.router, prefix="/roadmap")
+api_router.include_router(price_router.router, prefix="/price")
