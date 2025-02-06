@@ -1,17 +1,33 @@
 from database import DataBaseConnector
-from sqlalchemy import Column, String, ARRAY, TEXT, TIMESTAMP, JSON
+from sqlalchemy import Column, String, ARRAY, TEXT, TIMESTAMP, JSON, ForeignKey, Integer
+from sqlalchemy.orm import relationship
 
 
-class Price(DataBaseConnector.Base):
+class PriceModel(DataBaseConnector.Base):
     """
     Price
     """
 
     __tablename__ = "tkl_item_price"
 
-    id = Column("id", TEXT, primary_key=True)
+    id = Column(TEXT, primary_key=True)
     item_name_en = Column(String)
     item_name_kr = Column(String)
     item_image = Column(TEXT)
     trader = Column(JSON)
     update_time = Column(TIMESTAMP)
+    history = relationship("PriceHistoryModel", backref="price", order_by="PriceHistoryModel.price_time")
+
+
+class PriceHistoryModel(DataBaseConnector.Base):
+    """
+    Price History
+    """
+
+    __tablename__ = "tkl_item_price_history"
+
+    id = Column(TEXT, ForeignKey("tkl_item_price.id"))
+    item_price = Column("price", Integer)
+    price_type = Column(String)
+    price_time = Column(TIMESTAMP, primary_key=True)
+    execute_time = Column(TIMESTAMP)

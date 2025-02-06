@@ -1,6 +1,8 @@
 from sqlalchemy import func, desc, text, or_
-from api.price.models import Price
+from api.price.models import PriceModel
 from database import DataBaseConnector
+from sqlalchemy.orm import subqueryload
+from collections import defaultdict
 
 
 class PriceService:
@@ -28,17 +30,33 @@ class PriceService:
                 )
 
                 price_list = (
-                    s.query(Price)
+                    s.query(PriceModel)
                     .filter(
                         or_(
-                            Price.item_name_en.ilike(f"%{word}%"),
-                            Price.item_name_kr.ilike(f"%{word}%")
+                            PriceModel.item_name_en.ilike(f"%{word}%"),
+                            PriceModel.item_name_kr.ilike(f"%{word}%")
                         )
                     )
+                    .options(subqueryload(PriceModel.history))
                     .limit(page_size)
                     .offset(offset)
                     .all()
                 )
+
+                for price in price_list:
+                    # price_type별로 pvp, pve로 나누기
+                    categorized_history = defaultdict(list)
+
+                    for history in price.history:
+                        categorized_history[history.price_type].append(history)
+
+                    # 결과를 PriceModel에 추가
+                    price.history_by_type = {
+                        "pvp": categorized_history.get("PVP", []),
+                        "pve": categorized_history.get("PVE", []),
+                    }
+
+                    price.history = []
 
                 return {
                     "data": price_list,
