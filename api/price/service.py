@@ -1,5 +1,6 @@
 from sqlalchemy import func, desc, text, or_
 from api.price.models import PriceModel
+from api.price.util import PriceUtil
 from database import DataBaseConnector
 from sqlalchemy.orm import subqueryload
 from collections import defaultdict
@@ -63,6 +64,30 @@ class PriceService:
                     "total_count": total_count,
                     "max_pages": max_pages,
                     "current_page": page,
+                }
+
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_price_top():
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+
+                pve_top_query = text(PriceUtil.get_pve_price_top())
+                pvp_top_query = text(PriceUtil.get_pvp_price_top())
+
+                pve_top_list = s.execute(pve_top_query)
+                pve_result = [dict(row) for row in pve_top_list.mappings()]
+
+                pvp_top_list = s.execute(pvp_top_query)
+                pvp_result = [dict(row) for row in pvp_top_list.mappings()]
+
+                return {
+                    'pvp_top_list': pvp_result,
+                    'pve_top_list': pve_result
                 }
 
         except Exception as e:

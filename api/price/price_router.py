@@ -14,3 +14,11 @@ def get_item_price(page: int, page_size: int, word: str):
     if price_list is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.PRICE_NOT_FOUND)
     return CustomResponse.response(price_list, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/top")
+def get_item_top_price():
+    top_list = PriceService.get_price_top()
+    if top_list is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.PRICE_NOT_FOUND)
+    return CustomResponse.response(top_list, HTTPCode.OK, Message.SUCCESS)
