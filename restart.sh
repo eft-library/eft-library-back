@@ -1,9 +1,9 @@
 #!/bin/bash
 
-source venv/bin/activate
+. venv/bin/activate
 
 # 포트 번호를 첫 번째 인수로 받아옴
-port=9020
+port=9021
 
 # 해당 포트를 사용 중인 프로세스의 PID를 찾아서 변수에 저장
 pid=$(netstat -tnlp | grep ":$port\b" | awk '{print $7}' | cut -d'/' -f1)
@@ -32,7 +32,7 @@ fi
 
 sleep 1
 
-nohup uvicorn main:app --reload --host=0.0.0.0 --port=9020 > log.out 2>&1 &
+nohup uvicorn main:app --reload --host=0.0.0.0 --port=9021 > log.out 2>&1 &
 
 echo "fastAPI를 실행합니다."
 
