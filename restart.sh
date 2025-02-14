@@ -32,7 +32,7 @@ fi
 
 sleep 1
 
-nohup uvicorn main:app --reload --host=0.0.0.0 --port=9022 --workers 6 > log.out 2>&1 &
+nohup uvicorn main:app --reload --host=0.0.0.0 --port=9022 > log.out 2>&1 &
 
 echo "fastAPI를 실행합니다."
 
