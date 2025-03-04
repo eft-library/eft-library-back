@@ -7,6 +7,7 @@ from api.user.user_req_models import (
 from database import DataBaseConnector
 from dotenv import load_dotenv
 from sqlalchemy import text
+from datetime import datetime
 from api.user.util import UserUtil
 
 load_dotenv()
@@ -35,6 +36,7 @@ class UserQuestService:
             with session() as s:
                 user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
                 user_quest.quest_id = userQuestList.userQuestList
+                user_quest.update_time = datetime.utcnow()
                 s.commit()
                 query = text(UserUtil.user_quest_query())
 

@@ -36,3 +36,4 @@ class UserQuest(DataBaseConnector.Base):
 
     user_email = Column(TEXT, primary_key=True)
     quest_id = Column(ARRAY(TEXT))
+    update_time = Column(TIMESTAMP)
