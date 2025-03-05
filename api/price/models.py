@@ -15,6 +15,7 @@ class PriceModel(DataBaseConnector.Base):
     item_name_kr = Column(String)
     item_image = Column(TEXT)
     trader = Column(JSON)
+    category = Column(TEXT)
     update_time = Column(TIMESTAMP)
     history = relationship("PriceHistoryModel", backref="price", order_by="PriceHistoryModel.price_time")
 
