@@ -10,6 +10,8 @@ class ItemUtil:
                            tkl_key.use_map_kr,
                            tkl_key.map_value,
                            tkl_key.image,
+                           tkl_key.width,
+                           tkl_key.height,
                            COALESCE(jsonb_agg(distinct
                                     jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
                                                        tkl_related_quest.in_raid, 'count', tkl_related_quest."count", 'url_mapping', tkl_quest.url_mapping))
