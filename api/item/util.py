@@ -34,6 +34,8 @@ class ItemUtil:
                        tkl_provisions.hydration,
                        tkl_provisions.stim_effects,
                        tkl_provisions.image,
+                       tkl_provisions.width,
+                       tkl_provisions.height,
                        COALESCE(jsonb_agg(distinct
                                 jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
                                                    tkl_related_quest.in_raid, 'count', tkl_related_quest."count", 'url_mapping', tkl_quest.url_mapping))
@@ -56,6 +58,8 @@ class ItemUtil:
                                tkl_loot.short_name,
                                tkl_loot.category,
                                tkl_loot.image,
+                               tkl_loot.width,
+                               tkl_loot.height,
                                COALESCE(jsonb_agg(distinct
                                         jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
                                                            tkl_related_quest.in_raid, 'count', tkl_related_quest."count", 'url_mapping', tkl_quest.url_mapping))
@@ -87,6 +91,8 @@ class ItemUtil:
                            tkl_glasses.durability,
                            tkl_glasses.blindness_protection,
                            tkl_glasses.image,
+                           tkl_glasses.width,
+                           tkl_glasses.height,
                            COALESCE(jsonb_agg(distinct
                                     jsonb_build_object('id', rq, 'name', tkl_quest.name_en, 'name_kr', tkl_quest.name_kr, 'in_raid',
                                                        tkl_related_quest.in_raid, 'count', tkl_related_quest."count", 'url_mapping', tkl_quest.url_mapping))

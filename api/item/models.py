@@ -22,6 +22,8 @@ class Weapon(DataBaseConnector.Base):
     ergonomics = Column(Integer)
     recoil_vertical = Column(Integer)
     recoil_horizontal = Column(Integer)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -40,6 +42,8 @@ class Knife(DataBaseConnector.Base):
     slash_damage = Column(Integer)
     stab_damage = Column(Integer)
     hit_radius = Column(NUMERIC)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -60,6 +64,8 @@ class Throwable(DataBaseConnector.Base):
     min_explosion_distance = Column(Integer)
     max_explosion_distance = Column(Integer)
     fragments = Column(Integer)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -74,6 +80,8 @@ class Headset(DataBaseConnector.Base):
     name = Column(TEXT)
     short_name = Column(TEXT)
     image = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -96,6 +104,8 @@ class Headwear(DataBaseConnector.Base):
     image = Column(TEXT)
     ricochet_str_kr = Column(TEXT)
     ricochet_str_en = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -115,6 +125,8 @@ class ArmorVest(DataBaseConnector.Base):
     durability = Column(INTEGER)
     weight = Column(NUMERIC)
     image = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -135,6 +147,8 @@ class Rig(DataBaseConnector.Base):
     capacity = Column(INTEGER)
     weight = Column(NUMERIC)
     image = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -155,6 +169,8 @@ class Provisions(DataBaseConnector.Base):
     stim_effects = Column(JSON)
     image = Column(TEXT)
     notes = Column(JSON)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -172,6 +188,8 @@ class Backpack(DataBaseConnector.Base):
     capacity = Column(INTEGER)
     weight = Column(NUMERIC)
     image = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -189,6 +207,8 @@ class Container(DataBaseConnector.Base):
     grids = Column(JSON)
     capacity = Column(INTEGER)
     image = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -208,6 +228,8 @@ class Key(DataBaseConnector.Base):
     map_value = Column(ARRAY(TEXT))
     image = Column(TEXT)
     notes = Column(JSON)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -234,6 +256,8 @@ class Medical(DataBaseConnector.Base):
     painkiller_duration = Column(INTEGER)
     hitpoints = Column(INTEGER)
     image = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -258,6 +282,8 @@ class Ammo(DataBaseConnector.Base):
     heavy_bleed_modifier = Column(NUMERIC)
     efficiency = Column(ARRAY(INTEGER))
     image = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -275,6 +301,8 @@ class Loot(DataBaseConnector.Base):
     image = Column(TEXT)
     notes = Column(JSON)
     category = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -297,6 +325,8 @@ class FaceCover(DataBaseConnector.Base):
     image = Column(TEXT)
     ricochet_str_kr = Column(TEXT)
     ricochet_str_en = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -312,6 +342,8 @@ class ArmBand(DataBaseConnector.Base):
     short_name = Column(TEXT)
     weight = Column(NUMERIC)
     image = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
 
 
@@ -330,4 +362,6 @@ class Glasses(DataBaseConnector.Base):
     blindness_protection = Column(NUMERIC)
     image = Column(TEXT)
     related_quests = Column(ARRAY(TEXT))
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)

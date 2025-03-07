@@ -1,5 +1,5 @@
 from database import DataBaseConnector
-from sqlalchemy import Column, String, ARRAY, TEXT, TIMESTAMP, JSON, ForeignKey, Integer
+from sqlalchemy import Column, String, ARRAY, TEXT, TIMESTAMP, JSON, ForeignKey, Integer, NUMERIC
 from sqlalchemy.orm import relationship
 
 
@@ -16,6 +16,8 @@ class PriceModel(DataBaseConnector.Base):
     item_image = Column(TEXT)
     trader = Column(JSON)
     category = Column(TEXT)
+    width = Column(NUMERIC)
+    height = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
     history = relationship("PriceHistoryModel", backref="price", order_by="PriceHistoryModel.price_time")
 
