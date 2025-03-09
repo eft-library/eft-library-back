@@ -27,11 +27,12 @@ class PriceUtil:
                         width,
                         height,
                         MAX((trade_info->>'price')::INT) AS flea_market_price,
+                        CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) as per_slot,
                         trader_list
                     FROM pve_prices
                     WHERE trade_info->'trader'->>'npc_id' = 'FLEA_MARKET'
                     GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height
-                    ORDER BY flea_market_price DESC
+                    ORDER BY CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) DESC
                     LIMIT 280
                 """
 
@@ -62,10 +63,11 @@ class PriceUtil:
                         width,
                         height,
                         MAX((trade_info->>'price')::INT) AS flea_market_price,
+                        CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) as per_slot,
                         trader_list
                     FROM pvp_prices
                     WHERE trade_info->'trader'->>'npc_id' = 'FLEA_MARKET'
                     GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height
-                    ORDER BY flea_market_price DESC
+                    ORDER BY CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) DESC
                     LIMIT 280
                 """
