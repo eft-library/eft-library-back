@@ -28,7 +28,7 @@ class PriceUtil:
                     WHERE trade_info->'trader'->>'npc_id' = 'FLEA_MARKET'
                     GROUP BY id, item_name_kr, item_name_en, item_image, trader_list
                     ORDER BY flea_market_price DESC
-                    LIMIT 10
+                    LIMIT 280
                 """
 
     @staticmethod
@@ -59,5 +59,5 @@ class PriceUtil:
                     WHERE trade_info->'trader'->>'npc_id' = 'FLEA_MARKET'
                     GROUP BY id, item_name_kr, item_name_en, item_image, trader_list
                     ORDER BY flea_market_price DESC
-                    LIMIT 10
+                    LIMIT 280
                 """

@@ -75,6 +75,10 @@ class PriceService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
+                tiers = ['S', 'A', 'B', 'C', 'D', 'E', 'F']
+                tier_size = 40
+                pvp_tier_dict = {tier: {'min': float('inf'), 'max': float('-inf'), 'list': []} for tier in tiers}
+                pve_tier_dict = {tier: {'min': float('inf'), 'max': float('-inf'), 'list': []} for tier in tiers}
 
                 pve_top_query = text(PriceUtil.get_pve_price_top())
                 pvp_top_query = text(PriceUtil.get_pvp_price_top())
@@ -85,9 +89,39 @@ class PriceService:
                 pvp_top_list = s.execute(pvp_top_query)
                 pvp_result = [dict(row) for row in pvp_top_list.mappings()]
 
+                for i, item in enumerate(pvp_result):
+                    tier_index = i // tier_size
+                    if tier_index < len(tiers):
+                        tier_name = tiers[tier_index]
+                        flea_price = item['flea_market_price']
+
+                        # 티어의 최소, 최대 금액 업데이트
+                        if flea_price < pvp_tier_dict[tier_name]['min']:
+                            pvp_tier_dict[tier_name]['min'] = flea_price
+                        if flea_price > pvp_tier_dict[tier_name]['max']:
+                            pvp_tier_dict[tier_name]['max'] = flea_price
+
+                        # 티어 리스트에 항목 추가
+                        pvp_tier_dict[tier_name]['list'].append(item)
+
+                for i, item in enumerate(pve_result):
+                    tier_index = i // tier_size
+                    if tier_index < len(tiers):
+                        tier_name = tiers[tier_index]
+                        flea_price = item['flea_market_price']
+
+                        # 티어의 최소, 최대 금액 업데이트
+                        if flea_price < pve_tier_dict[tier_name]['min']:
+                            pve_tier_dict[tier_name]['min'] = flea_price
+                        if flea_price > pve_tier_dict[tier_name]['max']:
+                            pve_tier_dict[tier_name]['max'] = flea_price
+
+                        # 티어 리스트에 항목 추가
+                        pve_tier_dict[tier_name]['list'].append(item)
+
                 return {
-                    'pvp_top_list': pvp_result,
-                    'pve_top_list': pve_result
+                    'pvp_top_list': pvp_tier_dict,
+                    'pve_top_list': pve_tier_dict
                 }
 
         except Exception as e:
