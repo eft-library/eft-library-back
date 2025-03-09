@@ -12,6 +12,8 @@ class PriceUtil:
                             item_name_kr,
                             item_name_en,
                             item_image,
+                            width,
+                            height,
                             trader->'pve_trader' AS trader_list,
                             jsonb_array_elements(trader->'pve_trader') AS trade_info
                         FROM tkl_item_price
@@ -22,11 +24,13 @@ class PriceUtil:
                         item_name_kr,
                         item_name_en,
                         item_image,
+                        width,
+                        height,
                         MAX((trade_info->>'price')::INT) AS flea_market_price,
                         trader_list
                     FROM pve_prices
                     WHERE trade_info->'trader'->>'npc_id' = 'FLEA_MARKET'
-                    GROUP BY id, item_name_kr, item_name_en, item_image, trader_list
+                    GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height
                     ORDER BY flea_market_price DESC
                     LIMIT 280
                 """
@@ -43,6 +47,8 @@ class PriceUtil:
                             item_name_kr,
                             item_name_en,
                             item_image,
+                            width,
+                            height,
                             trader->'pvp_trader' AS trader_list,
                             jsonb_array_elements(trader->'pvp_trader') AS trade_info
                         FROM tkl_item_price
@@ -53,11 +59,13 @@ class PriceUtil:
                         item_name_kr,
                         item_name_en,
                         item_image,
+                        width,
+                        height,
                         MAX((trade_info->>'price')::INT) AS flea_market_price,
                         trader_list
                     FROM pvp_prices
                     WHERE trade_info->'trader'->>'npc_id' = 'FLEA_MARKET'
-                    GROUP BY id, item_name_kr, item_name_en, item_image, trader_list
+                    GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height
                     ORDER BY flea_market_price DESC
                     LIMIT 280
                 """

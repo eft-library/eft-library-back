@@ -4,6 +4,7 @@ from api.price.util import PriceUtil
 from database import DataBaseConnector
 from sqlalchemy.orm import subqueryload
 from collections import defaultdict
+import math
 
 
 class PriceService:
@@ -93,13 +94,14 @@ class PriceService:
                     tier_index = i // tier_size
                     if tier_index < len(tiers):
                         tier_name = tiers[tier_index]
-                        flea_price = item['flea_market_price']
+                        calculated_price = item['flea_market_price'] / (item['width'] + item['height'])
+                        rounded_price = math.ceil(calculated_price)
 
                         # 티어의 최소, 최대 금액 업데이트
-                        if flea_price < pvp_tier_dict[tier_name]['min']:
-                            pvp_tier_dict[tier_name]['min'] = flea_price
-                        if flea_price > pvp_tier_dict[tier_name]['max']:
-                            pvp_tier_dict[tier_name]['max'] = flea_price
+                        if rounded_price < pvp_tier_dict[tier_name]['min']:
+                            pvp_tier_dict[tier_name]['min'] = rounded_price
+                        if rounded_price > pvp_tier_dict[tier_name]['max']:
+                            pvp_tier_dict[tier_name]['max'] = rounded_price
 
                         # 티어 리스트에 항목 추가
                         pvp_tier_dict[tier_name]['list'].append(item)
@@ -108,13 +110,14 @@ class PriceService:
                     tier_index = i // tier_size
                     if tier_index < len(tiers):
                         tier_name = tiers[tier_index]
-                        flea_price = item['flea_market_price']
+                        calculated_price = item['flea_market_price'] / (item['width'] + item['height'])
+                        rounded_price = math.ceil(calculated_price)
 
                         # 티어의 최소, 최대 금액 업데이트
-                        if flea_price < pve_tier_dict[tier_name]['min']:
-                            pve_tier_dict[tier_name]['min'] = flea_price
-                        if flea_price > pve_tier_dict[tier_name]['max']:
-                            pve_tier_dict[tier_name]['max'] = flea_price
+                        if rounded_price < pve_tier_dict[tier_name]['min']:
+                            pve_tier_dict[tier_name]['min'] = rounded_price
+                        if rounded_price > pve_tier_dict[tier_name]['max']:
+                            pve_tier_dict[tier_name]['max'] = rounded_price
 
                         # 티어 리스트에 항목 추가
                         pve_tier_dict[tier_name]['list'].append(item)
