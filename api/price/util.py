@@ -14,6 +14,7 @@ class PriceUtil:
                             item_image,
                             width,
                             height,
+                            category,
                             trader->'pve_trader' AS trader_list,
                             jsonb_array_elements(trader->'pve_trader') AS trade_info
                         FROM tkl_item_price
@@ -26,13 +27,14 @@ class PriceUtil:
                         item_image,
                         width,
                         height,
+                        category,
                         MAX((trade_info->>'price')::INT) AS flea_market_price,
                         CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) as per_slot,
                         trader_list
                     FROM pve_prices
                     WHERE trade_info->'trader'->>'npc_id' = 'FLEA_MARKET'
                     AND category IN :categories
-                    GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height
+                    GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height, category
                     ORDER BY CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) DESC
                     LIMIT 280
                 """
@@ -51,6 +53,7 @@ class PriceUtil:
                             item_image,
                             width,
                             height,
+                            category,
                             trader->'pvp_trader' AS trader_list,
                             jsonb_array_elements(trader->'pvp_trader') AS trade_info
                         FROM tkl_item_price
@@ -63,13 +66,14 @@ class PriceUtil:
                         item_image,
                         width,
                         height,
+                        category,
                         MAX((trade_info->>'price')::INT) AS flea_market_price,
                         CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) as per_slot,
                         trader_list
                     FROM pvp_prices
                     WHERE trade_info->'trader'->>'npc_id' = 'FLEA_MARKET'
                     AND category IN :categories
-                    GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height
+                    GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height, category
                     ORDER BY CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) DESC
                     LIMIT 280
                 """
