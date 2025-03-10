@@ -36,7 +36,7 @@ class PriceUtil:
                     AND category IN :categories
                     GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height, category
                     ORDER BY CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) DESC
-                    LIMIT 280
+                    LIMIT 700
                 """
 
     @staticmethod
@@ -75,5 +75,5 @@ class PriceUtil:
                     AND category IN :categories
                     GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height, category
                     ORDER BY CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) DESC
-                    LIMIT 280
+                    LIMIT 700
                 """

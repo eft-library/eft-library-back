@@ -76,7 +76,7 @@ class PriceService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 tiers = ['S', 'A', 'B', 'C', 'D', 'E', 'F']
-                tier_size = 40
+                tier_size = 100
                 pvp_tier_dict = {tier: {'min': float('inf'), 'max': 0, 'list': []} for tier in tiers}
                 pve_tier_dict = {tier: {'min': float('inf'), 'max': 0, 'list': []} for tier in tiers}
 
