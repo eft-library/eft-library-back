@@ -17,7 +17,7 @@ def get_item_price(page: int, page_size: int, word: str):
     return CustomResponse.response(price_list, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/top")
+@router.post("/top")
 def get_item_top_price(priceRankReq: PriceRankReq):
     top_list = PriceService.get_price_top(priceRankReq)
     if top_list is None:
