@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, TIMESTAMP, ForeignKey, Integer
+from sqlalchemy import Column, String, TIMESTAMP, ForeignKey, Integer, Boolean
 from sqlalchemy.orm import relationship
 
 from database import DataBaseConnector
@@ -51,4 +51,6 @@ class MainInfo(DataBaseConnector.Base):
     link = Column(String)
     order = Column(Integer)
     image = Column(String)
+    use_slide = Column(Boolean)
+    main_image = Column(String)
     update_time = Column(TIMESTAMP)

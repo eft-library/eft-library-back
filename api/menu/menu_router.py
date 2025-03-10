@@ -21,3 +21,11 @@ def get_main_info():
     if main_info_list is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.MAIN_INFO_NOT_FOUND)
     return CustomResponse.response(main_info_list, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/slide")
+def get_main_slide():
+    main_slide_list = MenuService.get_main_slide()
+    if main_slide_list is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.MAIN_INFO_NOT_FOUND)
+    return CustomResponse.response(main_slide_list, HTTPCode.OK, Message.SUCCESS)

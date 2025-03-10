@@ -30,3 +30,14 @@ class MenuService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_main_slide():
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                main_info_list = s.query(MainInfo).order_by(MainInfo.order).filter(MainInfo.use_slide == True).all()
+                return main_info_list
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
