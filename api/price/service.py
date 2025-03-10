@@ -127,9 +127,24 @@ class PriceService:
                         pve_tier_dict[tier]['min'] = 0
                         pve_tier_dict[tier]['max'] = 0
 
+                # 리스트 형태로 변환
+                pvp_tier_list = [{
+                    'tier': tier,
+                    'min': pvp_tier_dict[tier]['min'],
+                    'max': pvp_tier_dict[tier]['max'],
+                    'list': pvp_tier_dict[tier]['list']
+                } for tier in tiers]
+
+                pve_tier_list = [{
+                    'tier': tier,
+                    'min': pve_tier_dict[tier]['min'],
+                    'max': pve_tier_dict[tier]['max'],
+                    'list': pve_tier_dict[tier]['list']
+                } for tier in tiers]
+
                 return {
-                    'pvp_top_list': pvp_tier_dict,
-                    'pve_top_list': pve_tier_dict
+                    'pvp_top_list': pvp_tier_list,
+                    'pve_top_list': pve_tier_list
                 }
 
         except Exception as e:

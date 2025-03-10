@@ -37,6 +37,7 @@ class PriceHistoryModel(DataBaseConnector.Base):
     price_time = Column(TIMESTAMP, primary_key=True)
     execute_time = Column(TIMESTAMP)
 
+
 class PriceRankReq(BaseModel):
     """
     아이템 랭크 카테고리 파라미터
