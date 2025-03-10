@@ -77,8 +77,8 @@ class PriceService:
             with session() as s:
                 tiers = ['S', 'A', 'B', 'C', 'D', 'E', 'F']
                 tier_size = 40
-                pvp_tier_dict = {tier: {'min': 0, 'max': 0, 'list': []} for tier in tiers}
-                pve_tier_dict = {tier: {'min': 0, 'max': 0, 'list': []} for tier in tiers}
+                pvp_tier_dict = {tier: {'min': float('inf'), 'max': 0, 'list': []} for tier in tiers}
+                pve_tier_dict = {tier: {'min': float('inf'), 'max': 0, 'list': []} for tier in tiers}
 
                 pve_top_query = text(PriceUtil.get_pve_price_top())
                 pvp_top_query = text(PriceUtil.get_pvp_price_top())
