@@ -77,8 +77,8 @@ class PriceService:
             with session() as s:
                 tiers = ['S', 'A', 'B', 'C', 'D', 'E', 'F']
                 tier_size = 40
-                pvp_tier_dict = {tier: {'min': float('inf'), 'max': float('-inf'), 'list': []} for tier in tiers}
-                pve_tier_dict = {tier: {'min': float('inf'), 'max': float('-inf'), 'list': []} for tier in tiers}
+                pvp_tier_dict = {tier: {'min': 0, 'max': 0, 'list': []} for tier in tiers}
+                pve_tier_dict = {tier: {'min': 0, 'max': 0, 'list': []} for tier in tiers}
 
                 pve_top_query = text(PriceUtil.get_pve_price_top())
                 pvp_top_query = text(PriceUtil.get_pvp_price_top())
@@ -118,6 +118,14 @@ class PriceService:
 
                         # 티어 리스트에 항목 추가
                         pve_tier_dict[tier_name]['list'].append(item)
+
+                for tier in tiers:
+                    if not pvp_tier_dict[tier]['list']:
+                        pvp_tier_dict[tier]['min'] = 0
+                        pvp_tier_dict[tier]['max'] = 0
+                    if not pve_tier_dict[tier]['list']:
+                        pve_tier_dict[tier]['min'] = 0
+                        pve_tier_dict[tier]['max'] = 0
 
                 return {
                     'pvp_top_list': pvp_tier_dict,
