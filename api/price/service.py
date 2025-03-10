@@ -74,6 +74,7 @@ class PriceService:
     def get_price_top():
         try:
             session = DataBaseConnector.create_session_factory()
+            categories = ['Keys', 'Weapon', 'Ammo']
             with session() as s:
                 tiers = ['S', 'A', 'B', 'C', 'D', 'E', 'F']
                 tier_size = 40
@@ -83,10 +84,10 @@ class PriceService:
                 pve_top_query = text(PriceUtil.get_pve_price_top())
                 pvp_top_query = text(PriceUtil.get_pvp_price_top())
 
-                pve_top_list = s.execute(pve_top_query)
+                pve_top_list = s.execute(pve_top_query, {'categories': tuple(categories)})
                 pve_result = [dict(row) for row in pve_top_list.mappings()]
 
-                pvp_top_list = s.execute(pvp_top_query)
+                pvp_top_list = s.execute(pvp_top_query, {'categories': tuple(categories)})
                 pvp_result = [dict(row) for row in pvp_top_list.mappings()]
 
                 for i, item in enumerate(pvp_result):

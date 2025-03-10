@@ -31,6 +31,7 @@ class PriceUtil:
                         trader_list
                     FROM pve_prices
                     WHERE trade_info->'trader'->>'npc_id' = 'FLEA_MARKET'
+                    AND category IN :categories
                     GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height
                     ORDER BY CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) DESC
                     LIMIT 280
@@ -67,6 +68,7 @@ class PriceUtil:
                         trader_list
                     FROM pvp_prices
                     WHERE trade_info->'trader'->>'npc_id' = 'FLEA_MARKET'
+                    AND category IN :categories
                     GROUP BY id, item_name_kr, item_name_en, item_image, trader_list, width, height
                     ORDER BY CEIL(MAX((trade_info->>'price')::INT)  / NULLIF(width * height, 0)) DESC
                     LIMIT 280
