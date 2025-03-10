@@ -1,6 +1,8 @@
 from database import DataBaseConnector
 from sqlalchemy import Column, String, ARRAY, TEXT, TIMESTAMP, JSON, ForeignKey, Integer, NUMERIC
 from sqlalchemy.orm import relationship
+from pydantic import BaseModel
+from typing import List
 
 
 class PriceModel(DataBaseConnector.Base):
@@ -34,3 +36,10 @@ class PriceHistoryModel(DataBaseConnector.Base):
     price_type = Column(String)
     price_time = Column(TIMESTAMP, primary_key=True)
     execute_time = Column(TIMESTAMP)
+
+class PriceRankReq(BaseModel):
+    """
+    아이템 랭크 카테고리 파라미터
+    """
+
+    categoryList: List[str]
