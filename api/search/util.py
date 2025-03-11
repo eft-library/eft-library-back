@@ -10,6 +10,8 @@ class SearchUtil:
                     union all
                     select '/rank' as tkl_link
                     union all
+                    select '/wipe' as tkl_link
+                    union all
                     select '/roadmap' as tkl_link
                     union all
                     select '/price' as tkl_link
