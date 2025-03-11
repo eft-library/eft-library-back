@@ -13,3 +13,11 @@ def get_news():
     if news is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.NEWS_NOT_FOUND)
     return CustomResponse.response(news, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/wipe")
+def get_wipe():
+    wipe = NewsService.get_wipe()
+    if wipe is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.WIPE_NOT_FOUND)
+    return CustomResponse.response(wipe, HTTPCode.OK, Message.SUCCESS)

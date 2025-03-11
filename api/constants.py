@@ -5,6 +5,7 @@ class Message(Enum):
     SUCCESS = "OK"
     MAP_NOT_FOUND = "Map not found"
     NEWS_NOT_FOUND = "News not found"
+    WIPE_NOT_FOUND = "Wipe not found"
     POPUP_NOT_FOUND = "Popup not found"
     MENU_NOT_FOUND = "Menu not found"
     NPC_NOT_FOUND = "NPC not found"

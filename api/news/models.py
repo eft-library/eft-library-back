@@ -16,3 +16,18 @@ class News(DataBaseConnector.Base):
     youtube_id = Column(TEXT)
     next_update = Column(TEXT)
     user_function = Column(JSON)
+
+
+class Wipe(DataBaseConnector.Base):
+    """
+    wipe
+    """
+
+    __tablename__ = "tkl_wipe"
+
+    id = Column("id", TEXT, primary_key=True)
+    patch_version = Column(TEXT)
+    season_start = Column(TEXT)
+    season_end = Column(TEXT)
+    create_time = Column(TIMESTAMP)
+
