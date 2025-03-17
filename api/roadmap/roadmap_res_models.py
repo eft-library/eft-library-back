@@ -41,6 +41,7 @@ class RoadmapNode(DataBaseConnector.Base):
     title_en = Column(TEXT)
     is_kappa = Column(TEXT)
     npc_value = Column(TEXT, ForeignKey("tkl_npc.id"))
+    node_color = Column(TEXT)
 
 
 class RoadmapEdge(DataBaseConnector.Base):
