@@ -23,8 +23,7 @@ def get_all_hideout():
 
 @router.post("/get_station")
 def get_station(station: GetHideoutStation):
-    # result = HideoutService.get_station(station.user_email)
-    result = None
+    result = HideoutService.get_station(station.user_email)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.HIDEOUT_NOT_FOUND)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

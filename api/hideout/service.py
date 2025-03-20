@@ -23,7 +23,7 @@ class HideoutService:
             return None
 
     @staticmethod
-    def get_station(complete_id: str, user_email: str):
+    def get_station(user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
