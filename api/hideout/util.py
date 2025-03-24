@@ -95,8 +95,12 @@ class HideoutUtil:
                                                  json_agg(
                                                  distinct jsonb_build_object(
                                                          'level', tkl_hideout_crafts.level,
+                                                         'width', tkl_hideout_crafts.width,
+                                                         'height', tkl_hideout_crafts.height,
                                                          'name_en', tkl_hideout_crafts.name_en,
-                                                         'name_kr', tkl_hideout_crafts.name_kr
+                                                         'name_kr', tkl_hideout_crafts.name_kr,
+                                                         'req_item', tkl_hideout_crafts.req_item,
+                                                         'duration', tkl_hideout_crafts.duration
                                                           )
                                                          ) FILTER (WHERE tkl_hideout_crafts.level IS NOT NULL),
                                                  '[]'::json) as crafts
