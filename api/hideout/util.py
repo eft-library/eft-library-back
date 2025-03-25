@@ -101,6 +101,7 @@ class HideoutUtil:
                                                          'name_kr', tkl_hideout_crafts.name_kr,
                                                          'req_item', tkl_hideout_crafts.req_item,
                                                          'duration', tkl_hideout_crafts.duration,
+                                                         'quantity', tkl_hideout_crafts.quantity,
                                                          'image', tkl_hideout_crafts.image
                                                           )
                                                          ) FILTER (WHERE tkl_hideout_crafts.level IS NOT NULL),
