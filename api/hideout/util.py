@@ -100,7 +100,8 @@ class HideoutUtil:
                                                          'name_en', tkl_hideout_crafts.name_en,
                                                          'name_kr', tkl_hideout_crafts.name_kr,
                                                          'req_item', tkl_hideout_crafts.req_item,
-                                                         'duration', tkl_hideout_crafts.duration
+                                                         'duration', tkl_hideout_crafts.duration,
+                                                         'image', tkl_hideout_crafts.image
                                                           )
                                                          ) FILTER (WHERE tkl_hideout_crafts.level IS NOT NULL),
                                                  '[]'::json) as crafts
