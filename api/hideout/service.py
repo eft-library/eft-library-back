@@ -60,13 +60,13 @@ class HideoutService:
             with session() as s:
                 user_hideout = s.query(UserHideOut).filter_by(user_email=user_email).first()
                 if user_hideout:
-                    user_hideout.quest_list = complete_list
+                    user_hideout.complete_list = complete_list
                     user_hideout.update_time = datetime.utcnow()
                     s.commit()
                 else:
                     new_user_hideout = UserHideOut(
                         user_email=user_email,
-                        quest_list=complete_list,
+                        complete_list=complete_list,
                         update_time=datetime.utcnow()
                     )
                     s.add(new_user_hideout)
