@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import text
 from database import DataBaseConnector
 from api.hideout.util import HideoutUtil
@@ -52,24 +54,19 @@ class HideoutService:
             return None
 
     @staticmethod
-    def complete_station(complete_id: str, user_email: str):
+    def save_station(complete_list: List[str], user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user_hideout = s.query(UserHideOut).filter_by(user_email=user_email).first()
                 if user_hideout:
-                    complete_list = user_hideout.complete_list or []
-
-                    if complete_id not in complete_list:
-                        complete_list.append(complete_id)
-
-                    user_hideout.complete_list = complete_list
+                    user_hideout.quest_list = complete_list
                     user_hideout.update_time = datetime.utcnow()
                     s.commit()
                 else:
                     new_user_hideout = UserHideOut(
                         user_email=user_email,
-                        complete_list=[complete_id],
+                        quest_list=complete_list,
                         update_time=datetime.utcnow()
                     )
                     s.add(new_user_hideout)
@@ -79,30 +76,3 @@ class HideoutService:
             print("오류 발생:", e)
             return None
 
-    @staticmethod
-    def broken_station(complete_id: str, user_email: str):
-        try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
-                user_hideout = s.query(UserHideOut).filter_by(user_email=user_email).first()
-                if user_hideout:
-                    complete_list = user_hideout.complete_list or []
-
-                    if complete_id not in complete_list:
-                        complete_list.remove(complete_id)
-
-                    user_hideout.complete_list = complete_list
-                    user_hideout.update_time = datetime.utcnow()
-                    s.commit()
-                else:
-                    new_user_hideout = UserHideOut(
-                        user_email=user_email,
-                        complete_list=[],
-                        update_time=datetime.utcnow()
-                    )
-                    s.add(new_user_hideout)
-                    s.commit()
-                return user_hideout
-        except Exception as e:
-            print("오류 발생:", e)
-            return None

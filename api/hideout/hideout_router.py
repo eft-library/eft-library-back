@@ -29,23 +29,11 @@ def get_station(station: GetHideoutStation):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/complete_station")
+@router.post("/save_station")
 def complete_station(station: CompleteHideoutStation, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = HideoutService.complete_station(station.complete_id, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.STATION_SAVE_FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
-
-
-@router.post("/broken_station")
-def broken_station(station: BrokenHideoutStation, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = HideoutService.broken_station(station.broken_id, user_email)
+        result = HideoutService.save_station(station.complete_list, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.STATION_SAVE_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

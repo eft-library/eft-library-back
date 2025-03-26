@@ -7,7 +7,7 @@ class CompleteHideoutStation(BaseModel):
     사용자 hideout station 건설
     """
 
-    complete_id: str
+    complete_list: List[str]
 
 
 class BrokenHideoutStation(BaseModel):
