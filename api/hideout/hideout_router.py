@@ -13,14 +13,6 @@ router = APIRouter(tags=["Hideout"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-@router.get("/all")
-def get_all_hideout():
-    hideout = HideoutService.get_all_hideout()
-    if hideout is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.HIDEOUT_NOT_FOUND)
-    return CustomResponse.response(hideout, HTTPCode.OK, Message.SUCCESS)
-
-
 @router.post("/get_station")
 def get_station(station: GetHideoutStation):
     result = HideoutService.get_station(station.user_email)
