@@ -124,3 +124,17 @@ def get_all_glasses():
     if glasses is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.GLASSES_NOT_FOUND)
     return CustomResponse.response(glasses, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/list/{item_type}")
+def get_item_list(item_type: str):
+    item_map = {
+        "rig": ItemService.get_rig_list,
+        "container": ItemService.get_container_list
+    }
+
+    item_list = item_map.get(item_type)() if item_type in item_map else None
+    if item_list is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.ITEM_LIST_NOT_FOUNT)
+
+    return CustomResponse.response(item_list, HTTPCode.OK, Message.SUCCESS)

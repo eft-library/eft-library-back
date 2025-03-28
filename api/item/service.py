@@ -12,10 +12,11 @@ from api.item.models import (
     FaceCover,
     ArmBand,
     Knife,
+    Item
 )
 from api.item.util import ItemUtil
 from database import DataBaseConnector
-from sqlalchemy import desc, text
+from sqlalchemy import desc, text, cast, func, Numeric
 
 
 class ItemService:
@@ -161,6 +162,52 @@ class ItemService:
             }
 
             return result_rig
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_rig_list():
+        """
+        rig 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                query = text(ItemUtil.get_rig_query())
+                result = s.execute(query)
+                rig = [dict(row) for row in result.mappings()]
+
+            class_rig = []
+            no_class_rig = []
+
+            for item in rig:
+                print(item['info'])
+                if item['info']['class_value'] is None:
+                    no_class_rig.append(item)
+                else:
+                    class_rig.append(item)
+
+            result_rig = {
+                "class_rig": class_rig,
+                "no_class_rig": no_class_rig,
+            }
+
+            return result_rig
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_container_list():
+        """
+        container 전체 조회
+        """
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                container = s.query(Item).filter_by(Item.category == "Container").order_by(func.coalesce(Item.info["capacity"], "0"), Numeric).all()
+                return container
         except Exception as e:
             print("오류 발생:", e)
             return None
