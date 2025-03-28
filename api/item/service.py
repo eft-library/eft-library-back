@@ -144,13 +144,15 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                rig = s.query(Rig).order_by(Rig.class_value, Rig.capacity).all()
+                query = text(ItemUtil.get_rig_query())
+                result = s.execute(query)
+                rig = [dict(row) for row in result.mappings()]
 
             class_rig = []
             no_class_rig = []
 
             for item in rig:
-                if item.class_value is None:
+                if item['class_value'] is None:
                     no_class_rig.append(item)
                 else:
                     class_rig.append(item)

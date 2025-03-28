@@ -109,3 +109,12 @@ class ItemUtil:
                              tkl_glasses.image
                     order by tkl_glasses.blindness_protection
                     """
+
+    @staticmethod
+    def get_rig_query():
+        return """
+            SELECT *
+            FROM TKL_ITEM
+            where category = 'Rig'
+            ORDER BY (INFO->>'class_value')::NUMERIC, (INFO->>'capacity')::NUMERIC
+        """
