@@ -1,16 +1,9 @@
 from api.item.models import (
-    Headset,
     Headwear,
-    ArmorVest,
     Rig,
-    Backpack,
-    Container,
     Throwable,
-    Medical,
-    Ammo,
     Weapon,
     FaceCover,
-    ArmBand,
     Knife,
     Item
 )
@@ -129,7 +122,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                container = s.query(Container).order_by(Container.capacity).all()
+                container = s.query(Item).filter(Item.category == 'Container').order_by(cast(Item.info["capacity"], Numeric)).all()
                 return container
         except Exception as e:
             print("오류 발생:", e)
@@ -204,7 +197,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                medical = s.query(Medical).order_by(Medical.category).all()
+                medical = s.query(Item).filter(Item.category == 'Medical').order_by(Item.info["medical_category"]).all()
                 return medical
         except Exception as e:
             print("오류 발생:", e)
@@ -218,7 +211,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                ammo = s.query(Ammo).order_by(Ammo.penetration_power).all()
+                ammo = s.query(Item).filter(Item.category == 'Ammo').order_by(cast(Item.info["penetration_power"], Numeric)).all()
                 return ammo
         except Exception as e:
             print("오류 발생:", e)
@@ -278,7 +271,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                arm_band = s.query(ArmBand).order_by(ArmBand.name).all()
+                arm_band = s.query(Item).filter(Item.category == 'Armband').order_by(Item.name_en).all()
                 return arm_band
         except Exception as e:
             print("오류 발생:", e)
