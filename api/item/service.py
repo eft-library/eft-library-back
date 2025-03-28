@@ -240,7 +240,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                face_cover = s.query(Item).filter(Item.category == 'FaceCover').order_by(cast(Item.info["class_value"], Numeric)).all()
+                face_cover = s.query(Item).filter(Item.category == 'FaceCover').order_by(cast(Item.info["class_value"], Numeric)).nulls_last().all()
             class_face_cover = []
 
             no_class_face_cover = []
