@@ -152,8 +152,8 @@ class ItemService:
             no_class_rig = []
 
             for item in rig:
-                print(item)
-                if item['class_value'] is None:
+                print(item['info'])
+                if item['info']['class_value'] is None:
                     no_class_rig.append(item)
                 else:
                     class_rig.append(item)
