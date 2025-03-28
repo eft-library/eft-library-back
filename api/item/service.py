@@ -144,9 +144,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                query = text(ItemUtil.get_rig_query())
-                result = s.execute(query)
-                rig = [dict(row) for row in result.mappings()]
+                rig = [row._asdict() for row in s.execute(text(ItemUtil.get_rig_query())).mappings()]
 
             class_rig = []
             no_class_rig = []
