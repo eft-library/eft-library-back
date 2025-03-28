@@ -12,13 +12,28 @@ from api.item.models import (
     FaceCover,
     ArmBand,
     Knife,
+    Item
 )
 from api.item.util import ItemUtil
 from database import DataBaseConnector
-from sqlalchemy import desc, text
+from sqlalchemy import desc, text, cast, Numeric
 
 
 class ItemService:
+    @staticmethod
+    def get_item_list(item_type: str):
+        """
+        item 조회
+        """
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                item_list = s.query(Item).filter(Item.category == item_type).order_by(cast(Item.info["class_value"], Numeric)).all()
+                return item_list
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
     @staticmethod
     def get_all_headset():
         """
@@ -27,7 +42,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                headset = s.query(Headset).order_by(Headset.name).all()
+                headset = s.query(Item).filter(Item.category == 'Headset').order_by(cast(Item.info["class_value"], Numeric)).all()
                 return headset
         except Exception as e:
             print("오류 발생:", e)
@@ -86,7 +101,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                armor_vest = s.query(ArmorVest).order_by(ArmorVest.class_value).all()
+                armor_vest = s.query(Item).filter(Item.category == 'ArmorVest').order_by(cast(Item.info["class_value"], Numeric)).all()
                 return armor_vest
         except Exception as e:
             print("오류 발생:", e)
@@ -100,7 +115,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                backpack = s.query(Backpack).order_by(Backpack.capacity).all()
+                backpack = s.query(Item).filter(Item.category == 'Backpack').order_by(cast(Item.info["capacity"], Numeric)).all()
                 return backpack
         except Exception as e:
             print("오류 발생:", e)
