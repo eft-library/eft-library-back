@@ -9,7 +9,7 @@ from api.item.models import (
 )
 from api.item.util import ItemUtil
 from database import DataBaseConnector
-from sqlalchemy import desc, text, cast, Numeric
+from sqlalchemy import desc, text, cast, Numeric, func
 
 
 class ItemService:
@@ -35,7 +35,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                headset = s.query(Item).filter(Item.category == 'Headset').order_by(cast(Item.info["class_value"], Numeric)).all()
+                headset = s.query(Item).filter(Item.category == 'Headset').order_by(cast(func.coalesce(Item.info["class_value"], "0"), Numeric)).all()
                 return headset
         except Exception as e:
             print("오류 발생:", e)
@@ -64,7 +64,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                headwear = s.query(Item).filter(Item.category == 'Headwear').order_by(cast(Item.info["class_value"], Numeric)).all()
+                headwear = s.query(Item).filter(Item.category == 'Headwear').order_by(cast(func.coalesce(Item.info["class_value"], "0"), Numeric)).all()
 
             class_headwear = []
 
@@ -94,7 +94,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                armor_vest = s.query(Item).filter(Item.category == 'ArmorVest').order_by(cast(Item.info["class_value"], Numeric)).all()
+                armor_vest = s.query(Item).filter(Item.category == 'ArmorVest').order_by(cast(func.coalesce(Item.info["class_value"], "0"), Numeric)).all()
                 return armor_vest
         except Exception as e:
             print("오류 발생:", e)
@@ -108,7 +108,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                backpack = s.query(Item).filter(Item.category == 'Backpack').order_by(cast(Item.info["capacity"], Numeric)).all()
+                backpack = s.query(Item).filter(Item.category == 'Backpack').order_by(cast(func.coalesce(Item.info["capacity"], "0"), Numeric)).all()
                 return backpack
         except Exception as e:
             print("오류 발생:", e)
@@ -122,7 +122,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                container = s.query(Item).filter(Item.category == 'Container').order_by(cast(Item.info["capacity"], Numeric)).all()
+                container = s.query(Item).filter(Item.category == 'Container').order_by(cast(func.coalesce(Item.info["capacity"], "0"), Numeric)).all()
                 return container
         except Exception as e:
             print("오류 발생:", e)
@@ -152,7 +152,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                rig = s.query(Item).filter(Item.category == 'Rig').order_by(cast(Item.info["class_value"], Numeric), cast(Item.info["capacity"], Numeric)).all()
+                rig = s.query(Item).filter(Item.category == 'Rig').order_by(cast(func.coalesce(Item.info["class_value"], "0"), Numeric), cast(func.coalesce(Item.info["class_value"], "0"), Numeric)).all()
             class_rig = []
             no_class_rig = []
 
@@ -210,7 +210,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                ammo = s.query(Item).filter(Item.category == 'Ammo').order_by(cast(Item.info["penetration_power"], Numeric)).all()
+                ammo = s.query(Item).filter(Item.category == 'Ammo').order_by(cast(func.coalesce(Item.info["penetration_power"], "0"), Numeric)).all()
                 return ammo
         except Exception as e:
             print("오류 발생:", e)
@@ -240,7 +240,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                face_cover = s.query(Item).filter(Item.category == 'FaceCover').order_by(cast(Item.info["class_value"], Numeric)).nulls_last().all()
+                face_cover = s.query(Item).filter(Item.category == 'FaceCover').order_bycast(func.coalesce(Item.info["class_value"], "0"), Numeric).all()
             class_face_cover = []
 
             no_class_face_cover = []
