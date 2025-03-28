@@ -159,8 +159,8 @@ class ItemService:
                     class_rig.append(item)
 
             result_rig = {
-                "class_rig": [item.__dict__ for item in class_rig],
-                "no_class_rig": [item.__dict__ for item in no_class_rig],
+                "class_rig": class_rig,
+                "no_class_rig": no_class_rig,
             }
 
             return result_rig
