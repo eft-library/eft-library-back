@@ -206,7 +206,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                container = s.query(Item).filter_by(Item.category == "Container").order_by(func.coalesce(Item.info["capacity"], "0"), Numeric).all()
+                container = s.query(Item).filter(Item.category == "Container").order_by(func.coalesce(Item.info["capacity"], "0"), Numeric).all()
                 return container
         except Exception as e:
             print("오류 발생:", e)
