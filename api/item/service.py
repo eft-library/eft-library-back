@@ -47,9 +47,9 @@ class ItemService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 weapon_list = {
-                    "gun": s.query(Weapon).all(),
-                    "knife": s.query(Knife).all(),
-                    "throwable": s.query(Throwable).all(),
+                    "gun": s.query(Item).filter(Item.category == 'Gun').all(),
+                    "knife": s.query(Item).filter(Item.category == 'Knife').all(),
+                    "throwable": s.query(Item).filter(Item.category == 'Throwable').all(),
                 }
             return weapon_list
         except Exception as e:
@@ -64,14 +64,14 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                headwear = s.query(Headwear).order_by(Headwear.class_value).all()
+                headwear = s.query(Item).filter(Item.category == 'Headwear').order_by(cast(Item.info["class_value"], Numeric)).all()
 
             class_headwear = []
 
             no_class_headwear = []
 
             for wear in headwear:
-                if wear.class_value is None:
+                if wear.info['class_value'] is None:
                     no_class_headwear.append(wear)
                 else:
                     class_headwear.append(wear)
@@ -152,8 +152,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                rig = s.query(Rig).order_by(Rig.class_value, Rig.capacity).all()
-
+                rig = s.query(Item).filter(Item.category == 'Rig').order_by(cast(Item.info["class_value"], Numeric), cast(Item.info["capacity"], Numeric)).all()
             class_rig = []
             no_class_rig = []
 
@@ -241,14 +240,13 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                face_cover = s.query(FaceCover).order_by(FaceCover.class_value).all()
-
+                face_cover = s.query(Item).filter(Item.category == 'FaceCover').order_by(cast(Item.info["class_value"], Numeric)).all()
             class_face_cover = []
 
             no_class_face_cover = []
 
             for cover in face_cover:
-                if cover.class_value is None:
+                if cover.info['class_value'] is None:
                     no_class_face_cover.append(cover)
                 else:
                     class_face_cover.append(cover)
