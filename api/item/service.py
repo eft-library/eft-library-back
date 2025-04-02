@@ -341,12 +341,15 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                glasses = s.query(Item).filter(Item.category == "Glasses").order_by(Item.info["class_value"]).all()
+                query = text(ItemUtil.get_glasses_query())
+                result = s.execute(query)
+                glasses = [dict(row) for row in result.mappings()]
 
             class_glasses = []
             no_class_glasses = []
 
             for item in glasses:
+                print(item)
                 if item['info']['class_value'] == 0:
                     no_class_glasses.append(item)
                 else:
@@ -370,7 +373,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                face_cover = s.query(FaceCover).order_by(FaceCover.class_value).all()
+                face_cover = s.query(Item).filter(Item.category == "FaceCover").order_by(Item.info["class_value"]).all()
 
             class_face_cover = []
 
@@ -554,7 +557,9 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                headwear = s.query(Item).filter(Item.category == "Headwear").order_by(cast(Item.info["class_value"], Numeric)).all()
+                query = text(ItemUtil.get_head_wear_query())
+                result = s.execute(query)
+                headwear = [dict(row) for row in result.mappings()]
 
             class_headwear = []
 
