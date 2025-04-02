@@ -84,7 +84,7 @@ class ItemUtil:
                     """
 
     @staticmethod
-    def get_glasses_query():
+    def get_all_glasses_query():
         return """
                     select tkl_glasses.id,
                            tkl_glasses.name,
@@ -134,7 +134,7 @@ class ItemUtil:
             SELECT *
             FROM TKL_ITEM
             where category = 'Glasses'
-            ORDER BY (INFO->>'class_value')::NUMERIC, (INFO->>'capacity')::NUMERIC
+            ORDER BY (INFO->>'class_value')::NUMERIC, (INFO->>'blindness_protection')::NUMERIC
         """
 
     @staticmethod

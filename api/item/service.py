@@ -278,7 +278,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                query = text(ItemUtil.get_glasses_query())
+                query = text(ItemUtil.get_all_glasses_query())
 
                 result = s.execute(query)
                 glasses = [dict(row) for row in result.mappings()]
