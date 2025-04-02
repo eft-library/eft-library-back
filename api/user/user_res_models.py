@@ -25,15 +25,3 @@ class User(DataBaseConnector.Base):
     create_time = Column(TIMESTAMP)
     attendance_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
-
-
-class UserQuest(DataBaseConnector.Base):
-    """
-    User quest
-    """
-
-    __tablename__ = "tkl_user_quest"
-
-    user_email = Column(TEXT, primary_key=True)
-    quest_id = Column(ARRAY(TEXT))
-    update_time = Column(TIMESTAMP)

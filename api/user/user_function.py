@@ -1,7 +1,5 @@
-from api.user.user_res_models import (
-    User,
-    UserQuest,
-)
+from api.user.user_res_models import User
+from api.planner.planner_res_models import UserQuest
 from api.user.user_req_models import AddUserReq
 from dotenv import load_dotenv
 from datetime import datetime, date
@@ -66,6 +64,7 @@ class UserFunction:
         new_user_quest = UserQuest(
             user_email=email,
             quest_id=[],
+            update_tiem=datetime.now()
         )
         session.add(new_user_quest)
 

@@ -1,25 +1,21 @@
-from api.user.user_res_models import (
-    UserQuest,
-)
-from api.user.user_req_models import (
-    UserQuestList,
-)
+from api.planner.planner_res_models import UserQuest
+from api.planner.planner_req_models import UserQuestList
 from database import DataBaseConnector
 from dotenv import load_dotenv
 from sqlalchemy import text
 from datetime import datetime
-from api.user.util import UserUtil
+from api.planner.util import PlannerUtil
 
 load_dotenv()
 
 
-class UserQuestService:
+class PlannerService:
     @staticmethod
     def get_user_quest(user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                query = text(UserUtil.user_quest_query())
+                query = text(PlannerUtil.user_quest_query())
                 result = s.execute(query, {"user_email": user_email})
                 if result:
                     return [dict(row) for row in result.mappings()]
@@ -38,7 +34,7 @@ class UserQuestService:
                 user_quest.quest_id = userQuestList.userQuestList
                 user_quest.update_time = datetime.utcnow()
                 s.commit()
-                query = text(UserUtil.user_quest_query())
+                query = text(PlannerUtil.user_quest_query())
 
                 result = s.execute(query, {"user_email": user_email})
                 new_user_quests = [dict(row) for row in result.mappings()]
@@ -55,7 +51,7 @@ class UserQuestService:
                 user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
                 user_quest.quest_id = userQuestList.userQuestList
                 s.commit()
-                query = text(UserUtil.user_quest_query())
+                query = text(PlannerUtil.user_quest_query())
                 result = s.execute(query, {"user_email": user_email})
                 new_user_quests = [dict(row) for row in result.mappings()]
                 return new_user_quests

@@ -16,6 +16,7 @@ from api.patch_notes import patch_notes_router
 from api.notice import notice_router
 from api.roadmap import roadmap_router
 from api.price import price_router
+from api.planner import planner_router
 
 api_router = APIRouter()
 
@@ -29,10 +30,11 @@ api_router.include_router(table_column_router.router, prefix="/table_column")
 api_router.include_router(search_router.router, prefix="/search")
 api_router.include_router(item_filter_router.router, prefix="/item_filter")
 api_router.include_router(item_router.router, prefix="/item")
-api_router.include_router(hideout_router.router, prefix="/hideout")
 api_router.include_router(user_router.router, prefix="/user")
+api_router.include_router(planner_router.router, prefix="/planner")
+api_router.include_router(roadmap_router.router, prefix="/roadmap")
+api_router.include_router(hideout_router.router, prefix="/hideout")
 api_router.include_router(event_router.router, prefix="/event")
 api_router.include_router(patch_notes_router.router, prefix="/patch_notes")
 api_router.include_router(notice_router.router, prefix="/notice")
-api_router.include_router(roadmap_router.router, prefix="/roadmap")
 api_router.include_router(price_router.router, prefix="/price")
