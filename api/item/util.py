@@ -136,3 +136,12 @@ class ItemUtil:
             where category = 'Glasses'
             ORDER BY (INFO->>'class_value')::NUMERIC, (INFO->>'capacity')::NUMERIC
         """
+
+    @staticmethod
+    def get_face_cover_query():
+        return """
+            SELECT *
+            FROM TKL_ITEM
+            where category = 'FaceCover'
+            ORDER BY (INFO->>'class_value')::NUMERIC, (INFO->>'capacity')::NUMERIC
+        """

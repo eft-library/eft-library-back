@@ -373,7 +373,10 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                face_cover = s.query(Item).filter(Item.category == "FaceCover").order_by(Item.info["class_value"]).all()
+
+                query = text(ItemUtil.get_face_cover_query())
+                result = s.execute(query)
+                face_cover = [dict(row) for row in result.mappings()]
 
             class_face_cover = []
 
