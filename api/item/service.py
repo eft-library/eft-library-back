@@ -490,7 +490,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                key = s.query(Item).filter(Item.category == "Key").all()
+                key = s.query(Item).filter(Item.category == "Key").order_by(Item.name_en).all()
                 return key
         except Exception as e:
             print("오류 발생:", e)
