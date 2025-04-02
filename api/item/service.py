@@ -531,7 +531,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                headset = s.query(Item).filter(Item.category == "Backpack").order_by(Item.name_en).all()
+                headset = s.query(Item).filter(Item.category == "Headset").order_by(Item.name_en).all()
                 return headset
         except Exception as e:
             print("오류 발생:", e)
