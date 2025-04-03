@@ -31,6 +31,7 @@ class HideoutUtil:
                                                  json_agg(
                                                  distinct jsonb_build_object(
                                                          'id', tkl_hideout_item_require.id,
+                                                         'level_id', tkl_hideout_item_require.level_id,
                                                          'name_en', tkl_hideout_item_require.name_en,
                                                          'name_kr', tkl_hideout_item_require.name_kr,
                                                          'count', tkl_hideout_item_require.count,
@@ -54,6 +55,7 @@ class HideoutUtil:
                                                          'name_en', tkl_hideout_trader_require.name_en,
                                                          'name_kr', tkl_hideout_trader_require.name_kr,
                                                          'compare', tkl_hideout_trader_require.compare,
+                                                         'level_id', tkl_hideout_trader_require.level_id,
                                                          'require_type', tkl_hideout_trader_require.require_type,
                                                          'value', tkl_hideout_trader_require.value,
                                                          'image', tkl_hideout_trader_require.image
@@ -64,6 +66,7 @@ class HideoutUtil:
                                                  json_agg(
                                                  distinct jsonb_build_object(
                                                          'level', tkl_hideout_station_require.level,
+                                                         'level_id', tkl_hideout_station_require.level_id,
                                                          'name_en', tkl_hideout_station_require.name_en,
                                                          'name_kr', tkl_hideout_station_require.name_kr,
                                                          'image', tkl_hideout_station_require.image
@@ -74,6 +77,7 @@ class HideoutUtil:
                                                  json_agg(
                                                  distinct jsonb_build_object(
                                                          'level', tkl_hideout_skill_require.level,
+                                                         'level_id', tkl_hideout_skill_require.level_id,
                                                          'name_en', tkl_hideout_skill_require.name_en,
                                                          'name_kr', tkl_hideout_skill_require.name_kr,
                                                          'image', tkl_hideout_skill_require.image
