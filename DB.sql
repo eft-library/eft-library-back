@@ -439,6 +439,7 @@ CREATE TABLE TKL_HIDEOUT_STATION_REQUIRE
     NAME_EN TEXT,
     NAME_KR TEXT,
     IMAGE TEXT,
+    station_master_id TEXT,
     UPDATE_TIME timestamp with time zone default now()
 );
 COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.ID IS 'Hideout station require 아이디';
@@ -447,6 +448,7 @@ COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.LEVEL IS 'Hideout station require 
 COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.NAME_EN IS 'Hideout station require 이름 영문';
 COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.NAME_KR IS 'Hideout station require 이름 한글';
 COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.IMAGE IS 'Hideout station require 이미지';
+COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.station_master_id IS 'Hideout station master 아이디';
 COMMENT ON COLUMN TKL_HIDEOUT_STATION_REQUIRE.UPDATE_TIME IS 'Hideout station require 업데이트 시간';
 
 -- hideout crafts

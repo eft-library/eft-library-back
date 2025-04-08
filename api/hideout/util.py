@@ -69,6 +69,7 @@ class HideoutUtil:
                                                          'level_id', tkl_hideout_station_require.level_id,
                                                          'name_en', tkl_hideout_station_require.name_en,
                                                          'name_kr', tkl_hideout_station_require.name_kr,
+                                                         'station_master_id', tkl_hideout_station_require.station_master_id,
                                                          'image', tkl_hideout_station_require.image
                                                           )
                                                          ) FILTER (WHERE tkl_hideout_station_require.level IS NOT NULL),
