@@ -13,7 +13,10 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                item = s.query(Item).filter(Item.url_mapping == item_url).first()
+                query = text(ItemUtil.get_item_detail_query())
+                param = {"url_mapping": item_url}
+                result = s.execute(query, param)
+                item = result.mappings().first()
                 return item
         except Exception as e:
             print("오류 발생:", e)
