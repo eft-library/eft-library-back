@@ -25,6 +25,7 @@ class NPC(DataBaseConnector.Base):
     name_kr = Column(TEXT)
     image = Column(String)
     order = Column(Integer)
+    barter_info = Column(JSON)
     update_time = Column(TIMESTAMP)
     all_quest = relationship("RoadmapNode", backref="npc")
 
