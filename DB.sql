@@ -229,19 +229,25 @@ COMMENT ON COLUMN TKL_MAP_PARENT.UPDATE_TIME IS '업데이트 시간';
 CREATE TABLE TKL_API_QUEST
 (
     id text NOT NULL PRIMARY KEY,
-    name text,
-    npc_name text,
+    name_en text,
+    name_kr text,
+    npc_id text,
+    lightkeeper_required boolean,
+    kappa_required boolean,
     task_requirements jsonb,
     objectives jsonb,
-    name_kr text,
+    finish_rewards jsonb,
     update_time timestamp with time zone DEFAULT now()
 );
 COMMENT ON COLUMN TKL_API_QUEST.id IS 'Api 퀘스트 ID';
-COMMENT ON COLUMN TKL_API_QUEST.name IS 'Api 퀘스트 이름';
-COMMENT ON COLUMN TKL_API_QUEST.npc_name IS 'Api 퀘스트 npc 이름';
-COMMENT ON COLUMN TKL_API_QUEST.task_requirements IS 'Api 퀘스트 선행 목록';
-COMMENT ON COLUMN TKL_API_QUEST.objectives IS 'Api 퀘스트 보상 목록';
+COMMENT ON COLUMN TKL_API_QUEST.name_en IS 'Api 퀘스트 이름';
 COMMENT ON COLUMN TKL_API_QUEST.name_kr IS 'Api 퀘스트 이름 한글';
+COMMENT ON COLUMN TKL_API_QUEST.npc_id IS 'Api 퀘스트 npc id';
+COMMENT ON COLUMN TKL_API_QUEST.lightkeeper_required IS 'Api 퀘스트 라이트키퍼 여부';
+COMMENT ON COLUMN TKL_API_QUEST.kappa_required IS 'Api 퀘스트 카파 여부';
+COMMENT ON COLUMN TKL_API_QUEST.task_requirements IS 'Api 퀘스트 선행 퀘스트 목록';
+COMMENT ON COLUMN TKL_API_QUEST.objectives IS 'Api 퀘스트 목표 목록';
+COMMENT ON COLUMN TKL_API_QUEST.finish_rewards IS 'Api 퀘스트 완료 보상 목록';
 COMMENT ON COLUMN TKL_API_QUEST.update_time IS 'Api 퀘스트 업데이트 시간';
 
 -- npc 정보
