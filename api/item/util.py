@@ -74,13 +74,13 @@ class ItemUtil:
                                                          ON SPLIT_PART(thir.level_id, '-', 1) = thm.id),
             
             -- 🛠 은신처 제작에 사용되는 정보
-                 filtered_crafts AS (SELECT thc.*,
-                                            thm.name_en             as master_name_en,
-                                            thm.name_kr             as master_name_kr,
-                                            thm.id                  as master_id,
-                                            elem -> 'item' ->> 'id' AS required_item_id
+                 filtered_crafts AS (SELECT DISTINCT ON (thc.id) thc.*,
+                                                                 thm.name_en             AS master_name_en,
+                                                                 thm.name_kr             AS master_name_kr,
+                                                                 thm.id                  AS master_id,
+                                                                 elem -> 'item' ->> 'id' AS required_item_id
                                      FROM tkl_hideout_crafts thc
-                                              LEFT JOIN LATERAL jsonb_array_elements(thc.req_item) AS elem on True
+                                              LEFT JOIN LATERAL jsonb_array_elements(thc.req_item) AS elem ON TRUE
                                               LEFT JOIN tkl_hideout_master thm ON SPLIT_PART(thc.level_id, '-', 1) = thm.id),
             
             -- 🎯 퀘스트 보상으로 사용되는 정보
