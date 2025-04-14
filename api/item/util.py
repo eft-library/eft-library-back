@@ -113,14 +113,14 @@ class ItemUtil:
                                                      AND q.name_kr IS NOT NULL),
             
             -- ❗ items 배열에 포함된 경우 (예: giveItem, plantItem, findItem)
-                 required_quests_by_items_array AS (SELECT q.id       AS quest_id,
-                                                           q.name_kr,
-                                                           q.name_en,
-                                                           q.url_mapping,
-                                                           tn.name_kr as npc_name_kr,
-                                                           tn.name_en as npc_name_en,
-                                                           tn.image   AS npc_image,
-                                                           obj        AS objective
+                 required_quests_by_items_array AS (SELECT distinct on (q.id) q.id       AS quest_id,
+                                                                  q.name_kr,
+                                                                  q.name_en,
+                                                                  q.url_mapping,
+                                                                  tn.name_kr as npc_name_kr,
+                                                                  tn.name_en as npc_name_en,
+                                                                  tn.image   AS npc_image,
+                                                                  obj        AS objective
                                                     FROM tkl_api_quest q
                                                              LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
                                                              LEFT JOIN tkl_npc tn on q.npc_id = tn.id
