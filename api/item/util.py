@@ -43,10 +43,9 @@ class ItemUtil:
                                  FROM tkl_item
                                  WHERE url_mapping = :url_mapping),
             
-            -- 바터 정보
+            -- 📦 바터 정보
                  filtered_barters AS (SELECT n.id                      AS npc_id,
                                              n.name_kr,
-                                             n.name_en,
                                              n.image,
                                              jsonb_build_object(
                                                      'level', barter ->> 'level',
@@ -58,13 +57,33 @@ class ItemUtil:
                                            jsonb_array_elements(n.barter_info) AS barter,
                                            jsonb_array_elements(barter -> 'rewardItems') AS reward),
             
-            -- 은신처 제작에 사용되는 정보
-                 filtered_crafts AS (SELECT thc.*,
-                                            elem -> 'item' ->> 'id' AS required_item_id
-                                     FROM tkl_hideout_crafts thc,
-                                          jsonb_array_elements(thc.req_item) AS elem),
+            -- 🛠 은신처 건설에 사용되는 정보
+                 filtered_hideout AS (SELECT thir.id,
+                                             thir.level_id,
+                                             thir.name_en,
+                                             thir.name_kr,
+                                             thir.quantity,
+                                             thir.count,
+                                             thir.image,
+                                             thir.item_id,
+                                             thm.name_kr as master_name_kr,
+                                             thm.name_en as master_name_en,
+                                             thm.id      as master_id
+                                      FROM tkl_hideout_item_require thir
+                                               LEFT JOIN tkl_hideout_master thm
+                                                         ON SPLIT_PART(thir.level_id, '-', 1) = thm.id),
             
-            -- 퀘스트 보상으로 사용되는 정보
+            -- 🛠 은신처 제작에 사용되는 정보
+                 filtered_crafts AS (SELECT thc.*,
+                                            thm.name_en             as master_name_en,
+                                            thm.name_kr             as master_name_kr,
+                                            thm.id                  as master_id,
+                                            elem -> 'item' ->> 'id' AS required_item_id
+                                     FROM tkl_hideout_crafts thc
+                                              LEFT JOIN LATERAL jsonb_array_elements(thc.req_item) AS elem on True
+                                              LEFT JOIN tkl_hideout_master thm ON SPLIT_PART(thc.level_id, '-', 1) = thm.id),
+            
+            -- 🎯 퀘스트 보상으로 사용되는 정보
                  filtered_quests AS (SELECT qa.id                                           AS quest_id,
                                             qa.name_en,
                                             qa.name_kr,
@@ -78,7 +97,7 @@ class ItemUtil:
                                               left join tkl_npc tn on qa.npc_id = tn.id
                                      WHERE qa.name_kr is not null),
             
-            -- questItem에 포함된 경우 (예: giveQuestItem, findQuestItem)
+            -- ❗ questItem에 포함된 경우 (예: giveQuestItem, findQuestItem)
                  required_quests_by_quest_item AS (SELECT q.id       AS quest_id,
                                                           q.name_kr,
                                                           q.name_en,
@@ -93,7 +112,7 @@ class ItemUtil:
                                                    WHERE obj ->> 'type' IN ('findQuestItem', 'giveQuestItem')
                                                      AND q.name_kr IS NOT NULL),
             
-            -- items 배열에 포함된 경우 (예: giveItem, plantItem, findItem)
+            -- ❗ items 배열에 포함된 경우 (예: giveItem, plantItem, findItem)
                  required_quests_by_items_array AS (SELECT q.id       AS quest_id,
                                                            q.name_kr,
                                                            q.name_en,
@@ -133,7 +152,10 @@ class ItemUtil:
                                                                       'quantity', thir.quantity,
                                                                       'count', thir.count,
                                                                       'image', thir.image,
-                                                                      'item_id', thir.item_id
+                                                                      'item_id', thir.item_id,
+                                                                      'master_name_en', thir.master_name_en,
+                                                                      'master_name_kr', thir.master_name_kr,
+                                                                      'master_id', thir.master_id
                                                                        )
                                                                       ) FILTER (WHERE thir.id IS NOT NULL),
                                                               '[]'
@@ -151,7 +173,10 @@ class ItemUtil:
                                                                       'duration', thc.duration,
                                                                       'reward_item_id', thc.reward_item_id,
                                                                       'image', thc.image,
-                                                                      'quantity', thc.quantity
+                                                                      'quantity', thc.quantity,
+                                                                      'master_name_en', thir.master_name_en,
+                                                                      'master_name_kr', thir.master_name_kr,
+                                                                      'master_id', thir.master_id
                                                                        )
                                                                       ) FILTER (WHERE thc.id IS NOT NULL),
                                                               '[]'
@@ -164,7 +189,6 @@ class ItemUtil:
                                                                       'npc_id', fb.npc_id,
                                                                       'npc_image', fb.image,
                                                                       'npc_name_kr', fb.name_kr,
-                                                                      'npc_name_en', fb.name_en,
                                                                       'barter_info', fb.matching_barter
                                                                        )
                                                                       ) FILTER (WHERE fb.npc_id IS NOT NULL),
@@ -188,7 +212,7 @@ class ItemUtil:
                                                               '[]'
                                               ) AS rewarded_by_quests,
             
-                                              -- questItem에 들어 있는 퀘스트
+                                              -- 📌 questItem에 들어 있는 퀘스트
                                               COALESCE(
                                                               json_agg(
                                                               DISTINCT jsonb_build_object(
@@ -207,7 +231,7 @@ class ItemUtil:
                                                               '[]'
                                               ) AS required_by_quest_item,
             
-                                              -- items 배열에 들어 있는 퀘스트
+                                              -- 📌 items 배열에 들어 있는 퀘스트
                                               COALESCE(
                                                               json_agg(
                                                               DISTINCT jsonb_build_object(
@@ -225,7 +249,7 @@ class ItemUtil:
                                               ) AS required_by_quest_item_array
             
                                        FROM target_item ti
-                                                LEFT JOIN tkl_hideout_item_require thir ON ti.id = thir.item_id
+                                                LEFT JOIN filtered_hideout thir ON ti.id = thir.item_id
                                                 LEFT JOIN filtered_crafts thc ON thc.required_item_id = ti.id
                                                 LEFT JOIN filtered_barters fb ON fb.reward_item_id = ti.id
                                                 LEFT JOIN filtered_quests fq ON fq.reward_elem -> 'item' ->> 'id' = ti.id
