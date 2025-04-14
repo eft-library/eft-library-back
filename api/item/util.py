@@ -41,11 +41,12 @@ class ItemUtil:
         return """
             WITH target_item AS (SELECT *
                                  FROM tkl_item
-                                 WHERE url_mapping = :url_mapping),
+                                 WHERE url_mapping = 'can-of-pacific-saury'),
             
-            -- 📦 바터 정보
+            -- 바터 정보
                  filtered_barters AS (SELECT n.id                      AS npc_id,
                                              n.name_kr,
+                                             n.image,
                                              jsonb_build_object(
                                                      'level', barter ->> 'level',
                                                      'rewardItems', reward,
@@ -56,40 +57,53 @@ class ItemUtil:
                                            jsonb_array_elements(n.barter_info) AS barter,
                                            jsonb_array_elements(barter -> 'rewardItems') AS reward),
             
-            -- 🛠 은신처 제작에 사용되는 정보
+            -- 은신처 제작에 사용되는 정보
                  filtered_crafts AS (SELECT thc.*,
                                             elem -> 'item' ->> 'id' AS required_item_id
                                      FROM tkl_hideout_crafts thc,
                                           jsonb_array_elements(thc.req_item) AS elem),
             
-            -- 🎯 퀘스트 보상으로 사용되는 정보
+            -- 퀘스트 보상으로 사용되는 정보
                  filtered_quests AS (SELECT qa.id                                           AS quest_id,
                                             qa.name_en,
                                             qa.name_kr,
+                                            qa.npc_id,
                                             qa.url_mapping,
+                                            tn.name_kr                                      as npc_name_kr,
+                                            tn.name_en                                      as npc_name_en,
+                                            tn.image                                        AS npc_image,
                                             jsonb_array_elements(finish_rewards -> 'items') AS reward_elem
                                      FROM tkl_api_quest qa
+                                              left join tkl_npc tn on qa.npc_id = tn.id
                                      WHERE qa.name_kr is not null),
             
-            -- ❗ questItem에 포함된 경우 (예: giveQuestItem, findQuestItem)
-                 required_quests_by_quest_item AS (SELECT q.id AS quest_id,
+            -- questItem에 포함된 경우 (예: giveQuestItem, findQuestItem)
+                 required_quests_by_quest_item AS (SELECT q.id       AS quest_id,
                                                           q.name_kr,
                                                           q.name_en,
                                                           q.url_mapping,
-                                                          obj  AS objective
-                                                   FROM tkl_api_quest q,
-                                                        jsonb_array_elements(q.objectives) AS obj
+                                                          tn.name_kr AS npc_name_kr,
+                                                          tn.name_en AS npc_name_en,
+                                                          tn.image   AS npc_image,
+                                                          obj        AS objective
+                                                   FROM tkl_api_quest q
+                                                            LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
+                                                            LEFT JOIN tkl_npc tn ON q.npc_id = tn.id
                                                    WHERE obj ->> 'type' IN ('findQuestItem', 'giveQuestItem')
-                                                   AND q.name_kr is not null),
+                                                     AND q.name_kr IS NOT NULL),
             
-            -- ❗ items 배열에 포함된 경우 (예: giveItem, plantItem, findItem)
-                 required_quests_by_items_array AS (SELECT q.id AS quest_id,
+            -- items 배열에 포함된 경우 (예: giveItem, plantItem, findItem)
+                 required_quests_by_items_array AS (SELECT q.id       AS quest_id,
                                                            q.name_kr,
                                                            q.name_en,
                                                            q.url_mapping,
-                                                           obj  AS objective
-                                                    FROM tkl_api_quest q,
-                                                         jsonb_array_elements(q.objectives) AS obj
+                                                           tn.name_kr as npc_name_kr,
+                                                           tn.name_en as npc_name_en,
+                                                           tn.image   AS npc_image,
+                                                           obj        AS objective
+                                                    FROM tkl_api_quest q
+                                                             LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
+                                                             LEFT JOIN tkl_npc tn on q.npc_id = tn.id
                                                     WHERE obj ->> 'type' IN ('plantItem', 'giveItem', 'findItem')
                                                       AND q.name_kr is not null
                                                       AND EXISTS (SELECT 1
@@ -147,6 +161,7 @@ class ItemUtil:
                                                               json_agg(
                                                               DISTINCT jsonb_build_object(
                                                                       'npc_id', fb.npc_id,
+                                                                      'npc_image', fb.image,
                                                                       'npc_name_kr', fb.name_kr,
                                                                       'barter_info', fb.matching_barter
                                                                        )
@@ -161,6 +176,9 @@ class ItemUtil:
                                                                       'quest_id', fq.quest_id,
                                                                       'name_en', fq.name_en,
                                                                       'name_kr', fq.name_kr,
+                                                                      'npc_name_en', fq.npc_name_en,
+                                                                      'npc_name_kr', fq.npc_name_kr,
+                                                                      'npc_image', fq.npc_image,
                                                                       'url_mapping', fq.url_mapping,
                                                                       'reward', fq.reward_elem
                                                                        )
@@ -168,13 +186,16 @@ class ItemUtil:
                                                               '[]'
                                               ) AS rewarded_by_quests,
             
-                                              -- 📌 questItem에 들어 있는 퀘스트
+                                              -- questItem에 들어 있는 퀘스트
                                               COALESCE(
                                                               json_agg(
                                                               DISTINCT jsonb_build_object(
                                                                       'quest_id', rqi.quest_id,
                                                                       'name_kr', rqi.name_kr,
                                                                       'name_en', rqi.name_en,
+                                                                      'npc_name_en', rqi.npc_name_en,
+                                                                      'npc_name_kr', rqi.npc_name_kr,
+                                                                      'npc_image', rqi.npc_image,
                                                                       'url_mapping', rqi.url_mapping,
                                                                       'objective', rqi.objective
                                                                        )
@@ -184,13 +205,16 @@ class ItemUtil:
                                                               '[]'
                                               ) AS required_by_quest_item,
             
-                                              -- 📌 items 배열에 들어 있는 퀘스트
+                                              -- items 배열에 들어 있는 퀘스트
                                               COALESCE(
                                                               json_agg(
                                                               DISTINCT jsonb_build_object(
                                                                       'quest_id', rqa.quest_id,
                                                                       'name_kr', rqa.name_kr,
                                                                       'name_en', rqa.name_en,
+                                                                      'npc_name_en', rqa.npc_name_en,
+                                                                      'npc_name_kr', rqa.npc_name_kr,
+                                                                      'npc_image', rqa.npc_image,
                                                                       'url_mapping', rqa.url_mapping,
                                                                       'objective', rqa.objective
                                                                        )
