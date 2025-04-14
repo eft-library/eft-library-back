@@ -237,6 +237,7 @@ CREATE TABLE TKL_API_QUEST
     task_requirements jsonb,
     objectives jsonb,
     finish_rewards jsonb,
+    url_mapping text,
     update_time timestamp with time zone DEFAULT now()
 );
 COMMENT ON COLUMN TKL_API_QUEST.id IS 'Api 퀘스트 ID';
@@ -248,6 +249,7 @@ COMMENT ON COLUMN TKL_API_QUEST.kappa_required IS 'Api 퀘스트 카파 여부';
 COMMENT ON COLUMN TKL_API_QUEST.task_requirements IS 'Api 퀘스트 선행 퀘스트 목록';
 COMMENT ON COLUMN TKL_API_QUEST.objectives IS 'Api 퀘스트 목표 목록';
 COMMENT ON COLUMN TKL_API_QUEST.finish_rewards IS 'Api 퀘스트 완료 보상 목록';
+COMMENT ON COLUMN TKL_API_QUEST.url_mapping IS 'Api 퀘스트 url mapping';
 COMMENT ON COLUMN TKL_API_QUEST.update_time IS 'Api 퀘스트 업데이트 시간';
 
 -- npc 정보
