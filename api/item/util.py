@@ -68,7 +68,8 @@ class ItemUtil:
                                             qa.name_kr,
                                             qa.url_mapping,
                                             jsonb_array_elements(finish_rewards -> 'items') AS reward_elem
-                                     FROM tkl_api_quest qa),
+                                     FROM tkl_api_quest qa
+                                     WHERE qa.name_kr is not null),
             
             -- ❗ questItem에 포함된 경우 (예: giveQuestItem, findQuestItem)
                  required_quests_by_quest_item AS (SELECT q.id AS quest_id,
@@ -78,7 +79,8 @@ class ItemUtil:
                                                           obj  AS objective
                                                    FROM tkl_api_quest q,
                                                         jsonb_array_elements(q.objectives) AS obj
-                                                   WHERE obj ->> 'type' IN ('findQuestItem', 'giveQuestItem')),
+                                                   WHERE obj ->> 'type' IN ('findQuestItem', 'giveQuestItem')
+                                                   AND q.name_kr is not null),
             
             -- ❗ items 배열에 포함된 경우 (예: giveItem, plantItem, findItem)
                  required_quests_by_items_array AS (SELECT q.id AS quest_id,
@@ -89,6 +91,7 @@ class ItemUtil:
                                                     FROM tkl_api_quest q,
                                                          jsonb_array_elements(q.objectives) AS obj
                                                     WHERE obj ->> 'type' IN ('plantItem', 'giveItem', 'findItem')
+                                                      AND q.name_kr is not null
                                                       AND EXISTS (SELECT 1
                                                                   FROM jsonb_array_elements(obj -> 'items') AS item
                                                                   WHERE item ->> 'id' = (SELECT id FROM target_item))),
