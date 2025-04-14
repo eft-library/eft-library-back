@@ -174,9 +174,9 @@ class ItemUtil:
                                                                       'reward_item_id', thc.reward_item_id,
                                                                       'image', thc.image,
                                                                       'quantity', thc.quantity,
-                                                                      'master_name_en', thir.master_name_en,
-                                                                      'master_name_kr', thir.master_name_kr,
-                                                                      'master_id', thir.master_id
+                                                                      'master_name_en', thc.master_name_en,
+                                                                      'master_name_kr', thc.master_name_kr,
+                                                                      'master_id', thc.master_id
                                                                        )
                                                                       ) FILTER (WHERE thc.id IS NOT NULL),
                                                               '[]'
