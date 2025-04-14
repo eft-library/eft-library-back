@@ -41,11 +41,12 @@ class ItemUtil:
         return """
             WITH target_item AS (SELECT *
                                  FROM tkl_item
-                                 WHERE url_mapping = 'can-of-pacific-saury'),
+                                 WHERE url_mapping = :url_mapping),
             
             -- 바터 정보
                  filtered_barters AS (SELECT n.id                      AS npc_id,
                                              n.name_kr,
+                                             n.name_en,
                                              n.image,
                                              jsonb_build_object(
                                                      'level', barter ->> 'level',
@@ -163,6 +164,7 @@ class ItemUtil:
                                                                       'npc_id', fb.npc_id,
                                                                       'npc_image', fb.image,
                                                                       'npc_name_kr', fb.name_kr,
+                                                                      'npc_name_en', fb.name_en,
                                                                       'barter_info', fb.matching_barter
                                                                        )
                                                                       ) FILTER (WHERE fb.npc_id IS NOT NULL),
