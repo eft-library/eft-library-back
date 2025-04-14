@@ -84,28 +84,28 @@ class ItemUtil:
                                               LEFT JOIN tkl_hideout_master thm ON SPLIT_PART(thc.level_id, '-', 1) = thm.id),
             
             -- 🎯 퀘스트 보상으로 사용되는 정보
-                 filtered_quests AS (SELECT qa.id                                           AS quest_id,
-                                            qa.name_en,
-                                            qa.name_kr,
-                                            qa.npc_id,
-                                            qa.url_mapping,
-                                            tn.name_kr                                      as npc_name_kr,
-                                            tn.name_en                                      as npc_name_en,
-                                            tn.image                                        AS npc_image,
-                                            jsonb_array_elements(finish_rewards -> 'items') AS reward_elem
+                 filtered_quests AS (SELECT distinct on (qa.id) qa.id                                           AS quest_id,
+                                                                qa.name_en,
+                                                                qa.name_kr,
+                                                                qa.npc_id,
+                                                                qa.url_mapping,
+                                                                tn.name_kr                                      as npc_name_kr,
+                                                                tn.name_en                                      as npc_name_en,
+                                                                tn.image                                        AS npc_image,
+                                                                jsonb_array_elements(finish_rewards -> 'items') AS reward_elem
                                      FROM tkl_api_quest qa
                                               left join tkl_npc tn on qa.npc_id = tn.id
                                      WHERE qa.name_kr is not null),
             
             -- ❗ questItem에 포함된 경우 (예: giveQuestItem, findQuestItem)
-                 required_quests_by_quest_item AS (SELECT q.id       AS quest_id,
-                                                          q.name_kr,
-                                                          q.name_en,
-                                                          q.url_mapping,
-                                                          tn.name_kr AS npc_name_kr,
-                                                          tn.name_en AS npc_name_en,
-                                                          tn.image   AS npc_image,
-                                                          obj        AS objective
+                 required_quests_by_quest_item AS (SELECT DISTINCT ON (q.id) q.id       AS quest_id,
+                                                                             q.name_kr,
+                                                                             q.name_en,
+                                                                             q.url_mapping,
+                                                                             tn.name_kr AS npc_name_kr,
+                                                                             tn.name_en AS npc_name_en,
+                                                                             tn.image   AS npc_image,
+                                                                             obj        AS objective
                                                    FROM tkl_api_quest q
                                                             LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
                                                             LEFT JOIN tkl_npc tn ON q.npc_id = tn.id
