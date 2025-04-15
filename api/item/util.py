@@ -171,6 +171,7 @@ class ItemUtil:
                                                                       'level_id', thc.level_id,
                                                                       'level', thc.level,
                                                                       'duration', thc.duration,
+                                                                      'req_item', thc.req_item,
                                                                       'reward_item_id', thc.reward_item_id,
                                                                       'image', thc.image,
                                                                       'quantity', thc.quantity,
