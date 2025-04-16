@@ -1,4 +1,3 @@
-from api.news.models import News, Wipe
 from database import DataBaseConnector
 from sqlalchemy import desc
 
