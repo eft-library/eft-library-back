@@ -14,7 +14,6 @@ class MainMenu(DataBaseConnector.Base):
     value = Column(String, primary_key=True)
     en_name = Column(String)
     kr_name = Column(String)
-    link = Column(String)
     order = Column(Integer)
     update_time = Column(TIMESTAMP)
     sub_menus = relationship("SubMenu", backref="main_menu", order_by="SubMenu.order")
