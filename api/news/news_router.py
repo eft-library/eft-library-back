@@ -7,14 +7,6 @@ from api.constants import Message
 router = APIRouter(tags=["News"])
 
 
-@router.get("/news")
-def get_news():
-    news = NewsService.get_news()
-    if news is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.NEWS_NOT_FOUND)
-    return CustomResponse.response(news, HTTPCode.OK, Message.SUCCESS)
-
-
 @router.get("/wipe")
 def get_wipe():
     wipe = NewsService.get_wipe()
