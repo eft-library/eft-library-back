@@ -43,11 +43,6 @@ class BossService:
                     .order_by(Boss.order)
                     .first()
                 )
-
-                if boss.location_guide is not None:
-                    boss.location_guide = boss.location_guide.replace(
-                        "/tkl_quest", os.getenv("NAS_DATA") + "/tkl_quest"
-                    )
                 for follower in boss.sub_followers:
                     follower.loot = sorted(
                         follower.loot, key=lambda x: priority[x.item_type]
@@ -87,12 +82,6 @@ class BossService:
                     .order_by(Boss.order)
                     .all()
                 )
-
-                for boss in boss_list:
-                    if boss.location_guide is not None:
-                        boss.location_guide = boss.location_guide.replace(
-                            "/tkl_quest", os.getenv("NAS_DATA") + "/tkl_quest"
-                        )
                 for boss in boss_list:
                     for follower in boss.sub_followers:
                         follower.loot = sorted(

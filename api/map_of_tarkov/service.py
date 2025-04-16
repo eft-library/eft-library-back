@@ -44,10 +44,6 @@ class MapOfTarkovService:
 
             updated_boss_list = []
             for boss in boss_list:
-                if boss.location_guide is not None:
-                    boss.location_guide = boss.location_guide.replace(
-                        "/tkl_quest", os.getenv("NAS_DATA") + "/tkl_quest"
-                    )
                 updated_boss_list.append(boss)
 
             # 각각의 Boss 객체를 딕셔너리로 변환
@@ -99,10 +95,6 @@ class MapOfTarkovService:
 
                 updated_boss_list = []
                 for boss in boss_dict.get(map_id, []):
-                    if boss.location_guide is not None:
-                        boss.location_guide = boss.location_guide.replace(
-                            "/tkl_quest", os.getenv("NAS_DATA") + "/tkl_quest"
-                        )
                     updated_boss_list.append(boss.__dict__)
 
                 map_of_tarkov = {
