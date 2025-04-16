@@ -29,5 +29,4 @@ class FilterSubCategories(DataBaseConnector.Base):
     en = Column(String)
     kr = Column(String)
     parent_value = Column(String, ForeignKey("tkl_filter_categories.value"))
-    image = Column(String)
     update_time = Column(TIMESTAMP)

@@ -16,7 +16,6 @@ class MainMenu(DataBaseConnector.Base):
     kr_name = Column(String)
     link = Column(String)
     order = Column(Integer)
-    image = Column(String)
     update_time = Column(TIMESTAMP)
     sub_menus = relationship("SubMenu", backref="main_menu", order_by="SubMenu.order")
 
@@ -34,7 +33,6 @@ class SubMenu(DataBaseConnector.Base):
     parent_value = Column(String, ForeignKey("tkl_main_menu.value"))
     link = Column(String)
     order = Column(Integer)
-    image = Column(String)
     update_time = Column(TIMESTAMP)
 
 

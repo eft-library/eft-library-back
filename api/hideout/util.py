@@ -9,7 +9,6 @@ class HideoutUtil:
                     SELECT master_id,
                            master_name_en,
                            master_name_kr,
-                           image,
                            json_agg(
                                    jsonb_build_object(
                                            'level_id', level_id,
@@ -26,7 +25,6 @@ class HideoutUtil:
                                  tkl_hideout_master.name_en as master_name_en,
                                  tkl_hideout_master.name_kr as master_name_kr,
                                  lid as level_id,
-                                 tkl_hideout_master.image as image,
                                  COALESCE(
                                                  json_agg(
                                                  distinct jsonb_build_object(
@@ -69,8 +67,7 @@ class HideoutUtil:
                                                          'level_id', tkl_hideout_station_require.level_id,
                                                          'name_en', tkl_hideout_station_require.name_en,
                                                          'name_kr', tkl_hideout_station_require.name_kr,
-                                                         'station_master_id', tkl_hideout_station_require.station_master_id,
-                                                         'image', tkl_hideout_station_require.image
+                                                         'station_master_id', tkl_hideout_station_require.station_master_id
                                                           )
                                                          ) FILTER (WHERE tkl_hideout_station_require.level IS NOT NULL),
                                                  '[]'::json) as station_require,
@@ -128,6 +125,6 @@ class HideoutUtil:
                                tkl_hideout_bonus on lid = tkl_hideout_bonus.level_id
                                    LEFT JOIN
                                tkl_hideout_crafts on lid = tkl_hideout_crafts.level_id
-                          GROUP BY tkl_hideout_master.id, tkl_hideout_master.name_en, tkl_hideout_master.image, lid) as a
-                    GROUP BY master_id, master_name_en, master_name_kr, image
+                          GROUP BY tkl_hideout_master.id, tkl_hideout_master.name_en, lid) as a
+                    GROUP BY master_id, master_name_en, master_name_kr
                     """

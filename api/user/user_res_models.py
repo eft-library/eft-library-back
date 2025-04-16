@@ -24,4 +24,3 @@ class User(DataBaseConnector.Base):
     attendance_count = Column(Integer)
     create_time = Column(TIMESTAMP)
     attendance_time = Column(TIMESTAMP)
-    update_time = Column(TIMESTAMP)
