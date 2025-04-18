@@ -91,7 +91,7 @@ class MapOfTarkovService:
 
             find_dict = {}
             for find in finds:
-                find_dict.setdefault(find.map, []).append(find)
+                find_dict.setdefault(find.id, []).append(find)
 
             # 최종 결과 구성
             result = []
