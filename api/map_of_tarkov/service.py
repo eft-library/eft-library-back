@@ -108,7 +108,7 @@ class MapOfTarkovService:
                     "extraction_info": extraction_dict.get(map_id, []),
                     "transits_info": transits_dict.get(map_id, []),
                     "map_id": map_id,
-                    "find_info": find_dict.get(map_id)
+                    "find_info": find_dict.get(map_id, [])
                 }
 
                 result.append(map_of_tarkov)
