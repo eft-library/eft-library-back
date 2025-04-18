@@ -5,6 +5,7 @@ from database import DataBaseConnector
 from api.hideout.util import HideoutUtil
 from datetime import datetime
 from api.hideout.hideout_res_models import UserHideOut
+import pytz
 
 
 class HideoutService:
@@ -44,15 +45,19 @@ class HideoutService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user_hideout = s.query(UserHideOut).filter_by(user_email=user_email).first()
+                utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
+                kst = pytz.timezone('Asia/Seoul')
+                kst_now = utc_now.astimezone(kst)
+
                 if user_hideout:
                     user_hideout.complete_list = complete_list
-                    user_hideout.update_time = datetime.utcnow()
+                    user_hideout.update_time = kst_now
                     s.commit()
                 else:
                     new_user_hideout = UserHideOut(
                         user_email=user_email,
                         complete_list=complete_list,
-                        update_time=datetime.utcnow()
+                        update_time=kst_now
                     )
                     s.add(new_user_hideout)
                     s.commit()

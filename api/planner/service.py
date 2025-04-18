@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from sqlalchemy import text
 from datetime import datetime
 from api.planner.util import PlannerUtil
+import pytz
 
 load_dotenv()
 
@@ -32,7 +33,11 @@ class PlannerService:
             with session() as s:
                 user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
                 user_quest.quest_id = userQuestList.userQuestList
-                user_quest.update_time = datetime.utcnow()
+                utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
+                kst = pytz.timezone('Asia/Seoul')
+                kst_now = utc_now.astimezone(kst)
+
+                user_quest.update_time = kst_now
                 s.commit()
                 query = text(PlannerUtil.user_quest_query())
 

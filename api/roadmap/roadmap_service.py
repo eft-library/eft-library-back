@@ -4,6 +4,7 @@ from api.quest.models import NPC
 from sqlalchemy.orm import subqueryload
 from api.roadmap.roadmap_res_models import UserRoadmap, RoadmapNode, RoadmapEdge
 from database import DataBaseConnector
+import pytz
 
 
 class RoadmapService:
@@ -51,15 +52,19 @@ class RoadmapService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user_roadmap = s.query(UserRoadmap).filter_by(user_email=user_email).first()
+                utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
+                kst = pytz.timezone('Asia/Seoul')
+                kst_now = utc_now.astimezone(kst)
+
                 if user_roadmap:
                     user_roadmap.quest_list = questList
-                    user_roadmap.update_time = datetime.utcnow()
+                    user_roadmap.update_time = kst_now
                     s.commit()
                 else:
                     new_user_roadmap = UserRoadmap(
                         user_email=user_email,
                         quest_list=questList,
-                        update_time=datetime.utcnow()
+                        update_time=kst_now
                     )
                     s.add(new_user_roadmap)
                     s.commit()
