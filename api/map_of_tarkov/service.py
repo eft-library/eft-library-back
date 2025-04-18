@@ -2,7 +2,7 @@ from sqlalchemy.orm import subqueryload
 
 from api.boss.models import Boss
 from api.map.models import ParentMap
-from api.map_of_tarkov.models import Extraction, Transits
+from api.map_of_tarkov.models import Extraction, Transits, WhereAmI
 from database import DataBaseConnector
 import os
 from dotenv import load_dotenv
@@ -73,6 +73,7 @@ class MapOfTarkovService:
                 bosses = s.query(Boss).all()
                 extractions = s.query(Extraction).all()
                 transits = s.query(Transits).all()
+                finds = s.query(WhereAmI).all()
 
             # 지도 ID를 기준으로 데이터 분류
             boss_dict = {}
@@ -87,6 +88,10 @@ class MapOfTarkovService:
             transits_dict = {}
             for transit in transits:
                 transits_dict.setdefault(transit.map, []).append(transit)
+
+            find_dict = {}
+            for find in finds:
+                find_dict.setdefault(find.map, []).append(find)
 
             # 최종 결과 구성
             result = []
@@ -103,6 +108,7 @@ class MapOfTarkovService:
                     "extraction_info": extraction_dict.get(map_id, []),
                     "transits_info": transits_dict.get(map_id, []),
                     "map_id": map_id,
+                    "find_info": find_dict.get(map_id, [])
                 }
 
                 result.append(map_of_tarkov)

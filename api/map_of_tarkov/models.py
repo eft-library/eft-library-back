@@ -41,3 +41,17 @@ class Transits(DataBaseConnector.Base):
     map = Column(String)
     image_thumbnail = Column(TEXT)
     update_time = Column(TIMESTAMP)
+
+
+class WhereAmI(DataBaseConnector.Base):
+    """
+    Where am i
+    """
+
+    __tablename__ = "tkl_where_am_i"
+
+    id = Column(String, primary_key=True)
+    name = Column(TEXT)
+    image = Column(TEXT)
+    map_bounds = Column(JSON)
+    image_bounds = Column(JSON)
