@@ -64,7 +64,7 @@ class UserFunction:
         new_user_quest = UserQuest(
             user_email=email,
             quest_id=[],
-            update_tiem=datetime.now()
+            update_time=datetime.now()
         )
         session.add(new_user_quest)
 
