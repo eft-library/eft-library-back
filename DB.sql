@@ -213,6 +213,7 @@ CREATE TABLE API_QUEST_I18N
     kappa_required BOOLEAN,
     task_requirements JSONB,
     objectives JSONB,
+    WIKI_URL TEXT,
     finish_rewards JSONB,
     url_mapping TEXT,
     update_time timestamp with time zone DEFAULT now()
@@ -224,6 +225,7 @@ COMMENT ON COLUMN API_QUEST_I18N.lightkeeper_required IS 'Api 퀘스트 라이�
 COMMENT ON COLUMN API_QUEST_I18N.kappa_required IS 'Api 퀘스트 카파 여부';
 COMMENT ON COLUMN API_QUEST_I18N.task_requirements IS 'Api 퀘스트 선행 퀘스트 목록';
 COMMENT ON COLUMN API_QUEST_I18N.objectives IS 'Api 퀘스트 목표 목록';
+COMMENT ON COLUMN API_QUEST_I18N.WIKI_URL IS 'Api 퀘스트 위키 주소';
 COMMENT ON COLUMN API_QUEST_I18N.finish_rewards IS 'Api 퀘스트 완료 보상 목록';
 COMMENT ON COLUMN API_QUEST_I18N.url_mapping IS 'Api 퀘스트 url mapping';
 COMMENT ON COLUMN API_QUEST_I18N.update_time IS 'Api 퀘스트 업데이트 시간';
