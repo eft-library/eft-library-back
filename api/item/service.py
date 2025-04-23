@@ -127,7 +127,18 @@ class ItemService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 medical = s.query(Item).filter(Item.category == "Medical").order_by(Item.info["medical_category"]).all()
-                return medical
+                result = {}
+
+                for item in medical:
+                    # 카테고리 키에서 공백 제거하고 소문자로 변환
+                    raw_category = item.info.get("medical_category", "Unknown")
+                    category = raw_category.replace(" ", "")
+
+                    if category not in result:
+                        result[category] = []
+                    result[category].append(item)
+
+                return result
         except Exception as e:
             print("오류 발생:", e)
             return None
