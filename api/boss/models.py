@@ -19,4 +19,5 @@ class Boss(DataBaseConnector.Base):
     spawn_chance = Column(JSON)
     location_guide = Column(JSON)
     order = Column(Integer)
+    url_mapping = Column(TEXT)
     update_time = Column(TIMESTAMP)
