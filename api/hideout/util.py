@@ -6,125 +6,114 @@ class HideoutUtil:
         """
 
         return """
-                    SELECT master_id,
-                           master_name_en,
-                           master_name_kr,
-                           json_agg(
-                                   jsonb_build_object(
-                                           'level_id', level_id,
-                                           'item_require', item_require,
-                                           'level_info', level_info,
-                                           'trader_require', trader_require,
-                                           'station_require', station_require,
-                                           'skill_require', skill_require,
-                                           'bonus', bonus,
-                                           'crafts', crafts
-                                   )
-                           ) as data
-                    FROM (SELECT tkl_hideout_master.id as master_id,
-                                 tkl_hideout_master.name_en as master_name_en,
-                                 tkl_hideout_master.name_kr as master_name_kr,
-                                 lid as level_id,
-                                 COALESCE(
-                                                 json_agg(
-                                                 distinct jsonb_build_object(
-                                                         'id', tkl_hideout_item_require.id,
-                                                         'level_id', tkl_hideout_item_require.level_id,
-                                                         'name_en', tkl_hideout_item_require.name_en,
-                                                         'name_kr', tkl_hideout_item_require.name_kr,
-                                                         'count', tkl_hideout_item_require.count,
-                                                         'quantity', tkl_hideout_item_require.quantity,
-                                                         'image', tkl_hideout_item_require.image
-                                                          )
-                                                         )
-                                                 FILTER (WHERE tkl_hideout_item_require.id IS NOT NULL),
-                                                 '[]'::json) as item_require,
-                                 COALESCE(
-                                                 json_agg(
-                                                 distinct jsonb_build_object(
-                                                         'level', tkl_hideout_level.level,
-                                                         'construction_time', tkl_hideout_level.construction_time
-                                                          )
-                                                         ) FILTER (WHERE tkl_hideout_level.level IS NOT NULL),
-                                                 '[]'::json) as level_info,
-                                 COALESCE(
-                                                 json_agg(
-                                                 distinct jsonb_build_object(
-                                                         'name_en', tkl_hideout_trader_require.name_en,
-                                                         'name_kr', tkl_hideout_trader_require.name_kr,
-                                                         'compare', tkl_hideout_trader_require.compare,
-                                                         'level_id', tkl_hideout_trader_require.level_id,
-                                                         'require_type', tkl_hideout_trader_require.require_type,
-                                                         'value', tkl_hideout_trader_require.value,
-                                                         'image', tkl_hideout_trader_require.image
-                                                          )
-                                                         ) FILTER (WHERE tkl_hideout_trader_require.name_en IS NOT NULL),
-                                                 '[]'::json) as trader_require,
-                                 COALESCE(
-                                                 json_agg(
-                                                 distinct jsonb_build_object(
-                                                         'level', tkl_hideout_station_require.level,
-                                                         'level_id', tkl_hideout_station_require.level_id,
-                                                         'name_en', tkl_hideout_station_require.name_en,
-                                                         'name_kr', tkl_hideout_station_require.name_kr,
-                                                         'station_master_id', tkl_hideout_station_require.station_master_id
-                                                          )
-                                                         ) FILTER (WHERE tkl_hideout_station_require.level IS NOT NULL),
-                                                 '[]'::json) as station_require,
-                                 COALESCE(
-                                                 json_agg(
-                                                 distinct jsonb_build_object(
-                                                         'level', tkl_hideout_skill_require.level,
-                                                         'level_id', tkl_hideout_skill_require.level_id,
-                                                         'name_en', tkl_hideout_skill_require.name_en,
-                                                         'name_kr', tkl_hideout_skill_require.name_kr,
-                                                         'image', tkl_hideout_skill_require.image
-                                                          )
-                                                         ) FILTER (WHERE tkl_hideout_skill_require.level IS NOT NULL),
-                                                 '[]'::json) as skill_require,
-                                 COALESCE(
-                                                 json_agg(
-                                                 distinct jsonb_build_object(
-                                                         'name_en', tkl_hideout_bonus.name_en,
-                                                         'name_kr', tkl_hideout_bonus.name_kr,
-                                                         'value', tkl_hideout_bonus.value,
-                                                         'skill_name_en', tkl_hideout_bonus.skill_name_en,
-                                                         'skill_name_kr', tkl_hideout_bonus.skill_name_kr
-                                                          )
-                                                         ) FILTER (WHERE tkl_hideout_bonus.name_en IS NOT NULL),
-                                                 '[]'::json) as bonus,
-                                 COALESCE(
-                                                 json_agg(
-                                                 distinct jsonb_build_object(
-                                                         'level', tkl_hideout_crafts.level,
-                                                         'width', tkl_hideout_crafts.width,
-                                                         'height', tkl_hideout_crafts.height,
-                                                         'name_en', tkl_hideout_crafts.name_en,
-                                                         'name_kr', tkl_hideout_crafts.name_kr,
-                                                         'req_item', tkl_hideout_crafts.req_item,
-                                                         'duration', tkl_hideout_crafts.duration,
-                                                         'quantity', tkl_hideout_crafts.quantity,
-                                                         'image', tkl_hideout_crafts.image
-                                                          )
-                                                         ) FILTER (WHERE tkl_hideout_crafts.level IS NOT NULL),
-                                                 '[]'::json) as crafts
-                          FROM tkl_hideout_master
-                                   LEFT JOIN LATERAL
-                              unnest(tkl_hideout_master.level_ids) AS lid ON true
-                                   LEFT JOIN
-                               tkl_hideout_item_require ON lid = tkl_hideout_item_require.level_id
-                                   LEFT JOIN
-                               tkl_hideout_level on lid = tkl_hideout_level.id
-                                   LEFT JOIN
-                               tkl_hideout_trader_require on lid = tkl_hideout_trader_require.level_id
-                                   LEFT JOIN
-                               tkl_hideout_station_require on lid = tkl_hideout_station_require.level_id
-                                   LEFT JOIN
-                               tkl_hideout_skill_require on lid = tkl_hideout_skill_require.level_id
-                                   LEFT JOIN
-                               tkl_hideout_bonus on lid = tkl_hideout_bonus.level_id
-                                   LEFT JOIN
-                               tkl_hideout_crafts on lid = tkl_hideout_crafts.level_id
-                          GROUP BY tkl_hideout_master.id, tkl_hideout_master.name_en, lid) as a
-                    GROUP BY master_id, master_name_en, master_name_kr
+            SELECT master_id,
+                   master_name,
+                   json_agg(
+                           jsonb_build_object(
+                                   'level_id', level_id,
+                                   'item_require', item_require,
+                                   'level_info', level_info,
+                                   'trader_require', trader_require,
+                                   'station_require', station_require,
+                                   'skill_require', skill_require,
+                                   'bonus', bonus,
+                                   'crafts', crafts
+                           )
+                   ) as data
+            FROM (SELECT hideout_master_i18n.id      as master_id,
+                         hideout_master_i18n.name    as master_name,
+                         lid                         as level_id,
+                         COALESCE(
+                                         json_agg(
+                                         distinct jsonb_build_object(
+                                                 'id', hideout_item_require_i18n.id,
+                                                 'level_id', hideout_item_require_i18n.level_id,
+                                                 'name', hideout_item_require_i18n.name,
+                                                 'count', hideout_item_require_i18n.count,
+                                                 'quantity', hideout_item_require_i18n.quantity,
+                                                 'image', hideout_item_require_i18n.image
+                                                  )
+                                                 )
+                                         FILTER (WHERE hideout_item_require_i18n.id IS NOT NULL),
+                                         '[]'::json) as item_require,
+                         COALESCE(
+                                         json_agg(
+                                         distinct jsonb_build_object(
+                                                 'level', hideout_level_i18n.level,
+                                                 'construction_time', hideout_level_i18n.construction_time
+                                                  )
+                                                 ) FILTER (WHERE hideout_level_i18n.level IS NOT NULL),
+                                         '[]'::json) as level_info,
+                         COALESCE(
+                                         json_agg(
+                                         distinct jsonb_build_object(
+                                                 'name', hideout_trader_require_i18n.name,
+                                                 'level_id', hideout_trader_require_i18n.level_id,
+                                                 'value', hideout_trader_require_i18n.value,
+                                                 'image', hideout_trader_require_i18n.image
+                                                  )
+                                                 ) FILTER (WHERE hideout_trader_require_i18n.name IS NOT NULL),
+                                         '[]'::json) as trader_require,
+                         COALESCE(
+                                         json_agg(
+                                         distinct jsonb_build_object(
+                                                 'level', hideout_station_require_i18n.level,
+                                                 'level_id', hideout_station_require_i18n.level_id,
+                                                 'name', hideout_station_require_i18n.name,
+                                                 'station_master_id', hideout_station_require_i18n.station_master_id
+                                                  )
+                                                 ) FILTER (WHERE hideout_station_require_i18n.level IS NOT NULL),
+                                         '[]'::json) as station_require,
+                         COALESCE(
+                                         json_agg(
+                                         distinct jsonb_build_object(
+                                                 'level', hideout_skill_require_i18n.level,
+                                                 'level_id', hideout_skill_require_i18n.level_id,
+                                                 'name', hideout_skill_require_i18n.name,
+                                                 'image', hideout_skill_require_i18n.image
+                                                  )
+                                                 ) FILTER (WHERE hideout_skill_require_i18n.level IS NOT NULL),
+                                         '[]'::json) as skill_require,
+                         COALESCE(
+                                         json_agg(
+                                         distinct jsonb_build_object(
+                                                 'name', hideout_bonus_i18n.name,
+                                                 'value', hideout_bonus_i18n.value,
+                                                 'skill_name', hideout_bonus_i18n.skill_name
+                                                  )
+                                                 ) FILTER (WHERE hideout_bonus_i18n.name IS NOT NULL),
+                                         '[]'::json) as bonus,
+                         COALESCE(
+                                         json_agg(
+                                         distinct jsonb_build_object(
+                                                 'level', hideout_crafts_i18n.level,
+                                                 'width', hideout_crafts_i18n.width,
+                                                 'height', hideout_crafts_i18n.height,
+                                                 'name', hideout_crafts_i18n.name,
+                                                 'req_item', hideout_crafts_i18n.req_item,
+                                                 'duration', hideout_crafts_i18n.duration,
+                                                 'quantity', hideout_crafts_i18n.quantity,
+                                                 'image', hideout_crafts_i18n.image
+                                                  )
+                                                 ) FILTER (WHERE hideout_crafts_i18n.level IS NOT NULL),
+                                         '[]'::json) as crafts
+                  FROM hideout_master_i18n
+                           LEFT JOIN LATERAL
+                      unnest(hideout_master_i18n.level_ids) AS lid ON true
+                           LEFT JOIN
+                       hideout_item_require_i18n ON lid = hideout_item_require_i18n.level_id
+                           LEFT JOIN
+                       hideout_level_i18n on lid = hideout_level_i18n.id
+                           LEFT JOIN
+                       hideout_trader_require_i18n on lid = hideout_trader_require_i18n.level_id
+                           LEFT JOIN
+                       hideout_station_require_i18n on lid = hideout_station_require_i18n.level_id
+                           LEFT JOIN
+                       hideout_skill_require_i18n on lid = hideout_skill_require_i18n.level_id
+                           LEFT JOIN
+                       hideout_bonus_i18n on lid = hideout_bonus_i18n.level_id
+                           LEFT JOIN
+                       hideout_crafts_i18n on lid = hideout_crafts_i18n.level_id
+                  GROUP BY hideout_master_i18n.id, hideout_master_i18n.name, lid) as a
+            GROUP BY master_id, master_name
                     """

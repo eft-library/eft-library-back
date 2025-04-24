@@ -1,33 +1,32 @@
-from api.quest.models import NPC, QuestPreview
+from api.quest.models import NPC, Quest
 from database import DataBaseConnector
-import os
 from dotenv import load_dotenv
-from sqlalchemy.orm import subqueryload
 
 
 class QuestService:
     @staticmethod
-    def get_all_npc():
+    def get_npc_selector():
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                npc_list = s.query(NPC).order_by(NPC.order).all()
-                return npc_list
+                npc_list = (
+                    s.query(NPC.id, NPC.name, NPC.image).order_by(NPC.order).all()
+                )
+
+                return [
+                    {"id": id_, "name": name, "image": image}
+                    for id_, name, image in npc_list
+                ]
         except Exception as e:
             print("오류 발생:", e)
             return None
 
     @staticmethod
-    def get_all_quest_preview():
+    def get_all_quest():
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                quest_list = (
-                    s.query(QuestPreview)
-                    .order_by(QuestPreview.order)
-                    .filter(QuestPreview.is_event == False)
-                    .all()
-                )
+                quest_list = s.query(Quest).order_by(Quest.order).all()
                 return quest_list
         except Exception as e:
             print("오류 발생:", e)
@@ -40,10 +39,9 @@ class QuestService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 quest_npc = (
-                    s.query(QuestPreview, NPC)
-                    .options(subqueryload(QuestPreview.sub))
-                    .filter(QuestPreview.npc_value == NPC.id)
-                    .filter(QuestPreview.url_mapping == url_mapping)
+                    s.query(Quest, NPC)
+                    .filter(Quest.npc_value == NPC.id)
+                    .filter(Quest.url_mapping == url_mapping)
                     .first()
                 )
             combined_info = {**quest_npc[0].__dict__, **quest_npc[1].__dict__}

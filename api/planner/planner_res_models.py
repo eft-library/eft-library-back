@@ -12,8 +12,8 @@ class UserQuest(DataBaseConnector.Base):
     User quest
     """
 
-    __tablename__ = "tkl_user_quest"
+    __tablename__ = "user_quest"
 
     user_email = Column(TEXT, primary_key=True)
-    quest_id = Column(ARRAY(TEXT))
+    quest_list = Column(ARRAY(TEXT))
     update_time = Column(TIMESTAMP)

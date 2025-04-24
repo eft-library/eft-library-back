@@ -1,6 +1,6 @@
 from sqlalchemy.orm import subqueryload
 
-from api.item_filter.models import FilterCategories, FilterSubCategories
+from api.item_filter.models import FilterGroup, FilterSubGroup
 from database import DataBaseConnector
 
 
@@ -15,9 +15,7 @@ class ItemFilterService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 item_filter = (
-                    s.query(FilterCategories)
-                    .options(subqueryload(FilterCategories.sub))
-                    .all()
+                    s.query(FilterGroup).options(subqueryload(FilterGroup.sub)).all()
                 )
                 return item_filter
         except Exception as e:
@@ -32,7 +30,7 @@ class ItemFilterService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                sub_item_filter = s.query(FilterSubCategories).all()
+                sub_item_filter = s.query(FilterSubGroup).all()
 
                 return sub_item_filter
         except Exception as e:

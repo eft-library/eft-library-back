@@ -1,8 +1,8 @@
-from api.table_column.models import TableColumn
+from api.dynamic_info.models import DynamicInfo
 from database import DataBaseConnector
 
 
-class TableColumnService:
+class DynamicInfoService:
 
     @staticmethod
     def get_column(column_key: str):
@@ -13,7 +13,7 @@ class TableColumnService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 column_list = (
-                    s.query(TableColumn).filter(TableColumn.id == column_key).first()
+                    s.query(DynamicInfo).filter(DynamicInfo.id == column_key).first()
                 )
                 return column_list
         except Exception as e:

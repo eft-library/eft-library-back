@@ -4,20 +4,20 @@ class EventUtil:
     def get_event_group():
         return """
         WITH selected_event AS (
-            SELECT id, name_en, name_kr, notes_en, notes_kr, update_time
-            FROM tkl_event
+            SELECT id, name, description, update_time
+            FROM event_i18n
             WHERE id = :id
         ),
         above_events AS (
-            SELECT id, name_en, name_kr, notes_en, notes_kr, update_time
-            FROM tkl_event
+            SELECT id, name, description, update_time
+            FROM event_i18n
             WHERE update_time > (SELECT update_time FROM selected_event)
-            ORDER BY update_time ASC
+            ORDER BY update_time
             LIMIT 2
         ),
         below_events AS (
-            SELECT id, name_en, name_kr, notes_en, notes_kr, update_time
-            FROM tkl_event
+            SELECT id, name, description, update_time
+            FROM event_i18n
             WHERE update_time < (SELECT update_time FROM selected_event)
             ORDER BY update_time DESC
             LIMIT 2

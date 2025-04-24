@@ -9,7 +9,7 @@ router = APIRouter(tags=["Quest"])
 
 @router.get("/npc")
 def get_npc():
-    npc_list = QuestService.get_all_npc()
+    npc_list = QuestService.get_npc_selector()
     if npc_list is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.NPC_NOT_FOUND)
     return CustomResponse.response(npc_list, HTTPCode.OK, Message.SUCCESS)
@@ -17,7 +17,7 @@ def get_npc():
 
 @router.get("/all")
 def get_all_quest():
-    quest_list = QuestService.get_all_quest_preview()
+    quest_list = QuestService.get_all_quest()
     if quest_list is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.QUEST_NOT_FOUND)
     return CustomResponse.response(quest_list, HTTPCode.OK, Message.SUCCESS)

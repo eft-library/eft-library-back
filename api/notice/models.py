@@ -1,5 +1,5 @@
 from database import DataBaseConnector
-from sqlalchemy import Column, String, ARRAY, TEXT, TIMESTAMP
+from sqlalchemy import Column, JSON, TEXT, TIMESTAMP
 
 
 class Notice(DataBaseConnector.Base):
@@ -7,11 +7,9 @@ class Notice(DataBaseConnector.Base):
     Notice
     """
 
-    __tablename__ = "tkl_notice"
+    __tablename__ = "notice_i18n"
 
     id = Column("id", TEXT, primary_key=True)
-    name_en = Column(String)
-    name_kr = Column(String)
-    notes_en = Column(TEXT)
-    notes_kr = Column(TEXT)
+    name = Column(JSON)
+    description = Column(JSON)
     update_time = Column(TIMESTAMP)

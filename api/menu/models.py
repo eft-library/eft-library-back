@@ -1,35 +1,35 @@
-from sqlalchemy import Column, String, TIMESTAMP, ForeignKey, Integer, Boolean
+from sqlalchemy import Column, String, TIMESTAMP, ForeignKey, Integer, Boolean, JSON
 from sqlalchemy.orm import relationship
 
 from database import DataBaseConnector
 
 
-class MainMenu(DataBaseConnector.Base):
+class MenuGroup(DataBaseConnector.Base):
     """
-    MainMenu
+    MenuGroup
     """
 
-    __tablename__ = "tkl_main_menu"
+    __tablename__ = "menu_group_i18n"
 
     value = Column(String, primary_key=True)
-    en_name = Column(String)
-    kr_name = Column(String)
+    name = Column(JSON)
     order = Column(Integer)
     update_time = Column(TIMESTAMP)
-    sub_menus = relationship("SubMenu", backref="main_menu", order_by="SubMenu.order")
+    sub_menus = relationship(
+        "MenuSubGroup", backref="main_menu", order_by="MenuSubGroup.order"
+    )
 
 
-class SubMenu(DataBaseConnector.Base):
+class MenuSubGroup(DataBaseConnector.Base):
     """
-    SubMenu
+    MenuSubGroup
     """
 
-    __tablename__ = "tkl_sub_menu"
+    __tablename__ = "menu_sub_group_i18n"
 
     value = Column(String, primary_key=True)
-    en_name = Column(String)
-    kr_name = Column(String)
-    parent_value = Column(String, ForeignKey("tkl_main_menu.value"))
+    name = Column(JSON)
+    parent_value = Column(String, ForeignKey("menu_group_i18n.value"))
     link = Column(String)
     order = Column(Integer)
     update_time = Column(TIMESTAMP)
@@ -40,14 +40,13 @@ class MainInfo(DataBaseConnector.Base):
     MainInfo
     """
 
-    __tablename__ = "tkl_main"
+    __tablename__ = "main_i18n"
 
     value = Column(String, primary_key=True)
-    en_name = Column(String)
-    kr_name = Column(String)
+    name = Column(JSON)
     link = Column(String)
     order = Column(Integer)
     image = Column(String)
     use_slide = Column(Boolean)
-    main_image = Column(String)
+    slide_image = Column(String)
     update_time = Column(TIMESTAMP)

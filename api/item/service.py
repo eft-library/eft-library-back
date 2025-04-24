@@ -1,7 +1,7 @@
 from api.item.models import Item
 from api.item.util import ItemUtil
 from database import DataBaseConnector
-from sqlalchemy import desc, text, cast, func, Numeric
+from sqlalchemy import text, cast, Numeric
 
 
 class ItemService:
@@ -38,7 +38,7 @@ class ItemService:
             no_class_rig = []
 
             for item in rig:
-                if item['info']['class_value'] is None:
+                if item["info"]["class_value"] is None:
                     no_class_rig.append(item)
                 else:
                     class_rig.append(item)
@@ -70,7 +70,7 @@ class ItemService:
 
             for item in glasses:
                 print(item)
-                if item['info']['class_value'] == 0:
+                if item["info"]["class_value"] == 0:
                     no_class_glasses.append(item)
                 else:
                     class_glasses.append(item)
@@ -103,14 +103,14 @@ class ItemService:
             no_class_face_cover = []
 
             for item in face_cover:
-                if item['info']['class_value'] is None:
+                if item["info"]["class_value"] is None:
                     no_class_face_cover.append(item)
                 else:
                     class_face_cover.append(item)
 
             result_face_cover = {
                 "class_face_cover": class_face_cover,
-                "no_class_face_cover": no_class_face_cover
+                "no_class_face_cover": no_class_face_cover,
             }
 
             return result_face_cover
@@ -126,7 +126,12 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                medical = s.query(Item).filter(Item.category == "Medical").order_by(Item.info["medical_category"]).all()
+                medical = (
+                    s.query(Item)
+                    .filter(Item.category == "Medical")
+                    .order_by(Item.info["medical_category"])
+                    .all()
+                )
                 result = {}
 
                 for item in medical:
@@ -151,7 +156,12 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                container = s.query(Item).filter(Item.category == "Container").order_by(cast(Item.info["capacity"], Numeric)).all()
+                container = (
+                    s.query(Item)
+                    .filter(Item.category == "Container")
+                    .order_by(cast(Item.info["capacity"], Numeric))
+                    .all()
+                )
                 return container
         except Exception as e:
             print("오류 발생:", e)
@@ -165,7 +175,12 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                arm_band = s.query(Item).filter(Item.category == "Armband").order_by(Item.name_en).all()
+                arm_band = (
+                    s.query(Item)
+                    .filter(Item.category == "Armband")
+                    .order_by(Item.name_en)
+                    .all()
+                )
                 return arm_band
         except Exception as e:
             print("오류 발생:", e)
@@ -193,7 +208,12 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                ammo = s.query(Item).filter(Item.category == "Ammo").order_by(cast(Item.info["penetration_power"], Numeric)).all()
+                ammo = (
+                    s.query(Item)
+                    .filter(Item.category == "Ammo")
+                    .order_by(cast(Item.info["penetration_power"], Numeric))
+                    .all()
+                )
                 return ammo
         except Exception as e:
             print("오류 발생:", e)
@@ -221,7 +241,12 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                key = s.query(Item).filter(Item.category == "Key").order_by(Item.name_en).all()
+                key = (
+                    s.query(Item)
+                    .filter(Item.category == "Key")
+                    .order_by(Item.name_en)
+                    .all()
+                )
                 return key
         except Exception as e:
             print("오류 발생:", e)
@@ -235,7 +260,12 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                armor_vest = s.query(Item).filter(Item.category == "ArmorVest").order_by(cast(Item.info["class_value"], Numeric)).all()
+                armor_vest = (
+                    s.query(Item)
+                    .filter(Item.category == "ArmorVest")
+                    .order_by(cast(Item.info["class_value"], Numeric))
+                    .all()
+                )
                 return armor_vest
         except Exception as e:
             print("오류 발생:", e)
@@ -249,11 +279,17 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                backpack = s.query(Item).filter(Item.category == "Backpack").order_by(cast(Item.info["capacity"], Numeric)).all()
+                backpack = (
+                    s.query(Item)
+                    .filter(Item.category == "Backpack")
+                    .order_by(cast(Item.info["capacity"], Numeric))
+                    .all()
+                )
                 return backpack
         except Exception as e:
             print("오류 발생:", e)
             return None
+
     @staticmethod
     def get_headset_list():
         """
@@ -262,7 +298,12 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                headset = s.query(Item).filter(Item.category == "Headset").order_by(Item.name_en).all()
+                headset = (
+                    s.query(Item)
+                    .filter(Item.category == "Headset")
+                    .order_by(Item.name_en)
+                    .all()
+                )
                 return headset
         except Exception as e:
             print("오류 발생:", e)
@@ -276,7 +317,9 @@ class ItemService:
                 weapon_list = {
                     "gun": s.query(Item).filter(Item.category == "Gun").all(),
                     "knife": s.query(Item).filter(Item.category == "Knife").all(),
-                    "throwable": s.query(Item).filter(Item.category == "Throwable").all(),
+                    "throwable": s.query(Item)
+                    .filter(Item.category == "Throwable")
+                    .all(),
                 }
             return weapon_list
         except Exception as e:
@@ -300,7 +343,7 @@ class ItemService:
             no_class_headwear = []
 
             for item in headwear:
-                if item['info']['class_value'] is None:
+                if item["info"]["class_value"] is None:
                     no_class_headwear.append(item)
                 else:
                     class_headwear.append(item)

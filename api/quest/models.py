@@ -18,62 +18,33 @@ class NPC(DataBaseConnector.Base):
     NPC
     """
 
-    __tablename__ = "tkl_npc"
+    __tablename__ = "npc_i18n"
 
     id = Column(TEXT, primary_key=True)
-    name_en = Column(TEXT)
-    name_kr = Column(TEXT)
+    name = Column(JSON)
     image = Column(String)
     order = Column(Integer)
     barter_info = Column(JSON)
     update_time = Column(TIMESTAMP)
-    all_quest = relationship("RoadmapNode", backref="npc")
 
 
-class QuestPreview(DataBaseConnector.Base):
+class Quest(DataBaseConnector.Base):
     """
-    QuestPreview
+    Quest
     """
 
-    __tablename__ = "tkl_quest"
+    __tablename__ = "quest_i18n"
 
     id = Column(String, primary_key=True)
-    npc_value = Column(String, ForeignKey("tkl_npc.id"))
-    title_en = Column("name_en", String)
-    title_kr = Column("name_kr", String)
-    objectives_en = Column(ARRAY(String))
-    objectives_kr = Column(ARRAY(String))
-    rewards_en = Column(ARRAY(String))
-    rewards_kr = Column(ARRAY(String))
+    npc_id = Column(String, ForeignKey("npc_i18n.id"))
+    url_mapping = Column(TEXT)
+    name = Column(String)
     required_kappa = Column(Boolean)
-    requirements_en = Column(ARRAY(String))
-    requirements_kr = Column(ARRAY(String))
+    objectives = Column(JSON)
+    rewards = Column(JSON)
+    requirements = Column(JSON)
     update_time = Column(TIMESTAMP)
     order = Column(Integer)
-    guide = Column(TEXT)
-    requires = Column(JSON)
+    guide = Column(JSON)
     next = Column(JSON)
-    is_event = Column(Boolean)
-    url_mapping = Column(TEXT)
-    sub = relationship("RelatedQuest", backref="quest_preview")
-
-
-class RelatedQuest(DataBaseConnector.Base):
-    """
-    Related Quest
-    """
-
-    __tablename__ = "tkl_related_quest"
-
-    item_id = Column(TEXT, primary_key=True)
-    quest_id = Column(TEXT, ForeignKey("tkl_quest.id"))
-    item_name_en = Column(TEXT)
-    quest_name_en = Column(TEXT)
-    item_name_kr = Column(TEXT)
-    quest_name_kr = Column(TEXT)
-    count = Column(Integer)
-    type = Column(TEXT)
-    in_raid = Column(Boolean)
-    item_image = Column(TEXT)
-    desc_text = Column(ARRAY(TEXT))
-    item_link = Column(TEXT)
+    prev = Column(JSON)

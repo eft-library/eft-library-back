@@ -1,32 +1,30 @@
-from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, String, JSON, TIMESTAMP, ForeignKey
 from sqlalchemy.orm import relationship
 
 from database import DataBaseConnector
 
 
-class FilterCategories(DataBaseConnector.Base):
+class FilterGroup(DataBaseConnector.Base):
     """
-    filter categories
+    filter group
     """
 
-    __tablename__ = "tkl_filter_categories"
+    __tablename__ = "filter_group_i18n"
 
     value = Column(String, primary_key=True)
-    en = Column(String)
-    kr = Column(String)
+    name = Column(JSON)
     update_time = Column(TIMESTAMP)
-    sub = relationship("FilterSubCategories", backref="FilterCategories")
+    sub = relationship("FilterSubGroup", backref="FilterGroup")
 
 
-class FilterSubCategories(DataBaseConnector.Base):
+class FilterSubGroup(DataBaseConnector.Base):
     """
-    filter sub categories
+    filter sub FilterSubCategories
     """
 
-    __tablename__ = "tkl_filter_sub_categories"
+    __tablename__ = "filter_sub_group_i18n"
 
     value = Column(String, primary_key=True)
-    en = Column(String)
-    kr = Column(String)
-    parent_value = Column(String, ForeignKey("tkl_filter_categories.value"))
+    name = Column(JSON)
+    parent_value = Column(String, ForeignKey("filter_group_i18n.value"))
     update_time = Column(TIMESTAMP)

@@ -15,7 +15,7 @@ class User(DataBaseConnector.Base):
     User
     """
 
-    __tablename__ = "tkl_user"
+    __tablename__ = "user_info"
 
     id = Column(TEXT, primary_key=True)
     name = Column(TEXT)

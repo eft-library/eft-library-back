@@ -1,5 +1,4 @@
 from typing import List
-
 from sqlalchemy import text
 from database import DataBaseConnector
 from api.hideout.util import HideoutUtil
@@ -19,7 +18,7 @@ class HideoutService:
                 query = text(HideoutUtil.get_hideout_query())
                 result = s.execute(query)
                 hideouts = [dict(row) for row in result.mappings()]
-                user_hideout['hideout_info'] = hideouts
+                user_hideout["hideout_info"] = hideouts
 
                 if user_email is not None:
                     complete_list = (
@@ -44,9 +43,11 @@ class HideoutService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                user_hideout = s.query(UserHideOut).filter_by(user_email=user_email).first()
+                user_hideout = (
+                    s.query(UserHideOut).filter_by(user_email=user_email).first()
+                )
                 utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
-                kst = pytz.timezone('Asia/Seoul')
+                kst = pytz.timezone("Asia/Seoul")
                 kst_now = utc_now.astimezone(kst)
 
                 if user_hideout:
@@ -57,7 +58,7 @@ class HideoutService:
                     new_user_hideout = UserHideOut(
                         user_email=user_email,
                         complete_list=complete_list,
-                        update_time=kst_now
+                        update_time=kst_now,
                     )
                     s.add(new_user_hideout)
                     s.commit()
@@ -65,4 +66,3 @@ class HideoutService:
         except Exception as e:
             print("오류 발생:", e)
             return None
-

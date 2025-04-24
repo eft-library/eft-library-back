@@ -1,9 +1,9 @@
 from typing import List
 from datetime import datetime
-from api.quest.models import NPC
-from sqlalchemy.orm import subqueryload
 from api.roadmap.roadmap_res_models import UserRoadmap, RoadmapNode, RoadmapEdge
 from database import DataBaseConnector
+from api.roadmap.util import RoadmapUtil
+from sqlalchemy import text
 import pytz
 
 
@@ -14,19 +14,15 @@ class RoadmapService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user_roadmap = {}
-                node_info = (
-                    s.query(NPC)
-                    .order_by(NPC.order)
-                    .options(subqueryload(NPC.all_quest))
-                    .all()
-                )
+
+                node_query = text(RoadmapUtil.get_roadmap_node())
+                node_result = s.execute(node_query)
+                node_info = [dict(row) for row in node_result.mappings()]
                 user_roadmap["node_info"] = node_info
 
-                edge_info = (
-                    s.query(RoadmapEdge).all()
-                )
+                edge_info = s.query(RoadmapEdge).all()
 
-                user_roadmap['edge_info'] = edge_info
+                user_roadmap["edge_info"] = edge_info
 
                 if user_email is not None:
                     user_quest_list = (
@@ -51,9 +47,11 @@ class RoadmapService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                user_roadmap = s.query(UserRoadmap).filter_by(user_email=user_email).first()
+                user_roadmap = (
+                    s.query(UserRoadmap).filter_by(user_email=user_email).first()
+                )
                 utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
-                kst = pytz.timezone('Asia/Seoul')
+                kst = pytz.timezone("Asia/Seoul")
                 kst_now = utc_now.astimezone(kst)
 
                 if user_roadmap:
@@ -62,9 +60,7 @@ class RoadmapService:
                     s.commit()
                 else:
                     new_user_roadmap = UserRoadmap(
-                        user_email=user_email,
-                        quest_list=questList,
-                        update_time=kst_now
+                        user_email=user_email, quest_list=questList, update_time=kst_now
                     )
                     s.add(new_user_roadmap)
                     s.commit()

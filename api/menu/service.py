@@ -1,5 +1,5 @@
 from sqlalchemy.orm import subqueryload
-from api.menu.models import MainMenu, MainInfo
+from api.menu.models import MenuGroup, MainInfo
 from database import DataBaseConnector
 
 
@@ -10,9 +10,9 @@ class MenuService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 main_menu_list = (
-                    s.query(MainMenu)
-                    .options(subqueryload(MainMenu.sub_menus))
-                    .order_by(MainMenu.order)
+                    s.query(MenuGroup)
+                    .options(subqueryload(MenuGroup.sub_menus))
+                    .order_by(MenuGroup.order)
                     .all()
                 )
                 return main_menu_list
@@ -36,7 +36,12 @@ class MenuService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                main_info_list = s.query(MainInfo).order_by(MainInfo.order).filter(MainInfo.use_slide == True).all()
+                main_info_list = (
+                    s.query(MainInfo)
+                    .order_by(MainInfo.order)
+                    .filter(MainInfo.use_slide.is_(True))
+                    .all()
+                )
                 return main_info_list
         except Exception as e:
             print("오류 발생:", e)

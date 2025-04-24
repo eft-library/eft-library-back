@@ -1,12 +1,5 @@
 from database import DataBaseConnector
-from sqlalchemy import (
-    Column,
-    TIMESTAMP,
-    ARRAY,
-    TEXT,
-    ForeignKey,
-    NUMERIC
-)
+from sqlalchemy import Column, TIMESTAMP, ARRAY, TEXT, ForeignKey, NUMERIC
 
 
 class UserRoadmap(DataBaseConnector.Base):
@@ -14,7 +7,7 @@ class UserRoadmap(DataBaseConnector.Base):
     user roadmap
     """
 
-    __tablename__ = "tkl_user_roadmap"
+    __tablename__ = "user_roadmap"
 
     user_email = Column(TEXT, primary_key=True)
     quest_list = Column(ARRAY(TEXT))
@@ -26,7 +19,7 @@ class RoadmapNode(DataBaseConnector.Base):
     roadmap node
     """
 
-    __tablename__ = "tkl_roadmap_node"
+    __tablename__ = "roadmap_node"
 
     id = Column(TEXT, primary_key=True)
     prev_list = Column(ARRAY(TEXT))
@@ -36,11 +29,6 @@ class RoadmapNode(DataBaseConnector.Base):
     single_x_coordinate = Column(NUMERIC)
     single_y_coordinate = Column(NUMERIC)
     update_time = Column(TIMESTAMP)
-    url_mapping = Column(TEXT)
-    title_kr = Column(TEXT)
-    title_en = Column(TEXT)
-    is_kappa = Column(TEXT)
-    npc_value = Column(TEXT, ForeignKey("tkl_npc.id"))
     node_color = Column(TEXT)
 
 
@@ -49,7 +37,7 @@ class RoadmapEdge(DataBaseConnector.Base):
     roadmap edge
     """
 
-    __tablename__ = "tkl_roadmap_edge"
+    __tablename__ = "roadmap_edge"
 
     id = Column(TEXT, primary_key=True)
     source_id = Column(TEXT)

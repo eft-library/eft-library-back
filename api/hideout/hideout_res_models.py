@@ -12,7 +12,7 @@ class UserHideOut(DataBaseConnector.Base):
     roadmap edge
     """
 
-    __tablename__ = "tkl_user_hideout"
+    __tablename__ = "user_hideout"
 
     user_email = Column(TEXT, primary_key=True)
     complete_list = Column(ARRAY(TEXT))
