@@ -1,6 +1,8 @@
+from sqlalchemy import text
 from sqlalchemy.orm import subqueryload
 
-from api.map.models import Map, ParentMap
+from api.map.models import Map
+from api.map.util import MapUtil
 from database import DataBaseConnector
 
 
@@ -13,12 +15,7 @@ class MapService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                response_map = (
-                    s.query(ParentMap)
-                    .options(subqueryload(ParentMap.sub))
-                    .filter(ParentMap.id == map_id)
-                    .first()
-                )
+                response_map = s.query(Map).filter(Map.id == map_id).first()
                 return response_map
         except Exception as e:
             print("오류 발생:", e)
@@ -32,15 +29,9 @@ class MapService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                maps = (
-                    s.query(ParentMap)
-                    .options(subqueryload(ParentMap.sub))
-                    .order_by(ParentMap.order)
-                    .all()
-                )
-
-            for parent_map in maps:
-                parent_map.sub.sort(key=lambda x: x.order)
+                query = text(MapUtil.get_map_query())
+                result = s.execute(query)
+                maps = [dict(row) for row in result.mappings()]
 
             return maps
         except Exception as e:

@@ -27,7 +27,7 @@ class SearchUtil:
             select '/map/' || id as tkl_link
             from map_group_i18n
             union all
-            select '/boss/' || id as tkl_link
+            select '/boss/' || url_mapping as tkl_link
             from boss_i18n
             where is_boss
             union all

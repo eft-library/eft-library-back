@@ -10,7 +10,6 @@ class RoadmapUtil:
                    rn.node_color,
                    rn.update_time,
                    qi.url_mapping,
-                   qi.url_mapping,
                    qi.name,
                    qi.kappa_required,
                    qi.npc_id,

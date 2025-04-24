@@ -1,10 +1,7 @@
-from sqlalchemy.orm import subqueryload
-
 from api.boss.models import Boss
-from api.map.models import ParentMap
+from api.map.models import Map
 from api.map_of_tarkov.models import Extraction, Transits, WhereAmI
 from database import DataBaseConnector
-import os
 from dotenv import load_dotenv
 
 
@@ -24,11 +21,7 @@ class MapOfTarkovService:
                     .order_by(Boss.order)
                     .all()
                 )
-                map_info = (
-                    s.query(ParentMap)
-                    .options(subqueryload(ParentMap.sub))
-                    .filter(ParentMap.id == map_id)
-                ).first()
+                map_info = (s.query(Map).filter(Map.id == map_id)).first()
                 extraction_info = (
                     s.query(Extraction)
                     .filter(Extraction.map == map_id)
@@ -69,7 +62,7 @@ class MapOfTarkovService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 # 모든 지도 정보와 관련 데이터를 한번에 가져오기
-                maps = s.query(ParentMap).options(subqueryload(ParentMap.sub)).all()
+                maps = s.query(Map).all()
                 bosses = s.query(Boss).all()
                 extractions = s.query(Extraction).all()
                 transits = s.query(Transits).all()
@@ -108,7 +101,7 @@ class MapOfTarkovService:
                     "extraction_info": extraction_dict.get(map_id, []),
                     "transits_info": transits_dict.get(map_id, []),
                     "map_id": map_id,
-                    "find_info": find_dict.get(map_id, [])
+                    "find_info": find_dict.get(map_id, []),
                 }
 
                 result.append(map_of_tarkov)

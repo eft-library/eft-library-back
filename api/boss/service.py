@@ -1,4 +1,7 @@
+from sqlalchemy import text
+
 from api.boss.models import Boss
+from api.boss.util import BossUtil
 from database import DataBaseConnector
 import os
 from dotenv import load_dotenv
@@ -34,9 +37,11 @@ class BossService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                boss_list = s.query(Boss).order_by(Boss.order).all()
+                query = text(BossUtil.get_boss_query())
+                result = s.execute(query)
+                bosses = [dict(row) for row in result.mappings()]
 
-                return boss_list
+                return bosses
         except Exception as e:
             print("오류 발생:", e)
             return None

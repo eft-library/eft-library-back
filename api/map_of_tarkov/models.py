@@ -8,10 +8,10 @@ class Extraction(DataBaseConnector.Base):
     Extraction info
     """
 
-    __tablename__ = "tkl_extraction"
+    __tablename__ = "extraction_i18n"
 
     id = Column(String, primary_key=True)
-    name = Column(TEXT)
+    name = Column(JSON)
     image = Column(TEXT)
     faction = Column(String)
     always_available = Column(BOOLEAN)
@@ -31,7 +31,7 @@ class Transits(DataBaseConnector.Base):
     __tablename__ = "tkl_transits"
 
     id = Column(String, primary_key=True)
-    name = Column(TEXT)
+    name = Column(JSON)
     image = Column(TEXT)
     faction = Column(String)
     always_available = Column(BOOLEAN)
@@ -48,10 +48,9 @@ class WhereAmI(DataBaseConnector.Base):
     Where am i
     """
 
-    __tablename__ = "tkl_where_am_i"
+    __tablename__ = "where_am_i_i18n"
 
     id = Column(String, primary_key=True)
-    name = Column(TEXT)
     image = Column(TEXT)
     map_bounds = Column(JSON)
     image_bounds = Column(JSON)
