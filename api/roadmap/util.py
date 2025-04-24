@@ -12,10 +12,10 @@ class RoadmapUtil:
                    qi.url_mapping,
                    qi.url_mapping,
                    qi.name,
-                   qi.required_kappa,
+                   qi.kappa_required,
                    qi.npc_id,
-                   qi.next,
-                   qi.prev
+                   qi.task_next,
+                   qi.task_requirements
             from roadmap_node rn
-                     left join public.quest_i18n qi on rn.id = qi.id    
+                     left join public.quest_i18n qi on rn.id = qi.id   
         """

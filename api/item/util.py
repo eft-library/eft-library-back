@@ -88,7 +88,7 @@ class ItemUtil:
                                                                 tn.name                                         as npc_name,
                                                                 tn.image                                        AS npc_image,
                                                                 jsonb_array_elements(finish_rewards -> 'items') AS reward_elem
-                                     FROM api_quest_i18n qa
+                                     FROM quest_i18n qa
                                               left join npc_i18n tn on qa.npc_id = tn.id
                                      WHERE qa.name is not null),
             
@@ -99,7 +99,7 @@ class ItemUtil:
                                                                              tn.name  AS npc_name,
                                                                              tn.image AS npc_image,
                                                                              obj      AS objective
-                                                   FROM api_quest_i18n q
+                                                   FROM quest_i18n q
                                                             LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
                                                             LEFT JOIN npc_i18n tn ON q.npc_id = tn.id
                                                    WHERE obj ->> 'type' IN ('findQuestItem', 'giveQuestItem')
@@ -112,7 +112,7 @@ class ItemUtil:
                                                                               tn.name  as npc_name,
                                                                               tn.image AS npc_image,
                                                                               obj      AS objective
-                                                    FROM api_quest_i18n q
+                                                    FROM quest_i18n q
                                                              LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
                                                              LEFT JOIN npc_i18n tn on q.npc_id = tn.id
                                                     WHERE obj ->> 'type' IN ('plantItem', 'giveItem', 'findItem')

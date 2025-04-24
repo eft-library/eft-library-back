@@ -13,7 +13,7 @@ class PlannerUtil:
                    jsonb_agg(jsonb_build_object('quest_id', rq, 'quest_name', quest_i18n.name, 'requirements_kr',
                                                 quest_i18n.requirements, 'requirements', 'objectives', quest_i18n.objectives,
                                                 'url_mapping', quest_i18n.url_mapping, 'next',
-                                                COALESCE(quest_i18n.next, jsonb '[]'::jsonb))) as quest_info
+                                                COALESCE(quest_i18n.task_next, jsonb '[]'::jsonb))) as quest_info
             from user_quest
                      left join lateral unnest(user_quest.quest_list) AS rq ON true
                      left join quest_i18n on rq = quest_i18n.id
