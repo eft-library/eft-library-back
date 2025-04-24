@@ -2,7 +2,6 @@ from api.boss.models import Boss
 from api.map.models import Map
 from api.map_of_tarkov.models import Extraction, Transits, WhereAmI
 from database import DataBaseConnector
-from dotenv import load_dotenv
 
 
 class MapOfTarkovService:
@@ -12,7 +11,6 @@ class MapOfTarkovService:
         map of tarkov 지도 조회
         """
         try:
-            load_dotenv()
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 boss_list = (
@@ -58,7 +56,6 @@ class MapOfTarkovService:
     @staticmethod
     def get_all_map_of_tarkov():
         try:
-            load_dotenv()
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 # 모든 지도 정보와 관련 데이터를 한번에 가져오기

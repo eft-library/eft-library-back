@@ -1,11 +1,8 @@
 from api.user.user_res_models import User
 from api.planner.planner_res_models import UserQuest
 from api.user.user_req_models import AddUserReq
-from dotenv import load_dotenv
 from datetime import datetime, date
 import pytz
-
-load_dotenv()
 
 
 class UserFunction:

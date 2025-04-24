@@ -3,11 +3,6 @@ from sqlalchemy import text
 from api.boss.models import Boss
 from api.boss.util import BossUtil
 from database import DataBaseConnector
-import os
-from dotenv import load_dotenv
-
-
-load_dotenv()
 
 
 class BossService:

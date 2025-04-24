@@ -1,13 +1,10 @@
 from api.planner.planner_res_models import UserQuest
 from api.planner.planner_req_models import UserQuestList
 from database import DataBaseConnector
-from dotenv import load_dotenv
 from sqlalchemy import text
 from datetime import datetime
 from api.planner.util import PlannerUtil
 import pytz
-
-load_dotenv()
 
 
 class PlannerService:

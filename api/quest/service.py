@@ -1,6 +1,5 @@
 from api.quest.models import NPC, Quest
 from database import DataBaseConnector
-from dotenv import load_dotenv
 
 
 class QuestService:
@@ -35,7 +34,6 @@ class QuestService:
     @staticmethod
     def get_quest_by_id(url_mapping):
         try:
-            load_dotenv()
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 quest_npc = (
