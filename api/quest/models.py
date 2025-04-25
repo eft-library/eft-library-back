@@ -43,7 +43,7 @@ class Quest(DataBaseConnector.Base):
     kappa_required = Column(Boolean)
     objectives = Column(JSON)
     finish_rewards = Column(JSON)
-    requirements = Column(JSON)
+    min_player_level = Column(Integer)
     update_time = Column(TIMESTAMP)
     order = Column(Integer)
     guide = Column(JSON)
