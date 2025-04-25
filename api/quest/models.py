@@ -38,7 +38,7 @@ class Quest(DataBaseConnector.Base):
     id = Column(String, primary_key=True)
     npc_id = Column(String, ForeignKey("npc_i18n.id"))
     url_mapping = Column(TEXT)
-    name = Column(String)
+    name = Column(JSON)
     wiki_url = Column(TEXT)
     kappa_required = Column(Boolean)
     objectives = Column(JSON)
