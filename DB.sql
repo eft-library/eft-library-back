@@ -191,8 +191,9 @@ CREATE TABLE QUEST_I18N
     objectives JSONB,
     WIKI_URL TEXT,
     finish_rewards JSONB,
-    requirements JSONB,
+    min_player_level INTEGER,
     guide JSONB,
+    "order" INTEGER,
     update_time timestamp with time zone DEFAULT now()
 );
 COMMENT ON COLUMN QUEST_I18N.id IS 'Quest ID';
@@ -206,8 +207,9 @@ COMMENT ON COLUMN QUEST_I18N.objectives IS 'Quest 목표 목록';
 COMMENT ON COLUMN QUEST_I18N.WIKI_URL IS 'Quest 위키 주소';
 COMMENT ON COLUMN QUEST_I18N.GUIDE IS 'Quest 가이드';
 COMMENT ON COLUMN QUEST_I18N.finish_rewards IS 'Quest 완료 보상 목록';
-COMMENT ON COLUMN QUEST_I18N.requirements IS 'Quest 조건';
+COMMENT ON COLUMN QUEST_I18N.min_player_level IS 'Quest 레벨 조건';
 COMMENT ON COLUMN QUEST_I18N.url_mapping IS 'Quest url mapping';
+COMMENT ON COLUMN QUEST_I18N."order" IS 'Quest 정렬';
 COMMENT ON COLUMN QUEST_I18N.update_time IS 'Quest 업데이트 시간';
 
 CREATE TABLE NPC_I18N
