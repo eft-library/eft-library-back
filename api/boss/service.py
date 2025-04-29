@@ -8,7 +8,7 @@ from database import DataBaseConnector
 class BossService:
 
     @staticmethod
-    def get_boss_by_id(boss_id: str):
+    def get_boss_by_id(url_mapping: str):
         """
         특정 boss id 조회
         """
@@ -17,7 +17,7 @@ class BossService:
             with session() as s:
                 boss = (
                     s.query(Boss)
-                    .filter(Boss.id == boss_id)
+                    .filter(Boss.url_mapping == url_mapping)
                     .order_by(Boss.order)
                     .first()
                 )

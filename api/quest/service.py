@@ -1,4 +1,7 @@
+from sqlalchemy import text
+
 from api.quest.models import NPC, Quest
+from api.quest.util import QuestUtil
 from database import DataBaseConnector
 
 
@@ -36,15 +39,12 @@ class QuestService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                quest_npc = (
-                    s.query(Quest, NPC)
-                    .filter(Quest.npc_value == NPC.id)
-                    .filter(Quest.url_mapping == url_mapping)
-                    .first()
-                )
-            combined_info = {**quest_npc[0].__dict__, **quest_npc[1].__dict__}
+                query = text(QuestUtil.get_quest_detail_query())
+                param = {"url_mapping": url_mapping}
+                result = s.execute(query, param)
+                quest = [dict(row) for row in result.mappings()]
 
-            return combined_info
+            return quest[0]
         except Exception as e:
             print("오류 발생:", e)
             return None
