@@ -19,6 +19,15 @@ class ItemUtil:
         """
 
     @staticmethod
+    def get_armor_vest_query():
+        return """
+            SELECT *
+            FROM item_i18n
+            where category = 'ArmorVest'
+            ORDER BY (INFO->>'class_value')::NUMERIC, (INFO->>'capacity')::NUMERIC
+        """
+
+    @staticmethod
     def get_glasses_query():
         return """
             SELECT *

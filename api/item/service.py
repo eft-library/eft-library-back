@@ -175,12 +175,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                arm_band = (
-                    s.query(Item)
-                    .filter(Item.category == "Armband")
-                    .order_by(Item.name_en)
-                    .all()
-                )
+                arm_band = s.query(Item).filter(Item.category == "Armband").all()
                 return arm_band
         except Exception as e:
             print("오류 발생:", e)
@@ -241,12 +236,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                key = (
-                    s.query(Item)
-                    .filter(Item.category == "Key")
-                    .order_by(Item.name_en)
-                    .all()
-                )
+                key = s.query(Item).filter(Item.category == "Key").all()
                 return key
         except Exception as e:
             print("오류 발생:", e)
@@ -260,12 +250,9 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                armor_vest = (
-                    s.query(Item)
-                    .filter(Item.category == "ArmorVest")
-                    .order_by(cast(Item.info["class_value"], Numeric))
-                    .all()
-                )
+                query = text(ItemUtil.get_armor_vest_query())
+                result = s.execute(query)
+                armor_vest = [dict(row) for row in result.mappings()]
                 return armor_vest
         except Exception as e:
             print("오류 발생:", e)
@@ -298,12 +285,7 @@ class ItemService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                headset = (
-                    s.query(Item)
-                    .filter(Item.category == "Headset")
-                    .order_by(Item.name_en)
-                    .all()
-                )
+                headset = s.query(Item).filter(Item.category == "Headset").all()
                 return headset
         except Exception as e:
             print("오류 발생:", e)
