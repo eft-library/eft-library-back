@@ -15,6 +15,7 @@ class Boss(DataBaseConnector.Base):
     faction = Column(String)
     image = Column(TEXT)
     health_total = Column(Integer)
+    health_image = Column(TEXT)
     item_info = Column(JSON)
     spawn_chance = Column(JSON)
     location_guide = Column(JSON)

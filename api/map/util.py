@@ -2,24 +2,24 @@ class MapUtil:
     @staticmethod
     def get_map_query():
         return """
-            SELECT parent_value,
-                   jsonb_agg(child_json) AS children
-            FROM (SELECT parent_value,
-                         jsonb_build_object(
-                                 'id', id,
-                                 'name', name,
-                                 'three_image', three_image,
-                                 'three_item_path', three_item_path,
-                                 'jpg_image', jpg_image,
-                                 'jpg_item_path', jpg_item_path,
-                                 'depth', depth,
-                                 'order', "order",
-                                 'link', link,
-                                 'mot_image', mot_image,
-                                 'map_json', map_json,
-                                 'update_time', update_time
-                         ) AS child_json
-                  FROM map_group_i18n
-                  ORDER BY parent_value, depth, "order") AS ordered_children
-            GROUP BY parent_value
+            SELECT
+                a.id,
+                a.name,
+                a.three_image,
+                a.parent_value,
+                a.three_item_path,
+                a.jpg_image,
+                a.jpg_item_path,
+                a.depth,
+                a."order",
+                a.link,
+                a.mot_image,
+                a.map_json,
+                a.update_time,
+                jsonb_agg(b.*) FILTER (WHERE b.id IS NOT NULL) AS children
+            FROM map_group_i18n a
+            LEFT JOIN map_group_i18n b
+                ON b.parent_value = a.id
+            WHERE a.depth = 1
+            GROUP BY a.id;
         """
