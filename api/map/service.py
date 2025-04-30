@@ -38,23 +38,6 @@ class MapService:
             return None
 
     @staticmethod
-    def get_all_map():
-        """
-        map 전체 조회
-        """
-        try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
-                query = text(MapUtil.get_map_query())
-                result = s.execute(query)
-                maps = [dict(row) for row in result.mappings()]
-
-            return maps
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
     def get_sub_map(map_id: str):
         """
         ID를 통한 sub map 조회

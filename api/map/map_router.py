@@ -15,14 +15,6 @@ def get_map(map_id: str):
     return CustomResponse.response(response_map, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/all")
-def get_all_map():
-    maps = MapService.get_all_map()
-    if maps is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.MAP_NOT_FOUND)
-    return CustomResponse.response(maps, HTTPCode.OK, Message.SUCCESS)
-
-
 @router.get("/sub/{map_id}")
 def get_sub_map(map_id: str):
     maps = MapService.get_sub_map(map_id)
