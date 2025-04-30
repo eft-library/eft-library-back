@@ -15,8 +15,24 @@ class MapService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                response_map = s.query(Map).filter(Map.id == map_id).first()
-                return response_map
+                query = text(MapUtil.get_map_detail_query())
+                param = {"map_id": map_id}
+                result = s.execute(query, param)
+                map = [dict(row) for row in result.mappings()]
+
+                map_selector = (
+                    s.query(Map).filter(Map.depth == 1).order_by(Map.order).all()
+                )
+
+                map_selector_list = [
+                    {"id": m.id, "name": m.name, "link": m.link} for m in map_selector
+                ]
+
+                return {
+                    "map": map[0],  # 상세 정보
+                    "map_selector": map_selector_list,  # selector 목록
+                }
+
         except Exception as e:
             print("오류 발생:", e)
             return None
