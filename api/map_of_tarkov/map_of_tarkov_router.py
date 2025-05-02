@@ -15,13 +15,3 @@ def get_map_of_tarkov(map_id: str):
             None, HTTPCode.OK, Message.MAP_OF_TARKOV_NOT_FOUND
         )
     return CustomResponse.response(map_of_tarkov, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/all")
-def get_all_map_of_tarkov():
-    map_of_tarkov = MapOfTarkovService.get_all_map_of_tarkov()
-    if map_of_tarkov is None:
-        return CustomResponse.response(
-            None, HTTPCode.OK, Message.MAP_OF_TARKOV_NOT_FOUND
-        )
-    return CustomResponse.response(map_of_tarkov, HTTPCode.OK, Message.SUCCESS)
