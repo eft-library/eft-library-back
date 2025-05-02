@@ -1,6 +1,9 @@
+from sqlalchemy import text
+
 from api.boss.models import Boss
 from api.map.models import Map
 from api.map_of_tarkov.models import Extraction, Transits, WhereAmI
+from api.map_of_tarkov.util import MapOfTarkovUtil
 from database import DataBaseConnector
 
 
@@ -13,13 +16,16 @@ class MapOfTarkovService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                boss_list = (
-                    s.query(Boss)
-                    .filter(Boss.spawn.contains([map_id]))
-                    .order_by(Boss.order)
-                    .all()
+                map_selector = (
+                    s.query(Map).filter(Map.depth == 1).order_by(Map.order).all()
                 )
-                map_info = (s.query(Map).filter(Map.id == map_id)).first()
+                map_selector_list = [{"id": m.id, "name": m.name} for m in map_selector]
+
+                query = text(MapOfTarkovUtil.get_map_of_tarkov_detail_query())
+                param = {"map_id": map_id}
+                result = s.execute(query, param)
+                map_data = [dict(row) for row in result.mappings()]
+
                 extraction_info = (
                     s.query(Extraction)
                     .filter(Extraction.map == map_id)
@@ -33,19 +39,17 @@ class MapOfTarkovService:
                     .all()
                 )
 
-            updated_boss_list = []
-            for boss in boss_list:
-                updated_boss_list.append(boss)
+                find_info = s.query(WhereAmI).filter(WhereAmI.id == map_id).first()
 
-            # 각각의 Boss 객체를 딕셔너리로 변환
-            combined_info = [boss.__dict__ for boss in updated_boss_list]
+                # boss_list
 
             map_of_tarkov = {
-                "boss_list": combined_info,
-                "map_info": map_info,
+                "map_info": map_data[0],
                 "extraction_info": extraction_info,
                 "transits_info": transits_info,
                 "map_id": map_id,
+                "find_info": find_info,
+                "map_selector": map_selector_list,
             }
 
             return map_of_tarkov

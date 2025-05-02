@@ -28,7 +28,7 @@ class Transits(DataBaseConnector.Base):
     Transits info
     """
 
-    __tablename__ = "tkl_transits"
+    __tablename__ = "transit_i18n"
 
     id = Column(String, primary_key=True)
     name = Column(JSON)
