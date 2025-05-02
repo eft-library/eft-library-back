@@ -10,6 +10,7 @@ class BossUtil:
                 b.health_total,
                 b.item_info,
                 b.spawn_chance,
+                b.spawn_map,
                 b.health_image,
                 b.location_guide,
                 b."order",

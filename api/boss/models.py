@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, TEXT
+from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, TEXT, ARRAY
 from database import DataBaseConnector
 
 
@@ -18,6 +18,7 @@ class Boss(DataBaseConnector.Base):
     health_image = Column(TEXT)
     item_info = Column(JSON)
     spawn_chance = Column(JSON)
+    spawn_map = Column(ARRAY(TEXT))
     location_guide = Column(JSON)
     order = Column(Integer)
     url_mapping = Column(TEXT)
