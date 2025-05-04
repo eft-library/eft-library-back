@@ -13,19 +13,3 @@ def get_boss_by_id(url_mapping: str):
     if boss is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.BOSS_NOT_FOUND)
     return CustomResponse.response(boss, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/all")
-def get_all_boss():
-    boss = BossService.get_all_boss()
-    if boss is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.BOSS_NOT_FOUND)
-    return CustomResponse.response(boss, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/selector")
-def get_boss_selector():
-    boss = BossService.get_boss_selector()
-    if boss is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.BOSS_NOT_FOUND)
-    return CustomResponse.response(boss, HTTPCode.OK, Message.SUCCESS)

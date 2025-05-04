@@ -21,5 +21,6 @@ class BossUtil:
             LEFT JOIN boss_i18n c
                 ON c.parent_id = b.id
             WHERE b.is_boss = true
+            and b.url_mapping = :url_mapping
             GROUP BY b.id;
         """

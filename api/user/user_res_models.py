@@ -3,10 +3,8 @@ from sqlalchemy import (
     Column,
     Integer,
     TIMESTAMP,
-    ARRAY,
     TEXT,
     Boolean,
-    BIGINT,
 )
 
 

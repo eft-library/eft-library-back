@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, TEXT, ARRAY
+from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, TEXT, ARRAY, Boolean
 from database import DataBaseConnector
 
 
@@ -21,5 +21,6 @@ class Boss(DataBaseConnector.Base):
     spawn_map = Column(ARRAY(TEXT))
     location_guide = Column(JSON)
     order = Column(Integer)
+    is_boss = Column(Boolean)
     url_mapping = Column(TEXT)
     update_time = Column(TIMESTAMP)
