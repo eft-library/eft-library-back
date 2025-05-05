@@ -50,7 +50,8 @@ class ItemUtil:
         return """
             WITH target_item AS (SELECT *
                                  FROM item_i18n
-                                 WHERE url_mapping = :url_mapping),
+                                 WHERE url_mapping = :url_mapping
+                                 limit 1),
             
                  -- 📦 바터 정보
                  filtered_barters AS (SELECT n.id                      AS npc_id,
