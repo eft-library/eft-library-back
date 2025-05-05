@@ -17,6 +17,10 @@ class RoadmapUtil:
                                            'total_y_coordinate', rn.total_y_coordinate,
                                            'single_x_coordinate', rn.single_x_coordinate,
                                            'single_y_coordinate', rn.single_y_coordinate,
+                                           'total_kappa_x_coordinate', rn.total_kappa_x_coordinate,
+                                           'total_kappa_y_coordinate', rn.total_kappa_y_coordinate,
+                                           'single_kappa_x_coordinate', rn.single_kappa_x_coordinate,
+                                           'single_kappa_y_coordinate', rn.single_kappa_y_coordinate,
                                            'node_color', rn.node_color,
                                            'task_next', COALESCE((SELECT jsonb_agg(elem -> 'task' -> 'id')
                                                                   FROM jsonb_array_elements(COALESCE(qi.task_next, '[]'::jsonb)) AS elem),

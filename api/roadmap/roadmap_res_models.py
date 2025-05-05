@@ -28,7 +28,10 @@ class RoadmapNode(DataBaseConnector.Base):
     total_y_coordinate = Column(NUMERIC)
     single_x_coordinate = Column(NUMERIC)
     single_y_coordinate = Column(NUMERIC)
-    update_time = Column(TIMESTAMP)
+    total_kappa_x_coordinate = Column(NUMERIC)
+    total_kappa_y_coordinate = Column(NUMERIC)
+    single_kappa_x_coordinate = Column(NUMERIC)
+    single_kappa_y_coordinate = Column(NUMERIC)
     node_color = Column(TEXT)
 
 
@@ -42,4 +45,3 @@ class RoadmapEdge(DataBaseConnector.Base):
     id = Column(TEXT, primary_key=True)
     source_id = Column(TEXT)
     target_id = Column(TEXT)
-    update_time = Column(TIMESTAMP)
