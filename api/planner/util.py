@@ -7,12 +7,12 @@ class PlannerUtil:
         """
 
         return """
-            select npc_i18n.id                                                                 as npc_id,
-                   npc_i18n.name                                                               as npc_name,
-                   npc_i18n.image                                                              as npc_image,
-                   jsonb_agg(jsonb_build_object('quest_id', rq, 'quest_name', quest_i18n.name, 'requirements_kr',
-                                                quest_i18n.requirements, 'requirements', 'objectives', quest_i18n.objectives,
-                                                'url_mapping', quest_i18n.url_mapping, 'next',
+            select npc_i18n.id                                                                      as npc_id,
+                   npc_i18n.name                                                                    as npc_name,
+                   npc_i18n.image                                                                   as npc_image,
+                   jsonb_agg(jsonb_build_object('quest_id', rq, 'quest_name', quest_i18n.name, 'task_requirements',
+                                                quest_i18n.task_requirements, 'objectives', quest_i18n.objectives,
+                                                'url_mapping', quest_i18n.url_mapping, 'min_player_level', quest_i18n.min_player_level, 'next',
                                                 COALESCE(quest_i18n.task_next, jsonb '[]'::jsonb))) as quest_info
             from user_quest
                      left join lateral unnest(user_quest.quest_list) AS rq ON true
