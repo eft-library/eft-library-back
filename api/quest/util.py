@@ -37,7 +37,6 @@ class QuestUtil:
                    qi.finish_rewards,
                    qi.min_player_level,
                    qi."order",
-                   qi.guide,
                    qi.task_next,
                    qi.task_requirements,
                    ni.name  as npc_name,

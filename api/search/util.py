@@ -18,9 +18,7 @@ class SearchUtil:
             union all
             select '/planner' as tkl_link
             union all
-            select '/privacy-policy-kr' as tkl_link
-            union all
-            select '/privacy-policy-en' as tkl_link
+            select '/privacy-policy' as tkl_link
             union all
             select '/terms' as tkl_link
             union all
