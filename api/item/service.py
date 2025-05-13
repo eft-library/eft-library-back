@@ -69,7 +69,6 @@ class ItemService:
             no_class_glasses = []
 
             for item in glasses:
-                print(item)
                 if item["info"]["class_value"] == 0:
                     no_class_glasses.append(item)
                 else:
