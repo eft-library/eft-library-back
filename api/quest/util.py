@@ -44,4 +44,5 @@ class QuestUtil:
                    ni.barter_info
             FROM quest_i18n qi
                      LEFT JOIN npc_i18n ni on qi.npc_id = ni.id
+            ORDER BY qi."order"
         """
