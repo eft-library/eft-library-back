@@ -164,7 +164,7 @@ CREATE TABLE MAP_GROUP_I18N
   DEPTH INTEGER,
   "order" INTEGER,
   LINK TEXT,
-  MOT_IMAGE TEXT,
+  MOT_IMAGE JSONB,
   MAP_JSON JSONB,
   UPDATE_TIME timestamp with time zone default now()
 );
