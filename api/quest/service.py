@@ -37,6 +37,19 @@ class QuestService:
             return None
 
     @staticmethod
+    def get_all_quest_detail():
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                query = text(QuestUtil.get_all_quest_detail_query())
+                result = s.execute(query)
+                quest_list = [dict(row) for row in result.mappings()]
+                return quest_list
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
     def get_quest_by_id(url_mapping):
         try:
             session = DataBaseConnector.create_session_factory()
