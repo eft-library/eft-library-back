@@ -13,12 +13,12 @@ load_dotenv()
 app = FastAPI(title="eft-library-back")
 
 
-@app.middleware("http")
-async def kafka_producer_middleware(request: Request, call_next):
-    message = f"Request: {request.method} {request.url.path}"
-    produce_message(message)
-    response = await call_next(request)
-    return response
+# @app.middleware("http")
+# async def kafka_producer_middleware(request: Request, call_next):
+#     message = f"Request: {request.method} {request.url.path}"
+#     produce_message(message)
+#     response = await call_next(request)
+#     return response
 
 
 @app.get("/docs")
