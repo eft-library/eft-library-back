@@ -1,5 +1,5 @@
+import json
 import uvicorn
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
@@ -15,8 +15,9 @@ app = FastAPI(title="eft-library-back")
 
 @app.middleware("http")
 async def kafka_producer_middleware(request: Request, call_next):
-    message = f"Request: {request.method} {request.url.path}"
-    produce_message(message)
+    data = {"method": request.method, "link": request.url.path}
+    json_str = json.dumps(data)
+    produce_message(json_str)
     response = await call_next(request)
     return response
 
