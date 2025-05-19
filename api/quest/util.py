@@ -48,6 +48,30 @@ class QuestUtil:
         """
 
     @staticmethod
+    def get_quest_by_npc():
+        return """
+            SELECT qi.id,
+                   qi.npc_id,
+                   qi.url_mapping,
+                   qi.name,
+                   qi.wiki_url,
+                   qi.kappa_required,
+                   qi.objectives,
+                   qi.finish_rewards,
+                   qi.min_player_level,
+                   qi."order",
+                   qi.task_next,
+                   qi.task_requirements,
+                   ni.name  as npc_name,
+                   ni.image as npc_image,
+                   ni.barter_info
+            FROM quest_i18n qi
+                     LEFT JOIN npc_i18n ni on qi.npc_id = ni.id
+            WHERE qi.npc_id = :npc_id
+            ORDER BY qi."order"
+        """
+
+    @staticmethod
     def get_all_quest_detail_query():
         return """
             SELECT qi.id,

@@ -63,3 +63,18 @@ class QuestService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_quest_by_npc(npc_id):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                query = text(QuestUtil.get_quest_by_npc())
+                param = {"npc_id": npc_id}
+                result = s.execute(query, param)
+                quest_list = [dict(row) for row in result.mappings()]
+
+            return quest_list
+        except Exception as e:
+            print("오류 발생:", e)
+            return None

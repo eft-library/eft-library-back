@@ -37,3 +37,11 @@ def get_quest_by_id(quest_id: str):
     if quest is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.QUEST_NOT_FOUND)
     return CustomResponse.response(quest, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/list/{npc_id}")
+def get_quest_by_npc(npc_id: str):
+    quest = QuestService.get_quest_by_npc(npc_id)
+    if quest is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.QUEST_NOT_FOUND)
+    return CustomResponse.response(quest, HTTPCode.OK, Message.SUCCESS)
