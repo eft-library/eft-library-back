@@ -5,16 +5,26 @@ from dotenv import load_dotenv
 import os
 from api.router import api_router
 from fastapi.openapi.docs import get_swagger_ui_html
+from kafka_producer import produce_message
+from fastapi import FastAPI, Request
 
 load_dotenv()
 
 app = FastAPI(title="eft-library-back")
 
 
+@app.middleware("http")
+async def kafka_producer_middleware(request: Request, call_next):
+    message = f"Request: {request.method} {request.url.path}"
+    produce_message(message)
+    response = await call_next(request)
+    return response
+
+
 @app.get("/docs")
 async def custom_swagger_ui_html():
     return get_swagger_ui_html(
-        openapi_url="/openapi.json",  # FastAPI 자동 생성된 OpenAPI 스키마 경로
+        openapi_url="/openapi.json",
         title="Swagger UI",
     )
 

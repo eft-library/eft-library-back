@@ -230,6 +230,6 @@ pip install python-dotenv
 pip install psycopg2-binary
 pip install requests
 pip install pytz
-pip install aiokafka
+pip install confluent-kafka
 uvicorn main:app --reload 
 -->
