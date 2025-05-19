@@ -2,6 +2,8 @@ import json
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import os
 from api.router import api_router
 from fastapi.openapi.docs import get_swagger_ui_html
@@ -15,7 +17,13 @@ app = FastAPI(title="eft-library-back")
 
 @app.middleware("http")
 async def kafka_producer_middleware(request: Request, call_next):
-    data = {"method": request.method, "link": request.url.path}
+    now_kst = datetime.now(ZoneInfo("Asia/Seoul"))
+    footprint_time = now_kst.isoformat()
+    data = {
+        "method": request.method,
+        "link": request.url.path,
+        "footprint_time": footprint_time,
+    }
     json_str = json.dumps(data)
     produce_message(json_str)
     response = await call_next(request)
