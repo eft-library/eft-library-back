@@ -24,16 +24,19 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
 - 가능하면 모든 데이터의 가공을 FastAPI에서 처리합니다.
 
 
-## 환경 및 패키지 정보
+## 패키지 정보
 
-- Python 3.10.12
-- FastAPI 0.115.12
-- psycopg2-binary 2.9.10
-- python-dotenv 1.1.0
-- pytz 2025.2
-- requests 2.32.3
-- SQLAlchemy 2.0.40
-- confluent-kafka 2.10.0
+| 패키지명             | 버전       |
+|----------------------|------------|
+| Python               | 3.10.12    |
+| FastAPI              | 0.115.12   |
+| psycopg2-binary      | 2.9.10     |
+| python-dotenv        | 1.1.0      |
+| pytz                 | 2025.2     |
+| requests             | 2.32.3     |
+| SQLAlchemy           | 2.0.40     |
+| confluent-kafka      | 2.10.0     |
+
 
 ## 구조
 
