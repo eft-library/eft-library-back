@@ -14,7 +14,7 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
 
 이 페이지는 Backend에 대하여 설명한다.
 
-![architecture](https://github.com/user-attachments/assets/97befe41-42a4-4165-b673-83f8fe947a20)
+![architecture](https://github.com/user-attachments/assets/957d39a5-8b81-42a8-92c1-c30ddf39b6fd)
 
 
 
@@ -29,9 +29,6 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
 
 ## 환경 및 패키지 정보
 
-- Ubuntu 22.04.5 LTS
-- RAM DDR4 32GB
-- CPU Ryzen 5 3600, 6 core / 12 thread
 - Python 3.10.12
 - FastAPI 0.115.12
 - psycopg2-binary 2.9.10
