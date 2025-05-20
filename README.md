@@ -96,7 +96,7 @@ FastAPI를 사용하면서 하는김에 해보자! 로 시작했는데, 어려�
 
 어떻게든 ORM을 사용하여 해결해보려 했는데, 구조가 점점 복잡해지면서 유지보수에 한계가 생길 것 같아 text, execute 방식으로 우회 하였다.
 
-![스크린샷 2025-01-31 오후 3 35 24](https://github.com/user-attachments/assets/ecb540c6-9826-48d0-b04f-954ea5a040a5)
+![스크린샷 2025-05-21 오전 8 17 50](https://github.com/user-attachments/assets/533576f2-63e0-4c09-b49e-962769116f0d)
 
 
 **✔ 해결:**  
@@ -323,7 +323,7 @@ ORM을 사용하면 ForeignKey와 relationship을 가지고 하위 항목을 전
 
 조회하면서 정렬도 적용할 수 있고 꽤나 편한 요소인데, 쿼리가 복잡해지면 내 입장에서는 좀 꼬이는 부분이 많아서 이런 경우는 Query를 직접 작성하고 가공했었다.
 
-![스크린샷 2025-01-31 오후 3 30 38](https://github.com/user-attachments/assets/4ee9b326-dd14-4e09-88d0-c8899ce675fc)
+![스크린샷 2025-05-21 오전 8 24 56](https://github.com/user-attachments/assets/9bf67cb4-8fe0-44b2-a9f7-97cb1a2a25b2)
 
 
 ### 4. 다국어 지원
