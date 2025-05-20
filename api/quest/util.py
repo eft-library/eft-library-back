@@ -31,17 +31,12 @@ class QuestUtil:
                    qi.npc_id,
                    qi.url_mapping,
                    qi.name,
-                   qi.wiki_url,
                    qi.kappa_required,
                    qi.objectives,
                    qi.finish_rewards,
                    qi.min_player_level,
-                   qi."order",
                    qi.task_next,
-                   qi.task_requirements,
-                   ni.name  as npc_name,
-                   ni.image as npc_image,
-                   ni.barter_info
+                   qi.task_requirements
             FROM quest_i18n qi
                      LEFT JOIN npc_i18n ni on qi.npc_id = ni.id
             ORDER BY qi."order"
@@ -66,21 +61,11 @@ class QuestUtil:
     def get_all_quest_detail_query():
         return """
             SELECT qi.id,
-                   qi.npc_id,
                    qi.url_mapping,
                    qi.name,
-                   qi.wiki_url,
-                   qi.kappa_required,
-                   qi.objectives,
-                   qi.finish_rewards,
-                   qi.min_player_level,
-                   qi."order",
-                   qi.task_next,
                    qi.guide,
                    qi.task_requirements,
-                   ni.name  as npc_name,
-                   ni.image as npc_image,
-                   ni.barter_info
+                   qi.update_time
             FROM quest_i18n qi
                      LEFT JOIN npc_i18n ni on qi.npc_id = ni.id
             ORDER BY qi."order"
