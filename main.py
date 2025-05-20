@@ -18,7 +18,8 @@ app = FastAPI(title="eft-library-back")
 @app.middleware("http")
 async def kafka_producer_middleware(request: Request, call_next):
     now_kst = datetime.now(ZoneInfo("Asia/Seoul"))
-    print("X-Forwarded-For:", request.headers.get("x-forwarded-for"))
+    client_ip = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+    print("X-Forwarded-For:", client_ip)
     footprint_time = now_kst.isoformat()
     data = {
         "method": request.method,
