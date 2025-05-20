@@ -10,9 +10,7 @@
 
 # EFT Library의 Backend 운영 방식
 
-EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 데이터를 적재하거나 조회한다.
-
-이 페이지는 Backend에 대하여 설명한다.
+EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 데이터를 적재하거나 조회합니다.
 
 ![architecture](https://github.com/user-attachments/assets/957d39a5-8b81-42a8-92c1-c30ddf39b6fd)
 
@@ -20,11 +18,10 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
 
 ## 주요 사항
 
-- 회원가입과 로그인의 경우 **NextJS의 next-auth를 사용**하고, Google에서 발급한 token을 FastAPI로 전달한 뒤, **FastAPI에서 Google의 Token 유효성 검사 통신을 통해 인증 및 인가**를 진행한다.
-- 회원가입은 무조건 Google OAuth를 사용하고, **사용자 이메일 정보만 사용한다. (비밀번호 사용 X)**
-- 가능한 경우 SQLAlchmey의 ORM을 사용한다.
-- Middleware를 추가하여, 모든 요청을 Kafka를 통해 History를 남긴다.
-- 가능하면 모든 데이터의 가공을 FastAPI에서 처리한다.
+- 회원가입과 로그인의 경우 **NextJS의 next-auth를 사용**하고, Google에서 발급한 token을 FastAPI로 전달한 뒤, **FastAPI에서 Google의 Token 유효성 검사 통신을 통해 인증 및 인가**를 진행합니다.
+- 회원가입은 무조건 Google OAuth를 사용하고, **사용자 이메일 정보만 사용합니다. (비밀번호 사용 X)**
+- Middleware를 추가하여, 모든 요청을 Kafka를 통해 History를 남깁니다.
+- 가능하면 모든 데이터의 가공을 FastAPI에서 처리합니다.
 
 
 ## 환경 및 패키지 정보
@@ -69,8 +66,8 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
 
 ### 1. SQLAlchemy ORM 적용
 
-FastAPI를 사용하면서 하는김에 해보자! 로 시작했는데, 어려웠다...
-특히 처음에 DB와 Connection을 만들어서 조회 후 반환을 하는데, 계속 빈 값만 나오는 문제가 있었는데, SQLAlchemy의 Session이 끝난 뒤 값을 반환해서 생기는 문제였다. 
+FastAPI를 사용하면서 하는김에 해보자! 로 시작했는데, 어려웠습니다...
+특히 처음에 DB와 Connection을 만들어서 조회 후 반환을 하는데, 계속 빈 값만 나오는 문제가 있었는데, SQLAlchemy의 Session이 끝난 뒤 값을 반환해서 생기는 문제였습니다. 
 
 #### 이전
 <img width="590" alt="3" src="https://github.com/user-attachments/assets/b0902073-41f2-429b-b693-8ec91b80bf2a" />
@@ -91,13 +88,13 @@ FastAPI를 사용하면서 하는김에 해보자! 로 시작했는데, 어려�
 
 ### 2. 너무 복잡한 쿼리의 경우
 
-어떻게든 ORM을 사용하여 해결해보려 했는데, 구조가 점점 복잡해지면서 유지보수에 한계가 생길 것 같아 text, execute 방식으로 우회 하였다.
+어떻게든 ORM을 사용하여 해결해보려 했는데, 구조가 점점 복잡해지면서 유지보수에 한계가 생길 것 같아 text, execute 방식으로 우회 하였습니다.
 
 ![스크린샷 2025-05-21 오전 8 17 50](https://github.com/user-attachments/assets/533576f2-63e0-4c09-b49e-962769116f0d)
 
 
 **✔ 해결:**  
-- ORM을 사용하지 않고 Query 직접 작성하였다.
+- ORM을 사용하지 않고 Query 직접 작성하였습니다.
 ```python
 
 @staticmethod
@@ -316,20 +313,20 @@ FROM item_with_details
 
 ### 3. 하위 항목 전체 조회
 
-ORM을 사용하면 ForeignKey와 relationship을 가지고 하위 항목을 전체 조회 해서 자동으로 배열로 넣어주는데, 처음에 몰라서 많이 헤멨었다.
+ORM을 사용하면 ForeignKey와 relationship을 가지고 하위 항목을 전체 조회 해서 자동으로 배열로 넣어주는데, 처음에 몰라서 많이 헤멨었습니다.
 
-조회하면서 정렬도 적용할 수 있고 꽤나 편한 요소인데, 쿼리가 복잡해지면 내 입장에서는 좀 꼬이는 부분이 많아서 이런 경우는 Query를 직접 작성하고 가공했었다.
+조회하면서 정렬도 적용할 수 있고 꽤나 편한 요소인데, 쿼리가 복잡해지면 내 입장에서는 좀 꼬이는 부분이 많아서 이런 경우는 Query를 직접 작성하고 가공했습니다.
 
 ![스크린샷 2025-05-21 오전 8 24 56](https://github.com/user-attachments/assets/9bf67cb4-8fe0-44b2-a9f7-97cb1a2a25b2)
 
 
 ### 4. 다국어 지원
 
-기존에는 name_en, name_kr 식으로 컬럼을 지정해줬었는데, jsonb로 컬럼을 수정하고 하나로 합쳤다.
+기존에는 name_en, name_kr 식으로 컬럼을 지정해줬었는데, jsonb로 컬럼을 수정하고 하나로 합쳤습니다.
 
 name: {en: test, ko: 테스트, テスト }
 
-이렇게 바꾸면서 모든 테이블을 갈아엎고 새로 만들었다.
+해당 데이터 구조로 바꾸면서 모든 테이블을 갈아엎고 새로 만들었습니다.
 
 
 <!--
