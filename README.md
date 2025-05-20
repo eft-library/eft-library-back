@@ -10,45 +10,51 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
 
 ## 주요 사항
 
-- 회원가입과 로그인의 경우 **NextJS의 next-auth를 사용**하는데, Google에서 발급한 token을 FastAPI로 전달한 뒤, **FastAPI에서 Google의 Token 유효성 검사 통신을 통해 인증 및 인가**를 진행한다.
+- 회원가입과 로그인의 경우 **NextJS의 next-auth를 사용**하고, Google에서 발급한 token을 FastAPI로 전달한 뒤, **FastAPI에서 Google의 Token 유효성 검사 통신을 통해 인증 및 인가**를 진행한다.
 - 회원가입은 무조건 Google OAuth를 사용하고, **사용자 이메일 정보만 사용한다. (비밀번호 사용 X)**
 - 가능한 경우 SQLAlchmey의 ORM을 사용한다.
+- Middleware를 추가하여, 모든 요청을 Kafka를 통해 History를 남긴다.
 - 가능하면 모든 데이터의 가공을 FastAPI에서 처리한다.
 
 
-## 환경
+## 환경 및 패키지 정보
 
-- Rocky Linux 8
-- Python 3.6
-- FastAPI 0.83.0
-- psycopg2-binary 2.9.5
-- python-dotenv 0.20.0
-- pytz 2024.1
-- requests 2.27.1
-- SQLAlchemy 1.4.52
+- Ubuntu 22.04.5 LTS
+- RAM DDR4 32GB
+- CPU Ryzen 5 3600, 6 core / 12 thread
+- Python 3.10.12
+- FastAPI 0.115.12
+- psycopg2-binary 2.9.10
+- python-dotenv 1.1.0
+- pytz 2025.2
+- requests 2.32.3
+- SQLAlchemy 2.0.40
+- confluent-kafka 2.10.0
 
 ## 구조
 
 - **api**
   - **boss** : 보스 API
-  - **event** : 타르코프 이벤트 정보 API
   - **item** : 모든 아이템 API
   - **item filter** : 대화형 지도에서 사용하는 아이템 필터링 API
   - **map** : 대화형 지도 API
   - **map of tarkov** : 타르코프 지도 API
   - **menu** : 메인 페이지 아이템 및 Nav 아이템 API
-  - **news** : 메인 페이지 News API
+  - **news** : 타르코프 초기화 관련 API
   - **notice** : 사이트 공지 API
   - **patch notes** : 타르코프 패치 노트 API
-  - **quest** : Quest 관련 API
-  - **roadmap** : 사용자 상호작용 퀘스트 Roadmap API
+  - **event** : 타르코프 이벤트 정보 API
+  - **hideout** : 사용자 상호작용 은신처 API
+  - **quest** : Quest API
+  - **planner** : 사용자 상호작용 Quest Planner API
+  - **roadmap** : 사용자 상호작용 Quest Roadmap API
   - **search** : 메인 페이지 검색 및 sitemap.xml 조회 API
-  - **server** : 웹 Reboot 관련 API
-  - **table column** : 사이트 내의 상수 조회 API
+  - **dynamic info** : 사이트 내의 상수 조회 API - footer, etc...
   - **user** : 사용자 관련 API
 - **util**
   - **constants** : HTTP Code 정의
 - **database** : PostgreSQL Connection 정의
+- **kafka_producer** : Middleware에서 받은 사용자 페이지 요청 정보를 Kafka로 전달하는 서비스
 - **DB.sql** : PostgreSQL Table 정의
 
 
@@ -84,129 +90,220 @@ FastAPI를 사용하면서 하는김에 해보자! 로 시작했는데, 어려�
 
 
 **✔ 해결:**  
-- ORM을 사용하지 않고 Query 직접 작성
+- ORM을 사용하지 않고 Query 직접 작성하였다.
 ```python
 
 @staticmethod
-def get_hideout_query():
+def get_item_detail_query():
 """
-하이드 아웃 전체 조회 쿼리
+아이템 상세 정보 조회 쿼리
 """
 
 return """
-SELECT master_id,
-       master_name_en,
-       master_name_kr,
-       image,
-       json_agg(
-               jsonb_build_object(
-                       'level_id', level_id,
-                       'item_require', item_require,
-                       'level_info', level_info,
-                       'trader_require', trader_require,
-                       'station_require', station_require,
-                       'skill_require', skill_require,
-                       'bonus', bonus,
-                       'crafts', crafts
-               )
-       ) as data
-FROM (SELECT tkl_hideout_master.id as master_id,
-             tkl_hideout_master.name_en as master_name_en,
-             tkl_hideout_master.name_kr as master_name_kr,
-             lid as level_id,
-             tkl_hideout_master.image as image,
-             COALESCE(
-                             json_agg(
-                             distinct jsonb_build_object(
-                                     'id', tkl_hideout_item_require.id,
-                                     'name_en', tkl_hideout_item_require.name_en,
-                                     'name_kr', tkl_hideout_item_require.name_kr,
-                                     'count', tkl_hideout_item_require.count,
-                                     'quantity', tkl_hideout_item_require.quantity,
-                                     'image', tkl_hideout_item_require.image
-                                      )
-                                     )
-                             FILTER (WHERE tkl_hideout_item_require.id IS NOT NULL),
-                             '[]'::json) as item_require,
-             COALESCE(
-                             json_agg(
-                             distinct jsonb_build_object(
-                                     'level', tkl_hideout_level.level,
-                                     'construction_time', tkl_hideout_level.construction_time
-                                      )
-                                     ) FILTER (WHERE tkl_hideout_level.level IS NOT NULL),
-                             '[]'::json) as level_info,
-             COALESCE(
-                             json_agg(
-                             distinct jsonb_build_object(
-                                     'name_en', tkl_hideout_trader_require.name_en,
-                                     'name_kr', tkl_hideout_trader_require.name_kr,
-                                     'compare', tkl_hideout_trader_require.compare,
-                                     'require_type', tkl_hideout_trader_require.require_type,
-                                     'value', tkl_hideout_trader_require.value,
-                                     'image', tkl_hideout_trader_require.image
-                                      )
-                                     ) FILTER (WHERE tkl_hideout_trader_require.name_en IS NOT NULL),
-                             '[]'::json) as trader_require,
-             COALESCE(
-                             json_agg(
-                             distinct jsonb_build_object(
-                                     'level', tkl_hideout_station_require.level,
-                                     'name_en', tkl_hideout_station_require.name_en,
-                                     'name_kr', tkl_hideout_station_require.name_kr,
-                                     'image', tkl_hideout_station_require.image
-                                      )
-                                     ) FILTER (WHERE tkl_hideout_station_require.level IS NOT NULL),
-                             '[]'::json) as station_require,
-             COALESCE(
-                             json_agg(
-                             distinct jsonb_build_object(
-                                     'level', tkl_hideout_skill_require.level,
-                                     'name_en', tkl_hideout_skill_require.name_en,
-                                     'name_kr', tkl_hideout_skill_require.name_kr,
-                                     'image', tkl_hideout_skill_require.image
-                                      )
-                                     ) FILTER (WHERE tkl_hideout_skill_require.level IS NOT NULL),
-                             '[]'::json) as skill_require,
-             COALESCE(
-                             json_agg(
-                             distinct jsonb_build_object(
-                                     'name_en', tkl_hideout_bonus.name_en,
-                                     'name_kr', tkl_hideout_bonus.name_kr,
-                                     'value', tkl_hideout_bonus.value,
-                                     'skill_name_en', tkl_hideout_bonus.skill_name_en,
-                                     'skill_name_kr', tkl_hideout_bonus.skill_name_kr
-                                      )
-                                     ) FILTER (WHERE tkl_hideout_bonus.name_en IS NOT NULL),
-                             '[]'::json) as bonus,
-             COALESCE(
-                             json_agg(
-                             distinct jsonb_build_object(
-                                     'level', tkl_hideout_crafts.level,
-                                     'name_en', tkl_hideout_crafts.name_en,
-                                     'name_kr', tkl_hideout_crafts.name_kr
-                                      )
-                                     ) FILTER (WHERE tkl_hideout_crafts.level IS NOT NULL),
-                             '[]'::json) as crafts
-      FROM tkl_hideout_master
-               LEFT JOIN LATERAL
-          unnest(tkl_hideout_master.level_ids) AS lid ON true
-               LEFT JOIN
-           tkl_hideout_item_require ON lid = tkl_hideout_item_require.level_id
-               LEFT JOIN
-           tkl_hideout_level on lid = tkl_hideout_level.id
-               LEFT JOIN
-           tkl_hideout_trader_require on lid = tkl_hideout_trader_require.level_id
-               LEFT JOIN
-           tkl_hideout_station_require on lid = tkl_hideout_station_require.level_id
-               LEFT JOIN
-           tkl_hideout_skill_require on lid = tkl_hideout_skill_require.level_id
-               LEFT JOIN
-           tkl_hideout_bonus on lid = tkl_hideout_bonus.level_id
-               LEFT JOIN
-           tkl_hideout_crafts on lid = tkl_hideout_crafts.level_id
-      GROUP BY tkl_hideout_master.id, tkl_hideout_master.name_en, tkl_hideout_master.image, lid) as a
-GROUP BY master_id, master_name_en, master_name_kr, image
+WITH target_item AS (SELECT *
+                     FROM item_i18n
+                     WHERE url_mapping = :url_mapping
+                     limit 1),
+
+     -- 📦 바터 정보
+     filtered_barters AS (SELECT n.id                      AS npc_id,
+                                 n.name,
+                                 n.image,
+                                 jsonb_build_object(
+                                         'level', barter ->> 'level',
+                                         'rewardItems', reward,
+                                         'requiredItems', barter -> 'requiredItems'
+                                 )                         AS matching_barter,
+                                 reward -> 'item' ->> 'id' AS reward_item_id
+                          FROM npc_i18n n,
+                               jsonb_array_elements(n.barter_info) AS barter,
+                               jsonb_array_elements(barter -> 'rewardItems') AS reward),
+
+     -- 🛠 은신처 건설에 사용되는 정보
+     filtered_hideout AS (SELECT thir.id,
+                                 thir.level_id,
+                                 thir.name,
+                                 thir.quantity,
+                                 thir.count,
+                                 thir.image,
+                                 thir.item_id,
+                                 thm.name as master_name,
+                                 thm.id   as master_id
+                          FROM hideout_item_require_i18n thir
+                                   LEFT JOIN hideout_master_i18n thm
+                                             ON SPLIT_PART(thir.level_id, '-', 1) = thm.id),
+
+     -- 🛠 은신처 제작에 사용되는 정보
+     filtered_crafts AS (SELECT DISTINCT ON (thc.id) thc.*,
+                                                     thm.name                as master_name,
+                                                     thm.id                  as master_id,
+                                                     elem -> 'item' ->> 'id' AS required_item_id
+                         FROM hideout_crafts_i18n thc
+                                  LEFT JOIN LATERAL jsonb_array_elements(thc.req_item) AS elem on True
+                                  LEFT JOIN hideout_master_i18n thm ON SPLIT_PART(thc.level_id, '-', 1) = thm.id),
+
+     -- 🎯 퀘스트 보상으로 사용되는 정보
+     filtered_quests AS (SELECT distinct on (qa.id) qa.id                                           AS quest_id,
+                                                    qa.name,
+                                                    qa.npc_id,
+                                                    qa.url_mapping,
+                                                    tn.name                                         as npc_name,
+                                                    tn.image                                        AS npc_image,
+                                                    jsonb_array_elements(finish_rewards -> 'items') AS reward_elem
+                         FROM quest_i18n qa
+                                  left join npc_i18n tn on qa.npc_id = tn.id
+                         WHERE qa.name is not null),
+
+     -- ❗ questItem에 포함된 경우 (예: giveQuestItem, findQuestItem)
+     required_quests_by_quest_item AS (SELECT DISTINCT ON (q.id) q.id     AS quest_id,
+                                                                 q.name,
+                                                                 q.url_mapping,
+                                                                 tn.name  AS npc_name,
+                                                                 tn.image AS npc_image,
+                                                                 obj      AS objective
+                                       FROM quest_i18n q
+                                                LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
+                                                LEFT JOIN npc_i18n tn ON q.npc_id = tn.id
+                                       WHERE obj ->> 'type' IN ('findQuestItem', 'giveQuestItem')
+                                         AND q.name IS NOT NULL),
+
+     -- ❗ items 배열에 포함된 경우 (예: giveItem, plantItem, findItem)
+     required_quests_by_items_array AS (SELECT distinct on (q.id) q.id     AS quest_id,
+                                                                  q.name,
+                                                                  q.url_mapping,
+                                                                  tn.name  as npc_name,
+                                                                  tn.image AS npc_image,
+                                                                  obj      AS objective
+                                        FROM quest_i18n q
+                                                 LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
+                                                 LEFT JOIN npc_i18n tn on q.npc_id = tn.id
+                                        WHERE obj ->> 'type' IN ('plantItem', 'giveItem', 'findItem')
+                                          AND q.name is not null
+                                          AND EXISTS (SELECT 1
+                                                      FROM jsonb_array_elements(obj -> 'items') AS item
+                                                      WHERE item ->> 'id' = (SELECT id FROM target_item))),
+
+     item_with_details AS (SELECT ti.id,
+                                  ti.name,
+                                  ti.category,
+                                  ti.image,
+                                  ti.image_width,
+                                  ti.image_height,
+                                  ti.info,
+                                  ti.update_time,
+                                  ti.url_mapping,
+
+                                  -- 은신처 아이템 요구 정보
+                                  COALESCE(
+                                                  json_agg(
+                                                  DISTINCT jsonb_build_object(
+                                                          'id', thir.id,
+                                                          'level_id', thir.level_id,
+                                                          'name', thir.name,
+                                                          'quantity', thir.quantity,
+                                                          'count', thir.count,
+                                                          'image', thir.image,
+                                                          'item_id', thir.item_id,
+                                                          'master_name', thir.master_name,
+                                                          'master_id', thir.master_id
+                                                           )
+                                                          ) FILTER (WHERE thir.id IS NOT NULL),
+                                                  '[]'
+                                  ) AS hideout_items,
+
+                                  -- 은신처 제작에 사용
+                                  COALESCE(
+                                                  json_agg(
+                                                  DISTINCT jsonb_build_object(
+                                                          'id', thc.id,
+                                                          'name', thc.name,
+                                                          'level_id', thc.level_id,
+                                                          'level', thc.level,
+                                                          'duration', thc.duration,
+                                                          'req_item', thc.req_item,
+                                                          'reward_item_id', thc.reward_item_id,
+                                                          'image', thc.image,
+                                                          'quantity', thc.quantity,
+                                                          'master_name', thc.master_name,
+                                                          'master_id', thc.master_id
+                                                           )
+                                                          ) FILTER (WHERE thc.id IS NOT NULL),
+                                                  '[]'
+                                  ) AS used_in_crafts,
+
+                                  -- NPC 바터 보상으로 나오는 정보
+                                  COALESCE(
+                                                  json_agg(
+                                                  DISTINCT jsonb_build_object(
+                                                          'npc_id', fb.npc_id,
+                                                          'npc_image', fb.image,
+                                                          'npc_name', fb.name,
+                                                          'barter_info', fb.matching_barter
+                                                           )
+                                                          ) FILTER (WHERE fb.npc_id IS NOT NULL),
+                                                  '[]'
+                                  ) AS rewarded_by_npcs,
+
+                                  -- 퀘스트 보상으로 나오는 정보
+                                  COALESCE(
+                                                  json_agg(
+                                                  DISTINCT jsonb_build_object(
+                                                          'quest_id', fq.quest_id,
+                                                          'name', fq.name,
+                                                          'npc_name', fq.npc_name,
+                                                          'npc_image', fq.npc_image,
+                                                          'url_mapping', fq.url_mapping,
+                                                          'reward', fq.reward_elem
+                                                           )
+                                                          ) FILTER (WHERE fq.quest_id IS NOT NULL),
+                                                  '[]'
+                                  ) AS rewarded_by_quests,
+
+                                  -- 📌 questItem에 들어 있는 퀘스트
+                                  COALESCE(
+                                                  json_agg(
+                                                  DISTINCT jsonb_build_object(
+                                                          'quest_id', rqi.quest_id,
+                                                          'name', rqi.name,
+                                                          'npc_name', rqi.npc_name,
+                                                          'npc_image', rqi.npc_image,
+                                                          'url_mapping', rqi.url_mapping,
+                                                          'objective', rqi.objective
+                                                           )
+                                                          ) FILTER (
+                                                      WHERE rqi.objective -> 'questItem' ->> 'id' = ti.id
+                                                      ),
+                                                  '[]'
+                                  ) AS required_by_quest_item,
+
+                                  -- 📌 items 배열에 들어 있는 퀘스트
+                                  COALESCE(
+                                                  json_agg(
+                                                  DISTINCT jsonb_build_object(
+                                                          'quest_id', rqa.quest_id,
+                                                          'name', rqa.name,
+                                                          'npc_name', rqa.npc_name,
+                                                          'npc_image', rqa.npc_image,
+                                                          'url_mapping', rqa.url_mapping,
+                                                          'objective', rqa.objective
+                                                           )
+                                                          ) FILTER (WHERE rqa.quest_id IS NOT NULL),
+                                                  '[]'
+                                  ) AS required_by_quest_item_array
+
+                           FROM target_item ti
+                                    LEFT JOIN filtered_hideout thir ON ti.id = thir.item_id
+                                    LEFT JOIN filtered_crafts thc ON thc.required_item_id = ti.id
+                                    LEFT JOIN filtered_barters fb ON fb.reward_item_id = ti.id
+                                    LEFT JOIN filtered_quests fq ON fq.reward_elem -> 'item' ->> 'id' = ti.id
+                                    LEFT JOIN required_quests_by_quest_item rqi
+                                              ON rqi.objective -> 'questItem' ->> 'id' = ti.id
+                                    LEFT JOIN required_quests_by_items_array rqa ON TRUE
+                           GROUP BY ti.id, ti.name, ti.name, ti.category, ti.image,
+                                    ti.image_width, ti.image_height, ti.info, ti.update_time, ti.url_mapping)
+
+SELECT *
+FROM item_with_details
 """
 ```
 
@@ -219,9 +316,14 @@ ORM을 사용하면 ForeignKey와 relationship을 가지고 하위 항목을 전
 ![스크린샷 2025-01-31 오후 3 30 38](https://github.com/user-attachments/assets/4ee9b326-dd14-4e09-88d0-c8899ce675fc)
 
 
-### FastAPI의 경우는 첫 환경 구성이 어려웠고, 개발은 쉽게 할 수 있었다.
+### 4. 다국어 지원
 
-> 다행인거지
+기존에는 name_en, name_kr 식으로 컬럼을 지정해줬었는데, jsonb로 컬럼을 수정하고 하나로 합쳤다.
+
+name: {en: test, ko: 테스트, テスト }
+
+이렇게 바꾸면서 모든 테이블을 갈아엎고 새로 만들었다.
+
 
 <!--
 pip install 'fastapi[all]'
