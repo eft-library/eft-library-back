@@ -37,6 +37,19 @@ class QuestService:
             return None
 
     @staticmethod
+    def get_all_quest_detail():
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                query = text(QuestUtil.get_all_quest_detail_query())
+                result = s.execute(query)
+                quest_list = [dict(row) for row in result.mappings()]
+                return quest_list
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
     def get_quest_by_id(url_mapping):
         try:
             session = DataBaseConnector.create_session_factory()
@@ -47,6 +60,21 @@ class QuestService:
                 quest = [dict(row) for row in result.mappings()]
 
             return quest[0]
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_quest_by_npc(npc_id):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                query = text(QuestUtil.get_quest_by_npc())
+                param = {"npc_id": npc_id}
+                result = s.execute(query, param)
+                quest_list = [dict(row) for row in result.mappings()]
+
+            return quest_list
         except Exception as e:
             print("오류 발생:", e)
             return None

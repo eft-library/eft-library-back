@@ -21,6 +21,6 @@ class Map(DataBaseConnector.Base):
     order = Column(Integer)
     link = Column(String)
     parent_value = Column(String)
-    mot_image = Column(String)
+    mot_image = Column(JSON)
     map_json = Column(JSON)
     update_time = Column(TIMESTAMP)

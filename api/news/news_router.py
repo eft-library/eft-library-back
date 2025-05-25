@@ -13,3 +13,8 @@ def get_wipe():
     if wipe is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.WIPE_NOT_FOUND)
     return CustomResponse.response(wipe, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/health")
+async def health_check():
+    return CustomResponse.response({"status": "ok"}, HTTPCode.OK, Message.SUCCESS)
