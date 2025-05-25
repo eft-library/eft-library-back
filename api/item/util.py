@@ -50,7 +50,7 @@ class ItemUtil:
         return """
             WITH target_item AS (SELECT *
                                  FROM item_i18n
-                                 WHERE url_mapping = 'mule-stimulant-injector'
+                                 WHERE url_mapping = :url_mapping
                                  limit 1),
             
                  -- 📦 바터 정보
