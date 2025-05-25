@@ -82,51 +82,48 @@ class ItemUtil:
                                                          ON SPLIT_PART(thir.level_id, '-', 1) = thm.id),
             
                  -- 🛠 은신처 제작에 사용되는 정보
-                 filtered_crafts AS (SELECT DISTINCT ON (thc.id) thc.*,
-                                                                 thm.name                as master_name,
-                                                                 thm.id                  as master_id,
-                                                                 elem -> 'item' ->> 'id' AS required_item_id
+                 filtered_crafts AS (SELECT thc.*,
+                                            thm.name                as master_name,
+                                            thm.id                  as master_id,
+                                            elem -> 'item' ->> 'id' AS required_item_id
                                      FROM hideout_crafts_i18n thc
                                               LEFT JOIN LATERAL jsonb_array_elements(thc.req_item) AS elem on True
                                               LEFT JOIN hideout_master_i18n thm ON SPLIT_PART(thc.level_id, '-', 1) = thm.id),
             
                  -- 🎯 퀘스트 보상으로 사용되는 정보
-                 filtered_quests AS (SELECT distinct on (qa.id) qa.id                                           AS quest_id,
-                                                                qa.name,
-                                                                qa.npc_id,
-                                                                qa.url_mapping,
-                                                                tn.name                                         as npc_name,
-                                                                tn.image                                        AS npc_image,
-                                                                jsonb_array_elements(finish_rewards -> 'items') AS reward_elem
+                 filtered_quests AS (SELECT qa.id                                           AS quest_id,
+                                            qa.name,
+                                            qa.npc_id,
+                                            qa.url_mapping,
+                                            tn.name                                         as npc_name,
+                                            tn.image                                        AS npc_image,
+                                            jsonb_array_elements(finish_rewards -> 'items') AS reward_elem
                                      FROM quest_i18n qa
-                                              left join npc_i18n tn on qa.npc_id = tn.id
-                                     WHERE qa.name is not null),
+                                              left join npc_i18n tn on qa.npc_id = tn.id),
             
                  -- ❗ questItem에 포함된 경우 (예: giveQuestItem, findQuestItem)
-                 required_quests_by_quest_item AS (SELECT DISTINCT ON (q.id) q.id     AS quest_id,
-                                                                             q.name,
-                                                                             q.url_mapping,
-                                                                             tn.name  AS npc_name,
-                                                                             tn.image AS npc_image,
-                                                                             obj      AS objective
+                 required_quests_by_quest_item AS (SELECT q.id     AS quest_id,
+                                                          q.name,
+                                                          q.url_mapping,
+                                                          tn.name  AS npc_name,
+                                                          tn.image AS npc_image,
+                                                          obj      AS objective
                                                    FROM quest_i18n q
                                                             LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
                                                             LEFT JOIN npc_i18n tn ON q.npc_id = tn.id
-                                                   WHERE obj ->> 'type' IN ('findQuestItem', 'giveQuestItem')
-                                                     AND q.name IS NOT NULL),
+                                                   WHERE obj ->> 'type' IN ('findQuestItem', 'giveQuestItem')),
             
                  -- ❗ items 배열에 포함된 경우 (예: giveItem, plantItem, findItem)
-                 required_quests_by_items_array AS (SELECT distinct on (q.id) q.id     AS quest_id,
-                                                                              q.name,
-                                                                              q.url_mapping,
-                                                                              tn.name  as npc_name,
-                                                                              tn.image AS npc_image,
-                                                                              obj      AS objective
+                 required_quests_by_items_array AS (SELECT q.id     AS quest_id,
+                                                           q.name,
+                                                           q.url_mapping,
+                                                           tn.name  as npc_name,
+                                                           tn.image AS npc_image,
+                                                           obj      AS objective
                                                     FROM quest_i18n q
                                                              LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
                                                              LEFT JOIN npc_i18n tn on q.npc_id = tn.id
                                                     WHERE obj ->> 'type' IN ('plantItem', 'giveItem', 'findItem')
-                                                      AND q.name is not null
                                                       AND EXISTS (SELECT 1
                                                                   FROM jsonb_array_elements(obj -> 'items') AS item
                                                                   WHERE item ->> 'id' = (SELECT id FROM target_item))),
