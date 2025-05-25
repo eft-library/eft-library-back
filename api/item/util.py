@@ -82,51 +82,75 @@ class ItemUtil:
                                                          ON SPLIT_PART(thir.level_id, '-', 1) = thm.id),
             
                  -- 🛠 은신처 제작에 사용되는 정보
-                 filtered_crafts AS (SELECT DISTINCT ON (thc.id) thc.*,
-                                                                 thm.name                as master_name,
-                                                                 thm.id                  as master_id,
-                                                                 elem -> 'item' ->> 'id' AS required_item_id
+                 filtered_crafts AS (SELECT thc.*,
+                                            thm.name                as master_name,
+                                            thm.id                  as master_id,
+                                            elem -> 'item' ->> 'id' AS required_item_id
                                      FROM hideout_crafts_i18n thc
                                               LEFT JOIN LATERAL jsonb_array_elements(thc.req_item) AS elem on True
                                               LEFT JOIN hideout_master_i18n thm ON SPLIT_PART(thc.level_id, '-', 1) = thm.id),
             
                  -- 🎯 퀘스트 보상으로 사용되는 정보
-                 filtered_quests AS (SELECT distinct on (qa.id) qa.id                                           AS quest_id,
-                                                                qa.name,
-                                                                qa.npc_id,
-                                                                qa.url_mapping,
-                                                                tn.name                                         as npc_name,
-                                                                tn.image                                        AS npc_image,
-                                                                jsonb_array_elements(finish_rewards -> 'items') AS reward_elem
+                 filtered_quests AS (SELECT qa.id                                           AS quest_id,
+                                            qa.name,
+                                            qa.npc_id,
+                                            qa.url_mapping,
+                                            tn.name                                         as npc_name,
+                                            tn.image                                        AS npc_image,
+                                            jsonb_array_elements(finish_rewards -> 'items') AS reward_elem
                                      FROM quest_i18n qa
-                                              left join npc_i18n tn on qa.npc_id = tn.id
-                                     WHERE qa.name is not null),
+                                              left join npc_i18n tn on qa.npc_id = tn.id),
+            
+                 -- 🎯 offer unlock으로 사용되는 정보
+                 filtered_quests_offer_unlock AS (SELECT qa.id AS quest_id,
+                                                         qa.name,
+                                                         qa.npc_id,
+                                                         qa.url_mapping,
+                                                         tn.name as npc_name,
+                                                         tn.image AS npc_image,
+                                                         jsonb_array_elements(finish_rewards -> 'offerUnlock') AS reward_elem
+                                                  FROM quest_i18n qa
+                                                           left join npc_i18n tn on qa.npc_id = tn.id),
+            
+                 -- 🧩 craftUnlock.rewardItems[*].item.id에 포함된 경우 (finish_rewards 안)
+                 filtered_quests_craft_unlock AS (
+                     SELECT qa.id AS quest_id,
+                            qa.name,
+                            qa.npc_id,
+                            qa.url_mapping,
+                            tn.name as npc_name,
+                            tn.image AS npc_image,
+                            reward_item
+                     FROM quest_i18n qa
+                              LEFT JOIN npc_i18n tn ON qa.npc_id = tn.id
+                              LEFT JOIN LATERAL jsonb_array_elements(qa.finish_rewards -> 'craftUnlock') AS craft_unlock ON TRUE
+                              LEFT JOIN LATERAL jsonb_array_elements(craft_unlock -> 'rewardItems') AS reward_item ON TRUE
+                     WHERE reward_item -> 'item' ->> 'id' = (SELECT id FROM target_item)
+                 ),
             
                  -- ❗ questItem에 포함된 경우 (예: giveQuestItem, findQuestItem)
-                 required_quests_by_quest_item AS (SELECT DISTINCT ON (q.id) q.id     AS quest_id,
-                                                                             q.name,
-                                                                             q.url_mapping,
-                                                                             tn.name  AS npc_name,
-                                                                             tn.image AS npc_image,
-                                                                             obj      AS objective
+                 required_quests_by_quest_item AS (SELECT q.id     AS quest_id,
+                                                          q.name,
+                                                          q.url_mapping,
+                                                          tn.name  AS npc_name,
+                                                          tn.image AS npc_image,
+                                                          obj      AS objective
                                                    FROM quest_i18n q
                                                             LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
                                                             LEFT JOIN npc_i18n tn ON q.npc_id = tn.id
-                                                   WHERE obj ->> 'type' IN ('findQuestItem', 'giveQuestItem')
-                                                     AND q.name IS NOT NULL),
+                                                   WHERE obj ->> 'type' IN ('findQuestItem', 'giveQuestItem')),
             
                  -- ❗ items 배열에 포함된 경우 (예: giveItem, plantItem, findItem)
-                 required_quests_by_items_array AS (SELECT distinct on (q.id) q.id     AS quest_id,
-                                                                              q.name,
-                                                                              q.url_mapping,
-                                                                              tn.name  as npc_name,
-                                                                              tn.image AS npc_image,
-                                                                              obj      AS objective
+                 required_quests_by_items_array AS (SELECT q.id     AS quest_id,
+                                                           q.name,
+                                                           q.url_mapping,
+                                                           tn.name  as npc_name,
+                                                           tn.image AS npc_image,
+                                                           obj      AS objective
                                                     FROM quest_i18n q
                                                              LEFT JOIN LATERAL jsonb_array_elements(q.objectives) AS obj ON TRUE
                                                              LEFT JOIN npc_i18n tn on q.npc_id = tn.id
                                                     WHERE obj ->> 'type' IN ('plantItem', 'giveItem', 'findItem')
-                                                      AND q.name is not null
                                                       AND EXISTS (SELECT 1
                                                                   FROM jsonb_array_elements(obj -> 'items') AS item
                                                                   WHERE item ->> 'id' = (SELECT id FROM target_item))),
@@ -207,6 +231,36 @@ class ItemUtil:
                                                               '[]'
                                               ) AS rewarded_by_quests,
             
+                                              -- 퀘스트 보상으로 나오는 정보
+                                              COALESCE(
+                                                              json_agg(
+                                                              DISTINCT jsonb_build_object(
+                                                                      'quest_id', fqon.quest_id,
+                                                                      'name', fqon.name,
+                                                                      'npc_name', fqon.npc_name,
+                                                                      'npc_image', fqon.npc_image,
+                                                                      'url_mapping', fqon.url_mapping,
+                                                                      'reward', fqon.reward_elem
+                                                                       )
+                                                                      ) FILTER (WHERE fqon.quest_id IS NOT NULL),
+                                                              '[]'
+                                              ) AS rewarded_by_quests_offer_unlock,
+            
+                                              -- 퀘스트 craftUnlock의 rewardItems에 포함된 정보
+                                              COALESCE(
+                                                              json_agg(
+                                                              DISTINCT jsonb_build_object(
+                                                                      'quest_id', fqc.quest_id,
+                                                                      'name', fqc.name,
+                                                                      'npc_name', fqc.npc_name,
+                                                                      'npc_image', fqc.npc_image,
+                                                                      'url_mapping', fqc.url_mapping,
+                                                                      'reward', fqc.reward_item
+                                                                       )
+                                                                      ) FILTER (WHERE fqc.quest_id IS NOT NULL),
+                                                              '[]'
+                                              ) AS rewarded_by_quests_craft_unlock,
+            
                                               -- 📌 questItem에 들어 있는 퀘스트
                                               COALESCE(
                                                               json_agg(
@@ -244,8 +298,9 @@ class ItemUtil:
                                                 LEFT JOIN filtered_crafts thc ON thc.required_item_id = ti.id
                                                 LEFT JOIN filtered_barters fb ON fb.reward_item_id = ti.id
                                                 LEFT JOIN filtered_quests fq ON fq.reward_elem -> 'item' ->> 'id' = ti.id
-                                                LEFT JOIN required_quests_by_quest_item rqi
-                                                          ON rqi.objective -> 'questItem' ->> 'id' = ti.id
+                                                LEFT JOIN required_quests_by_quest_item rqi ON rqi.objective -> 'questItem' ->> 'id' = ti.id
+                                                LEFT JOIN filtered_quests_offer_unlock fqon ON fqon.reward_elem -> 'item' ->> 'id' = ti.id
+                                                LEFT JOIN filtered_quests_craft_unlock fqc ON TRUE
                                                 LEFT JOIN required_quests_by_items_array rqa ON TRUE
                                        GROUP BY ti.id, ti.name, ti.name, ti.category, ti.image,
                                                 ti.image_width, ti.image_height, ti.info, ti.update_time, ti.url_mapping)
