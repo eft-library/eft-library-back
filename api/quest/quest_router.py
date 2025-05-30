@@ -114,6 +114,12 @@ def get_quest_by_id(quest_id: str):
         "5c0bdb5286f774166e38eed4",
         "638fcd23dc65553116701d33",
         "625d6ff5ddc94657c21a1625",
+        "1234",
+        "5d24b81486f77439c92d6ba8",
+        "6179afd0bca27a099552e040",
+        "null",
+        "leatherman-multitool",
+        "overseas-trust-part-1",
     }
 
     if quest_id in deprecated_ids:
