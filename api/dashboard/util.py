@@ -34,13 +34,16 @@ class DashboardUtil:
     def getPSQLTimeDistribution():
         return """
             SELECT
-              EXTRACT(HOUR FROM EXECUTE_TIME) AS hour,
-              EXTRACT(MINUTE FROM EXECUTE_TIME) AS minute,
-              COUNT(*) AS request_count
+              TO_CHAR(
+                date_trunc('hour', EXECUTE_TIME) + 
+                INTERVAL '1 minute' * (FLOOR(EXTRACT(MINUTE FROM EXECUTE_TIME) / 15) * 15),
+                'HH24:MI'
+              ) AS time,
+              COUNT(*) AS requests
             FROM USER_FOOTPRINT
             WHERE EXECUTE_TIME BETWEEN :start_date AND :end_date
-            GROUP BY hour, minute
-            ORDER BY hour, minute
+            GROUP BY time
+            ORDER BY time
         """
 
     @staticmethod
