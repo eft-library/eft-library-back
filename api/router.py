@@ -17,6 +17,7 @@ from api.notice import notice_router
 from api.roadmap import roadmap_router
 from api.price import price_router
 from api.planner import planner_router
+from api.dashboard import dashboard_router
 
 api_router = APIRouter()
 
@@ -38,3 +39,4 @@ api_router.include_router(event_router.router, prefix="/event")
 api_router.include_router(patch_notes_router.router, prefix="/patch_notes")
 api_router.include_router(notice_router.router, prefix="/notice")
 api_router.include_router(price_router.router, prefix="/price")
+api_router.include_router(dashboard_router.router, prefix="/dashboard")
