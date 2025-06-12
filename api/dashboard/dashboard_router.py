@@ -9,8 +9,8 @@ from api.constants import Message
 router = APIRouter(tags=["Dashboard"])
 
 
-@router.get("/wipe")
-def get_wipe(
+@router.get("/chart")
+def get_chart(
     start_date: Optional[date] = Query(None), end_date: Optional[date] = Query(None)
 ):
     chart_data = DashboardService.get_chart_data(start_date, end_date)
