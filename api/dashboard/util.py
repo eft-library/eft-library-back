@@ -51,15 +51,15 @@ class DashboardUtil:
     @staticmethod
     def get_psql_user_total_count():
         return """
-            SELECT COUNT(*) AS total_requests
-            FROM USER_FOOTPRINT
+            SELECT COUNT(*) AS user_total_count
+            FROM USER_INFO
         """
 
     @staticmethod
     def get_psql_active_user_count():
         return """
-            SELECT COUNT(*) AS total_requests
-            FROM USER_FOOTPRINT
+            SELECT COUNT(*) AS active_user
+            FROM USER_INFO
             WHERE EXECUTE_TIME BETWEEN :start_date AND :end_date
         """
 
