@@ -28,7 +28,7 @@ class SearchService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                sitemap_list = s.query(Sitemap).all()
+                sitemap_list = s.query(Sitemap).order_by(Sitemap.priority).all()
                 return sitemap_list
         except Exception as e:
             print("오류 발생:", e)
