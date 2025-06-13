@@ -1,7 +1,7 @@
 from sqlalchemy import text
 from database import DataBaseConnector
 from api.dashboard.util import DashboardUtil
-from datetime import date
+from datetime import date, datetime, timedelta
 
 
 class DashboardService:
@@ -39,7 +39,7 @@ class DashboardService:
             return None
 
     @staticmethod
-    def get_fix_data():
+    def get_fix_data(start_date: date, end_date: date):
         """
         총 요청수, 현재 시간 1일 대비 트래픽 양
         1일 기준 서버 상태
@@ -47,4 +47,15 @@ class DashboardService:
         1일간 활성 사용자
         총 사용자
         """
-        pass
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                date_param = {"start_date": start_date, "end_date": end_date}
+                total_request_query = text(DashboardUtil.getPSQLTotalCount())
+                total_request_result = s.execute(total_request_query, date_param)
+                total_request = [dict(row) for row in total_request_result.mappings()]
+
+                return {}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
