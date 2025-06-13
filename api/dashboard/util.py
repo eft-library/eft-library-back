@@ -33,7 +33,7 @@ class DashboardUtil:
                 AND FOOTPRINT_TIME < :end_date
             )
             SELECT 
-              c.request_count AS current_requests,
+              c.request_count AS current_requests
             FROM current_period c
         """
 
