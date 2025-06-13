@@ -74,8 +74,5 @@ class SearchUtil:
             union all
             select '/event/detail/' || id as tkl_link
             from event_i18n
-            union all
-            select '/item/' || url_mapping as tkl_link
-            from item_i18n
             order by tkl_link
                     """
