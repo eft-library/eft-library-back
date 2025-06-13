@@ -1,3 +1,5 @@
+from sqlalchemy import desc
+
 from api.search.models import Search, Sitemap
 from database import DataBaseConnector
 from dotenv import load_dotenv
@@ -28,7 +30,7 @@ class SearchService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                sitemap_list = s.query(Sitemap).order_by(Sitemap.priority).all()
+                sitemap_list = s.query(Sitemap).order_by(desc(Sitemap.priority)).all()
                 return sitemap_list
         except Exception as e:
             print("오류 발생:", e)
