@@ -1,9 +1,6 @@
-from api.search.models import Search
+from api.search.models import Search, Sitemap
 from database import DataBaseConnector
-import os
 from dotenv import load_dotenv
-from sqlalchemy import text
-from api.search.util import SearchUtil
 
 
 class SearchService:
@@ -31,14 +28,8 @@ class SearchService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                query = text(SearchUtil.get_sitemap_query())
-                result = s.execute(query)
-
-                search_list = [os.getenv("SITE_URL")]
-                for row in result:
-                    search_list.append(os.getenv("SITE_URL") + row[0])
-
-                return search_list
+                sitemap_list = s.query(Sitemap).all()
+                return sitemap_list
         except Exception as e:
             print("오류 발생:", e)
             return None

@@ -17,3 +17,17 @@ class Search(DataBaseConnector.Base):
     page_value = Column(INTEGER)
     order = Column(INTEGER)
     update_time = Column(TIMESTAMP)
+
+class Sitemap(DataBaseConnector.Base):
+    """
+    sitemap.xml
+    """
+
+    __tablename__ = "sitemap"
+
+    id = Column(INTEGER, primary_key=True)
+    link = Column(String)
+    priority = Column(INTEGER)
+    change_freq = Column(String)
+    create_date = Column(TIMESTAMP)
+    update_time = Column(TIMESTAMP)
