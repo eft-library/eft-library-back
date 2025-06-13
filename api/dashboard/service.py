@@ -50,9 +50,9 @@ class DashboardService:
                 return {
                     "endpoint": endpoint,
                     "time_distribution": time_distribution,
-                    "active_user": active_user,
-                    "total_user": total_user,
-                    "total_request": total_request
+                    "active_user": active_user[0],
+                    "total_user": total_user[0],
+                    "total_request": total_request[0]
                 }
 
         except Exception as e:
