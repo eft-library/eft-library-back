@@ -41,10 +41,10 @@ class DashboardUtil:
             SELECT 
               c.request_count AS current_requests,
               p.request_count AS previous_requests,
-              CASE 
-                WHEN p.request_count = 0 THEN NULL
-                ELSE ROUND(((c.request_count - p.request_count) * 100.0 / p.request_count), 1)
-              END AS percent_change
+              COALESCE(
+                ROUND(((c.request_count - p.request_count) * 100.0 / NULLIF(p.request_count, 0)), 1),
+                0
+              ) AS percent_change
             FROM current_period c, previous_period p
         """
 
