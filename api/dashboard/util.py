@@ -9,7 +9,7 @@ class DashboardUtil:
     """
 
     @staticmethod
-    def getPSQLTopRequest():
+    def get_psql_top_request():
         return """
             SELECT
               REQUEST,
@@ -17,13 +17,14 @@ class DashboardUtil:
               COUNT(*) AS request_count
             FROM USER_FOOTPRINT
             WHERE EXECUTE_TIME BETWEEN :start_date AND :end_date
+            AND link not like '%health%'    
             GROUP BY REQUEST, LINK
             ORDER BY request_count DESC
             LIMIT 10
         """
 
     @staticmethod
-    def getPSQLTotalCount():
+    def get_psql_total_count():
         return """
             SELECT COUNT(*) AS total_requests
             FROM USER_FOOTPRINT
@@ -31,7 +32,22 @@ class DashboardUtil:
         """
 
     @staticmethod
-    def getPSQLTimeDistribution():
+    def get_psql_user_total_count():
+        return """
+            SELECT COUNT(*) AS total_requests
+            FROM USER_FOOTPRINT
+        """
+
+    @staticmethod
+    def get_psql_active_user_count():
+        return """
+            SELECT COUNT(*) AS total_requests
+            FROM USER_FOOTPRINT
+            WHERE EXECUTE_TIME BETWEEN :start_date AND :end_date
+        """
+
+    @staticmethod
+    def get_psql_time_distribution():
         return """
             SELECT
               TO_CHAR(
@@ -47,7 +63,7 @@ class DashboardUtil:
         """
 
     @staticmethod
-    def getClickHouseTopRequest():
+    def get_clickhouse_top_request():
         return """
             SELECT
               request,
@@ -61,7 +77,7 @@ class DashboardUtil:
         """
 
     @staticmethod
-    def getClickHouseTotalCount():
+    def get_clickhouse_total_count():
         return """
             SELECT COUNT(*) AS total_requests
             FROM prd.user_footprint
@@ -69,7 +85,7 @@ class DashboardUtil:
         """
 
     @staticmethod
-    def getClickHouseTimeDistribution():
+    def get_clickhouse_time_distribution():
         return """
             SELECT
               toHour(execute_time) AS hour,
