@@ -26,9 +26,26 @@ class DashboardUtil:
     @staticmethod
     def get_psql_total_count():
         return """
-            SELECT COUNT(*) AS total_requests
-            FROM USER_FOOTPRINT
-            WHERE EXECUTE_TIME BETWEEN :start_date AND :end_date
+            WITH current_period AS (
+              SELECT COUNT(*) AS request_count
+              FROM USER_FOOTPRINT
+              WHERE FOOTPRINT_TIME >= :start_date
+                AND FOOTPRINT_TIME < :end_date
+            ),
+            previous_period AS (
+              SELECT COUNT(*) AS request_count
+              FROM USER_FOOTPRINT
+              WHERE FOOTPRINT_TIME >= :prev_start_date
+                AND FOOTPRINT_TIME < :prev_end_date
+            )
+            SELECT 
+              c.request_count AS current_requests,
+              p.request_count AS previous_requests,
+              CASE 
+                WHEN p.request_count = 0 THEN NULL
+                ELSE ROUND(((c.request_count - p.request_count) * 100.0 / p.request_count), 1)
+              END AS percent_change
+            FROM current_period c, previous_period p
         """
 
     @staticmethod
