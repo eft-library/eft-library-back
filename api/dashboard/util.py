@@ -31,21 +31,10 @@ class DashboardUtil:
               FROM USER_FOOTPRINT
               WHERE FOOTPRINT_TIME >= :start_date
                 AND FOOTPRINT_TIME < :end_date
-            ),
-            previous_period AS (
-              SELECT COUNT(*) AS request_count
-              FROM USER_FOOTPRINT
-              WHERE FOOTPRINT_TIME >= :prev_start_date
-                AND FOOTPRINT_TIME < :prev_end_date
             )
             SELECT 
               c.request_count AS current_requests,
-              p.request_count AS previous_requests,
-              COALESCE(
-                ROUND(((c.request_count - p.request_count) * 100.0 / NULLIF(p.request_count, 0)), 1),
-                0
-              ) AS percent_change
-            FROM current_period c, previous_period p
+            FROM current_period c
         """
 
     @staticmethod

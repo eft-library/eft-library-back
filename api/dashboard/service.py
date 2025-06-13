@@ -7,10 +7,7 @@ from datetime import date
 class DashboardService:
 
     @staticmethod
-    def get_chart_data(start_date: date,
-                       end_date: date,
-                       prev_start_date: date,
-                       prev_end_date: date):
+    def get_chart_data(start_date: date, end_date: date):
         """
         상위 10개 엔드포인트
         시간대별 요청 분포
@@ -18,10 +15,7 @@ class DashboardService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                date_param = {"start_date": start_date,
-                              "end_date": end_date,
-                              'prev_start_date': prev_start_date,
-                              'prev_end_date': prev_end_date}
+                date_param = {"start_date": start_date, "end_date": end_date}
 
                 endpoint_query = text(DashboardUtil.get_psql_top_request())
                 endpoint_result = s.execute(endpoint_query, date_param)
