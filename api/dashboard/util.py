@@ -60,7 +60,7 @@ class DashboardUtil:
         return """
             SELECT COUNT(*) AS active_user
             FROM USER_INFO
-            WHERE EXECUTE_TIME BETWEEN :start_date AND :end_date
+            WHERE attendance_time BETWEEN :start_date AND :end_date
         """
 
     @staticmethod
