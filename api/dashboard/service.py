@@ -52,7 +52,7 @@ class DashboardService:
                     "active_user": active_user[0],
                     "total_user": total_user[0],
                     "total_request": total_request[0],
-                    "health_check": health_check[0],
+                    "health_check": health_check,
                 }
 
         except Exception as e:
