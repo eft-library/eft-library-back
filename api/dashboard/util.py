@@ -79,9 +79,24 @@ class DashboardUtil:
             ROUND(SUM(CASE WHEN status = 'OK' THEN 1 ELSE 0 END)::numeric / COUNT(*) * 100, 2) AS ok_percentage,
             ROUND(SUM(CASE WHEN status = 'FAIL' THEN 1 ELSE 0 END)::numeric / COUNT(*) * 100, 2) AS fail_percentage
         FROM health_check
-        WHERE checked_time AT TIME ZONE 'Asia/Seoul' BETWEEN :start_date AND :end_date
+        WHERE checked_time BETWEEN (:start_date AT TIME ZONE 'Asia/Seoul') AND (:end_date AT TIME ZONE 'Asia/Seoul')
         GROUP BY service_name
         ORDER BY service_name
+        """
+
+    @staticmethod
+    def get_response_ms():
+        return """
+        SELECT
+            service_name,
+            ROUND(AVG(response_time::DOUBLE PRECISION) * 1000) AS avg_response_ms
+        FROM
+            response_time
+        WHERE
+            checked_time BETWEEN (:start_date AT TIME ZONE 'Asia/Seoul') AND (:end_date AT TIME ZONE 'Asia/Seoul')
+          AND response_time IS NOT NULL
+        GROUP BY
+            service_name
         """
 
     @staticmethod

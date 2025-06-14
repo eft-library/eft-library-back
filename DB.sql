@@ -672,3 +672,14 @@ COMMENT ON COLUMN HEALTH_CHECK.ID IS 'health check 아이디';
 COMMENT ON COLUMN HEALTH_CHECK.service_name IS 'health check 서비스 이름';
 COMMENT ON COLUMN HEALTH_CHECK.status IS 'health check 상태';
 COMMENT ON COLUMN HEALTH_CHECK.checked_time IS 'health check 점검 시간';
+
+CREATE TABLE RESPONSE_TIME (
+    id SERIAL PRIMARY KEY,
+    service_name TEXT,
+    response_ms NUMERIC,
+    checked_time TIMESTAMP NOT NULL DEFAULT NOW()
+);
+COMMENT ON COLUMN RESPONSE_TIME.ID IS '응답 시간 아이디';
+COMMENT ON COLUMN RESPONSE_TIME.service_name IS '응답 시간 서비스 이름';
+COMMENT ON COLUMN RESPONSE_TIME.response_ms IS '응답 시간';
+COMMENT ON COLUMN RESPONSE_TIME.checked_time IS '응답 시간 점검 시간';

@@ -45,6 +45,10 @@ class DashboardService:
                 health_check_result = s.execute(health_check_query, date_param)
                 health_check = [dict(row) for row in health_check_result.mappings()]
 
+                response_time_query = text(DashboardUtil.get_response_ms())
+                response_time_result = s.execute(response_time_query, date_param)
+                response_time = [dict(row) for row in response_time_result.mappings()]
+
 
                 return {
                     "endpoint": endpoint,
@@ -53,6 +57,7 @@ class DashboardService:
                     "total_user": total_user[0],
                     "total_request": total_request[0],
                     "health_check": health_check,
+                    "response_time": response_time
                 }
 
         except Exception as e:
