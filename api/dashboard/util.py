@@ -16,7 +16,7 @@ class DashboardUtil:
               LINK,
               COUNT(*) AS request_count
             FROM USER_FOOTPRINT
-            WHERE EXECUTE_TIME AT TIME ZONE 'Asia/Seoul' BETWEEN :start_date AND :end_date
+            WHERE (EXECUTE_TIME AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
               AND LINK NOT LIKE '%health%'
             GROUP BY REQUEST, LINK
             ORDER BY request_count DESC
@@ -49,7 +49,7 @@ class DashboardUtil:
         return """
             SELECT COUNT(*) AS active_user
             FROM USER_INFO
-            WHERE attendance_time AT TIME ZONE 'Asia/Seoul' BETWEEN :start_date AND :end_date
+            WHERE (attendance_time AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
         """
 
     @staticmethod
@@ -63,7 +63,7 @@ class DashboardUtil:
               ) AS time,
               COUNT(*) AS requests
             FROM USER_FOOTPRINT
-            WHERE EXECUTE_TIME AT TIME ZONE 'Asia/Seoul' BETWEEN :start_date AND :end_date
+            WHERE (EXECUTE_TIME AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
             GROUP BY time
             ORDER BY time
         """
@@ -79,7 +79,7 @@ class DashboardUtil:
             ROUND(SUM(CASE WHEN status = 'OK' THEN 1 ELSE 0 END)::numeric / COUNT(*) * 100, 2) AS ok_percentage,
             ROUND(SUM(CASE WHEN status = 'FAIL' THEN 1 ELSE 0 END)::numeric / COUNT(*) * 100, 2) AS fail_percentage
         FROM health_check
-        WHERE checked_time BETWEEN (:start_date AT TIME ZONE 'Asia/Seoul') AND (:end_date AT TIME ZONE 'Asia/Seoul')
+        WHERE (checked_time AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
         GROUP BY service_name
         ORDER BY service_name
         """
@@ -93,7 +93,7 @@ class DashboardUtil:
         FROM
             response_time
         WHERE
-            checked_time BETWEEN (:start_date AT TIME ZONE 'Asia/Seoul') AND (:end_date AT TIME ZONE 'Asia/Seoul')
+            (checked_time AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
           AND response_ms IS NOT NULL
         GROUP BY
             service_name
