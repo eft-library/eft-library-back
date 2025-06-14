@@ -16,8 +16,8 @@ class DashboardUtil:
               LINK,
               COUNT(*) AS request_count
             FROM USER_FOOTPRINT
-            WHERE EXECUTE_TIME BETWEEN :start_date AND :end_date
-            AND link not like '%health%'    
+            WHERE EXECUTE_TIME AT TIME ZONE 'Asia/Seoul' BETWEEN :start_date AND :end_date
+              AND LINK NOT LIKE '%health%'
             GROUP BY REQUEST, LINK
             ORDER BY request_count DESC
             LIMIT 10
@@ -29,8 +29,8 @@ class DashboardUtil:
             WITH current_period AS (
               SELECT COUNT(*) AS request_count
               FROM USER_FOOTPRINT
-              WHERE FOOTPRINT_TIME >= :start_date
-                AND FOOTPRINT_TIME < :end_date
+              WHERE FOOTPRINT_TIME AT TIME ZONE 'Asia/Seoul' >= :start_date
+                AND FOOTPRINT_TIME AT TIME ZONE 'Asia/Seoul' < :end_date
             )
             SELECT 
               c.request_count AS current_requests
@@ -49,7 +49,7 @@ class DashboardUtil:
         return """
             SELECT COUNT(*) AS active_user
             FROM USER_INFO
-            WHERE attendance_time BETWEEN :start_date AND :end_date
+            WHERE attendance_time AT TIME ZONE 'Asia/Seoul' BETWEEN :start_date AND :end_date
         """
 
     @staticmethod
@@ -57,13 +57,13 @@ class DashboardUtil:
         return """
             SELECT
               TO_CHAR(
-                date_trunc('hour', EXECUTE_TIME) + 
-                INTERVAL '1 minute' * (FLOOR(EXTRACT(MINUTE FROM EXECUTE_TIME) / 15) * 15),
+                date_trunc('hour', EXECUTE_TIME AT TIME ZONE 'Asia/Seoul') + 
+                INTERVAL '1 minute' * (FLOOR(EXTRACT(MINUTE FROM EXECUTE_TIME AT TIME ZONE 'Asia/Seoul') / 15) * 15),
                 'HH24:MI'
               ) AS time,
               COUNT(*) AS requests
             FROM USER_FOOTPRINT
-            WHERE EXECUTE_TIME BETWEEN :start_date AND :end_date
+            WHERE EXECUTE_TIME AT TIME ZONE 'Asia/Seoul' BETWEEN :start_date AND :end_date
             GROUP BY time
             ORDER BY time
         """
