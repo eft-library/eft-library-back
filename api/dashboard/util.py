@@ -89,12 +89,12 @@ class DashboardUtil:
         return """
         SELECT
             service_name,
-            ROUND(AVG(response_time::DOUBLE PRECISION) * 1000) AS avg_response_ms
+            ROUND(AVG(response_ms::DOUBLE PRECISION) * 1000) AS avg_response_ms
         FROM
             response_time
         WHERE
             checked_time BETWEEN (:start_date AT TIME ZONE 'Asia/Seoul') AND (:end_date AT TIME ZONE 'Asia/Seoul')
-          AND response_time IS NOT NULL
+          AND response_ms IS NOT NULL
         GROUP BY
             service_name
         """
