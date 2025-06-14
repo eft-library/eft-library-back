@@ -41,12 +41,18 @@ class DashboardService:
                 active_user_result = s.execute(active_user_query, date_param)
                 active_user = [dict(row) for row in active_user_result.mappings()]
 
+                health_check_query = text(DashboardUtil.get_psql_health_check())
+                health_check_result = s.execute(health_check_query, date_param)
+                health_check = [dict(row) for row in health_check_result.mappings()]
+
+
                 return {
                     "endpoint": endpoint,
                     "time_distribution": time_distribution,
                     "active_user": active_user[0],
                     "total_user": total_user[0],
-                    "total_request": total_request[0]
+                    "total_request": total_request[0],
+                    "health_check": health_check[0],
                 }
 
         except Exception as e:

@@ -69,6 +69,22 @@ class DashboardUtil:
         """
 
     @staticmethod
+    def get_psql_health_check():
+        return """
+        SELECT
+            service_name,
+            COUNT(*) AS total,
+            SUM(CASE WHEN status = 'OK' THEN 1 ELSE 0 END) AS ok_count,
+            SUM(CASE WHEN status = 'FAIL' THEN 1 ELSE 0 END) AS fail_count,
+            ROUND(SUM(CASE WHEN status = 'OK' THEN 1 ELSE 0 END)::numeric / COUNT(*) * 100, 2) AS ok_percentage,
+            ROUND(SUM(CASE WHEN status = 'FAIL' THEN 1 ELSE 0 END)::numeric / COUNT(*) * 100, 2) AS fail_percentage
+        FROM health_check
+        WHERE checked_time AT TIME ZONE 'Asia/Seoul' BETWEEN :start_date AND :end_date
+        GROUP BY service_name
+        ORDER BY service_name
+        """
+
+    @staticmethod
     def get_clickhouse_top_request():
         return """
             SELECT

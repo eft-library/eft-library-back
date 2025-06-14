@@ -661,3 +661,14 @@ COMMENT ON COLUMN SITEMAP.PRIORITY IS 'sitemap 우선순위';
 COMMENT ON COLUMN SITEMAP.CHANGE_FREQ IS 'sitemap 업데이트 주기';
 COMMENT ON COLUMN SITEMAP.CREATE_DATE IS 'sitemap 생성일';
 COMMENT ON COLUMN SITEMAP.UPDATE_TIME IS 'sitemap 업데이트 날짜';
+
+CREATE TABLE HEALTH_CHECK (
+    id SERIAL PRIMARY KEY,
+    service_name TEXT,
+    status TEXT,
+    checked_time TIMESTAMP NOT NULL DEFAULT NOW()
+);
+COMMENT ON COLUMN HEALTH_CHECK.ID IS 'health check 아이디';
+COMMENT ON COLUMN HEALTH_CHECK.service_name IS 'health check 서비스 이름';
+COMMENT ON COLUMN HEALTH_CHECK.status IS 'health check 상태';
+COMMENT ON COLUMN HEALTH_CHECK.checked_time IS 'health check 점검 시간';
