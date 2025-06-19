@@ -1,4 +1,14 @@
-from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, ARRAY, TEXT, BOOLEAN
+from sqlalchemy import (
+    Column,
+    String,
+    JSON,
+    Integer,
+    TIMESTAMP,
+    ARRAY,
+    TEXT,
+    BOOLEAN,
+    NUMERIC,
+)
 
 from database import DataBaseConnector
 
@@ -54,3 +64,4 @@ class WhereAmI(DataBaseConnector.Base):
     image = Column(TEXT)
     map_bounds = Column(JSON)
     image_bounds = Column(JSON)
+    default_zoom_level = Column(NUMERIC)
