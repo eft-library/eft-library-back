@@ -103,12 +103,13 @@ class DashboardUtil:
     def get_clickhouse_top_request():
         return """
             SELECT
-              request,
-              link,
+              REQUEST,
+              LINK,
               COUNT(*) AS request_count
-            FROM prd.user_footprint
-            WHERE execute_time BETWEEN {start_date} AND {end_date}
-            GROUP BY request, link
+            FROM USER_FOOTPRINT
+            WHERE toTimeZone(EXECUTE_TIME, 'Asia/Seoul') BETWEEN :start_date AND :end_date
+              AND LINK NOT LIKE '%health%'
+            GROUP BY REQUEST, LINK
             ORDER BY request_count DESC
             LIMIT 10
         """
@@ -116,20 +117,22 @@ class DashboardUtil:
     @staticmethod
     def get_clickhouse_total_count():
         return """
-            SELECT COUNT(*) AS total_requests
-            FROM prd.user_footprint
-            WHERE execute_time BETWEEN {start_date} AND {end_date}
+            SELECT COUNT(*) AS user_total_count
+            FROM USER_INFO
         """
 
     @staticmethod
     def get_clickhouse_time_distribution():
         return """
             SELECT
-              toHour(execute_time) AS hour,
-              toMinute(execute_time) AS minute,
-              COUNT(*) AS request_count
-            FROM prd.user_footprint
-            WHERE execute_time BETWEEN {start_date} AND {end_date}
-            GROUP BY hour, minute
-            ORDER BY hour, minute
+              formatDateTime(
+                toStartOfHour(toTimeZone(EXECUTE_TIME, 'Asia/Seoul')) +
+                INTERVAL intDiv(minute(toTimeZone(EXECUTE_TIME, 'Asia/Seoul')), 15) * 15 MINUTE,
+                '%H:%M'
+              ) AS time,
+              COUNT(*) AS requests
+            FROM USER_FOOTPRINT
+            WHERE toTimeZone(EXECUTE_TIME, 'Asia/Seoul') BETWEEN :start_date AND :end_date
+            GROUP BY time
+            ORDER BY time
         """
