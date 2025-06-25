@@ -1,39 +1,50 @@
 #!/bin/bash
 
+# 가상환경 활성화
 . venv/bin/activate
 
-# 포트 번호를 첫 번째 인수로 받아옴
-port=9022
+# 기본 포트
+DEFAULT_PORT=9022
 
-# 해당 포트를 사용 중인 프로세스의 PID를 찾아서 변수에 저장
-pid=$(netstat -tnlp | grep ":$port\b" | awk '{print $7}' | cut -d'/' -f1)
+# 인자 처리
+ACTION=$1
+PORT=${2:-$DEFAULT_PORT}  # 두 번째 인자가 없으면 기본값 사용
 
-# PID가 비어있는지 확인하고, 비어있지 않으면 프로세스를 종료
-if [ -n "$pid" ]; then
-  echo "포트 $port를 사용 중인 프로세스의 PID: $pid"
-  echo "프로세스를 종료합니다."
-  kill -9 "$pid"
-else
-  echo "포트 $port를 사용 중인 프로세스가 없습니다."
-fi
+# 프로세스 종료 함수
+stop_server() {
+  pid=$(netstat -tnlp 2>/dev/null | grep ":$PORT\b" | awk '{print $7}' | cut -d'/' -f1)
+  if [ -n "$pid" ]; then
+    echo "포트 $PORT를 사용 중인 프로세스(PID: $pid)를 종료합니다."
+    kill -9 "$pid"
+    sleep 1
+  else
+    echo "포트 $PORT를 사용 중인 프로세스가 없습니다."
+  fi
+}
 
-sleep 1
+# 서버 시작 함수
+start_server() {
+  echo "FastAPI 서버를 포트 $PORT에서 실행합니다."
+  nohup uvicorn main:app --reload --host=0.0.0.0 --port=$PORT > log.out 2>&1 &
+}
 
-piid=$(netstat -tnlp | grep ":$port\b" | awk '{print $7}' | cut -d'/' -f1)
+# 명령 분기
+case "$ACTION" in
+  start)
+    start_server
+    ;;
+  stop)
+    stop_server
+    ;;
+  restart)
+    stop_server
+    start_server
+    ;;
+  *)
+    echo "사용법: $0 {start|stop|restart} [포트번호]"
+    exit 1
+    ;;
+esac
 
-# PID가 비어있는지 확인하고, 비어있지 않으면 프로세스를 종료
-if [ -n "$piid" ]; then
-  echo "포트 $port를 사용 중인 프로세스의 PID: $piid"
-  echo "프로세스를 종료합니다."
-  kill -9 "$piid"
-else
-  echo "포트 $port를 사용 중인 프로세스가 없습니다."
-fi
-
-sleep 1
-
-nohup uvicorn main:app --reload --host=0.0.0.0 --port=9022 > log.out 2>&1 &
-
-echo "fastAPI를 실행합니다."
-
+# 가상환경 비활성화
 deactivate
