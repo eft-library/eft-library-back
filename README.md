@@ -76,5 +76,5 @@ pip install psycopg2-binary
 pip install requests
 pip install pytz
 pip install confluent-kafka
-uvicorn main:app --reload 
+pip install tzdata
 -->
