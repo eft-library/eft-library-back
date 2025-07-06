@@ -18,11 +18,13 @@ from api.price import price_router
 from api.planner import planner_router
 from api.dashboard import dashboard_router
 from api.home import home_router
+from api.menu import menu_router
 
 api_router = APIRouter()
 
 api_router.include_router(map_router.router, prefix="/map")
 api_router.include_router(news_router.router, prefix="/news")
+api_router.include_router(menu_router.router, prefix="/menu")
 api_router.include_router(home_router.router, prefix="/home")
 api_router.include_router(quest_router.router, prefix="/quest")
 api_router.include_router(boss_router.router, prefix="/boss")
