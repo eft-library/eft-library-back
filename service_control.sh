@@ -60,9 +60,9 @@ manage_minio() {
 manage_airflow() {
   echo "🔧 Airflow: $ACTION"
   if [ "$ACTION" = "stop" ]; then
-    docker stop 861824de8429
+    docker stop cafe0dbf82c1
   else
-    docker start 861824de8429
+    docker start cafe0dbf82c1
     docker exec -d airflow airflow scheduler
   fi
 }
@@ -71,9 +71,9 @@ manage_airflow() {
 manage_nginx_proxy() {
   echo "🔧 Nginx Proxy Manager: $ACTION"
   if [ "$ACTION" = "stop" ]; then
-    docker stop e3cb3207c648
+    docker stop 1105d1a9241d
   else
-    docker start e3cb3207c648
+    docker start 1105d1a9241d
   fi
 }
 
