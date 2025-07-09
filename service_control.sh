@@ -71,23 +71,23 @@ manage_airflow() {
 manage_nginx_proxy() {
   echo "🔧 Nginx Proxy Manager: $ACTION"
   if [ "$ACTION" = "stop" ]; then
-    docker stop 44b959f4357e
+    docker stop e3cb3207c648
   else
-    docker start 44b959f4357e
+    docker start e3cb3207c648
   fi
 }
 
 # ▶️ 모든 서비스 실행
 main() {
   echo "===== [$ACTION] 모든 서비스 제어 시작 ====="
-  manage_nextjs
-  manage_fastapi
-  manage_kafka
+  manage_nginx_proxy
   manage_clickhouse
   manage_postgresql
+  manage_kafka
   manage_minio
+  manage_fastapi
+  manage_nextjs
   manage_airflow
-  manage_nginx_proxy
   echo "===== [$ACTION] 모든 서비스 제어 완료 ====="
 }
 
