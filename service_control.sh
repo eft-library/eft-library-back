@@ -60,9 +60,9 @@ manage_minio() {
 manage_airflow() {
   echo "🔧 Airflow: $ACTION"
   if [ "$ACTION" = "stop" ]; then
-    docker stop 861824de8429
+    docker stop cafe0dbf82c1
   else
-    docker start 861824de8429
+    docker start cafe0dbf82c1
     docker exec -d airflow airflow scheduler
   fi
 }
@@ -71,23 +71,23 @@ manage_airflow() {
 manage_nginx_proxy() {
   echo "🔧 Nginx Proxy Manager: $ACTION"
   if [ "$ACTION" = "stop" ]; then
-    docker stop 44b959f4357e
+    docker stop 1105d1a9241d
   else
-    docker start 44b959f4357e
+    docker start 1105d1a9241d
   fi
 }
 
 # ▶️ 모든 서비스 실행
 main() {
   echo "===== [$ACTION] 모든 서비스 제어 시작 ====="
-  manage_nextjs
-  manage_fastapi
-  manage_kafka
+  manage_nginx_proxy
   manage_clickhouse
   manage_postgresql
+  manage_kafka
   manage_minio
+  manage_fastapi
+  manage_nextjs
   manage_airflow
-  manage_nginx_proxy
   echo "===== [$ACTION] 모든 서비스 제어 완료 ====="
 }
 

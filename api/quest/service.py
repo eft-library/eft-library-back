@@ -78,3 +78,27 @@ class QuestService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_quest_with_trader(trader_id):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                info = {}
+                query = text(QuestUtil.get_quest_by_npc())
+                param = {"npc_id": trader_id}
+                quest_list = s.execute(query, param)
+                npc_list = (
+                    s.query(NPC.id, NPC.name, NPC.image).order_by(NPC.order).all()
+                )
+                info['quest_list'] = [dict(row) for row in quest_list.mappings()]
+                info['trader_list'] =[
+                    {"id": id_, "name": name, "image": image}
+                    for id_, name, image in npc_list
+                ]
+
+
+            return info
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
