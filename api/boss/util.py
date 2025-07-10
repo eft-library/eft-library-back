@@ -9,6 +9,7 @@ class BossUtil:
                 b.image,
                 b.health_total,
                 b.item_info,
+                b.health_detail,
                 b.spawn_chance,
                 b.spawn_map,
                 b.health_image,

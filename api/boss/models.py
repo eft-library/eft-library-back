@@ -17,6 +17,7 @@ class Boss(DataBaseConnector.Base):
     health_total = Column(Integer)
     health_image = Column(TEXT)
     item_info = Column(JSON)
+    health_detail = Column(JSON)
     spawn_chance = Column(JSON)
     spawn_map = Column(ARRAY(TEXT))
     location_guide = Column(JSON)
