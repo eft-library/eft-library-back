@@ -308,6 +308,21 @@ class ItemService:
             return None
 
     @staticmethod
+    def get_weapon_list_new():
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                weapon_list = (
+                    s.query(Item)
+                    .filter(Item.category.in_(["Gun", "Knife", "Throwable"]))
+                    .all()
+                )
+            return weapon_list
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
     def get_headwear_list():
         """
         headwear 전체 조회
