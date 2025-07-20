@@ -31,6 +31,7 @@ class QuestUtil:
                    qi.npc_id,
                    qi.url_mapping,
                    qi.name,
+                   ni.name  as npc_name,
                    qi.kappa_required,
                    qi.objectives,
                    qi.finish_rewards,
