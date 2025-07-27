@@ -17,11 +17,21 @@ class BossUtil:
                 b."order",
                 b.update_time,
                 b.url_mapping,
-                jsonb_agg(c.* ORDER BY c.is_boss DESC, c.id) FILTER (WHERE c.id IS NOT NULL) AS children
+                (
+                    SELECT jsonb_agg(entry ORDER BY entry.is_boss DESC, entry.id)
+                    FROM (
+                             -- 자식들
+                             SELECT c.*
+                             FROM boss_i18n c
+                             WHERE c.parent_id = b.id
+            
+                             UNION ALL
+            
+                             -- 자기 자신
+                             SELECT b.*
+                         ) AS entry
+                ) AS children
             FROM boss_i18n b
-                     LEFT JOIN boss_i18n c
-                               ON c.parent_id = b.id
             WHERE b.is_boss = true
-              and b.url_mapping = :url_mapping
-            GROUP BY b.id
+              AND b.url_mapping = :url_mapping;
         """
