@@ -17,11 +17,11 @@ class BossUtil:
                 b."order",
                 b.update_time,
                 b.url_mapping,
-                jsonb_agg(c.*) FILTER (WHERE c.id IS NOT NULL) AS children
+                jsonb_agg(c.* ORDER BY c.is_boss DESC, c.id) FILTER (WHERE c.id IS NOT NULL) AS children
             FROM boss_i18n b
-            LEFT JOIN boss_i18n c
-                ON c.parent_id = b.id
+                     LEFT JOIN boss_i18n c
+                               ON c.parent_id = b.id
             WHERE b.is_boss = true
-            and b.url_mapping = :url_mapping
-            GROUP BY b.id;
+              and b.url_mapping = :url_mapping
+            GROUP BY b.id
         """
