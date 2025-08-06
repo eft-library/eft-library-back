@@ -25,6 +25,7 @@ minio_client = Minio(
 )
 
 bucket_name = "eftlibrary"
+folder_name = "tkl_community/posts_image"
 
 
 @router.post("/community/upload_image")
@@ -33,7 +34,7 @@ async def upload_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="이미지 파일만 업로드 가능합니다.")
 
     timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
-    object_name = f"{timestamp}_{file.filename.replace(' ', '_')}"
+    object_name = f"{folder_name}/{timestamp}_{file.filename.replace(' ', '_')}"
 
     try:
         # 업로드를 위해 파일 내용을 바이트로 읽기
