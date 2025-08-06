@@ -31,3 +31,4 @@ class Message(Enum):
     GET_ROADMAP_FAIL = "Get Roadmap fail"
     ROADMAP_SAVE_FAIL = "Roadmap save fail"
     STATION_SAVE_FAIL = "Station save fail"
+    IMAGE_UPLOAD_FAIL = "Image upload fail"
