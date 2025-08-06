@@ -687,3 +687,50 @@ COMMENT ON COLUMN RESPONSE_TIME.ID IS '응답 시간 아이디';
 COMMENT ON COLUMN RESPONSE_TIME.service_name IS '응답 시간 서비스 이름';
 COMMENT ON COLUMN RESPONSE_TIME.response_ms IS '응답 시간';
 COMMENT ON COLUMN RESPONSE_TIME.checked_time IS '응답 시간 점검 시간';
+
+CREATE TABLE COMMUNITY_POSTS (
+    id BIGINT PRIMARY KEY,
+    slug TEXT,
+    user_email TEXT,
+    category TEXT,
+    title TEXT,
+    contents TEXT,
+    thumbnail TEXT,
+    delete_by_user BOOLEAN NOT NULL DEFAULT FALSE,
+    delete_by_admin BOOLEAN NOT NULL DEFAULT FALSE,
+    create_time TIMESTAMP NOT NULL DEFAULT NOW(),
+    update_time TIMESTAMP NOT NULL DEFAULT NOW()
+);
+COMMENT ON COLUMN COMMUNITY_POSTS.ID IS '게시글 snoflake 아이디';
+COMMENT ON COLUMN COMMUNITY_POSTS.SLUG IS '게시글 slug';
+COMMENT ON COLUMN COMMUNITY_POSTS.USER_EMAIL IS '게시글 사용자 이메일';
+COMMENT ON COLUMN COMMUNITY_POSTS.CATEGORY IS '게시글 카테고리';
+COMMENT ON COLUMN COMMUNITY_POSTS.TITLE IS '게시글 제목';
+COMMENT ON COLUMN COMMUNITY_POSTS.CONTENTS IS '게시글 내용';
+COMMENT ON COLUMN COMMUNITY_POSTS.THUMBNAIL IS '게시글 미리보기 사진';
+COMMENT ON COLUMN COMMUNITY_POSTS.DELETE_BY_USER IS '게시글 유저 삭제 여부';
+COMMENT ON COLUMN COMMUNITY_POSTS.DELETE_BY_ADMIN IS '게시글 관리자 삭제 여부';
+COMMENT ON COLUMN COMMUNITY_POSTS.CREATE_TIME IS '게시글 생성 시간';
+COMMENT ON COLUMN COMMUNITY_POSTS.UPDATE_TIME IS '게시글 업데이트 시간';
+
+CREATE TABLE community_post_views (
+    post_id BIGINT PRIMARY KEY,
+    view_count BIGINT NOT NULL DEFAULT 0
+);
+COMMENT ON COLUMN community_post_views.post_id IS '게시글 snoflake 아이디';
+COMMENT ON COLUMN community_post_views.view_count IS '게시글 조회수';
+
+CREATE TABLE community_post_reactions (
+    post_id BIGINT NOT NULL,
+    user_email BIGINT NOT NULL,
+    reaction_type SMALLINT NOT NULL,
+    update_time TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (post_id, user_email)
+);
+COMMENT ON COLUMN community_post_reactions.post_id IS '게시글 snoflake 아이디';
+COMMENT ON COLUMN community_post_reactions.user_email IS '리액션 누른 사용자 이메일';
+COMMENT ON COLUMN community_post_reactions.reaction_type IS '리액션 종류 (1: 좋아요, 2: 싫어요)';
+COMMENT ON COLUMN community_post_reactions.update_time IS '게시글 snoflake 아이디';
+
+-- 조회 성능을 위한 인덱스
+CREATE INDEX idx_post_reactions_post ON community_post_reactions(post_id);
