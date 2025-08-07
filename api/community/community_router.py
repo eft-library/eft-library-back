@@ -9,19 +9,19 @@ from util.constants import HTTPCode
 from api.constants import Message
 import os
 from datetime import datetime
+from PIL import Image  # ✅ 추가
 
 load_dotenv()
 
 router = APIRouter(tags=["Roadmap"])
 
-# JWT를 헤더에서 추출하는 의존성 함수
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 minio_client = Minio(
-    os.getenv("MINIO_ENDPOINT"),  # MinIO 서버 주소
+    os.getenv("MINIO_ENDPOINT").replace("http://", "").replace("https://", ""),
     access_key=os.getenv("MINIO_ACCESS_KEY"),
     secret_key=os.getenv("MINIO_SECRET_KEY"),
-    secure=False,  # https 사용 시 True
+    secure=False,
 )
 
 bucket_name = "eftlibrary"
@@ -34,23 +34,39 @@ async def upload_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="이미지 파일만 업로드 가능합니다.")
 
     timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
-    object_name = f"{folder_name}/{timestamp}_{file.filename.replace(' ', '_')}"
+    filename_wo_ext = os.path.splitext(file.filename.replace(" ", "_"))[0]
+    object_name = (
+        f"{folder_name}/{timestamp}_{filename_wo_ext}.webp"  # ✅ .webp 확장자로 저장
+    )
 
     try:
-        # 업로드를 위해 파일 내용을 바이트로 읽기
-        data = await file.read()
-        # MinIO에 업로드
+        # 1. 이미지 열기 (UploadFile -> PIL Image)
+        image = Image.open(file.file)
+
+        # 2. 리사이징 (선택적): 너무 큰 이미지 줄이기
+        max_size = (1200, 1200)
+        image.thumbnail(max_size)
+
+        # 3. WebP로 저장
+        buffer = io.BytesIO()
+        image.save(buffer, format="WEBP", quality=80, method=6)  # ✅ 압축률 조정
+        buffer.seek(0)
+
+        # 4. MinIO에 업로드
         minio_client.put_object(
             bucket_name,
             object_name,
-            data=io.BytesIO(data),
-            length=len(data),
-            content_type=file.content_type,
+            data=buffer,
+            length=buffer.getbuffer().nbytes,
+            content_type="image/webp",
         )
+
     except S3Error as e:
         raise HTTPException(status_code=500, detail=f"MinIO 업로드 실패: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"이미지 처리 실패: {e}")
 
-    # 공개 접근 가능한 URL 생성 (MinIO 설정에 따라 다름)
+    # 공개 접근 가능한 URL 생성
     url = f"https://image.eftlibrary.com/{bucket_name}/{object_name}"
 
     result = {"image_url": url}
