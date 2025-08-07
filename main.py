@@ -21,6 +21,16 @@ from zoneinfo import ZoneInfo
 import json
 
 
+# CORS 미들웨어 추가
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 @app.middleware("http")
 async def kafka_producer_middleware(request: Request, call_next):
     # 기존 Kafka 메시지 생산 로직
@@ -36,10 +46,13 @@ async def kafka_producer_middleware(request: Request, call_next):
 
     # 요청 처리 후 응답 가져오기
     response = await call_next(request)
+    print("Headers before delete:", response.headers)
 
     # iframe 허용을 위해 x-frame-options 헤더 제거 또는 변경
     if "x-frame-options" in response.headers:
         del response.headers["x-frame-options"]
+    if "X-Frame-Options" in response.headers:
+        del response.headers["X-Frame-Options"]
 
     return response
 
@@ -53,15 +66,6 @@ async def custom_swagger_ui_html():
 
 
 app.include_router(api_router, prefix=os.getenv("API_PREFIX"))
-
-# CORS 미들웨어 추가
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 if __name__ == "__main__":
