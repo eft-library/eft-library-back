@@ -70,5 +70,5 @@ async def upload_image(file: UploadFile = File(...)):
     url = f"https://image.eftlibrary.com/{bucket_name}/{object_name}"
 
     result = {"image_url": url}
-    print(result)
+
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
