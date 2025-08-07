@@ -13,7 +13,7 @@ from PIL import Image  # ✅ 추가
 
 load_dotenv()
 
-router = APIRouter(tags=["Roadmap"])
+router = APIRouter(tags=["Community"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
