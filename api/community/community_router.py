@@ -28,7 +28,7 @@ bucket_name = "eftlibrary"
 folder_name = "tkl_community/posts_image"
 
 
-@router.post("/community/upload_image")
+@router.post("/upload_image")
 async def upload_image(file: UploadFile = File(...)):
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="이미지 파일만 업로드 가능합니다.")
