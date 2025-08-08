@@ -46,7 +46,6 @@ async def kafka_producer_middleware(request: Request, call_next):
 
     # 요청 처리 후 응답 가져오기
     response = await call_next(request)
-    print("Headers before delete:", response.headers)
 
     # iframe 허용을 위해 x-frame-options 헤더 제거 또는 변경
     if "x-frame-options" in response.headers:
