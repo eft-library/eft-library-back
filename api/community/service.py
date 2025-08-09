@@ -98,7 +98,6 @@ class CommunityService:
 
                 # 리턴은 snowflake-slug
                 return {"url": f"{new_id}-{slug}"}
-            pass
         except Exception as e:
             print("오류 발생:", e)
             return None
