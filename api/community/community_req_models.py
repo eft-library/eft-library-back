@@ -3,7 +3,6 @@ from pydantic import BaseModel
 class CreateCommunity(BaseModel):
     title: str
     category: str
-    user_email: str
     contents: str
 
 class UpdateCommunity(CreateCommunity):
@@ -14,5 +13,4 @@ class ViewCount(BaseModel):
 
 class PostReaction(BaseModel):
     post_id: int
-    user_email: str
     reaction_type: str

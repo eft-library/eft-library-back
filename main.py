@@ -2,24 +2,18 @@ import json
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from datetime import datetime
-from zoneinfo import ZoneInfo
 import os
 from api.router import api_router
 from fastapi.openapi.docs import get_swagger_ui_html
 from kafka_producer import produce_message
 from fastapi import FastAPI, Request
-
-load_dotenv()
-
-app = FastAPI(title="eft-library-back")
-
-
-from fastapi import Request
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import json
 
+load_dotenv()
+
+app = FastAPI(title="eft-library-back")
 
 # CORS 미들웨어 추가
 app.add_middleware(

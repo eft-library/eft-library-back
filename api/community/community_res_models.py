@@ -28,7 +28,7 @@ class CommunityPostsReactions(DataBaseConnector.Base):
 
 class CommunityPostsView(DataBaseConnector.Base):
 
-    __tablename__ = "community_posts_view"
+    __tablename__ = "community_posts_views"
 
     post_id = Column(BIGINT, primary_key=True)
     view_count = Column(BIGINT)

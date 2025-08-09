@@ -88,11 +88,15 @@ class CommunityService:
                     title=post_info.title,
                     contents=post_info.contents,
                     thumbnail=thumbnail,
+                    delete_by_user=False,
+                    delete_by_admin=False,
+                    create_time=datetime.now(),
+                    update_time=datetime.now()
                 )
                 s.add(new_post)
 
                 # view count 1 생성
-                new_view_count = ViewCount(id=new_id, user_id=user_email)
+                new_view_count = CommunityPostsView(post_id=new_id, view_count=1)
                 s.add(new_view_count)
                 s.commit()
 
