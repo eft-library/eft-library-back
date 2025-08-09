@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, String, JSON, Integer, TIMESTAMP
 
 from database import DataBaseConnector
 

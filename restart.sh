@@ -25,7 +25,7 @@ stop_server() {
 # 서버 시작 함수
 start_server() {
   echo "FastAPI 서버를 포트 $PORT에서 실행합니다."
-  nohup uvicorn main:app --reload --host=0.0.0.0 --port=$PORT > log.out 2>&1 &
+  nohup gunicorn main:app -k uvicorn.workers.UvicornWorker --workers 4 --bind 0.0.0.0:$PORT > log.out 2>&1 &
 }
 
 # 명령 분기

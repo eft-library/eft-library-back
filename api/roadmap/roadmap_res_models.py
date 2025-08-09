@@ -1,5 +1,5 @@
 from database import DataBaseConnector
-from sqlalchemy import Column, TIMESTAMP, ARRAY, TEXT, ForeignKey, NUMERIC
+from sqlalchemy import Column, TIMESTAMP, ARRAY, TEXT, NUMERIC
 
 
 class UserRoadmap(DataBaseConnector.Base):

@@ -734,3 +734,10 @@ COMMENT ON COLUMN community_post_reactions.update_time IS '게시글 snoflake �
 
 -- 조회 성능을 위한 인덱스
 CREATE INDEX idx_post_reactions_post ON community_post_reactions(post_id);
+
+CREATE TABLE COMMUNITY_POSTS_HOT_ISSUE (
+    post_id BIGINT PRIMARY KEY,
+    issue_time TIMESTAMP NOT NULL DEFAULT NOW()
+);
+COMMENT ON COLUMN COMMUNITY_POSTS_HOT_ISSUE.post_id IS '게시글 snoflake 아이디';
+COMMENT ON COLUMN COMMUNITY_POSTS_HOT_ISSUE.post_id IS '게시글 핫이슈 시간';
