@@ -30,5 +30,6 @@ class Message(Enum):
     SUCCESS_QUEST_FAIL = "Success quest fail"
     GET_ROADMAP_FAIL = "Get Roadmap fail"
     ROADMAP_SAVE_FAIL = "Roadmap save fail"
+    COMMUNITY_FAIL = "Community fail"
     STATION_SAVE_FAIL = "Station save fail"
     IMAGE_UPLOAD_FAIL = "Image upload fail"
