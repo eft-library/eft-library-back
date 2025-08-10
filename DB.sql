@@ -722,7 +722,7 @@ COMMENT ON COLUMN community_post_views.view_count IS '게시글 조회수';
 
 CREATE TABLE community_post_reactions (
     post_id BIGINT NOT NULL,
-    user_email BIGINT NOT NULL,
+    user_email TEXT NOT NULL,
     reaction_type SMALLINT NOT NULL,
     update_time TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY (post_id, user_email)
