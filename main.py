@@ -25,29 +25,29 @@ app.add_middleware(
 )
 
 
-# @app.middleware("http")
-# async def kafka_producer_middleware(request: Request, call_next):
-#     # 기존 Kafka 메시지 생산 로직
-#     now_kst = datetime.now(ZoneInfo("Asia/Seoul"))
-#     footprint_time = now_kst.isoformat()
-#     data = {
-#         "method": request.method,
-#         "link": request.url.path,
-#         "footprint_time": footprint_time,
-#     }
-#     json_str = json.dumps(data)
-#     produce_message(json_str)
-#
-#     # 요청 처리 후 응답 가져오기
-#     response = await call_next(request)
-#
-#     # iframe 허용을 위해 x-frame-options 헤더 제거 또는 변경
-#     if "x-frame-options" in response.headers:
-#         del response.headers["x-frame-options"]
-#     if "X-Frame-Options" in response.headers:
-#         del response.headers["X-Frame-Options"]
-#
-#     return response
+@app.middleware("http")
+async def kafka_producer_middleware(request: Request, call_next):
+    # 기존 Kafka 메시지 생산 로직
+    now_kst = datetime.now(ZoneInfo("Asia/Seoul"))
+    footprint_time = now_kst.isoformat()
+    data = {
+        "method": request.method,
+        "link": request.url.path,
+        "footprint_time": footprint_time,
+    }
+    json_str = json.dumps(data)
+    produce_message(json_str)
+
+    # 요청 처리 후 응답 가져오기
+    response = await call_next(request)
+
+    # iframe 허용을 위해 x-frame-options 헤더 제거 또는 변경
+    if "x-frame-options" in response.headers:
+        del response.headers["x-frame-options"]
+    if "X-Frame-Options" in response.headers:
+        del response.headers["X-Frame-Options"]
+
+    return response
 
 
 @app.get("/docs")
