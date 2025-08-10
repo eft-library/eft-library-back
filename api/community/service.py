@@ -105,3 +105,27 @@ class CommunityService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_posts(category: str, page_num: int):
+        try:
+            limit = 10
+            offset = (page_num - 1) * limit
+
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                # 메인페이지 역할
+                if category == "issue":
+                    query = s.query(CommunityPosts).join(CommunityPostsHotIssue.post)
+                    query = query.order_by(CommunityPostsHotIssue.issue_time.desc())
+                else:
+                    query = s.query(CommunityPosts).filter(CommunityPosts.category == category)
+                    query = query.order_by(CommunityPosts.create_time.desc())
+
+                total = query.count()
+                posts = query.limit(limit).offset(offset).all()
+
+                return {"total": total, "posts": posts}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None

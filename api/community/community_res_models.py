@@ -1,4 +1,6 @@
-from sqlalchemy import Column, BIGINT, TIMESTAMP, TEXT, Boolean
+from sqlalchemy import Column, BIGINT, TIMESTAMP, TEXT, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
+
 from database import DataBaseConnector
 
 class CommunityPosts(DataBaseConnector.Base):
@@ -16,6 +18,8 @@ class CommunityPosts(DataBaseConnector.Base):
     delete_by_admin = Column(Boolean)
     create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)
+
+    hot_issue = relationship("CommunityPostsHotIssue", back_populates="post")
 
 class CommunityPostsReactions(DataBaseConnector.Base):
 
@@ -37,6 +41,7 @@ class CommunityPostsHotIssue(DataBaseConnector.Base):
 
     __tablename__ = "community_posts_hot_issue"
 
-    post_id = Column(BIGINT, primary_key=True)
+    post_id = Column(BIGINT, ForeignKey("community_posts.id"), primary_key=True)
     issue_time = Column(TIMESTAMP)
+    post = relationship("CommunityPosts", back_populates="hot_issue")
 
