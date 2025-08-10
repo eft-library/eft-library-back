@@ -125,7 +125,20 @@ class CommunityService:
                 total = query.count()
                 posts = query.limit(limit).offset(offset).all()
 
-                return {"total": total, "posts": posts}
+                # 아 괜히 snowflake id 썼나 번거롭네;;;
+                # id / post_id만 문자열로 변환
+                result_posts = []
+                for post in posts:
+                    post_dict = post.__dict__.copy()
+                    # 내부에 _sa_instance_state 같은 SQLAlchemy 내부 속성 제거
+                    post_dict.pop('_sa_instance_state', None)
+
+                    # id 변환
+                    if "id" in post_dict:
+                        post_dict["id"] = str(post_dict["id"])
+                    result_posts.append(post_dict)
+
+                return {"total": total, "posts": result_posts}
         except Exception as e:
             print("오류 발생:", e)
             return None
