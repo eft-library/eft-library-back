@@ -1,6 +1,17 @@
+import math
 from fastapi import UploadFile, File, HTTPException
-from api.community.community_res_models import CommunityPosts, CommunityPostsView, CommunityPostsReactions, CommunityPostsHotIssue
-from api.community.community_req_models import CreateCommunity, UpdateCommunity, ViewCount, PostReaction
+from api.community.community_res_models import (
+    CommunityPosts,
+    CommunityPostsView,
+    CommunityPostsReactions,
+    CommunityPostsHotIssue,
+)
+from api.community.community_req_models import (
+    CreateCommunity,
+    UpdateCommunity,
+    ViewCount,
+    PostReaction,
+)
 from database import DataBaseConnector
 from util.snowflake_id import SnowflakeGenerator
 from slugify import slugify
@@ -26,15 +37,14 @@ minio_client = Minio(
     secure=False,
 )
 
+
 class CommunityService:
 
     @staticmethod
     def upload_image(file: UploadFile = File(...)):
         timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
         filename_wo_ext = os.path.splitext(file.filename.replace(" ", "_"))[0]
-        object_name = (
-            f"{folder_name}/{timestamp}_{filename_wo_ext}.webp"  # ✅ .webp 확장자로 저장
-        )
+        object_name = f"{folder_name}/{timestamp}_{filename_wo_ext}.webp"  # ✅ .webp 확장자로 저장
         try:
             # 1. 이미지 열기 (UploadFile -> PIL Image)
             image = Image.open(file.file)
@@ -91,7 +101,7 @@ class CommunityService:
                     delete_by_user=False,
                     delete_by_admin=False,
                     create_time=datetime.now(),
-                    update_time=datetime.now()
+                    update_time=datetime.now(),
                 )
                 s.add(new_post)
 
@@ -109,7 +119,7 @@ class CommunityService:
     @staticmethod
     def get_posts(category: str, page_num: int, word: str, search_type):
         try:
-            limit = 10
+            limit = 20
             offset = (page_num - 1) * limit
 
             session = DataBaseConnector.create_session_factory()
@@ -122,7 +132,9 @@ class CommunityService:
                     query = s.query(CommunityPosts)
                     query = query.order_by(CommunityPosts.create_time.desc())
                 else:
-                    query = s.query(CommunityPosts).filter(CommunityPosts.category == category)
+                    query = s.query(CommunityPosts).filter(
+                        CommunityPosts.category == category
+                    )
                     query = query.order_by(CommunityPosts.create_time.desc())
 
                 # 검색어 조건 추가
@@ -132,12 +144,13 @@ class CommunityService:
                         query = query.filter(CommunityPosts.title.contains(word))
                     elif search_type == "title_content":
                         query = query.filter(
-                            (CommunityPosts.title.contains(word)) |
-                            (CommunityPosts.contents.contains(word))
+                            (CommunityPosts.title.contains(word))
+                            | (CommunityPosts.contents.contains(word))
                         )
 
                 total = query.count()
                 posts = query.limit(limit).offset(offset).all()
+                max_page_count = math.ceil(total / limit) if total > 0 else 1
 
                 # 아 괜히 snowflake id 썼나 번거롭네;;;
                 # id / post_id만 문자열로 변환
@@ -145,14 +158,18 @@ class CommunityService:
                 for post in posts:
                     post_dict = post.__dict__.copy()
                     # 내부에 _sa_instance_state 같은 SQLAlchemy 내부 속성 제거
-                    post_dict.pop('_sa_instance_state', None)
+                    post_dict.pop("_sa_instance_state", None)
 
                     # id 변환
                     if "id" in post_dict:
                         post_dict["id"] = str(post_dict["id"])
                     result_posts.append(post_dict)
 
-                return {"total": total, "posts": result_posts}
+                return {
+                    "total": total,
+                    "max_page_count": max_page_count,
+                    "posts": result_posts,
+                }
         except Exception as e:
             print("오류 발생:", e)
             return None
