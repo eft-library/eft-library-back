@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from typing import Optional
+
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Query
 from api.response import CustomResponse
 from fastapi.security import OAuth2PasswordBearer
 from api.user.util import UserUtil
@@ -31,8 +33,10 @@ def create_posts(post_info: CreateCommunity, token: str = Depends(oauth2_scheme)
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 @router.get("/{category}")
-def get_posts(category: str, page_num: int):
-    result = CommunityService.get_posts(category, page_num)
+def get_posts(category: str, page_num: int,
+              word: Optional[str] = Query("", description="검색어"),
+              search_type: str = Query("all", regex="^(all|title|comment|title_content)$")):
+    result = CommunityService.get_posts(category, page_num, word, search_type)
     if result:
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:

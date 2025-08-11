@@ -107,7 +107,7 @@ class CommunityService:
             return None
 
     @staticmethod
-    def get_posts(category: str, page_num: int):
+    def get_posts(category: str, page_num: int, word: str, search_type):
         try:
             limit = 10
             offset = (page_num - 1) * limit
@@ -118,9 +118,23 @@ class CommunityService:
                 if category == "issue":
                     query = s.query(CommunityPosts).join(CommunityPostsHotIssue.post)
                     query = query.order_by(CommunityPostsHotIssue.issue_time.desc())
+                elif category == "all":
+                    query = s.query(CommunityPosts)
+                    query = query.order_by(CommunityPosts.create_time.desc())
                 else:
                     query = s.query(CommunityPosts).filter(CommunityPosts.category == category)
                     query = query.order_by(CommunityPosts.create_time.desc())
+
+                # 검색어 조건 추가
+                # 댓글 추가 해야함
+                if word:  # 빈 문자열이면 조건 안 붙음
+                    if search_type == "title":
+                        query = query.filter(CommunityPosts.title.contains(word))
+                    elif search_type == "title_content":
+                        query = query.filter(
+                            (CommunityPosts.title.contains(word)) |
+                            (CommunityPosts.contents.contains(word))
+                        )
 
                 total = query.count()
                 posts = query.limit(limit).offset(offset).all()
