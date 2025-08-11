@@ -1,8 +1,13 @@
 annotated-types==0.7.0
 anyio==4.9.0
+argon2-cffi==25.1.0
+argon2-cffi-bindings==25.1.0
+black==25.1.0
 certifi==2025.4.26
+cffi==1.17.1
 charset-normalizer==3.4.2
 click==8.2.0
+confluent-kafka==2.10.0
 dnspython==2.7.0
 email_validator==2.2.0
 fastapi==0.115.12
@@ -18,8 +23,16 @@ Jinja2==3.1.6
 markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 mdurl==0.1.2
+minio==7.2.16
+mypy_extensions==1.1.0
 orjson==3.10.18
+packaging==25.0
+pathspec==0.12.1
+pillow==11.3.0
+platformdirs==4.3.8
 psycopg2-binary==2.9.10
+pycparser==2.22
+pycryptodome==3.23.0
 pydantic==2.11.4
 pydantic-extra-types==2.10.4
 pydantic-settings==2.9.1
@@ -45,4 +58,3 @@ uvicorn==0.34.2
 uvloop==0.21.0
 watchfiles==1.0.5
 websockets==15.0.1
-minio~=7.2.16
