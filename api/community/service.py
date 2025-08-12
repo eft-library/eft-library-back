@@ -13,6 +13,7 @@ from api.community.community_req_models import (
     ViewCount,
     PostReaction,
 )
+from api.notice.models import Notice
 from database import DataBaseConnector
 from util.snowflake_id import SnowflakeGenerator
 from slugify import slugify
@@ -229,11 +230,14 @@ class CommunityService:
                         post_dict["id"] = str(post_dict["id"])
                     result_issue_posts.append(post_dict)
 
+                notice_posts = s.query(Notice).order_by(Notice.update_time.desc()).limit(5).all()
+
                 return {
                     "total": total,
                     "max_page_count": max_page_count,
                     "posts": result_posts,
-                    "issue_posts": result_issue_posts
+                    "issue_posts": result_issue_posts,
+                    "notice_posts": notice_posts
                 }
         except Exception as e:
             print("오류 발생:", e)
