@@ -216,10 +216,30 @@ class CommunityService:
                     post_dict["view_count"] = view_count
                     result_posts.append(post_dict)
 
+                issue_posts = s.query(CommunityPosts).join(CommunityPostsHotIssue.post).order_by(CommunityPostsHotIssue.issue_time.desc()).limit(5).all()
+
+                result_issue_posts = []
+                for post in issue_posts:
+                    post_dict = post.__dict__.copy()
+                    # 내부에 _sa_instance_state 같은 SQLAlchemy 내부 속성 제거
+                    post_dict.pop("_sa_instance_state", None)
+
+                    # id 변환
+                    if "id" in post_dict:
+                        post_dict["id"] = str(post_dict["id"])
+                    result_issue_posts.append(post_dict)
+
                 return {
                     "total": total,
                     "max_page_count": max_page_count,
                     "posts": result_posts,
+                }
+
+                return {
+                    "total": total,
+                    "max_page_count": max_page_count,
+                    "posts": result_posts,
+                    "issue_posts": result_issue_posts
                 }
         except Exception as e:
             print("오류 발생:", e)
