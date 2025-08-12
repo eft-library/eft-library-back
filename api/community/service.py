@@ -129,13 +129,13 @@ class CommunityService:
                     func.coalesce(
                         func.sum(
                             case(
-                                (CommunityPostsReactions.reaction_type == "1", 1),
+                                (CommunityPostsReactions.reaction_type == 1, 1),
                                 else_=0,
                             )
                         )
                         - func.sum(
                             case(
-                                (CommunityPostsReactions.reaction_type == "0", 1),
+                                (CommunityPostsReactions.reaction_type == 0, 1),
                                 else_=0,
                             )
                         ),
@@ -201,28 +201,26 @@ class CommunityService:
                             | (CommunityPosts.contents.contains(word))
                         )
 
-                    total = query.count()
-                    posts = query.limit(limit).offset(offset).all()
-                    max_page_count = math.ceil(total / limit) if total > 0 else 1
+                total = query.count()
+                posts = query.limit(limit).offset(offset).all()
+                max_page_count = math.ceil(total / limit) if total > 0 else 1
 
-                    # 아 괜히 snowflake id 썼나 번거롭네;;;
-                    # id / post_id만 문자열로 변환
-                    result_posts = []
-                    for post in posts:
-                        post_dict = post.__dict__.copy()
-                        # 내부에 _sa_instance_state 같은 SQLAlchemy 내부 속성 제거
-                        post_dict.pop("_sa_instance_state", None)
+                # 아 괜히 snowflake id 썼나 번거롭네;;;
+                # id / post_id만 문자열로 변환
+                result_posts = []
+                for post, reaction_score, view_count in posts:
+                    post_dict = post.__dict__.copy()
+                    post_dict.pop("_sa_instance_state", None)
+                    post_dict["id"] = str(post_dict["id"])
+                    post_dict["reaction_score"] = reaction_score
+                    post_dict["view_count"] = view_count
+                    result_posts.append(post_dict)
 
-                        # id 변환
-                        if "id" in post_dict:
-                            post_dict["id"] = str(post_dict["id"])
-                        result_posts.append(post_dict)
-
-                    return {
-                        "total": total,
-                        "max_page_count": max_page_count,
-                        "posts": result_posts,
-                    }
+                return {
+                    "total": total,
+                    "max_page_count": max_page_count,
+                    "posts": result_posts,
+                }
         except Exception as e:
             print("오류 발생:", e)
             return None
