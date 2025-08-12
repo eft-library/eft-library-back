@@ -1,4 +1,5 @@
 import math
+from sqlalchemy import func, case
 from fastapi import UploadFile, File, HTTPException
 from api.community.community_res_models import (
     CommunityPosts,
@@ -121,25 +122,77 @@ class CommunityService:
         try:
             limit = 20
             offset = (page_num - 1) * limit
-
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                # 메인페이지 역할
-                if category == "issue":
-                    query = s.query(CommunityPosts).join(CommunityPostsHotIssue.post)
-                    query = query.order_by(CommunityPostsHotIssue.issue_time.desc())
-                elif category == "all":
-                    query = s.query(CommunityPosts)
-                    query = query.order_by(CommunityPosts.create_time.desc())
-                else:
-                    query = s.query(CommunityPosts).filter(
-                        CommunityPosts.category == category
-                    )
-                    query = query.order_by(CommunityPosts.create_time.desc())
+                # 좋아요-싫어요 계산식
+                reaction_score_expr = func.greatest(
+                    func.coalesce(
+                        func.sum(
+                            case(
+                                (CommunityPostsReactions.reaction_type == "1", 1),
+                                else_=0,
+                            )
+                        )
+                        - func.sum(
+                            case(
+                                (CommunityPostsReactions.reaction_type == "0", 1),
+                                else_=0,
+                            )
+                        ),
+                        0,
+                    ),
+                    0,
+                )
 
-                # 검색어 조건 추가
-                # 댓글 추가 해야함
-                if word:  # 빈 문자열이면 조건 안 붙음
+                # 기본 SELECT 구성
+                query = (
+                    s.query(
+                        CommunityPosts,
+                        reaction_score_expr.label("reaction_score"),
+                        func.coalesce(CommunityPostsView.view_count, 0).label(
+                            "view_count"
+                        ),
+                    )
+                    .outerjoin(
+                        CommunityPostsReactions,
+                        CommunityPosts.id == CommunityPostsReactions.post_id,
+                    )
+                    .outerjoin(
+                        CommunityPostsView,
+                        CommunityPosts.id == CommunityPostsView.post_id,
+                    )
+                )
+
+                # 카테고리별 처리
+                if category == "issue":
+                    query = (
+                        query.join(CommunityPostsHotIssue.post)
+                        .group_by(
+                            CommunityPosts.id,
+                            CommunityPostsView.view_count,
+                            CommunityPostsHotIssue.issue_time,
+                        )
+                        .order_by(CommunityPostsHotIssue.issue_time.desc())
+                    )
+                elif category == "all":
+                    query = query.group_by(
+                        CommunityPosts.id,
+                        CommunityPostsView.view_count,
+                        CommunityPosts.create_time,
+                    ).order_by(CommunityPosts.create_time.desc())
+                else:
+                    query = (
+                        query.filter(CommunityPosts.category == category)
+                        .group_by(
+                            CommunityPosts.id,
+                            CommunityPostsView.view_count,
+                            CommunityPosts.create_time,
+                        )
+                        .order_by(CommunityPosts.create_time.desc())
+                    )
+
+                # 검색 조건
+                if word:
                     if search_type == "title":
                         query = query.filter(CommunityPosts.title.contains(word))
                     elif search_type == "title_content":
@@ -148,28 +201,28 @@ class CommunityService:
                             | (CommunityPosts.contents.contains(word))
                         )
 
-                total = query.count()
-                posts = query.limit(limit).offset(offset).all()
-                max_page_count = math.ceil(total / limit) if total > 0 else 1
+                    total = query.count()
+                    posts = query.limit(limit).offset(offset).all()
+                    max_page_count = math.ceil(total / limit) if total > 0 else 1
 
-                # 아 괜히 snowflake id 썼나 번거롭네;;;
-                # id / post_id만 문자열로 변환
-                result_posts = []
-                for post in posts:
-                    post_dict = post.__dict__.copy()
-                    # 내부에 _sa_instance_state 같은 SQLAlchemy 내부 속성 제거
-                    post_dict.pop("_sa_instance_state", None)
+                    # 아 괜히 snowflake id 썼나 번거롭네;;;
+                    # id / post_id만 문자열로 변환
+                    result_posts = []
+                    for post in posts:
+                        post_dict = post.__dict__.copy()
+                        # 내부에 _sa_instance_state 같은 SQLAlchemy 내부 속성 제거
+                        post_dict.pop("_sa_instance_state", None)
 
-                    # id 변환
-                    if "id" in post_dict:
-                        post_dict["id"] = str(post_dict["id"])
-                    result_posts.append(post_dict)
+                        # id 변환
+                        if "id" in post_dict:
+                            post_dict["id"] = str(post_dict["id"])
+                        result_posts.append(post_dict)
 
-                return {
-                    "total": total,
-                    "max_page_count": max_page_count,
-                    "posts": result_posts,
-                }
+                    return {
+                        "total": total,
+                        "max_page_count": max_page_count,
+                        "posts": result_posts,
+                    }
         except Exception as e:
             print("오류 발생:", e)
             return None
