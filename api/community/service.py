@@ -124,6 +124,7 @@ class CommunityService:
             limit = 20
             offset = (page_num - 1) * limit
             session = DataBaseConnector.create_session_factory()
+
             with session() as s:
                 # 좋아요-싫어요 계산식
                 reaction_score_expr = func.greatest(
@@ -150,9 +151,7 @@ class CommunityService:
                     s.query(
                         CommunityPosts,
                         reaction_score_expr.label("reaction_score"),
-                        func.coalesce(CommunityPostsView.view_count, 0).label(
-                            "view_count"
-                        ),
+                        func.coalesce(CommunityPostsView.view_count, 0).label("view_count"),
                     )
                     .outerjoin(
                         CommunityPostsReactions,
@@ -166,8 +165,12 @@ class CommunityService:
 
                 # 카테고리별 처리
                 if category == "issue":
+                    # 관계 join 대신 직접 join 조건으로 변경
                     query = (
-                        query.join(CommunityPostsHotIssue.post)
+                        query.join(
+                            CommunityPostsHotIssue,
+                            CommunityPosts.id == CommunityPostsHotIssue.post_id
+                        )
                         .group_by(
                             CommunityPosts.id,
                             CommunityPostsView.view_count,
@@ -206,8 +209,7 @@ class CommunityService:
                 posts = query.limit(limit).offset(offset).all()
                 max_page_count = math.ceil(total / limit) if total > 0 else 1
 
-                # 아 괜히 snowflake id 썼나 번거롭네;;;
-                # id / post_id만 문자열로 변환
+                # 결과 가공
                 result_posts = []
                 for post, reaction_score, view_count in posts:
                     post_dict = post.__dict__.copy()
@@ -217,17 +219,23 @@ class CommunityService:
                     post_dict["view_count"] = view_count
                     result_posts.append(post_dict)
 
-                issue_posts = s.query(CommunityPosts).join(CommunityPostsHotIssue.post).order_by(CommunityPostsHotIssue.issue_time.desc()).limit(5).all()
+                # issue_posts 조회 시에도 join 조건 방식으로 변경
+                issue_posts = (
+                    s.query(CommunityPosts)
+                    .join(
+                        CommunityPostsHotIssue,
+                        CommunityPosts.id == CommunityPostsHotIssue.post_id
+                    )
+                    .order_by(CommunityPostsHotIssue.issue_time.desc())
+                    .limit(5)
+                    .all()
+                )
 
                 result_issue_posts = []
                 for post in issue_posts:
                     post_dict = post.__dict__.copy()
-                    # 내부에 _sa_instance_state 같은 SQLAlchemy 내부 속성 제거
                     post_dict.pop("_sa_instance_state", None)
-
-                    # id 변환
-                    if "id" in post_dict:
-                        post_dict["id"] = str(post_dict["id"])
+                    post_dict["id"] = str(post_dict["id"])
                     result_issue_posts.append(post_dict)
 
                 notice_posts = s.query(Notice).order_by(Notice.update_time.desc()).limit(5).all()
