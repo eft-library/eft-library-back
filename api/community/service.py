@@ -233,12 +233,6 @@ class CommunityService:
                     "total": total,
                     "max_page_count": max_page_count,
                     "posts": result_posts,
-                }
-
-                return {
-                    "total": total,
-                    "max_page_count": max_page_count,
-                    "posts": result_posts,
                     "issue_posts": result_issue_posts
                 }
         except Exception as e:
