@@ -7,12 +7,19 @@ from api.user.util import UserUtil
 from util.constants import HTTPCode
 from api.constants import Message
 from api.community.service import CommunityService
-from api.community.community_req_models import CreateCommunity, UpdateCommunity, ViewCount, PostReaction
+from api.community.community_req_models import (
+    CreateCommunity,
+    GetPostDetail,
+    UpdateCommunity,
+    ViewCount,
+    PostReaction,
+)
 
 
 router = APIRouter(tags=["Community"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 
 @router.post("/upload_image")
 async def upload_image(file: UploadFile = File(...)):
@@ -20,6 +27,7 @@ async def upload_image(file: UploadFile = File(...)):
     if result is None:
         raise HTTPException(status_code=500, detail=f"이미지 처리 실패")
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
 
 @router.post("/create_posts")
 def create_posts(post_info: CreateCommunity, token: str = Depends(oauth2_scheme)):
@@ -32,12 +40,25 @@ def create_posts(post_info: CreateCommunity, token: str = Depends(oauth2_scheme)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
+
 @router.get("/{category}")
-def get_posts(category: str, page_num: int,
-              word: Optional[str] = Query("", description="검색어"),
-              search_type: str = Query("all", regex="^(all|title|comment|title_content)$")):
+def get_posts(
+    category: str,
+    page_num: int,
+    word: Optional[str] = Query("", description="검색어"),
+    search_type: str = Query("all", regex="^(all|title|comment|title_content)$"),
+):
     result = CommunityService.get_posts(category, page_num, word, search_type)
-    if result:
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
+    if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.post("/detail")
+def get_posts_detail(request_info: GetPostDetail):
+    result = CommunityService.get_detail_posts(
+        request_info.url, request_info.user_email
+    )
+    if result is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

@@ -405,6 +405,7 @@ CREATE TABLE USER_INFO
   ID TEXT primary key,
   NAME TEXT,
   EMAIL TEXT,
+  NICKNAME TEXT,
   IS_ADMIN BOOLEAN,
   ATTENDANCE_COUNT INTEGER,
   CREATE_TIME timestamp with time zone default now(),

@@ -120,107 +120,40 @@ class CommunityService:
     @staticmethod
     def get_posts(category: str, page_num: int, word: str, search_type):
         try:
-            limit = 20
-            offset = (page_num - 1) * limit
+            limit, offset = 20, (page_num - 1) * 20
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                # 좋아요-싫어요 계산식
-                reaction_score_expr = func.greatest(
-                    func.coalesce(
-                        func.sum(
-                            case(
-                                (CommunityPostsReactions.reaction_type == 1, 1),
-                                else_=0,
-                            )
-                        )
-                        - func.sum(
-                            case(
-                                (CommunityPostsReactions.reaction_type == 0, 1),
-                                else_=0,
-                            )
-                        ),
-                        0,
-                    ),
-                    0,
-                )
+                # 1. 기본 쿼리 생성
+                query = CommunityFunction.build_get_post_base_query(s)
 
-                # 기본 SELECT 구성
-                query = (
-                    s.query(
-                        CommunityPosts,
-                        reaction_score_expr.label("reaction_score"),
-                        func.coalesce(CommunityPostsView.view_count, 0).label(
-                            "view_count"
-                        ),
-                    )
-                    .outerjoin(
-                        CommunityPostsReactions,
-                        CommunityPosts.id == CommunityPostsReactions.post_id,
-                    )
-                    .outerjoin(
-                        CommunityPostsView,
-                        CommunityPosts.id == CommunityPostsView.post_id,
-                    )
-                )
+                # 2. 카테고리별 조건 적용
+                query = CommunityFunction.apply_category_filter(query, category)
 
-                # 카테고리별 처리
-                if category == "issue":
-                    query = (
-                        query.join(CommunityPostsHotIssue.post)
-                        .group_by(
-                            CommunityPosts.id,
-                            CommunityPostsView.view_count,
-                            CommunityPostsHotIssue.issue_time,
-                        )
-                        .order_by(CommunityPostsHotIssue.issue_time.desc())
-                    )
-                elif category == "all":
-                    query = query.group_by(
-                        CommunityPosts.id,
-                        CommunityPostsView.view_count,
-                        CommunityPosts.create_time,
-                    ).order_by(CommunityPosts.create_time.desc())
-                else:
-                    query = (
-                        query.filter(CommunityPosts.category == category)
-                        .group_by(
-                            CommunityPosts.id,
-                            CommunityPostsView.view_count,
-                            CommunityPosts.create_time,
-                        )
-                        .order_by(CommunityPosts.create_time.desc())
-                    )
+                # 3. 검색 조건 적용
+                query = CommunityFunction.apply_search_filter(query, word, search_type)
 
-                # 검색 조건
-                if word:
-                    if search_type == "title":
-                        query = query.filter(CommunityPosts.title.contains(word))
-                    elif search_type == "title_content":
-                        query = query.filter(
-                            (CommunityPosts.title.contains(word))
-                            | (CommunityPosts.contents.contains(word))
-                        )
+                # 4. 페이징 및 결과 가공
+                return CommunityFunction.fetch_and_format_results(query, limit, offset)
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
 
-                total = query.count()
-                posts = query.limit(limit).offset(offset).all()
-                max_page_count = math.ceil(total / limit) if total > 0 else 1
+    @staticmethod
+    def get_detail_posts(post_id_slug: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                # 게시글 상세 정보
+                query = CommunityFunction.build_get_post_base_query(s)
 
-                # 아 괜히 snowflake id 썼나 번거롭네;;;
-                # id / post_id만 문자열로 변환
-                result_posts = []
-                for post, reaction_score, view_count in posts:
-                    post_dict = post.__dict__.copy()
-                    post_dict.pop("_sa_instance_state", None)
-                    post_dict["id"] = str(post_dict["id"])
-                    post_dict["reaction_score"] = reaction_score
-                    post_dict["view_count"] = view_count
-                    result_posts.append(post_dict)
+                # 요청한 사용자의 해당 게시글에 대한 좋아요 싫어요 정보
 
-                return {
-                    "total": total,
-                    "max_page_count": max_page_count,
-                    "posts": result_posts,
-                }
+                # 해당 게시글 작성자의 정보 (게시글 수, 팔로워 수)
+
+                # 북마크 여부
+
+            return None
         except Exception as e:
             print("오류 발생:", e)
             return None
