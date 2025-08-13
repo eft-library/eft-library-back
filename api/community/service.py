@@ -13,6 +13,7 @@ from api.community.community_req_models import (
     ViewCount,
     PostReaction,
 )
+from api.notice.models import Notice
 from database import DataBaseConnector
 from util.snowflake_id import SnowflakeGenerator
 from slugify import slugify
@@ -122,6 +123,7 @@ class CommunityService:
         try:
             limit, offset = 20, (page_num - 1) * 20
             session = DataBaseConnector.create_session_factory()
+
             with session() as s:
                 # 1. 기본 쿼리 생성
                 query = CommunityFunction.build_get_post_base_query(s)
@@ -141,7 +143,6 @@ class CommunityService:
     @staticmethod
     def get_detail_posts(post_id_slug: str, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 # 게시글 상세 정보
