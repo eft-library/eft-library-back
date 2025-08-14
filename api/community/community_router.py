@@ -56,7 +56,17 @@ def get_posts(
 
 @router.post("/detail")
 def get_posts_detail(request_info: GetPostDetail):
-    result = CommunityService.get_detail_posts(
+    result = CommunityService.get_detail_post(
+        request_info.url, request_info.user_email
+    )
+    if result is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.post("/detail-meta-data")
+def get_posts_detail_meta_data(request_info: GetPostDetail):
+    result = CommunityService.get_detail_post_meta_data(
         request_info.url, request_info.user_email
     )
     if result is None:

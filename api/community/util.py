@@ -14,6 +14,7 @@ class CommunityUtil:
                 cp.thumbnail,
                 cp.create_time,
                 cp.update_time,
+                cpv.view_count,
                 -- 작성자 팔로워 수
                 (SELECT COUNT(*)
                  FROM user_follows uf
@@ -24,5 +25,24 @@ class CommunityUtil:
                  WHERE cp2.user_email = cp.user_email) AS total_post_count
             FROM community_posts cp
             LEFT JOIN user_info ui ON cp.user_email = ui.email
-            WHERE cp.id = :post_id        
+            LEFT JOIN community_posts_views cpv on cp.id = cpv.post_id
+            WHERE cp.id = :post_id
+        """
+
+    @staticmethod
+    def get_post_detail_meta_data():
+        return """
+            SELECT
+                cp.id,
+                COALESCE(cpr.reaction_type, 0) as is_like,
+                CASE
+                    WHEN cpb.post_id IS NOT NULL THEN 1
+                    ELSE 0 END AS is_bookmarked,
+                (select count(*) from community_posts_reactions cpr2 where cpr2.post_id = cp.id and cpr2.reaction_type = 1) as like_count
+            FROM community_posts cp
+            LEFT JOIN community_posts_bookmark cpb
+                   ON cp.id = cpb.post_id AND cpb.user_email = :user_email
+            LEFT JOIN community_posts_reactions cpr
+                   ON cp.id = cpr.post_id AND cpr.user_email = :user_email
+            WHERE cp.id = :post_id
         """

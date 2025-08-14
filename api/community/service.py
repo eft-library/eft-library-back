@@ -153,7 +153,7 @@ class CommunityService:
             return None
 
     @staticmethod
-    def get_detail_posts(post_id_slug: str, user_email: str):
+    def get_detail_post(post_id_slug: str, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
@@ -168,4 +168,18 @@ class CommunityService:
             print("오류 발생:", e)
             return None
 
-    #  북마크 여부, 게시글 좋아요/싫어요 개수 및 좋아요 여부 반환하는 api 만들기
+    @staticmethod
+    def get_detail_post_meta_data(post_id_slug: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
+                post_detail_query = text(CommunityUtil.get_post_detail_meta_data())
+                post_detail_param = {"post_id": post_id, "user_email": user_email}
+                post_detail_result = s.execute(post_detail_query, post_detail_param)
+                post_detail = [dict(row) for row in post_detail_result.mappings()]
+
+                return {"detail_meta_data": post_detail[0]}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
