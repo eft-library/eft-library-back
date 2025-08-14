@@ -722,7 +722,7 @@ CREATE TABLE community_posts_views (
 COMMENT ON COLUMN community_post_views.post_id IS '게시글 snoflake 아이디';
 COMMENT ON COLUMN community_post_views.view_count IS '게시글 조회수';
 
-CREATE TABLE community_post_reactions (
+CREATE TABLE community_posts_reactions (
     post_id BIGINT NOT NULL,
     user_email TEXT NOT NULL,
     reaction_type SMALLINT NOT NULL,
@@ -743,3 +743,23 @@ CREATE TABLE COMMUNITY_POSTS_HOT_ISSUE (
 );
 COMMENT ON COLUMN COMMUNITY_POSTS_HOT_ISSUE.post_id IS '게시글 snoflake 아이디';
 COMMENT ON COLUMN COMMUNITY_POSTS_HOT_ISSUE.post_id IS '게시글 핫이슈 시간';
+
+CREATE TABLE USER_FOLLOWS (
+    follower_email text,
+    following_email text,
+    create_time TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (follower_email, following_email)
+);
+COMMENT ON COLUMN USER_FOLLOWS.follower_email IS '팔로잉 대상';
+COMMENT ON COLUMN USER_FOLLOWS.following_email IS '팔로잉 한 유저';
+COMMENT ON COLUMN USER_FOLLOWS.create_time IS '팔로잉 시작 날짜';
+
+CREATE TABLE community_posts_bookmark (
+    user_email text,
+    post_id text,
+    create_time TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_email, post_id)
+);
+COMMENT ON COLUMN community_posts_bookmark.user_email IS '사용자 이메일';
+COMMENT ON COLUMN community_posts_bookmark.post_id IS '북마크 게시글 아이디';
+COMMENT ON COLUMN community_posts_bookmark.create_time IS '북마크 시작 날짜';

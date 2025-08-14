@@ -150,9 +150,9 @@ class CommunityService:
 
                 # 요청한 사용자의 해당 게시글에 대한 좋아요 싫어요 정보
 
-                # 해당 게시글 작성자의 정보 (게시글 수, 팔로워 수)
+                # 요청한 사용자의 북마크 여부
 
-                # 북마크 여부
+                # 해당 게시글 작성자의 정보 (게시글 수, 팔로워 수)
 
             return None
         except Exception as e:

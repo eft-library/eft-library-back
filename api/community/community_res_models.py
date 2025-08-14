@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 
 from database import DataBaseConnector
 
+
 class CommunityPosts(DataBaseConnector.Base):
 
     __tablename__ = "community_posts"
@@ -21,6 +22,7 @@ class CommunityPosts(DataBaseConnector.Base):
 
     hot_issue = relationship("CommunityPostsHotIssue", back_populates="post")
 
+
 class CommunityPostsReactions(DataBaseConnector.Base):
 
     __tablename__ = "community_posts_reactions"
@@ -30,12 +32,14 @@ class CommunityPostsReactions(DataBaseConnector.Base):
     reaction_type = Column(TEXT)
     update_time = Column(TIMESTAMP)
 
+
 class CommunityPostsView(DataBaseConnector.Base):
 
     __tablename__ = "community_posts_views"
 
     post_id = Column(BIGINT, primary_key=True)
     view_count = Column(BIGINT)
+
 
 class CommunityPostsHotIssue(DataBaseConnector.Base):
 
@@ -45,3 +49,20 @@ class CommunityPostsHotIssue(DataBaseConnector.Base):
     issue_time = Column(TIMESTAMP)
     post = relationship("CommunityPosts", back_populates="hot_issue")
 
+
+class UserFollows(DataBaseConnector.Base):
+
+    __tablename__ = "user_follows"
+
+    follower_email = Column(TEXT, primary_key=True)
+    following_email = Column(TEXT, primary_key=True)
+    create_time = Column(TIMESTAMP)
+
+
+class CommunityPostsBoolmakr(DataBaseConnector.Base):
+
+    __tablename__ = "community_posts_bookmark"
+
+    user_email = Column(TEXT, primary_key=True)
+    post_id = Column(TEXT, primary_key=True)
+    create_time = Column(TIMESTAMP)
