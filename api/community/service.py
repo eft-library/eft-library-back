@@ -163,7 +163,7 @@ class CommunityService:
                 post_detail_result = s.execute(post_detail_query, post_detail_param)
                 post_detail = [dict(row) for row in post_detail_result.mappings()]
 
-                return {"detail": post_detail[0]}
+                return post_detail[0]
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -179,7 +179,7 @@ class CommunityService:
                 post_detail_result = s.execute(post_detail_query, post_detail_param)
                 post_detail = [dict(row) for row in post_detail_result.mappings()]
 
-                return {"detail_meta_data": post_detail[0]}
+                return post_detail[0]
         except Exception as e:
             print("오류 발생:", e)
             return None
