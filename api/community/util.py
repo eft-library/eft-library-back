@@ -33,7 +33,7 @@ class CommunityUtil:
     def get_post_detail_meta_data():
         return """
             SELECT
-                cp.id,
+                cp.id::text AS id,
                 COALESCE(cpr.reaction_type, 0) AS is_like,
                 CASE
                     WHEN cpb.post_id IS NOT NULL THEN 1
