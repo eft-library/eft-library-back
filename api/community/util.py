@@ -4,7 +4,7 @@ class CommunityUtil:
     def get_post_detail():
         return """
             SELECT
-                cp.id,
+                cp.id::text AS id,
                 cp.slug,
                 cp.user_email,
                 ui.nickname,
