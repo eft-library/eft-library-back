@@ -167,3 +167,5 @@ class CommunityService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    #  북마크 여부, 게시글 좋아요/싫어요 개수 및 좋아요 여부 반환하는 api 만들기
