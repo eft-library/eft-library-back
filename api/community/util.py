@@ -34,11 +34,18 @@ class CommunityUtil:
         return """
             SELECT
                 cp.id,
-                COALESCE(cpr.reaction_type, 0) as is_like,
+                COALESCE(cpr.reaction_type, 0) AS is_like,
                 CASE
                     WHEN cpb.post_id IS NOT NULL THEN 1
-                    ELSE 0 END AS is_bookmarked,
-                (select count(*) from community_posts_reactions cpr2 where cpr2.post_id = cp.id and cpr2.reaction_type = 1) as like_count
+                    ELSE 0
+                END AS is_bookmarked,
+                (
+                    SELECT 
+                        COALESCE(SUM(CASE WHEN cpr2.reaction_type = 1 THEN 1 ELSE 0 END), 0)
+                        - COALESCE(SUM(CASE WHEN cpr2.reaction_type = 0 THEN 1 ELSE 0 END), 0)
+                    FROM community_posts_reactions cpr2
+                    WHERE cpr2.post_id = cp.id
+                ) AS like_count
             FROM community_posts cp
             LEFT JOIN community_posts_bookmark cpb
                    ON cp.id = cpb.post_id AND cpb.user_email = :user_email
