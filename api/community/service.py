@@ -1,19 +1,11 @@
-import math
-from sqlalchemy import func, case
 from fastapi import UploadFile, File, HTTPException
 from api.community.community_res_models import (
     CommunityPosts,
     CommunityPostsView,
-    CommunityPostsReactions,
-    CommunityPostsHotIssue,
 )
 from api.community.community_req_models import (
     CreateCommunity,
-    UpdateCommunity,
-    ViewCount,
-    PostReaction,
 )
-from api.notice.models import Notice
 from database import DataBaseConnector
 from util.snowflake_id import SnowflakeGenerator
 from slugify import slugify
@@ -134,8 +126,23 @@ class CommunityService:
                 # 3. 검색 조건 적용
                 query = CommunityFunction.apply_search_filter(query, word, search_type)
 
-                # 4. 페이징 및 결과 가공
-                return CommunityFunction.fetch_and_format_results(query, limit, offset)
+                # 4. 게시글 목록 + 페이징 처리
+                total, max_page_count, result_posts = (
+                    CommunityFunction.fetch_and_format_results(query, limit, offset)
+                )
+
+                # 5. issue_posts & notice_posts 조회
+                result_issue_posts = CommunityFunction.fetch_issue_posts(s)
+                notice_posts = CommunityFunction.fetch_notice_posts(s)
+
+                return {
+                    "total": total,
+                    "max_page_count": max_page_count,
+                    "posts": result_posts,
+                    "issue_posts": result_issue_posts,
+                    "notice_posts": notice_posts,
+                }
+
         except Exception as e:
             print("오류 발생:", e)
             return None

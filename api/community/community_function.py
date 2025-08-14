@@ -9,6 +9,7 @@ from api.community.community_res_models import (
     CommunityPostsView,
     CommunityPostsReactions,
 )
+from api.notice.models import Notice
 
 
 class CommunityFunction:
@@ -108,8 +109,30 @@ class CommunityFunction:
             post_dict["view_count"] = view_count
             result_posts.append(post_dict)
 
-        return {
-            "total": total,
-            "max_page_count": max_page_count,
-            "posts": result_posts,
-        }
+        return total, max_page_count, result_posts
+
+    @staticmethod
+    def fetch_issue_posts(s):
+        issue_posts = (
+            s.query(CommunityPosts)
+            .join(
+                CommunityPostsHotIssue,
+                CommunityPosts.id == CommunityPostsHotIssue.post_id,
+            )
+            .order_by(CommunityPostsHotIssue.issue_time.desc())
+            .limit(5)
+            .all()
+        )
+
+        result_issue_posts = []
+        for post in issue_posts:
+            post_dict = post.__dict__.copy()
+            post_dict.pop("_sa_instance_state", None)
+            post_dict["id"] = str(post_dict["id"])
+            result_issue_posts.append(post_dict)
+
+        return result_issue_posts
+
+    @staticmethod
+    def fetch_notice_posts(s):
+        return s.query(Notice).order_by(Notice.update_time.desc()).limit(5).all()

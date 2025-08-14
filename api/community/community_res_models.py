@@ -59,7 +59,7 @@ class UserFollows(DataBaseConnector.Base):
     create_time = Column(TIMESTAMP)
 
 
-class CommunityPostsBoolmakr(DataBaseConnector.Base):
+class CommunityPostsBookmark(DataBaseConnector.Base):
 
     __tablename__ = "community_posts_bookmark"
 
