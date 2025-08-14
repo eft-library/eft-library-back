@@ -756,7 +756,7 @@ COMMENT ON COLUMN USER_FOLLOWS.create_time IS '팔로잉 시작 날짜';
 
 CREATE TABLE community_posts_bookmark (
     user_email text,
-    post_id text,
+    post_id BIGINT,
     create_time TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_email, post_id)
 );

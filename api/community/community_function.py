@@ -8,6 +8,8 @@ from api.community.community_res_models import (
     CommunityPostsHotIssue,
     CommunityPostsView,
     CommunityPostsReactions,
+    UserFollows,
+    CommunityPostsBookmark,
 )
 from api.notice.models import Notice
 
@@ -136,3 +138,11 @@ class CommunityFunction:
     @staticmethod
     def fetch_notice_posts(s):
         return s.query(Notice).order_by(Notice.update_time.desc()).limit(5).all()
+
+    @staticmethod
+    def parse_id_and_slug(value: str):
+        try:
+            id_str, slug = value.split("-", 1)  # 1번만 split (slug에 '-'가 있어도 유지)
+            return int(id_str)
+        except ValueError:
+            raise ValueError(f"잘못된 형식입니다: {value}")

@@ -2,7 +2,11 @@ from fastapi import UploadFile, File, HTTPException
 from api.community.community_res_models import (
     CommunityPosts,
     CommunityPostsView,
+    CommunityPostsReactions,
+    CommunityPostsBookmark,
+    UserFollows,
 )
+from api.community.util import CommunityUtil
 from api.community.community_req_models import (
     CreateCommunity,
 )
@@ -17,6 +21,7 @@ from PIL import Image
 from minio import Minio
 from minio.error import S3Error
 import io
+from sqlalchemy import text
 
 
 load_dotenv()
@@ -152,16 +157,13 @@ class CommunityService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                # 게시글 상세 정보
-                query = CommunityFunction.build_get_post_base_query(s)
+                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
+                post_detail_query = text(CommunityUtil.get_post_detail())
+                post_detail_param = {"post_id": post_id, "user_email": user_email}
+                post_detail_result = s.execute(post_detail_query, post_detail_param)
+                post_detail = [dict(row) for row in post_detail_result.mappings()]
 
-                # 요청한 사용자의 해당 게시글에 대한 좋아요 싫어요 정보
-
-                # 요청한 사용자의 북마크 여부
-
-                # 해당 게시글 작성자의 정보 (게시글 수, 팔로워 수)
-
-            return None
+                return {"detail": post_detail[0]}
         except Exception as e:
             print("오류 발생:", e)
             return None

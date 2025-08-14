@@ -64,5 +64,5 @@ class CommunityPostsBookmark(DataBaseConnector.Base):
     __tablename__ = "community_posts_bookmark"
 
     user_email = Column(TEXT, primary_key=True)
-    post_id = Column(TEXT, primary_key=True)
+    post_id = Column(BIGINT, primary_key=True)
     create_time = Column(TIMESTAMP)
