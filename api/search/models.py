@@ -18,6 +18,7 @@ class Search(DataBaseConnector.Base):
     order = Column(INTEGER)
     update_time = Column(TIMESTAMP)
 
+
 class Sitemap(DataBaseConnector.Base):
     """
     sitemap.xml
@@ -28,6 +29,7 @@ class Sitemap(DataBaseConnector.Base):
     id = Column(INTEGER, primary_key=True)
     link = Column(String)
     priority = Column(INTEGER)
+    value = Column(String)
     change_freq = Column(String)
     create_date = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)

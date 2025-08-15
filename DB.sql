@@ -658,6 +658,7 @@ CREATE TABLE SITEMAP
     LINK TEXT,
     PRIORITY NUMERIC,
     CHANGE_FREQ TEXT,
+    VALUE TEXT,
     CREATE_DATE timestamp with time zone default now(),
     UPDATE_TIME timestamp with time zone default now()
 )
@@ -665,6 +666,7 @@ COMMENT ON COLUMN SITEMAP.ID IS 'sitemap 아이디';
 COMMENT ON COLUMN SITEMAP.LINK IS 'sitemap 주소';
 COMMENT ON COLUMN SITEMAP.PRIORITY IS 'sitemap 우선순위';
 COMMENT ON COLUMN SITEMAP.CHANGE_FREQ IS 'sitemap 업데이트 주기';
+COMMENT ON COLUMN SITEMAP.VALUE IS 'sitemap 분리 값';
 COMMENT ON COLUMN SITEMAP.CREATE_DATE IS 'sitemap 생성일';
 COMMENT ON COLUMN SITEMAP.UPDATE_TIME IS 'sitemap 업데이트 날짜';
 
