@@ -185,17 +185,16 @@ class CommunityService:
             return None
 
     @staticmethod
-    def like_post(post_id_slug: str, user_email: str):
+    def like_post(post_id: str, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
-
+                bigint_post_id = int(post_id)
                 # 기존 reaction 조회
                 reaction = (
                     s.query(CommunityPostsReactions)
                     .filter(
-                        CommunityPostsReactions.post_id == post_id,
+                        CommunityPostsReactions.post_id == bigint_post_id,
                         CommunityPostsReactions.user_email == user_email,
                     )
                     .first()
@@ -208,7 +207,7 @@ class CommunityService:
                 else:
                     # 없으면 새로 생성
                     reaction = CommunityPostsReactions(
-                        post_id=post_id,
+                        post_id=bigint_post_id,
                         user_email=user_email,
                         reaction_type=1,
                         update_time=datetime.now(),
@@ -223,17 +222,16 @@ class CommunityService:
             return None
 
     @staticmethod
-    def dislike_post(post_id_slug: str, user_email: str):
+    def dislike_post(post_id: str, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
-
+                bigint_post_id = int(post_id)
                 # 기존 reaction 조회 (ORM 방식)
                 reaction = (
                     s.query(CommunityPostsReactions)
                     .filter(
-                        CommunityPostsReactions.post_id == post_id,
+                        CommunityPostsReactions.post_id == bigint_post_id,
                         CommunityPostsReactions.user_email == user_email,
                     )
                     .first()
@@ -246,7 +244,7 @@ class CommunityService:
                 else:
                     # 없으면 새로 생성
                     reaction = CommunityPostsReactions(
-                        post_id=post_id,
+                        post_id=bigint_post_id,
                         user_email=user_email,
                         reaction_type=0,
                         update_time=datetime.now(),
@@ -261,17 +259,17 @@ class CommunityService:
             return None
 
     @staticmethod
-    def bookmark_post(post_id_slug: str, user_email: str):
+    def bookmark_post(post_id: str, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
+                bigint_post_id = int(post_id)
 
                 # 기존 bookmark 조회 (ORM 방식)
                 bookmark = (
                     s.query(CommunityPostsBookmark)
                     .filter(
-                        CommunityPostsBookmark.post_id == post_id,
+                        CommunityPostsBookmark.post_id == bigint_post_id,
                         CommunityPostsBookmark.user_email == user_email,
                     )
                     .first()
@@ -283,7 +281,7 @@ class CommunityService:
                 else:
                     # 없으면 새로 생성
                     new_bookmark = CommunityPostsBookmark(
-                        post_id=post_id,
+                        post_id=bigint_post_id,
                         user_email=user_email,
                         create_time=datetime.now(),
                     )
