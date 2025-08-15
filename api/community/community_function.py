@@ -57,7 +57,10 @@ class CommunityFunction:
     def apply_category_filter(query, category):
         if category == "issue":
             return (
-                query.join(CommunityPostsHotIssue.post)
+                query.join(
+                    CommunityPostsHotIssue,
+                    CommunityPostsHotIssue.post_id == CommunityPosts.id
+                )
                 .group_by(
                     CommunityPosts.id,
                     CommunityPostsView.view_count,
