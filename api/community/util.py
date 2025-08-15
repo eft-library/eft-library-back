@@ -9,6 +9,7 @@ class CommunityUtil:
                 cp.user_email,
                 ui.nickname,
                 cp.category,
+                (select CASE WHEN uf.following_email = :user_email THEN 1 ELSE 0 END from user_follows uf) as is_follow,
                 cp.title,
                 cp.contents,
                 cp.thumbnail,
