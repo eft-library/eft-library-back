@@ -144,5 +144,5 @@ def check_follow(
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(
-            {"is_follow": 0}, HTTPCode.OK, Message.INVALID_USER
+            {"is_follow": "Qweqwe"}, HTTPCode.OK, Message.INVALID_USER
         )
