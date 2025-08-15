@@ -130,6 +130,7 @@ def check_follow(
     token: Optional[str] = Depends(oauth2_scheme),  # 토큰이 없어도 됨
 ):
     user_email = None
+    print(token)
     if token:
         user_email = UserUtil.verify_google_token(access_token=token)
 
@@ -144,5 +145,5 @@ def check_follow(
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(
-            {"is_follow": "Qweqwe"}, HTTPCode.OK, Message.INVALID_USER
+            {"is_follow": 0}, HTTPCode.OK, Message.INVALID_USER
         )
