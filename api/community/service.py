@@ -163,7 +163,16 @@ class CommunityService:
                 post_detail_result = s.execute(post_detail_query, post_detail_param)
                 post_detail = [dict(row) for row in post_detail_result.mappings()]
 
-                return post_detail[0]
+                result_issue_posts = CommunityFunction.fetch_issue_posts(s)
+                notice_posts = CommunityFunction.fetch_notice_posts(s)
+                # 게시글 목록 추가해야 함
+                # 이전이 이슈인지 카테고리인지 파악후 리턴을 해야 하는데 흠
+
+                return {
+                    "post_detail": post_detail[0],
+                    "issue_posts": result_issue_posts,
+                    "notice_posts": notice_posts,
+                }
         except Exception as e:
             print("오류 발생:", e)
             return None
