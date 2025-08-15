@@ -317,25 +317,11 @@ class CommunityService:
             return None
 
     @staticmethod
-    def follow_user(author_email: str, user_email: str):
+    def toggle_follow(author_email: str, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                new_follow = UserFollows(
-                    follower_email=author_email, following_email=user_email
-                )
-                s.add(new_follow)
-                s.commit()
-                return {"result": 1}
-        except Exception as e:
-            print("오류 발생:", e)
-            return None
-
-    @staticmethod
-    def unfollow_user(author_email: str, user_email: str):
-        try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+                # 현재 팔로우 상태 확인
                 follower_status = (
                     s.query(UserFollows)
                     .filter(
@@ -344,10 +330,21 @@ class CommunityService:
                     )
                     .first()
                 )
+
                 if follower_status:
+                    # 이미 팔로우 중이면 → 언팔로우
                     s.delete(follower_status)
+                else:
+                    # 팔로우 중이 아니면 → 팔로우
+                    new_follow = UserFollows(
+                        follower_email=author_email,
+                        following_email=user_email,
+                    )
+                    s.add(new_follow)
+
                 s.commit()
                 return {"result": 1}
+
         except Exception as e:
             print("오류 발생:", e)
             return None
