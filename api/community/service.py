@@ -207,6 +207,8 @@ class CommunityService:
                         reaction.reaction_type = 1
                     elif reaction.reaction_type == 1:
                         reaction.reaction_type = -1
+                    elif reaction.reaction_type == -1:
+                        reaction.reaction_type = 1
                     # update_time 갱신
                     reaction.update_time = datetime.now()
                 else:
@@ -248,6 +250,8 @@ class CommunityService:
                     if reaction.reaction_type == 0:
                         reaction.reaction_type = -1
                     elif reaction.reaction_type == 1:
+                        reaction.reaction_type = 0
+                    elif reaction.reaction_type == -1:
                         reaction.reaction_type = 0
                     # update_time 갱신
                     reaction.update_time = datetime.now()
