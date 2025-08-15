@@ -190,6 +190,7 @@ class CommunityService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 bigint_post_id = int(post_id)
+
                 # 기존 reaction 조회
                 reaction = (
                     s.query(CommunityPostsReactions)
@@ -201,11 +202,15 @@ class CommunityService:
                 )
 
                 if reaction:
-                    # 이미 있으면 1로 업데이트
-                    reaction.reaction_type = 1
+                    # 기존 값에 따라 변경
+                    if reaction.reaction_type == 0:
+                        reaction.reaction_type = 1
+                    elif reaction.reaction_type == 1:
+                        reaction.reaction_type = -1
+                    # update_time 갱신
                     reaction.update_time = datetime.now()
                 else:
-                    # 없으면 새로 생성
+                    # 없으면 새로 생성 (1로 시작)
                     reaction = CommunityPostsReactions(
                         post_id=bigint_post_id,
                         user_email=user_email,
@@ -215,7 +220,7 @@ class CommunityService:
                     s.add(reaction)
 
                 s.commit()
-                return {"result": 1}  # 성공
+                return {"result": reaction.reaction_type}  # 현재 상태 반환
 
         except Exception as e:
             print("오류 발생:", e)
@@ -227,7 +232,8 @@ class CommunityService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 bigint_post_id = int(post_id)
-                # 기존 reaction 조회 (ORM 방식)
+
+                # 기존 reaction 조회
                 reaction = (
                     s.query(CommunityPostsReactions)
                     .filter(
@@ -238,11 +244,15 @@ class CommunityService:
                 )
 
                 if reaction:
-                    # 기존이 있으면 0으로 변경
-                    reaction.reaction_type = 0
+                    # 기존 값에 따라 변경
+                    if reaction.reaction_type == 0:
+                        reaction.reaction_type = -1
+                    elif reaction.reaction_type == 1:
+                        reaction.reaction_type = 0
+                    # update_time 갱신
                     reaction.update_time = datetime.now()
                 else:
-                    # 없으면 새로 생성
+                    # 없으면 새로 생성 (0으로 시작)
                     reaction = CommunityPostsReactions(
                         post_id=bigint_post_id,
                         user_email=user_email,
@@ -252,7 +262,7 @@ class CommunityService:
                     s.add(reaction)
 
                 s.commit()
-                return {"result": 1}  # 성공
+                return {"result": reaction.reaction_type}  # 현재 상태 반환
 
         except Exception as e:
             print("오류 발생:", e)
