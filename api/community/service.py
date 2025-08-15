@@ -21,8 +21,7 @@ from PIL import Image
 from minio import Minio
 from minio.error import S3Error
 import io
-from sqlalchemy import text
-
+from sqlalchemy import text, case, and_
 
 load_dotenv()
 snowflake = SnowflakeGenerator(datacenter_id=1, worker_id=1)
@@ -318,12 +317,12 @@ class CommunityService:
             return None
 
     @staticmethod
-    def follow_user(following_user_email: str, user_email: str):
+    def follow_user(author_email: str, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 new_follow = UserFollows(
-                    follower_email=user_email, following_email=following_user_email
+                    follower_email=author_email, following_email=user_email
                 )
                 s.add(new_follow)
                 s.commit()
@@ -333,15 +332,15 @@ class CommunityService:
             return None
 
     @staticmethod
-    def unfollow_user(following_user_email: str, user_email: str):
+    def unfollow_user(author_email: str, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 follower_status = (
                     s.query(UserFollows)
                     .filter(
-                        UserFollows.follower_email == user_email,
-                        UserFollows.following_email == following_user_email,
+                        UserFollows.follower_email == author_email,
+                        UserFollows.following_email == user_email,
                     )
                     .first()
                 )
@@ -349,6 +348,27 @@ class CommunityService:
                     s.delete(follower_status)
                 s.commit()
                 return {"result": 1}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def check_user_following(author_email: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                follower_status = s.query(
+                    case(
+                        (
+                            and_(
+                                UserFollows.following_email == user_email,
+                                UserFollows.follower_email == author_email,
+                            )
+                        ),
+                        else_=0,
+                    ).label("is_follow")
+                )
+                return follower_status
         except Exception as e:
             print("오류 발생:", e)
             return None
