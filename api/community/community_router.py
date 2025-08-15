@@ -20,7 +20,7 @@ from api.community.community_req_models import (
 
 router = APIRouter(tags=["Community"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
 @router.post("/upload_image")
