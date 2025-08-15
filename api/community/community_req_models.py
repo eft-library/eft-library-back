@@ -12,12 +12,19 @@ class UpdateCommunity(CreateCommunity):
 
 
 class ViewCount(BaseModel):
-    post_id: int
+    post_id: str
 
 
 class PostReaction(BaseModel):
-    post_id: int
-    reaction_type: str
+    post_id: str
+
+
+class PostBookmark(BaseModel):
+    post_id: str
+
+
+class FollowUser(BaseModel):
+    following_user_email: str
 
 
 class GetPostDetail(BaseModel):

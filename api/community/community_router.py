@@ -13,6 +13,8 @@ from api.community.community_req_models import (
     UpdateCommunity,
     ViewCount,
     PostReaction,
+    PostBookmark,
+    FollowUser,
 )
 
 
@@ -56,9 +58,7 @@ def get_posts(
 
 @router.post("/detail")
 def get_posts_detail(request_info: GetPostDetail):
-    result = CommunityService.get_detail_post(
-        request_info.url, request_info.user_email
-    )
+    result = CommunityService.get_detail_post(request_info.url, request_info.user_email)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -72,3 +72,67 @@ def get_posts_detail_meta_data(request_info: GetPostDetail):
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.post("/like_post")
+def like_post(request_info: PostReaction, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommunityService.like_post(request_info.post_id, user_email)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/dislike_post")
+def dislike_post(request_info: PostReaction, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommunityService.dislike_post(request_info.post_id, user_email)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/bookmark_post")
+def bookmark_post(request_info: PostBookmark, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommunityService.bookmark_post(request_info.post_id, user_email)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/follow_user")
+def follow_user(request_info: FollowUser, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommunityService.follow_user(
+            request_info.following_user_email, user_email
+        )
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/unfollow_user")
+def unfollow_user(request_info: FollowUser, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommunityService.unfollow_user(
+            request_info.following_user_email, user_email
+        )
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)

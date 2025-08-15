@@ -183,3 +183,151 @@ class CommunityService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def like_post(post_id_slug: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
+
+                # 기존 reaction 조회
+                reaction = (
+                    s.query(CommunityPostsReactions)
+                    .filter(
+                        CommunityPostsReactions.post_id == post_id,
+                        CommunityPostsReactions.user_email == user_email,
+                    )
+                    .first()
+                )
+
+                if reaction:
+                    # 이미 있으면 1로 업데이트
+                    reaction.reaction_type = 1
+                    reaction.update_time = datetime.now()
+                else:
+                    # 없으면 새로 생성
+                    reaction = CommunityPostsReactions(
+                        post_id=post_id,
+                        user_email=user_email,
+                        reaction_type=1,
+                        update_time=datetime.now(),
+                    )
+                    s.add(reaction)
+
+                s.commit()
+                return {"result": 1}  # 성공
+
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def dislike_post(post_id_slug: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
+
+                # 기존 reaction 조회 (ORM 방식)
+                reaction = (
+                    s.query(CommunityPostsReactions)
+                    .filter(
+                        CommunityPostsReactions.post_id == post_id,
+                        CommunityPostsReactions.user_email == user_email,
+                    )
+                    .first()
+                )
+
+                if reaction:
+                    # 기존이 있으면 0으로 변경
+                    reaction.reaction_type = 0
+                    reaction.update_time = datetime.now()
+                else:
+                    # 없으면 새로 생성
+                    reaction = CommunityPostsReactions(
+                        post_id=post_id,
+                        user_email=user_email,
+                        reaction_type=0,
+                        update_time=datetime.now(),
+                    )
+                    s.add(reaction)
+
+                s.commit()
+                return {"result": 1}  # 성공
+
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def bookmark_post(post_id_slug: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
+
+                # 기존 bookmark 조회 (ORM 방식)
+                bookmark = (
+                    s.query(CommunityPostsBookmark)
+                    .filter(
+                        CommunityPostsBookmark.post_id == post_id,
+                        CommunityPostsBookmark.user_email == user_email,
+                    )
+                    .first()
+                )
+
+                if bookmark:
+                    # 있으면 제거
+                    s.delete(bookmark)
+                else:
+                    # 없으면 새로 생성
+                    new_bookmark = CommunityPostsBookmark(
+                        post_id=post_id,
+                        user_email=user_email,
+                        create_time=datetime.now(),
+                    )
+                    s.add(new_bookmark)
+
+                s.commit()
+                return {"result": 1}  # 성공
+
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def follow_user(following_user_email: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                new_follow = UserFollows(
+                    follower_email=user_email, following_email=following_user_email
+                )
+                s.add(new_follow)
+                s.commit()
+                return {"result": 1}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def unfollow_user(following_user_email: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                follower_status = (
+                    s.query(UserFollows)
+                    .filter(
+                        UserFollows.follower_email == user_email,
+                        UserFollows.following_email == following_user_email,
+                    )
+                    .first()
+                )
+                if follower_status:
+                    s.delete(follower_status)
+                s.commit()
+                return {"result": 1}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BIGINT, TIMESTAMP, TEXT, Boolean, ForeignKey
+from sqlalchemy import Column, BIGINT, TIMESTAMP, TEXT, Boolean, ForeignKey, INTEGER
 from sqlalchemy.orm import relationship
 
 from database import DataBaseConnector
@@ -29,7 +29,7 @@ class CommunityPostsReactions(DataBaseConnector.Base):
 
     post_id = Column(BIGINT, primary_key=True)
     user_email = Column(TEXT, primary_key=True)
-    reaction_type = Column(TEXT)
+    reaction_type = Column(INTEGER)
     update_time = Column(TIMESTAMP)
 
 
