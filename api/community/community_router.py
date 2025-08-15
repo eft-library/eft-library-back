@@ -129,20 +129,22 @@ def check_follow(
     request_info: FollowUser,
     token: Optional[str] = Depends(oauth2_scheme),  # 토큰이 없어도 됨
 ):
-    user_email = None
-    print(token)
     if token:
         user_email = UserUtil.verify_google_token(access_token=token)
 
-    if user_email:
-        result = CommunityService.check_user_following(
-            request_info.following_user_email, user_email
-        )
-        if result is None:
-            return CustomResponse.response(
-                {"is_follow": 0}, HTTPCode.OK, Message.COMMUNITY_FAIL
+        if user_email:
+            result = CommunityService.check_user_following(
+                request_info.following_user_email, user_email
             )
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+            if result is None:
+                return CustomResponse.response(
+                    {"is_follow": 0}, HTTPCode.OK, Message.COMMUNITY_FAIL
+                )
+            return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+        else:
+            return CustomResponse.response(
+                {"is_follow": 0}, HTTPCode.OK, Message.INVALID_USER
+            )
     else:
         return CustomResponse.response(
             {"is_follow": 0}, HTTPCode.OK, Message.INVALID_USER
