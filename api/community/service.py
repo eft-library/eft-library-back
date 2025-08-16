@@ -339,6 +339,7 @@ class CommunityService:
                     new_follow = UserFollows(
                         follower_email=author_email,
                         following_email=user_email,
+                        create_time=datetime.now(),
                     )
                     s.add(new_follow)
 
