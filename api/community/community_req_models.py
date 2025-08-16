@@ -27,6 +27,11 @@ class FollowUser(BaseModel):
     following_user_email: str
 
 
+class CheckFollow(BaseModel):
+    following_user_email: str
+    user_email: str
+
+
 class GetPostDetail(BaseModel):
     url: str
     user_email: str
