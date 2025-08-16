@@ -361,12 +361,14 @@ class CommunityService:
                             and_(
                                 UserFollows.following_email == user_email,
                                 UserFollows.follower_email == author_email,
-                            )
+                            ),
+                            1,
                         ),
                         else_=0,
-                    ).label("is_follow")
-                )
-                return follower_status
+                    )
+                ).scalar()
+
+                return {"is_follow": follower_status}
         except Exception as e:
             print("오류 발생:", e)
             return None
