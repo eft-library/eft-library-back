@@ -1,3 +1,4 @@
+from PIL.ImageChops import offset
 from fastapi import UploadFile, File, HTTPException
 from api.community.community_res_models import (
     CommunityPosts,
@@ -160,6 +161,7 @@ class CommunityService:
     @staticmethod
     def get_detail_post(post_id_slug: str, user_email: str, page_category: str):
         try:
+            limit = 20
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
@@ -186,14 +188,53 @@ class CommunityService:
                 ]
 
                 # 게시글 목록
-                # get_posts 쓸 거를 여기에 쓸 수 있을 거 같음
+                if page_category == "issue":
+                    get_post_query = text(CommunityUtil.get_posts_with_issue())
+                    get_post_count_query = text(CommunityUtil.get_post_issue_count())
+                    get_post_current_page_num_query = text(
+                        CommunityUtil.get_current_post_issue_page_num()
+                    )
+                else:
+                    get_post_query = text(CommunityUtil.get_posts_with_category())
+                    get_post_count_query = text(CommunityUtil.get_post_category_count())
+                    get_post_current_page_num_query = text(
+                        CommunityUtil.get_current_post_category_page_num()
+                    )
+
+                get_post_current_page_num = s.execute(
+                    get_post_current_page_num_query, {"category": page_category}
+                )
+                current_page_num = (get_post_current_page_num - 1) / limit + 1
+
+                offset = (current_page_num - 1) * 20
+
+                get_post_params = {
+                    "limit": limit,
+                    "offset": offset,
+                    "category": page_category,
+                }
+                get_post_data_result = s.execute(get_post_query, get_post_params)
+                get_post_data = [dict(row) for row in get_post_data_result.mappings()]
+
                 # total, max_pages, current_page_num 필요
+                get_post_count_result = s.execute(
+                    get_post_count_query, {"category": page_category}
+                )
+                total = get_post_count_result.scalar()
+
+                max_page_count = (total + limit - 1) // limit
 
                 return {
                     "post_detail": post_detail[0],
                     "issue_posts": result_issue_posts,
                     "notice_posts": notice_posts,
                     "author_detail": author_meta_data[0],
+                    "posts": {
+                        "total": total,
+                        "max_page_count": max_page_count,
+                        "posts": get_post_data,
+                        "current_page_num": current_page_num,
+                    },
                 }
         except Exception as e:
             print("오류 발생:", e)

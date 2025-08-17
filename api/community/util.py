@@ -160,3 +160,30 @@ class CommunityUtil:
         WHERE following_email = :user_email
           AND follower_email = :author_email;
         """
+
+    @staticmethod
+    def get_current_post_category_page_num():
+        return """
+            WITH ordered_posts AS (
+                SELECT id,
+                       ROW_NUMBER() OVER (ORDER BY create_time DESC) AS rn
+                FROM community_posts
+                WHERE category = :category
+            )
+            SELECT rn
+            FROM ordered_posts
+            WHERE id = :post_id        
+        """
+
+    @staticmethod
+    def get_current_post_issue_page_num():
+        return """
+            WITH ordered_posts AS (
+                SELECT post_id as id,
+                       ROW_NUMBER() OVER (ORDER BY issue_time DESC) AS rn
+                FROM community_posts_hot_issue
+            )
+            SELECT rn
+            FROM ordered_posts
+            WHERE id = :post_id     
+        """

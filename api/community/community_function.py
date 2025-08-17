@@ -1,15 +1,8 @@
 import re
 
-import math
-from sqlalchemy import func, case
-
 from api.community.community_res_models import (
     CommunityPosts,
     CommunityPostsHotIssue,
-    CommunityPostsView,
-    CommunityPostsReactions,
-    UserFollows,
-    CommunityPostsBookmark,
 )
 from api.notice.models import Notice
 
