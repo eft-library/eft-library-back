@@ -165,16 +165,16 @@ class CommunityService:
                 result_issue_posts = CommunityFunction.fetch_issue_posts(s)
                 notice_posts = CommunityFunction.fetch_notice_posts(s)
 
-                # author_meta_data_query = text(
-                #     CommunityUtil.get_detail_author_meta_data()
-                # )
-                # author_meta_data_param = {"post_id": post_id, "user_email": user_email}
-                # author_meta_data_result = s.execute(
-                #     author_meta_data_query, author_meta_data_param
-                # )
-                # author_meta_data = [
-                #     dict(row) for row in author_meta_data_result.mappings()
-                # ]
+                author_meta_data_query = text(
+                    CommunityUtil.get_detail_author_meta_data()
+                )
+                author_meta_data_param = {"post_id": post_id, "user_email": user_email}
+                author_meta_data_result = s.execute(
+                    author_meta_data_query, author_meta_data_param
+                )
+                author_meta_data = [
+                    dict(row) for row in author_meta_data_result.mappings()
+                ]
 
                 # 게시글 목록 추가해야 함 - 이전이 이슈인지 카테고리인지 파악후 리턴을 해야 하는데 흠
 
@@ -182,7 +182,7 @@ class CommunityService:
                     "post_detail": post_detail[0],
                     "issue_posts": result_issue_posts,
                     "notice_posts": notice_posts,
-                    # "author_detail": author_meta_data[0],
+                    "author_detail": author_meta_data[0],
                 }
         except Exception as e:
             print("오류 발생:", e)
