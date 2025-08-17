@@ -206,7 +206,7 @@ class CommunityService:
                 )
                 current_page_num = (get_post_current_page_num.scalar() - 1) // limit + 1
 
-                offset = (current_page_num - 1) * 20
+                offset = (current_page_num - 1) * limit
 
                 get_post_params = {
                     "limit": limit,
