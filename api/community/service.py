@@ -182,7 +182,7 @@ class CommunityService:
                     "post_detail": post_detail[0],
                     "issue_posts": result_issue_posts,
                     "notice_posts": notice_posts,
-                    "author_detail": author_meta_data[0],
+                    # "author_detail": author_meta_data[0],
                 }
         except Exception as e:
             print("오류 발생:", e)
