@@ -1,4 +1,3 @@
-from PIL.ImageChops import offset
 from fastapi import UploadFile, File, HTTPException
 from api.community.community_res_models import (
     CommunityPosts,
@@ -22,7 +21,7 @@ from PIL import Image
 from minio import Minio
 from minio.error import S3Error
 import io
-from sqlalchemy import text, case, and_
+from sqlalchemy import text
 
 load_dotenv()
 snowflake = SnowflakeGenerator(datacenter_id=1, worker_id=1)
@@ -205,7 +204,7 @@ class CommunityService:
                     get_post_current_page_num_query,
                     {"category": page_category, "post_id": post_id},
                 )
-                current_page_num = (get_post_current_page_num.scalar() - 1) / limit + 1
+                current_page_num = (get_post_current_page_num.scalar() - 1) // limit + 1
 
                 offset = (current_page_num - 1) * 20
 
