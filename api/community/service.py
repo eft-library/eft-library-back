@@ -202,7 +202,8 @@ class CommunityService:
                     )
 
                 get_post_current_page_num = s.execute(
-                    get_post_current_page_num_query, {"category": page_category}
+                    get_post_current_page_num_query,
+                    {"category": page_category, "post_id": post_id},
                 )
                 current_page_num = (get_post_current_page_num - 1) / limit + 1
 
