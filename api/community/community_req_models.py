@@ -35,3 +35,4 @@ class CheckFollow(BaseModel):
 class GetPostDetail(BaseModel):
     url: str
     user_email: str
+    page_category: str

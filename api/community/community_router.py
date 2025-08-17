@@ -45,13 +45,8 @@ def create_posts(post_info: CreateCommunity, token: str = Depends(oauth2_scheme)
 
 
 @router.get("/{category}")
-def get_posts(
-    category: str,
-    page_num: int,
-    word: Optional[str] = Query("", description="검색어"),
-    search_type: str = Query("all", regex="^(all|title|comment|title_content)$"),
-):
-    result = CommunityService.get_posts(category, page_num, word, search_type)
+def get_posts(category: str, page_num: int):
+    result = CommunityService.get_posts(category, page_num)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -59,7 +54,9 @@ def get_posts(
 
 @router.post("/detail")
 def get_posts_detail(request_info: GetPostDetail):
-    result = CommunityService.get_detail_post(request_info.url, request_info.user_email)
+    result = CommunityService.get_detail_post(
+        request_info.url, request_info.user_email, request_info.page_category
+    )
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

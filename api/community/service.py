@@ -115,34 +115,40 @@ class CommunityService:
             return None
 
     @staticmethod
-    def get_posts(category: str, page_num: int, word: str, search_type):
+    def get_posts(category: str, page_num: int):
         try:
             limit, offset = 20, (page_num - 1) * 20
             session = DataBaseConnector.create_session_factory()
 
             with session() as s:
-                # 1. 기본 쿼리 생성
-                query = CommunityFunction.build_get_post_base_query(s)
-
-                # 2. 카테고리별 조건 적용
-                query = CommunityFunction.apply_category_filter(query, category)
-
-                # 3. 검색 조건 적용
-                query = CommunityFunction.apply_search_filter(query, word, search_type)
-
-                # 4. 게시글 목록 + 페이징 처리
-                total, max_page_count, result_posts = (
-                    CommunityFunction.fetch_and_format_results(query, limit, offset)
+                if category == "issue":
+                    get_post_query = CommunityUtil.get_posts_with_issue()
+                    get_post_count_query = CommunityUtil.get_post_issue_count()
+                else:
+                    get_post_query = CommunityUtil.get_posts_with_category()
+                    get_post_count_query = CommunityUtil.get_post_category_count()
+                get_post_params = {
+                    "limit": limit,
+                    "offset": offset,
+                    "category": category,
+                }
+                get_post_data_result = s.execute(get_post_query, get_post_params)
+                get_post_data = [dict(row) for row in get_post_data_result.mappings()]
+                get_post_count_result = s.execute(
+                    get_post_count_query, {"category": category}
                 )
+                total = get_post_count_result.scalar()
 
-                # 5. issue_posts & notice_posts 조회
+                max_page_count = (total + limit - 1) // limit
+
+                # issue_posts & notice_posts 조회
                 result_issue_posts = CommunityFunction.fetch_issue_posts(s)
                 notice_posts = CommunityFunction.fetch_notice_posts(s)
 
                 return {
                     "total": total,
                     "max_page_count": max_page_count,
-                    "posts": result_posts,
+                    "posts": get_post_data,
                     "issue_posts": result_issue_posts,
                     "notice_posts": notice_posts,
                 }
@@ -152,11 +158,13 @@ class CommunityService:
             return None
 
     @staticmethod
-    def get_detail_post(post_id_slug: str, user_email: str):
+    def get_detail_post(post_id_slug: str, user_email: str, page_category: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
+
+                # 게시글 상세 정보
                 post_detail_query = text(CommunityUtil.get_post_detail())
                 post_detail_param = {"post_id": post_id, "user_email": user_email}
                 post_detail_result = s.execute(post_detail_query, post_detail_param)
@@ -165,6 +173,7 @@ class CommunityService:
                 result_issue_posts = CommunityFunction.fetch_issue_posts(s)
                 notice_posts = CommunityFunction.fetch_notice_posts(s)
 
+                # 작성자 정보
                 author_meta_data_query = text(
                     CommunityUtil.get_detail_author_meta_data()
                 )
@@ -176,7 +185,9 @@ class CommunityService:
                     dict(row) for row in author_meta_data_result.mappings()
                 ]
 
-                # 게시글 목록 추가해야 함 - 이전이 이슈인지 카테고리인지 파악후 리턴을 해야 하는데 흠
+                # 게시글 목록
+                # get_posts 쓸 거를 여기에 쓸 수 있을 거 같음
+                # total, max_pages, current_page_num 필요
 
                 return {
                     "post_detail": post_detail[0],
@@ -368,7 +379,10 @@ class CommunityService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 check_follow_query = text(CommunityUtil.check_follow())
-                check_follow_param = {"author_email": author_email, "user_email": user_email}
+                check_follow_param = {
+                    "author_email": author_email,
+                    "user_email": user_email,
+                }
                 check_follow_result = s.execute(check_follow_query, check_follow_param)
                 check_follow = [dict(row) for row in check_follow_result.mappings()]
 
