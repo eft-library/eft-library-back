@@ -367,20 +367,12 @@ class CommunityService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                follower_status = s.query(
-                    case(
-                        (
-                            and_(
-                                UserFollows.following_email == user_email,
-                                UserFollows.follower_email == author_email,
-                            ),
-                            1,
-                        ),
-                        else_=0,
-                    )
-                ).scalar()
+                check_follow_query = text(CommunityUtil.check_follow())
+                check_follow_param = {"author_email": author_email, "user_email": user_email}
+                check_follow_result = s.execute(check_follow_query, check_follow_param)
+                check_follow = [dict(row) for row in check_follow_result.mappings()]
 
-                return {"is_follow": follower_status}
+                return check_follow[0]
         except Exception as e:
             print("오류 발생:", e)
             return None

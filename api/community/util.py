@@ -72,3 +72,13 @@ class CommunityUtil:
         where cp.id = :post_id
         group by cp.user_email, ui.nickname, uf.follower_email
         """
+
+    @staticmethod
+    def check_follow():
+        return """
+        SELECT
+            CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS is_follow
+        FROM user_follows
+        WHERE following_email = :user_email
+          AND follower_email = :author_email;
+        """
