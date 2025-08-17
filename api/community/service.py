@@ -122,11 +122,11 @@ class CommunityService:
 
             with session() as s:
                 if category == "issue":
-                    get_post_query = CommunityUtil.get_posts_with_issue()
-                    get_post_count_query = CommunityUtil.get_post_issue_count()
+                    get_post_query = text(CommunityUtil.get_posts_with_issue())
+                    get_post_count_query = text(CommunityUtil.get_post_issue_count())
                 else:
-                    get_post_query = CommunityUtil.get_posts_with_category()
-                    get_post_count_query = CommunityUtil.get_post_category_count()
+                    get_post_query = text(CommunityUtil.get_posts_with_category())
+                    get_post_count_query = text(CommunityUtil.get_post_category_count())
                 get_post_params = {
                     "limit": limit,
                     "offset": offset,
