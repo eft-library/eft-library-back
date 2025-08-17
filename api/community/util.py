@@ -59,6 +59,7 @@ class CommunityUtil:
         return """
         select cp.user_email,
                ui.nickname,
+               cp.id::text AS post_id,
                count(distinct cp2.id) as posts_count,
                count(cpr.post_id) filter (where cpr.reaction_type = 1) as like_count,
                case when uf.follower_email is not null then 1 else 0 end as is_follow
