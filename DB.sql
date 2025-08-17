@@ -765,3 +765,33 @@ CREATE TABLE community_posts_bookmark (
 COMMENT ON COLUMN community_posts_bookmark.user_email IS '사용자 이메일';
 COMMENT ON COLUMN community_posts_bookmark.post_id IS '북마크 게시글 아이디';
 COMMENT ON COLUMN community_posts_bookmark.create_time IS '북마크 시작 날짜';
+
+-- 댓글
+CREATE EXTENSION IF NOT EXISTS ltree;
+
+CREATE TABLE community_comments (
+    id TEXT PRIMARY KEY,                  -- nanoid
+    parent_id TEXT,
+    post_id BIGINT,
+    path LTREE,
+    user_email TEXT,
+    contents TEXT,
+    delete_by_user BOOLEAN NOT NULL DEFAULT FALSE,
+    delete_by_admin BOOLEAN NOT NULL DEFAULT FALSE,
+    create_time TIMESTAMP NOT NULL DEFAULT NOW(),
+    update_time TIMESTAMP NOT NULL DEFAULT NOW()
+);
+COMMENT ON COLUMN community_comments.id IS '댓글 nano id';
+COMMENT ON COLUMN community_comments.parent_id IS '부모 댓글 nano id';
+COMMENT ON COLUMN community_comments.post_id IS '작성 게시글 id';
+COMMENT ON COLUMN community_comments.path IS '댓글 LTREE';
+COMMENT ON COLUMN community_comments.user_email IS '작성자 이메일';
+COMMENT ON COLUMN community_comments.contents IS '내용';
+COMMENT ON COLUMN community_comments.DELETE_BY_USER IS '댓글 유저 삭제 여부';
+COMMENT ON COLUMN community_comments.DELETE_BY_ADMIN IS '댓글 관리자 삭제 여부';
+COMMENT ON COLUMN community_comments.create_time IS '작성 시간';
+COMMENT ON COLUMN community_comments.update_time IS '업데이트 날짜';
+
+-- 성능 인덱스
+CREATE INDEX idx_comments_path ON community_comments USING GIST (path);
+CREATE INDEX idx_comments_post_id ON community_comments (post_id);
