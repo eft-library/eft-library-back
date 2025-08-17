@@ -205,7 +205,7 @@ class CommunityService:
                     get_post_current_page_num_query,
                     {"category": page_category, "post_id": post_id},
                 )
-                current_page_num = (get_post_current_page_num - 1) / limit + 1
+                current_page_num = (get_post_current_page_num.scalar() - 1) / limit + 1
 
                 offset = (current_page_num - 1) * 20
 
