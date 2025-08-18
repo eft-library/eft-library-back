@@ -94,8 +94,14 @@ class CommentService:
                 }
                 comments = s.execute(get_comment_query, get_comment_param)
 
+                get_issue_comment_query = text(CommentUtil.get_issue_comment())
+                issue_comments = s.execute(
+                    get_issue_comment_query, {"post_id": post_id}
+                )
+
                 return {
                     "comments": comments,
+                    "issue_comments": issue_comments,
                     "total": total,
                     "max_page_count": max_page_count,
                     "current_page_num": current_page_num,
