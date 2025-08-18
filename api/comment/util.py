@@ -60,7 +60,7 @@ class CommentUtil:
                 SELECT
                     cc.id,
                     cc.parent_id,
-                    cc.post_id,
+                    cc.post_id::text AS post_id,
                     cc.path,
                     cc.contents,
                     cc.delete_by_admin,
@@ -82,7 +82,7 @@ class CommentUtil:
                 SELECT
                     c.id,
                     c.parent_id,
-                    c.post_id,
+                    c.post_id::text AS post_id,
                     c.path,
                     c.contents,
                     c.delete_by_admin,
@@ -133,7 +133,7 @@ class CommentUtil:
             SELECT 
                 c.id,
                 c.parent_id,
-                c.post_id,
+                c.post_id::text AS post_id,
                 c.path,
                 c.user_email,
                 c.contents,
