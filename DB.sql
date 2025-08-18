@@ -796,6 +796,12 @@ COMMENT ON COLUMN community_comments.update_time IS '업데이트 날짜';
 CREATE INDEX idx_comments_path ON community_comments USING GIST (path);
 CREATE INDEX idx_comments_post_id ON community_comments (post_id);
 
+-- ilike 검색 인덱스
+create extension if not exists pg_trgm;
+create index idx_posts_title_trgm on community_posts using gin (title gin_trgm_ops);
+create index idx_posts_contents_trgm on community_posts using gin (contents gin_trgm_ops);
+create index idx_comments_contents_trgm on community_comments using gin (contents gin_trgm_ops);
+
 CREATE TABLE community_comments_reactions (
     comment_id TEXT,
     user_email TEXT,
