@@ -2,6 +2,8 @@ from api.comment.util import CommentUtil
 from database import DataBaseConnector
 from sqlalchemy import text
 from nanoid import generate
+from api.comment.comment_res_models import CommentReaction
+from datetime import datetime
 
 
 class CommentService:
@@ -106,6 +108,90 @@ class CommentService:
                     "max_page_count": max_page_count,
                     "current_page_num": current_page_num,
                 }
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def like_comment(comment_id: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                # 기존 reaction 조회
+                reaction = (
+                    s.query(CommentReaction)
+                    .filter(
+                        CommentReaction.comment_id == comment_id,
+                        CommentReaction.user_email == user_email,
+                    )
+                    .first()
+                )
+
+                if reaction:
+                    # 기존 값에 따라 변경
+                    if reaction.reaction_type == 0:
+                        reaction.reaction_type = 1
+                    elif reaction.reaction_type == 1:
+                        reaction.reaction_type = -1
+                    elif reaction.reaction_type == -1:
+                        reaction.reaction_type = 1
+                    # update_time 갱신
+                    reaction.update_time = datetime.now()
+                else:
+                    # 없으면 새로 생성 (1로 시작)
+                    reaction = CommentReaction(
+                        comment_id=comment_id,
+                        user_email=user_email,
+                        reaction_type=1,
+                        update_time=datetime.now(),
+                    )
+                    s.add(reaction)
+
+                s.commit()
+                return {"result": reaction.reaction_type}  # 현재 상태 반환
+
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def dislike_comment(comment_id: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                # 기존 reaction 조회
+                reaction = (
+                    s.query(CommentReaction)
+                    .filter(
+                        CommentReaction.comment_id == comment_id,
+                        CommentReaction.user_email == user_email,
+                    )
+                    .first()
+                )
+
+                if reaction:
+                    # 기존 값에 따라 변경
+                    if reaction.reaction_type == 0:
+                        reaction.reaction_type = -1
+                    elif reaction.reaction_type == 1:
+                        reaction.reaction_type = 0
+                    elif reaction.reaction_type == -1:
+                        reaction.reaction_type = 0
+                    # update_time 갱신
+                    reaction.update_time = datetime.now()
+                else:
+                    # 없으면 새로 생성 (0으로 시작)
+                    reaction = CommentReaction(
+                        comment_id=comment_id,
+                        user_email=user_email,
+                        reaction_type=0,
+                        update_time=datetime.now(),
+                    )
+                    s.add(reaction)
+
+                s.commit()
+                return {"result": reaction.reaction_type}  # 현재 상태 반환
+
         except Exception as e:
             print("오류 발생:", e)
             return None
