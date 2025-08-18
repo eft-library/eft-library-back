@@ -58,26 +58,37 @@ class CommentService:
             limit = 20
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                rn_start = (page_num - 1) * limit + 1
-                rn_end = page_num + limit
-                get_comment_query = text(CommentUtil.get_comment())
-                get_comment_param = {
-                    "post_id": post_id,
-                    "rn_start": rn_start,
-                    "rn_edn": rn_end,
-                }
-                comments = s.execute(get_comment_query, get_comment_param)
-
+                # 전체 개수 조회
                 total_query = text(CommentUtil.get_comment_total_count())
                 total_result = s.execute(total_query, {"post_id": post_id})
                 total = total_result.scalar()
 
+                # 최대 페이지 수
                 max_page_count = (total + limit - 1) // limit
+
+                # 마지막 페이지 요청 (page_num == 0)
+                if page_num == 0:
+                    current_page_num = max_page_count
+                else:
+                    current_page_num = page_num
+
+                # rn_start, rn_end 계산
+                rn_start = (current_page_num - 1) * limit + 1
+                rn_end = current_page_num * limit
+
+                get_comment_query = text(CommentUtil.get_comment())
+                get_comment_param = {
+                    "post_id": post_id,
+                    "rn_start": rn_start,
+                    "rn_end": rn_end,
+                }
+                comments = s.execute(get_comment_query, get_comment_param)
 
                 return {
                     "comments": comments,
                     "total": total,
                     "max_page_count": max_page_count,
+                    "current_page_num": current_page_num,
                 }
         except Exception as e:
             print("오류 발생:", e)

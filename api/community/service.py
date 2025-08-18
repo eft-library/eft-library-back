@@ -160,83 +160,22 @@ class CommunityService:
     @staticmethod
     def get_detail_post(post_id_slug: str, user_email: str, page_category: str):
         try:
-            limit = 20
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
 
-                # 게시글 상세 정보
-                post_detail_query = text(CommunityUtil.get_post_detail())
-                post_detail_param = {"post_id": post_id, "user_email": user_email}
-                post_detail_result = s.execute(post_detail_query, post_detail_param)
-                post_detail = [dict(row) for row in post_detail_result.mappings()]
-
-                result_issue_posts = CommunityFunction.fetch_issue_posts(s)
-                notice_posts = CommunityFunction.fetch_notice_posts(s)
-
-                # 작성자 정보
-                author_meta_data_query = text(
-                    CommunityUtil.get_detail_author_meta_data()
-                )
-                author_meta_data_param = {"post_id": post_id, "user_email": user_email}
-                author_meta_data_result = s.execute(
-                    author_meta_data_query, author_meta_data_param
-                )
-                author_meta_data = [
-                    dict(row) for row in author_meta_data_result.mappings()
-                ]
-
-                # 게시글 목록
-                if page_category == "issue":
-                    get_post_query = text(CommunityUtil.get_posts_with_issue())
-                    get_post_count_query = text(CommunityUtil.get_post_issue_count())
-                    get_post_current_page_num_query = text(
-                        CommunityUtil.get_current_post_issue_page_num()
-                    )
-                else:
-                    get_post_query = text(CommunityUtil.get_posts_with_category())
-                    get_post_count_query = text(CommunityUtil.get_post_category_count())
-                    get_post_current_page_num_query = text(
-                        CommunityUtil.get_current_post_category_page_num()
-                    )
-
-                get_post_current_page_num = s.execute(
-                    get_post_current_page_num_query,
-                    {"category": page_category, "post_id": post_id},
-                )
-                posts_current_page_num = (
-                    get_post_current_page_num.scalar() - 1
-                ) // limit + 1
-
-                offset = (posts_current_page_num - 1) * limit
-
-                get_post_params = {
-                    "limit": limit,
-                    "offset": offset,
-                    "category": page_category,
-                }
-                get_post_data_result = s.execute(get_post_query, get_post_params)
-                get_post_data = [dict(row) for row in get_post_data_result.mappings()]
-
-                # total, max_pages, current_page_num 필요
-                get_post_count_result = s.execute(
-                    get_post_count_query, {"category": page_category}
-                )
-                posts_total = get_post_count_result.scalar()
-
-                max_posts_page_count = (posts_total + limit - 1) // limit
-
                 return {
-                    "post_detail": post_detail[0],
-                    "issue_posts": result_issue_posts,
-                    "notice_posts": notice_posts,
-                    "author_detail": author_meta_data[0],
-                    "posts": {
-                        "total": posts_total,
-                        "max_page_count": max_posts_page_count,
-                        "posts": get_post_data,
-                        "current_page_num": posts_current_page_num,
-                    },
+                    "post_detail": CommunityFunction.fetch_post_detail(
+                        s, post_id, user_email
+                    ),
+                    "issue_posts": CommunityFunction.fetch_issue_posts(s),
+                    "notice_posts": CommunityFunction.fetch_notice_posts(s),
+                    "author_detail": CommunityFunction.fetch_author_meta(
+                        s, post_id, user_email
+                    ),
+                    "posts": CommunityFunction.fetch_posts_with_paging(
+                        s, post_id, page_category
+                    ),
                 }
         except Exception as e:
             print("오류 발생:", e)

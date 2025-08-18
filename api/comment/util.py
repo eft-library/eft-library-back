@@ -114,6 +114,20 @@ class CommentUtil:
         """
 
     @staticmethod
+    def get_issue_comment_page():
+        return """
+            WITH ordered AS (
+                SELECT
+                    id,
+                    ROW_NUMBER() OVER (ORDER BY path, create_time) AS row_num
+                FROM tree
+            )
+            SELECT CEIL(row_num / :limit::float) AS page_num
+            FROM ordered
+            WHERE id = :comment_id        
+        """
+
+    @staticmethod
     def my_page_comment():
         return """
         """
