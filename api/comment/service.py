@@ -62,9 +62,10 @@ class CommentService:
             limit = 20
             session = DataBaseConnector.create_session_factory()
             with session() as s:
+                bigint_post_id = int(post_id)
                 # 전체 개수 조회
                 total_query = text(CommentUtil.get_comment_total_count())
-                total_result = s.execute(total_query, {"post_id": post_id})
+                total_result = s.execute(total_query, {"post_id": bigint_post_id})
                 total = total_result.scalar()
 
                 # 최대 페이지 수
@@ -80,7 +81,7 @@ class CommentService:
                     )
                     current_issue_comment_page_result = s.execute(
                         current_issue_comment_page_query,
-                        {"post_id": post_id, "comment_id": issue_comment_id},
+                        {"post_id": bigint_post_id, "comment_id": issue_comment_id},
                     )
                     current_page_num = current_issue_comment_page_result.scalar()
                 else:
@@ -92,7 +93,7 @@ class CommentService:
                 # comment 조회할 때 user_email로 좋아요인지 싫어요인지 가져와야 함
                 get_comment_query = text(CommentUtil.get_comment())
                 get_comment_param = {
-                    "post_id": post_id,
+                    "post_id": bigint_post_id,
                     "rn_start": rn_start,
                     "rn_end": rn_end,
                 }
@@ -100,7 +101,7 @@ class CommentService:
 
                 get_issue_comment_query = text(CommentUtil.get_issue_comment())
                 issue_comments = s.execute(
-                    get_issue_comment_query, {"post_id": post_id}
+                    get_issue_comment_query, {"post_id": bigint_post_id}
                 )
 
                 return {
