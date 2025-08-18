@@ -1,6 +1,4 @@
-from typing import Optional
-
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Query
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from api.response import CustomResponse
 from fastapi.security import OAuth2PasswordBearer
 from api.user.util import UserUtil

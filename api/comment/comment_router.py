@@ -1,0 +1,48 @@
+from fastapi import APIRouter, Depends
+from api.response import CustomResponse
+from fastapi.security import OAuth2PasswordBearer
+from api.user.util import UserUtil
+from util.constants import HTTPCode
+from api.constants import Message
+from api.comment.service import CommentService
+from api.comment.comment_req_models import InsertParentComment, InsertChildComment
+
+
+router = APIRouter(tags=["Comment"])
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
+
+
+@router.post("/insert_parent_comment")
+def insert_parent_comment(
+    request_info: InsertParentComment, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommentService.insert_parent_comment(
+            request_info.post_id, request_info.contents, user_email
+        )
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/insert_child_comment")
+def insert_child_comment(
+    request_info: InsertChildComment, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommentService.inset_child_comment(
+            request_info.post_id,
+            request_info.parent_comment_id,
+            request_info.contents,
+            user_email,
+        )
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)

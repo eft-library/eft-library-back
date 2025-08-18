@@ -795,3 +795,15 @@ COMMENT ON COLUMN community_comments.update_time IS '업데이트 날짜';
 -- 성능 인덱스
 CREATE INDEX idx_comments_path ON community_comments USING GIST (path);
 CREATE INDEX idx_comments_post_id ON community_comments (post_id);
+
+CREATE TABLE community_comments_reactions (
+    comment_id TEXT,
+    user_email TEXT,
+    reaction_type SMALLINT NOT NULL,
+    update_time TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (comment_id, user_email)
+);
+COMMENT ON COLUMN community_comments_reactions.comment_id IS '댓글 nano 아이디';
+COMMENT ON COLUMN community_comments_reactions.user_email IS '리액션 누른 사용자 이메일';
+COMMENT ON COLUMN community_comments_reactions.reaction_type IS '리액션 종류 (1: 좋아요, 0: 싫어요, -1:무반응)';
+COMMENT ON COLUMN community_comments_reactions.update_time IS '리액선 시간';

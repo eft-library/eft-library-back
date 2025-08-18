@@ -204,9 +204,11 @@ class CommunityService:
                     get_post_current_page_num_query,
                     {"category": page_category, "post_id": post_id},
                 )
-                current_page_num = (get_post_current_page_num.scalar() - 1) // limit + 1
+                posts_current_page_num = (
+                    get_post_current_page_num.scalar() - 1
+                ) // limit + 1
 
-                offset = (current_page_num - 1) * limit
+                offset = (posts_current_page_num - 1) * limit
 
                 get_post_params = {
                     "limit": limit,
@@ -220,9 +222,9 @@ class CommunityService:
                 get_post_count_result = s.execute(
                     get_post_count_query, {"category": page_category}
                 )
-                total = get_post_count_result.scalar()
+                posts_total = get_post_count_result.scalar()
 
-                max_page_count = (total + limit - 1) // limit
+                max_posts_page_count = (posts_total + limit - 1) // limit
 
                 return {
                     "post_detail": post_detail[0],
@@ -230,10 +232,10 @@ class CommunityService:
                     "notice_posts": notice_posts,
                     "author_detail": author_meta_data[0],
                     "posts": {
-                        "total": total,
-                        "max_page_count": max_page_count,
+                        "total": posts_total,
+                        "max_page_count": max_posts_page_count,
                         "posts": get_post_data,
-                        "current_page_num": current_page_num,
+                        "current_page_num": posts_current_page_num,
                     },
                 }
         except Exception as e:
