@@ -12,3 +12,10 @@ class InsertChildComment(InsertParentComment):
 
 class CommentReaction(BaseModel):
     comment_id: str
+
+
+class GetComments(BaseModel):
+    post_id: str
+    issue_comment_id: str
+    page_num: int
+    user_email: str

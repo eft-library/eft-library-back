@@ -55,7 +55,9 @@ class CommentService:
             return None
 
     @staticmethod
-    def get_comment(post_id: str, page_num: int, issue_comment_id: str):
+    def get_comment(
+        post_id: str, page_num: int, issue_comment_id: str, user_email: str
+    ):
         try:
             limit = 20
             session = DataBaseConnector.create_session_factory()
@@ -87,7 +89,7 @@ class CommentService:
                 # rn_start, rn_end 계산
                 rn_start = (current_page_num - 1) * limit + 1
                 rn_end = current_page_num * limit
-
+                # comment 조회할 때 user_email로 좋아요인지 싫어요인지 가져와야 함
                 get_comment_query = text(CommentUtil.get_comment())
                 get_comment_param = {
                     "post_id": post_id,

@@ -9,6 +9,7 @@ from api.comment.comment_req_models import (
     InsertParentComment,
     InsertChildComment,
     CommentReaction,
+    GetComments,
 )
 
 
@@ -50,6 +51,19 @@ def insert_child_comment(
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/get_comments")
+def get_comments(request_info: GetComments):
+    result = CommentService.get_comment(
+        request_info.post_id,
+        request_info.page_num,
+        request_info.issue_comment_id,
+        request_info.user_email,
+    )
+    if result is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
 @router.post("/like_comment")
