@@ -67,17 +67,13 @@ class CommentUtil:
                     cc.delete_by_user,
                     cc.create_time,
                     cc.update_time,
-                    COALESCE(SUM(CASE WHEN ccr.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
-                    COALESCE(SUM(CASE WHEN ccr.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS dislike_count,
                     nlevel(cc.path) AS depth
                 FROM community_comments cc
-                         LEFT JOIN community_comments_reactions ccr ON ccr.comment_id = cc.id
                 WHERE cc.post_id = :post_id
-                  AND nlevel(cc.path) = :post_id
-                GROUP BY cc.id
-            
+                  AND nlevel(cc.path) = 1   -- 최상위 댓글 레벨
+                
                 UNION ALL
-            
+                
                 -- 대댓글
                 SELECT
                     c.id,
@@ -89,22 +85,23 @@ class CommentUtil:
                     c.delete_by_user,
                     c.create_time,
                     c.update_time,
-                    COALESCE(SUM(CASE WHEN ccr.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
-                    COALESCE(SUM(CASE WHEN ccr.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS dislike_count,
                     nlevel(c.path) AS depth
                 FROM community_comments c
-                         JOIN tree t ON c.parent_id = t.id
-                         LEFT JOIN community_comments_reactions ccr ON ccr.comment_id = c.id
+                JOIN tree t ON c.parent_id = t.id
                 WHERE c.post_id = :post_id
-                GROUP BY c.id
             )
-            SELECT *
-            FROM (
-                     SELECT *, row_number() OVER (ORDER BY path, create_time) AS rn
-                     FROM tree
-                 ) t
-            WHERE rn BETWEEN :rn_start AND :rn_end
-            ORDER BY pat
+            -- 여기서 reaction join
+            SELECT
+                t.*,
+                COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
+                COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS dislike_count,
+                row_number() OVER (ORDER BY t.path, t.create_time) AS rn
+            FROM tree t
+            LEFT JOIN community_comments_reactions r ON r.comment_id = t.id
+            GROUP BY t.id, t.parent_id, t.post_id, t.path, t.contents,
+                     t.delete_by_admin, t.delete_by_user, t.create_time, t.update_time, t.depth
+            HAVING row_number() OVER (ORDER BY t.path, t.create_time) BETWEEN :rn_start AND :rn_end
+            ORDER BY t.path, t.create_time
         """
 
     @staticmethod
