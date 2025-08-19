@@ -109,13 +109,13 @@ class CommentUtil:
             ),
             ranked AS (
                 SELECT a.*,
-                       ROW_NUMBER() OVER (ORDER BY a.path, a.create_time) AS rn
+                       ROW_NUMBER() OVER (ORDER BY a.create_time) AS rn
                 FROM aggregated a
             )
             SELECT *
             FROM ranked
             WHERE rn BETWEEN :rn_start AND :rn_end
-            ORDER BY path, create_time
+            ORDER BY create_time
         """
 
     @staticmethod
