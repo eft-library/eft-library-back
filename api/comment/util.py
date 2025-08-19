@@ -89,26 +89,33 @@ class CommentUtil:
                 FROM community_comments c
                 JOIN tree t ON c.parent_id = t.id
                 WHERE c.post_id = :post_id
-            )
-            -- 리액션 집계 + 페이징
-            SELECT *
-            FROM (
+            ),
+            aggregated AS (   
                 SELECT
                     t.*,
                     COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
                     COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS dislike_count,
-                    ROW_NUMBER() OVER (ORDER BY t.path, t.create_time) AS rn,
                     ui.nickname,
                     COALESCE(ccr.reaction_type, -1) AS is_like
                 FROM tree t
-                LEFT JOIN community_comments_reactions r ON r.comment_id = t.id
-                LEFT JOIN community_comments_reactions ccr on r.comment_id = ccr.comment_id and ccr.user_email = :user_email
-                JOIN user_info ui on t.user_email = ui.email
+                LEFT JOIN community_comments_reactions r 
+                       ON r.comment_id = t.id
+                LEFT JOIN community_comments_reactions ccr 
+                       ON t.id = ccr.comment_id AND ccr.user_email = :user_email
+                JOIN user_info ui 
+                       ON t.user_email = ui.email
                 GROUP BY t.id, t.parent_id, t.post_id, t.user_email, t.path, t.contents,
                          t.delete_by_admin, t.delete_by_user, t.create_time, t.update_time, t.depth, ui.nickname, ccr.reaction_type
-            ) ranked
-            WHERE ranked.rn BETWEEN :rn_start AND :rn_end
-            ORDER BY ranked.path, ranked.create_time
+            ),
+            ranked AS (
+                SELECT a.*,
+                       ROW_NUMBER() OVER (ORDER BY a.path, a.create_time) AS rn
+                FROM aggregated a
+            )
+            SELECT *
+            FROM ranked
+            WHERE rn BETWEEN :rn_start AND :rn_end
+            ORDER BY path, create_time
         """
 
     @staticmethod
