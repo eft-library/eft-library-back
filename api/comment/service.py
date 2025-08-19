@@ -94,6 +94,7 @@ class CommentService:
                 get_comment_query = text(CommentUtil.get_comment())
                 get_comment_param = {
                     "post_id": bigint_post_id,
+                    "user_email": user_email,
                     "rn_start": rn_start,
                     "rn_end": rn_end,
                 }
