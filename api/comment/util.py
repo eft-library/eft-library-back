@@ -62,35 +62,37 @@ class CommentUtil:
                     cc.parent_id,
                     cc.post_id::text AS post_id,
                     cc.user_email,
-                    cc.path,
                     cc.contents,
                     cc.delete_by_admin,
                     cc.delete_by_user,
                     cc.create_time,
                     cc.update_time,
-                    nlevel(cc.path) AS depth
+                    1 AS depth,
+                    ARRAY[EXTRACT(EPOCH FROM cc.create_time)::BIGINT] AS sort_path
                 FROM community_comments cc
                 WHERE cc.post_id = :post_id
-                  AND nlevel(cc.path) = 1
+                  AND cc.parent_id IS NULL
+            
                 UNION ALL
-                -- 대댓글 (재귀)
+            
+                -- 대댓글
                 SELECT
                     c.id,
                     c.parent_id,
                     c.post_id::text AS post_id,
                     c.user_email,
-                    c.path,
                     c.contents,
                     c.delete_by_admin,
                     c.delete_by_user,
                     c.create_time,
                     c.update_time,
-                    nlevel(c.path) AS depth
+                    t.depth + 1 AS depth,
+                    t.sort_path || EXTRACT(EPOCH FROM c.create_time)::BIGINT
                 FROM community_comments c
                 JOIN tree t ON c.parent_id = t.id
                 WHERE c.post_id = :post_id
             ),
-            aggregated AS (   
+            aggregated AS (
                 SELECT
                     t.*,
                     COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
@@ -104,18 +106,18 @@ class CommentUtil:
                        ON t.id = ccr.comment_id AND ccr.user_email = :user_email
                 JOIN user_info ui 
                        ON t.user_email = ui.email
-                GROUP BY t.id, t.parent_id, t.post_id, t.user_email, t.path, t.contents,
-                         t.delete_by_admin, t.delete_by_user, t.create_time, t.update_time, t.depth, ui.nickname, ccr.reaction_type
+                GROUP BY t.id, t.parent_id, t.post_id, t.user_email, t.contents,
+                         t.delete_by_admin, t.delete_by_user, t.create_time, t.update_time, t.depth, t.sort_path, ui.nickname, ccr.reaction_type
             ),
             ranked AS (
                 SELECT a.*,
-                       ROW_NUMBER() OVER (ORDER BY a.create_time) AS rn
+                       ROW_NUMBER() OVER (ORDER BY a.sort_path) AS rn
                 FROM aggregated a
             )
             SELECT *
             FROM ranked
             WHERE rn BETWEEN :rn_start AND :rn_end
-            ORDER BY create_time
+            ORDER BY sort_path
         """
 
     @staticmethod
