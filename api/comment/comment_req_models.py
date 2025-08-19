@@ -8,6 +8,8 @@ class InsertParentComment(BaseModel):
 
 class InsertChildComment(InsertParentComment):
     parent_comment_id: str
+    contents: str
+    post_id: str
 
 
 class CommentReaction(BaseModel):
