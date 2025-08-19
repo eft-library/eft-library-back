@@ -23,7 +23,7 @@ class CommentService:
                     "user_email": user_email,
                 }
                 s.execute(insert_comment_query, insert_comment_params)
-
+                s.commit()
                 return {"result": 1}
         except Exception as e:
             print("오류 발생:", e)
@@ -48,7 +48,7 @@ class CommentService:
                     "user_email": user_email,
                 }
                 s.execute(insert_comment_query, insert_comment_params)
-
+                s.commit()
                 return {"result": 1}
         except Exception as e:
             print("오류 발생:", e)
