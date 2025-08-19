@@ -105,8 +105,8 @@ class CommentService:
                 )
 
                 return {
-                    "comments": comments,
-                    "issue_comments": issue_comments,
+                    "comments": [dict(row) for row in comments.mappings()],
+                    "issue_comments": [dict(row) for row in issue_comments.mappings()],
                     "total": total,
                     "max_page_count": max_page_count,
                     "current_page_num": current_page_num,
