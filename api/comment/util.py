@@ -9,7 +9,7 @@ class CommentUtil:
                 NULL,            -- parent_id 없음
                 :post_id,               -- post_id
                 :contents,
-                :comment_id::ltree,  -- path = id
+                CAST(:comment_id AS ltree),  -- path = id
                 :user_email
             )        
         """
@@ -28,7 +28,7 @@ class CommentUtil:
                 :parent_comment_id,       -- parent_id
                 :post_id,               -- post_id
                 :contents,
-                parent.path || :comment_id::ltree,  -- path = 부모 path + 새 id
+                parent.path || CAST(:comment_id AS ltree),  -- path = 부모 path + 새 id
                 :user_email
             FROM parent  
         """
