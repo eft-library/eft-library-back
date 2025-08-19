@@ -70,11 +70,11 @@ class CommentUtil:
                     nlevel(cc.path) AS depth
                 FROM community_comments cc
                 WHERE cc.post_id = :post_id
-                  AND nlevel(cc.path) = 1   -- 최상위 댓글 레벨
+                  AND nlevel(cc.path) = 1
                 
                 UNION ALL
                 
-                -- 대댓글
+                -- 대댓글 (재귀)
                 SELECT
                     c.id,
                     c.parent_id,
@@ -90,18 +90,22 @@ class CommentUtil:
                 JOIN tree t ON c.parent_id = t.id
                 WHERE c.post_id = :post_id
             )
-            -- 여기서 reaction join
-            SELECT
-                t.*,
-                COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
-                COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS dislike_count,
-                row_number() OVER (ORDER BY t.path, t.create_time) AS rn
-            FROM tree t
-            LEFT JOIN community_comments_reactions r ON r.comment_id = t.id
-            GROUP BY t.id, t.parent_id, t.post_id, t.path, t.contents,
-                     t.delete_by_admin, t.delete_by_user, t.create_time, t.update_time, t.depth
-            HAVING row_number() OVER (ORDER BY t.path, t.create_time) BETWEEN :rn_start AND :rn_end
-            ORDER BY t.path, t.create_time
+            
+            -- 리액션 집계 + 페이징
+            SELECT *
+            FROM (
+                SELECT
+                    t.*,
+                    COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
+                    COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS dislike_count,
+                    ROW_NUMBER() OVER (ORDER BY t.path, t.create_time) AS rn
+                FROM tree t
+                LEFT JOIN community_comments_reactions r ON r.comment_id = t.id
+                GROUP BY t.id, t.parent_id, t.post_id, t.path, t.contents,
+                         t.delete_by_admin, t.delete_by_user, t.create_time, t.update_time, t.depth
+            ) ranked
+            WHERE ranked.rn BETWEEN :rn_start AND :rn_end
+            ORDER BY ranked.path, ranked.create_time
         """
 
     @staticmethod
