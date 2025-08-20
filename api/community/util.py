@@ -16,6 +16,9 @@ class CommunityUtil:
                    cp.create_time,
                    cp.update_time,
                    cpv.view_count                           as view_count,
+                    coalesce((SELECT COUNT(*)
+                              FROM community_comments cc
+                              WHERE cc.post_id = cp.id), 0) AS comment_count,
                    coalesce((SELECT SUM(CASE
                                             WHEN cpr.reaction_type = 1 THEN 1
                                             WHEN cpr.reaction_type = 0 THEN -1
@@ -25,6 +28,7 @@ class CommunityUtil:
             from community_posts cp
                      LEFT JOIN user_info ui on cp.user_email = ui.email
                      LEFT JOIN community_posts_views cpv on cp.id = cpv.post_id
+                     LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
             where cp.category = :category
             order by cp.create_time desc
             limit :limit 
@@ -49,37 +53,37 @@ class CommunityUtil:
     @staticmethod
     def get_posts_with_issue():
         return """
-            select cphi.post_id::text AS id,
-                   cphi.issue_time,
-                   cp.slug,
-                   cp.user_email,
-                   ui.nickname,
-                   cp.category,
-                   cp.title,
-                   cp.contents,
-                   cp.thumbnail,
-                   cp.delete_by_user,
-                   cp.delete_by_admin,
-                   cp.create_time,
-                   cp.update_time,
-                   cpv.view_count                           as view_count,
-                    coalesce((SELECT COUNT(*)
-                              FROM community_comments cc
-                              WHERE cc.post_id = cp.id), 0) AS comment_count,
-                   coalesce((SELECT SUM(CASE
-                                            WHEN cpr.reaction_type = 1 THEN 1
-                                            WHEN cpr.reaction_type = 0 THEN -1
-                                            ELSE 0 END) AS reaction_score
-                             FROM community_posts_reactions cpr
-                             where cpr.post_id = cp.id), 0) as reaction_score
-            from community_posts_hot_issue cphi
-                     LEFT JOIN community_posts cp on cphi.post_id = cp.id
-                     LEFT JOIN user_info ui on cp.user_email = ui.email
-                     LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
-                     LEFT JOIN community_posts_views cpv on cphi.post_id = cpv.post_id
-            order by cphi.issue_time desc
-            limit :limit 
-            offset :offset
+            SELECT
+                cphi.post_id::text AS id,
+                cphi.issue_time,
+                cp.slug,
+                cp.user_email,
+                ui.nickname,
+                cp.category,
+                cp.title,
+                cp.contents,
+                cp.thumbnail,
+                cp.delete_by_user,
+                cp.delete_by_admin,
+                cp.create_time,
+                cp.update_time,
+                cpv.view_count AS view_count,
+                coalesce((SELECT COUNT(*)
+                          FROM community_comments cc
+                          WHERE cc.post_id = cp.id), 0) AS comment_count,
+                coalesce((SELECT SUM(CASE
+                                         WHEN cpr.reaction_type = 1 THEN 1
+                                         WHEN cpr.reaction_type = 0 THEN -1
+                                         ELSE 0 END) AS reaction_score
+                          FROM community_posts_reactions cpr
+                          WHERE cpr.post_id = cp.id), 0) AS reaction_score
+            FROM community_posts_hot_issue cphi
+            LEFT JOIN community_posts cp ON cphi.post_id = cp.id
+            LEFT JOIN user_info ui ON cp.user_email = ui.email
+            LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
+            ORDER BY cphi.issue_time DESC
+            LIMIT :limit 
+            OFFSET :offset
         """
 
     @staticmethod
