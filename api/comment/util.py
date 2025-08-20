@@ -141,16 +141,37 @@ class CommentUtil:
     @staticmethod
     def get_issue_comment_page():
         return """
-            WITH ordered AS (
+            WITH RECURSIVE tree AS (
+                SELECT
+                    cc.id,
+                    cc.parent_id,
+                    cc.post_id::text AS post_id,
+                    cc.create_time,
+                    ARRAY[EXTRACT(EPOCH FROM cc.create_time)::BIGINT] AS sort_path
+                FROM community_comments cc
+                WHERE cc.post_id = :post_id AND cc.parent_id IS NULL
+            
+                UNION ALL
+            
                 SELECT
                     c.id,
-                    ROW_NUMBER() OVER (ORDER BY c.path, c.create_time) AS row_num
+                    c.parent_id,
+                    c.post_id::text AS post_id,
+                    c.create_time,
+                    t.sort_path || EXTRACT(EPOCH FROM c.create_time)::BIGINT
                 FROM community_comments c
+                JOIN tree t ON c.parent_id = t.id
                 WHERE c.post_id = :post_id
+            ),
+            ordered AS (
+                SELECT
+                    t.id,
+                    ROW_NUMBER() OVER (ORDER BY t.sort_path) AS row_num
+                FROM tree t
             )
             SELECT CEIL(row_num / CAST(:limit AS numeric)) AS page_num
             FROM ordered
-            WHERE id = :comment_id        
+            WHERE id = :comment_id       
         """
 
     @staticmethod
