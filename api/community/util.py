@@ -63,6 +63,9 @@ class CommunityUtil:
                    cp.create_time,
                    cp.update_time,
                    cpv.view_count                           as view_count,
+                    coalesce((SELECT COUNT(*)
+                              FROM community_comments cc
+                              WHERE cc.post_id = cp.id), 0) AS comment_count,
                    coalesce((SELECT SUM(CASE
                                             WHEN cpr.reaction_type = 1 THEN 1
                                             WHEN cpr.reaction_type = 0 THEN -1
@@ -72,6 +75,7 @@ class CommunityUtil:
             from community_posts_hot_issue cphi
                      LEFT JOIN community_posts cp on cphi.post_id = cp.id
                      LEFT JOIN user_info ui on cp.user_email = ui.email
+                     LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                      LEFT JOIN community_posts_views cpv on cphi.post_id = cpv.post_id
             order by cphi.issue_time desc
             limit :limit 
