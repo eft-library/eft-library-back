@@ -28,7 +28,6 @@ class CommunityUtil:
             from community_posts cp
                      LEFT JOIN user_info ui on cp.user_email = ui.email
                      LEFT JOIN community_posts_views cpv on cp.id = cpv.post_id
-                     LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
             where cp.category = :category
             order by cp.create_time desc
             limit :limit 
