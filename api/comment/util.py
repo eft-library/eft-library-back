@@ -166,6 +166,7 @@ class CommentUtil:
                 c.delete_by_admin,
                 c.create_time,
                 c.update_time,
+                nlevel(c.path) AS depth,
                 -- 좋아요 / 싫어요 개수
                 COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
                 COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS dislike_count,
