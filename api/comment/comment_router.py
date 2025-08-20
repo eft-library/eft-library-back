@@ -10,6 +10,8 @@ from api.comment.comment_req_models import (
     InsertChildComment,
     CommentReaction,
     GetComments,
+    UpdateComment,
+    DeleteComment,
 )
 
 
@@ -83,6 +85,48 @@ def dislike_comment(request_info: CommentReaction, token: str = Depends(oauth2_s
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
         result = CommentService.dislike_comment(request_info.comment_id, user_email)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/update_comment")
+def update_comment(request_info: UpdateComment, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommentService.update_comment(
+            request_info.comment_id, request_info.contents
+        )
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/delete_comment_by_admin")
+def delete_comment_by_admin(
+    request_info: DeleteComment, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommentService.delete_comment_by_admin(request_info.comment_id)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/delete_comment_by_user")
+def delete_comment_by_user(
+    request_info: DeleteComment, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommentService.delete_comment_by_user(request_info.comment_id)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

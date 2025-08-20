@@ -117,6 +117,58 @@ class CommentService:
             return None
 
     @staticmethod
+    def update_comment(comment_id: str, contents: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                update_comment_query = text(CommentUtil.update_comment())
+                update_comment_params = {
+                    "comment_id": comment_id,
+                    "contents": contents,
+                    "update_time": datetime.now(),
+                }
+                s.execute(update_comment_query, update_comment_params)
+                s.commit()
+                return {"result": 1}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def delete_comment_by_user(comment_id: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                delete_comment_query = text(CommentUtil.delete_comment_by_user())
+                delete_comment_params = {
+                    "comment_id": comment_id,
+                    "update_time": datetime.now(),
+                }
+                s.execute(delete_comment_query, delete_comment_params)
+                s.commit()
+                return {"result": 1}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def delete_comment_by_admin(comment_id: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                delete_comment_query = text(CommentUtil.delete_comment_by_admin())
+                delete_comment_params = {
+                    "comment_id": comment_id,
+                    "update_time": datetime.now(),
+                }
+                s.execute(delete_comment_query, delete_comment_params)
+                s.commit()
+                return {"result": 1}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
     def like_comment(comment_id: str, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()

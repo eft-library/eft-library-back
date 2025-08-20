@@ -14,6 +14,7 @@ from api.community.community_req_models import (
     PostBookmark,
     FollowUser,
     CheckFollow,
+    PostDelete,
 )
 
 
@@ -130,3 +131,41 @@ def check_follow(
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.post("/update_post")
+def update_post(post_info: UpdateCommunity, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommunityService.update_post(
+            post_info.id, post_info.category, post_info.title, post_info.contents
+        )
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/delete_post_by_admin")
+def delete_post_by_admin(request_info: PostDelete, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommunityService.delete_post_by_admin(request_info.post_id)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/delete_post_by_user")
+def delete_post_by_user(request_info: PostDelete, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommunityService.delete_post_by_user(request_info.post_id)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)

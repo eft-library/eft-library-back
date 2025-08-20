@@ -12,6 +12,15 @@ class InsertChildComment(InsertParentComment):
     post_id: str
 
 
+class UpdateComment(BaseModel):
+    comment_id: str
+    contents: str
+
+
+class DeleteComment(BaseModel):
+    comment_id: str
+
+
 class CommentReaction(BaseModel):
     comment_id: str
 

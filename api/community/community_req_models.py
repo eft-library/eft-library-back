@@ -8,7 +8,7 @@ class CreateCommunity(BaseModel):
 
 
 class UpdateCommunity(CreateCommunity):
-    id: int
+    id: str
 
 
 class ViewCount(BaseModel):
@@ -20,6 +20,10 @@ class PostReaction(BaseModel):
 
 
 class PostBookmark(BaseModel):
+    post_id: str
+
+
+class PostDelete(BaseModel):
     post_id: str
 
 

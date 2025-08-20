@@ -36,16 +36,28 @@ class CommentUtil:
     @staticmethod
     def update_comment():
         return """
+            update community_comments
+            set contents = :contents,
+                update_time = :update_time
+            where id = :comment_id
         """
 
     @staticmethod
     def delete_comment_by_user():
         return """
+            update community_comments
+            set delete_by_user = true
+                update_time = :update_time
+            where id = :comment_id
         """
 
     @staticmethod
     def delete_comment_by_admin():
         return """
+            update community_comments
+            set delete_by_admin = true
+                update_time = :update_time
+            where id = :comment_id
         """
 
     @staticmethod
