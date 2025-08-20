@@ -147,7 +147,7 @@ class CommentUtil:
                     ROW_NUMBER() OVER (ORDER BY path, create_time) AS row_num
                 FROM tree
             )
-            SELECT CEIL(row_num / :limit::float) AS page_num
+            SELECT CEIL(row_num / CAST(:limit AS float)) AS page_num
             FROM ordered
             WHERE id = :comment_id        
         """
