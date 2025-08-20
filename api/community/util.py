@@ -100,6 +100,9 @@ class CommunityUtil:
                 cp.create_time,
                 cp.update_time,
                 cpv.view_count,
+                coalesce((SELECT COUNT(*)
+                          FROM community_comments cc
+                          WHERE cc.post_id = cp.id), 0) AS comment_count,
                 -- 작성자 팔로워 수
                 (SELECT COUNT(*)
                  FROM user_follows uf
