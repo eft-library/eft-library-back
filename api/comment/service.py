@@ -78,7 +78,11 @@ class CommentService:
                     )
                     current_issue_comment_page_result = s.execute(
                         current_issue_comment_page_query,
-                        {"post_id": bigint_post_id, "comment_id": issue_comment_id},
+                        {
+                            "post_id": bigint_post_id,
+                            "comment_id": issue_comment_id,
+                            "limit": limit,
+                        },
                     )
                     current_page_num = current_issue_comment_page_result.scalar()
                 # 마지막 페이지 요청 (page_num == 0)

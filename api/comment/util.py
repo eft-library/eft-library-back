@@ -143,11 +143,12 @@ class CommentUtil:
         return """
             WITH ordered AS (
                 SELECT
-                    id,
-                    ROW_NUMBER() OVER (ORDER BY path, create_time) AS row_num
-                FROM tree
+                    c.id,
+                    ROW_NUMBER() OVER (ORDER BY c.path, c.create_time) AS row_num
+                FROM community_comments c
+                WHERE c.post_id = :post_id
             )
-            SELECT CEIL(row_num / CAST(:limit AS float)) AS page_num
+            SELECT CEIL(row_num / CAST(:limit AS numeric)) AS page_num
             FROM ordered
             WHERE id = :comment_id        
         """
