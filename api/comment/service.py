@@ -71,11 +71,8 @@ class CommentService:
                 # 최대 페이지 수
                 max_page_count = (total + limit - 1) // limit
 
-                # 마지막 페이지 요청 (page_num == 0)
-                if page_num == 0:
-                    current_page_num = max_page_count
                 # issue comment 바로가기 동작
-                elif len(issue_comment_id) > 0:
+                if len(issue_comment_id) > 0:
                     current_issue_comment_page_query = text(
                         CommentUtil.get_issue_comment_page()
                     )
@@ -84,6 +81,9 @@ class CommentService:
                         {"post_id": bigint_post_id, "comment_id": issue_comment_id},
                     )
                     current_page_num = current_issue_comment_page_result.scalar()
+                # 마지막 페이지 요청 (page_num == 0)
+                elif page_num == 0:
+                    current_page_num = max_page_count
                 else:
                     current_page_num = page_num
 
