@@ -425,6 +425,7 @@ class CommunityService:
 
                 if post_info:
                     if post_info.user_email == user_email:
+                        post_info.id = str(post_info.id)
                         return post_info
 
                 return None
