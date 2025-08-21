@@ -159,7 +159,7 @@ def get_update_post_detail(
 ):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = CommunityService.get_update_post_detail(post_info.id, user_email)
+        result = CommunityService.get_update_post_detail(post_info.post_id, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
