@@ -9,6 +9,7 @@ class CreateCommunity(BaseModel):
 
 class UpdateCommunity(CreateCommunity):
     id: str
+    slug: str
 
 
 class ViewCount(BaseModel):
@@ -34,6 +35,10 @@ class FollowUser(BaseModel):
 class CheckFollow(BaseModel):
     following_user_email: str
     user_email: str
+
+
+class GetUpdatePostDetail(BaseModel):
+    post_id: str
 
 
 class GetPostDetail(BaseModel):

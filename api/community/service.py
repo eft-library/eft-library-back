@@ -374,29 +374,63 @@ class CommunityService:
             return None
 
     @staticmethod
-    def update_post(post_id: str, page_category: str, title: str, contents: str):
+    def update_post(
+        post_id: str,
+        slug: str,
+        page_category: str,
+        title: str,
+        contents: str,
+        user_email: str,
+    ):
         new_slug = slugify(title)
         new_thumbnail = CommunityFunction.extract_thumbnail_img(contents)
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 bigint_post_id = int(post_id)
-                post_info = s.query(CommunityPosts).filter(CommunityPosts.id == bigint_post_id).first()
+                post_info = (
+                    s.query(CommunityPosts)
+                    .filter(CommunityPosts.id == bigint_post_id)
+                    .first()
+                )
 
                 if post_info:
-                    post_info.update_time = datetime.now()
-                    post_info.title = title
-                    post_info.contents = contents
-                    post_info.thumbnail = new_thumbnail
-                    post_info.slug = new_slug
-                    post_info.category = page_category
+                    if post_info.user_email == user_email:
+                        post_info.update_time = datetime.now()
+                        post_info.title = title
+                        post_info.contents = contents
+                        post_info.thumbnail = new_thumbnail
+                        post_info.slug = new_slug
+                        post_info.category = page_category
+                        s.commit()
 
-                s.commit()
-                return {"url": f"{bigint_post_id}-{new_slug}"}
+                    return {"url": f"{bigint_post_id}-{new_slug}"}
+
+                return {"url": f"{bigint_post_id}-{slug}"}
         except Exception as e:
             print("오류 발생:", e)
             return None
 
+    @staticmethod
+    def get_update_post_detail(post_id: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                bigint_post_id = int(post_id)
+                post_info = (
+                    s.query(CommunityPosts)
+                    .filter(CommunityPosts.id == bigint_post_id)
+                    .first()
+                )
+
+                if post_info:
+                    if post_info.user_email == user_email:
+                        return post_info
+
+                return None
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
 
     @staticmethod
     def delete_post_by_admin(post_id: str):
@@ -404,7 +438,11 @@ class CommunityService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 bigint_post_id = int(post_id)
-                post_info = s.query(CommunityPosts).filter(CommunityPosts.id == bigint_post_id).first()
+                post_info = (
+                    s.query(CommunityPosts)
+                    .filter(CommunityPosts.id == bigint_post_id)
+                    .first()
+                )
 
                 if post_info:
                     post_info.update_time = datetime.now()
@@ -416,14 +454,17 @@ class CommunityService:
             print("오류 발생:", e)
             return None
 
-
     @staticmethod
     def delete_post_by_user(post_id: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 bigint_post_id = int(post_id)
-                post_info = s.query(CommunityPosts).filter(CommunityPosts.id == bigint_post_id).first()
+                post_info = (
+                    s.query(CommunityPosts)
+                    .filter(CommunityPosts.id == bigint_post_id)
+                    .first()
+                )
 
                 if post_info:
                     post_info.update_time = datetime.now()

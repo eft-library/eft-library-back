@@ -15,6 +15,7 @@ from api.community.community_req_models import (
     FollowUser,
     CheckFollow,
     PostDelete,
+    GetUpdatePostDetail,
 )
 
 
@@ -138,8 +139,27 @@ def update_post(post_info: UpdateCommunity, token: str = Depends(oauth2_scheme))
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
         result = CommunityService.update_post(
-            post_info.id, post_info.category, post_info.title, post_info.contents
+            post_info.id,
+            post_info.slug,
+            post_info.category,
+            post_info.title,
+            post_info.contents,
+            user_email,
         )
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/get_update_post_detail")
+def get_update_post_detail(
+    post_info: GetUpdatePostDetail, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommunityService.get_update_post_detail(post_info.id, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
