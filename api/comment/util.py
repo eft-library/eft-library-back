@@ -109,7 +109,8 @@ class CommentUtil:
                     t.*,
                     COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
                     COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS dislike_count,
-                    ui.nickname,
+                    ui.nickname AS nickname,  -- 댓글 작성자 닉네임
+                    pui.nickname AS parent_nickname, -- 부모 댓글 작성자 닉네임
                     COALESCE(ccr.reaction_type, -1) AS is_like
                 FROM tree t
                 LEFT JOIN community_comments_reactions r 
@@ -118,8 +119,14 @@ class CommentUtil:
                        ON t.id = ccr.comment_id AND ccr.user_email = :user_email
                 JOIN user_info ui 
                        ON t.user_email = ui.email
-                GROUP BY t.id, t.parent_id, t.post_id, t.user_email, t.contents,
-                         t.delete_by_admin, t.delete_by_user, t.create_time, t.update_time, t.depth, t.sort_path, ui.nickname, ccr.reaction_type
+                LEFT JOIN community_comments pc
+                       ON t.parent_id = pc.id
+                LEFT JOIN user_info pui
+                       ON pc.user_email = pui.email
+                GROUP BY 
+                    t.id, t.parent_id, t.post_id, t.user_email, t.contents,
+                    t.delete_by_admin, t.delete_by_user, t.create_time, t.update_time, 
+                    t.depth, t.sort_path, ui.nickname, pui.nickname, ccr.reaction_type
             ),
             ranked AS (
                 SELECT a.*,
