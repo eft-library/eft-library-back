@@ -11,6 +11,10 @@ class UserFunction:
         return session.query(User).filter(User.email == email).first()
 
     @staticmethod
+    def _check_nickname_duplicate(session, nickname: str):
+        return session.query(User).filter(User.nickname == nickname).first()
+
+    @staticmethod
     def _handle_existing_user(session, user: User):
         today = date.today()
         tz = pytz.timezone("Asia/Seoul")
