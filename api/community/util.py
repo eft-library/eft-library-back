@@ -29,6 +29,7 @@ class CommunityUtil:
                      LEFT JOIN user_info ui on cp.user_email = ui.email
                      LEFT JOIN community_posts_views cpv on cp.id = cpv.post_id
             where cp.category = :category
+            and cp.delete_by_user = false and cp.delete_by_admin = false
             order by cp.create_time desc
             limit :limit 
             offset :offset
@@ -81,6 +82,7 @@ class CommunityUtil:
             LEFT JOIN user_info ui ON cp.user_email = ui.email
             LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
             ORDER BY cphi.issue_time DESC
+            where cp.delete_by_user = false and cp.delete_by_admin = false
             LIMIT :limit 
             OFFSET :offset
         """
@@ -158,6 +160,7 @@ class CommunityUtil:
                            on uf.following_email = :user_email
                                and uf.follower_email = cp.user_email
         where cp.id = :post_id
+        and cp.delete_by_user = false and cp.delete_by_admin = false
         group by cp.user_email, ui.nickname, uf.follower_email
         """
 
@@ -179,6 +182,7 @@ class CommunityUtil:
                        ROW_NUMBER() OVER (ORDER BY create_time DESC) AS rn
                 FROM community_posts
                 WHERE category = :category
+                and delete_by_user = false and delete_by_admin = false
             )
             SELECT rn
             FROM ordered_posts
