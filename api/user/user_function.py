@@ -63,7 +63,4 @@ class UserFunction:
     @staticmethod
     def _get_user_data(session, user_email: str):
         user = session.query(User).filter(User.email == user_email).first()
-        user_data = {
-            "user": user,
-        }
-        return user_data
+        return user
