@@ -21,7 +21,7 @@ def add_user(addUserReq: AddUserReq):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/user_info")
+@router.get("/user_info")
 def get_user(token: str = Depends(oauth2_scheme)):
 
     user_email = UserUtil.verify_google_token(access_token=token)
