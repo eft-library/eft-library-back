@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from api.user.user_req_models import AddUserReq
 from database import DataBaseConnector
 from api.user.user_function import UserFunction
@@ -38,6 +40,23 @@ class UserService:
                 user = UserFunction._get_existing_user(s, user_email)
                 if user:
                     UserFunction._create_delete_user(s, user)
+                    return True
+                else:
+                    return False
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def update_nickname(nickname: str, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user = UserFunction._get_existing_user(s, user_email)
+                if user:
+                    user.nickname = nickname
+                    user.last_update_nickname = datetime.now()
+                    s.commit()
                     return True
                 else:
                     return False

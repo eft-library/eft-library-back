@@ -10,3 +10,7 @@ class AddUserReq(BaseModel):
     name: str
     email: str
     image: str
+
+
+class UpdateUserNickname(BaseModel):
+    nickname: str

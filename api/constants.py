@@ -26,6 +26,7 @@ class Message(Enum):
     HIDEOUT_NOT_FOUND = "Hideout not found"
     USER_ADD_FAIL = "User add fail"
     USER_DELETE_FAIL = "User delete fail"
+    UPDATE_NICK_NAME_FAIL = "Update Nick Name fail"
     INVALID_USER = "Invalid User"
     SUCCESS_QUEST_FAIL = "Success quest fail"
     GET_ROADMAP_FAIL = "Get Roadmap fail"

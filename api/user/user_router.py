@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from util.constants import HTTPCode
 from api.constants import Message
 from api.user.service import UserService
-from api.user.user_req_models import AddUserReq
+from api.user.user_req_models import AddUserReq, UpdateUserNickname
 from api.user.util import UserUtil
 
 router = APIRouter(tags=["User"])
@@ -42,6 +42,23 @@ def delete_user(token: str = Depends(oauth2_scheme)):
         result = UserService.user_delete(user_email)
         if result is False:
             return CustomResponse.response(None, HTTPCode.OK, Message.USER_DELETE_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/update_nickname")
+def update_nickname(
+    request_info: UpdateUserNickname, token: str = Depends(oauth2_scheme)
+):
+    user_email = UserUtil.verify_google_token(access_token=token)
+
+    if user_email:
+        result = UserService.update_nickname(request_info.nickname, user_email)
+        if result is False:
+            return CustomResponse.response(
+                None, HTTPCode.OK, Message.UPDATE_NICK_NAME_FAIL
+            )
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
