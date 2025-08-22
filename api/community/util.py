@@ -81,8 +81,8 @@ class CommunityUtil:
             LEFT JOIN community_posts cp ON cphi.post_id = cp.id
             LEFT JOIN user_info ui ON cp.user_email = ui.email
             LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
-            ORDER BY cphi.issue_time DESC
             where cp.delete_by_user = false and cp.delete_by_admin = false
+            ORDER BY cphi.issue_time DESC
             LIMIT :limit 
             OFFSET :offset
         """
