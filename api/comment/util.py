@@ -190,24 +190,31 @@ class CommentUtil:
                 c.post_id::text AS post_id,
                 c.path,
                 c.user_email,
+                ui.nickname AS nickname,              
+                pui.nickname AS parent_nickname,     
                 c.contents,
                 c.delete_by_user,
                 c.delete_by_admin,
                 c.create_time,
                 c.update_time,
                 nlevel(c.path) AS depth,
-                -- 좋아요 / 싫어요 개수
                 COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
                 COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS dislike_count,
-                -- 점수 (좋아요 - 싫어요)
                 COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0)
                   - COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS score
             FROM community_comments c
             LEFT JOIN community_comments_reactions r 
                    ON r.comment_id = c.id
+            JOIN user_info ui 
+                 ON c.user_email = ui.email
+            LEFT JOIN community_comments pc 
+                   ON c.parent_id = pc.id
+            LEFT JOIN user_info pui 
+                   ON pc.user_email = pui.email
             WHERE c.post_id = :post_id
-            GROUP BY c.id, c.parent_id, c.post_id, c.path, c.user_email, 
-                     c.contents, c.delete_by_user, c.delete_by_admin, c.create_time, c.update_time
+            GROUP BY 
+                c.id, c.parent_id, c.post_id, c.path, c.user_email, ui.nickname, 
+                pui.nickname, c.contents, c.delete_by_user, c.delete_by_admin, c.create_time, c.update_time
             ORDER BY score DESC, like_count DESC, c.create_time ASC
             LIMIT 3
         """
