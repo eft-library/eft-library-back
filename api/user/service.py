@@ -200,6 +200,8 @@ class UserService:
                 if user.last_update_nickname:
                     # timezone-aware now
                     thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+                    if user.nickname is None:
+                        return {"result": 1}
                     if user.last_update_nickname > thirty_days_ago:
                         # 30일 안 지남 → 업데이트 불가
                         return {"result": 0}
