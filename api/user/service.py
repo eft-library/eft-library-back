@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import re
 from api.user.user_req_models import AddUserReq
 from database import DataBaseConnector
@@ -198,7 +198,8 @@ class UserService:
 
                 # 30일 이전 체크
                 if user.last_update_nickname:
-                    thirty_days_ago = datetime.now() - timedelta(days=30)
+                    # timezone-aware now
+                    thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
                     if user.last_update_nickname > thirty_days_ago:
                         # 30일 안 지남 → 업데이트 불가
                         return {"result": 0}
