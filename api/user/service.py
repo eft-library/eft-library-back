@@ -18,18 +18,37 @@ class UserService:
             "시발",
             "개새끼",
         ]
+
         # 1. 길이 체크
         if len(nickname) < 2 or len(nickname) > 12:
-            return False, "닉네임은 2~12자 사이여야 합니다."
+            return False, {
+                "ko": "닉네임은 2~12자 사이여야 합니다.",
+                "jp": "ニックネームは2〜12文字である必要があります。",
+                "en": "Nickname must be between 2 and 12 characters.",
+            }
 
         # 2. 허용 문자 체크 (한글, 영문, 숫자, _, -)
         if not re.match(r"^[가-힣a-zA-Z0-9_-]+$", nickname):
-            return False, "닉네임에는 한글, 영문, 숫자, _, -만 사용할 수 있습니다."
+            return False, {
+                "ko": "닉네임에는 한글, 영문, 숫자, _, -만 사용할 수 있습니다.",
+                "jp": "ニックネームには韓国語、英語、数字、_, -のみ使用できます。",
+                "en": "Nickname can only contain Korean, English letters, numbers, _, -.",
+            }
 
         # 3. 금지 단어 체크
         lower_nick = nickname.lower()
         if any(word.lower() in lower_nick for word in forbidden_words):
-            return False, "사용할 수 없는 단어가 포함되어 있습니다."
+            return False, {
+                "ko": "사용할 수 없는 단어가 포함되어 있습니다.",
+                "jp": "使用できない単語が含まれています。",
+                "en": "Nickname contains forbidden words.",
+            }
+
+        return True, {
+            "ko": "사용 가능한 닉네임입니다.",
+            "jp": "使用可能なニックネームです。",
+            "en": "Nickname is available.",
+        }
 
     @staticmethod
     def add_new_user(addUserReq: AddUserReq):
@@ -78,27 +97,46 @@ class UserService:
             # 1️⃣ 닉네임 규칙 체크
             valid, message = UserService._validate_nickname_rules(nickname)
             if not valid:
-                return {"success": False, "message": message}
+                return {
+                    "success": False,
+                    "ko": message["ko"],
+                    "jp": message["jp"],
+                    "en": message["en"],
+                }
 
             # 2️⃣ 마지막 업데이트 30일 체크
             last_check = UserService.check_last_update_nickname(user_email)
             if last_check is None:
                 return {
                     "success": False,
-                    "message": "유저 정보를 확인하는 중 오류 발생",
+                    "ko": "유저 정보를 확인하는 중 오류 발생",
+                    "jp": "ユーザー情報の確認中にエラーが発生しました。",
+                    "en": "An error occurred while checking user information.",
                 }
             if last_check.get("result") == 0:
                 return {
                     "success": False,
-                    "message": "닉네임은 30일에 1회만 변경할 수 있습니다.",
+                    "ko": "닉네임은 30일에 1회만 변경할 수 있습니다.",
+                    "jp": "ニックネームは30日に1回しか変更できません。",
+                    "en": "Nickname can only be changed once every 30 days.",
                 }
 
             # 3️⃣ 중복 체크
             duplicate_check = UserService.check_nickname_duplicate(nickname)
             if duplicate_check is None:
-                return {"success": False, "message": "닉네임 중복 확인 중 오류 발생"}
+                return {
+                    "success": False,
+                    "ko": "닉네임 중복 확인 중 오류 발생",
+                    "jp": "ニックネームの重複確認中にエラーが発生しました。",
+                    "en": "An error occurred while checking nickname duplication.",
+                }
             if duplicate_check.get("result") == 1:
-                return {"success": False, "message": "이미 사용 중인 닉네임입니다."}
+                return {
+                    "success": False,
+                    "ko": "이미 사용 중인 닉네임입니다.",
+                    "jp": "すでに使用されているニックネームです。",
+                    "en": "This nickname is already in use.",
+                }
 
             session = DataBaseConnector.create_session_factory()
             with session() as s:
@@ -109,14 +147,26 @@ class UserService:
                     s.commit()
                     return {
                         "success": True,
-                        "message": "닉네임이 성공적으로 변경되었습니다.",
+                        "ko": "닉네임이 성공적으로 변경되었습니다.",
+                        "jp": "ニックネームが正常に変更されました。",
+                        "en": "Nickname has been successfully updated.",
                     }
                 else:
-                    return {"success": False, "message": "사용자를 찾을 수 없습니다."}
+                    return {
+                        "success": False,
+                        "ko": "사용자를 찾을 수 없습니다.",
+                        "jp": "ユーザーが見つかりません。",
+                        "en": "User not found.",
+                    }
 
         except Exception as e:
             print("오류 발생:", e)
-            return {"success": False, "message": "서버 오류 발생"}
+            return {
+                "success": False,
+                "ko": "서버 오류 발생",
+                "jp": "サーバーエラーが発生しました。",
+                "en": "A server error has occurred.",
+            }
 
     @staticmethod
     def check_nickname_duplicate(nickname: str):
