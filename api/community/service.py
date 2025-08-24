@@ -144,11 +144,12 @@ class CommunityService:
                 # issue_posts & notice_posts 조회
                 side_issue_posts_query = text(CommunityUtil.get_posts_with_issue())
                 get_side_issue_posts = s.execute(
-                    side_issue_posts_query, {"limit": 3, offset: 0}
+                    side_issue_posts_query, {"limit": 3, "offset": 0}
                 )
                 get_side_issue_posts_data = [
                     dict(row) for row in get_side_issue_posts.mappings()
                 ]
+
                 notice_posts = CommunityFunction.fetch_notice_posts(s)
 
                 return {
