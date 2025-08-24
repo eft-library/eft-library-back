@@ -491,3 +491,37 @@ class CommunityService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def get_search(search_type: str, word: str, page_num: int):
+        limit, offset = 20, (page_num - 1) * 20
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                get_search_sql = text(CommunityFunction.get_search_sql(search_type))
+                get_search_total_count_sql = text(
+                    CommunityFunction.get_search_total_count_sql(search_type)
+                )
+                get_search_params = {
+                    "limit": limit,
+                    "offset": offset,
+                    "word": word,
+                }
+                get_search_result = s.execute(get_search_sql, get_search_params)
+                get_search_result_data = [
+                    dict(row) for row in get_search_result.mappings()
+                ]
+                get_search_total_count_result = s.execute(
+                    get_search_total_count_sql, get_search_params
+                )
+                total = get_search_total_count_result.scalar()
+                max_page_count = (total + limit - 1) // limit
+
+                return {
+                    "search_result": get_search_result_data,
+                    "total": total,
+                    "max_page_count": max_page_count,
+                }
+        except Exception as e:
+            print("오류 발생:", e)
+            return None

@@ -93,3 +93,268 @@ class CommunityFunction:
             return int(id_str)
         except ValueError:
             raise ValueError(f"잘못된 형식입니다: {value}")
+
+    @staticmethod
+    def get_search_sql(search_type: str):
+        queries = {
+            "title": """
+                SELECT cp.id::text                      AS id,
+                       cp.slug,
+                       cp.user_email,
+                       cp.category,
+                       ui.nickname,
+                       cp.title,
+                       cp.contents,
+                       cpv.view_count,
+                       COUNT(DISTINCT cc.id)            AS comment_count,
+                       COALESCE(SUM(CASE
+                                        WHEN cpr.reaction_type = 1 THEN 1
+                                        WHEN cpr.reaction_type = 0 THEN -1
+                                        ELSE 0 END), 0) AS reaction_score,
+                       cp.thumbnail,
+                       cp.delete_by_user,
+                       cp.delete_by_admin,
+                       cp.create_time,
+                       cp.update_time
+                FROM community_posts cp
+                         LEFT JOIN user_info ui ON cp.user_email = ui.email
+                         LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
+                         LEFT JOIN community_comments cc ON cc.post_id = cp.id
+                         LEFT JOIN community_posts_reactions cpr ON cpr.post_id = cp.id
+                WHERE cp.delete_by_admin = false
+                  AND cp.delete_by_user = false
+                  AND cp.title ILIKE :word
+                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
+                ORDER BY cp.create_time DESC
+                LIMIT :limit OFFSET :offset
+            """,
+            "titleContent": """
+                SELECT cp.id::text                      AS id,
+                       cp.slug,
+                       cp.user_email,
+                       cp.category,
+                       ui.nickname,
+                       cp.title,
+                       cp.contents,
+                       cpv.view_count,
+                       COUNT(DISTINCT cc.id)            AS comment_count,
+                       COALESCE(SUM(CASE
+                                        WHEN cpr.reaction_type = 1 THEN 1
+                                        WHEN cpr.reaction_type = 0 THEN -1
+                                        ELSE 0 END), 0) AS reaction_score,
+                       cp.thumbnail,
+                       cp.delete_by_user,
+                       cp.delete_by_admin,
+                       cp.create_time,
+                       cp.update_time
+                FROM community_posts cp
+                         LEFT JOIN user_info ui ON cp.user_email = ui.email
+                         LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
+                         LEFT JOIN community_comments cc ON cc.post_id = cp.id
+                         LEFT JOIN community_posts_reactions cpr ON cpr.post_id = cp.id
+                WHERE cp.delete_by_admin = false
+                  AND cp.delete_by_user = false
+                  AND (cp.title ILIKE :word OR cp.contents ILIKE :word)
+                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
+                ORDER BY cp.create_time DESC
+                LIMIT :limit OFFSET :offset
+            """,
+            "comment": """
+                SELECT cp.id::text                      AS id,
+                       cp.slug,
+                       cp.user_email,
+                       cp.category,
+                       ui.nickname,
+                       cp.title,
+                       cp.contents,
+                       cpv.view_count,
+                       COUNT(DISTINCT cc_all.id)        AS comment_count,
+                       COALESCE(SUM(CASE
+                                        WHEN cpr.reaction_type = 1 THEN 1
+                                        WHEN cpr.reaction_type = 0 THEN -1
+                                        ELSE 0 END), 0) AS reaction_score,
+                       cp.thumbnail,
+                       cp.delete_by_user,
+                       cp.delete_by_admin,
+                       cp.create_time,
+                       cp.update_time,
+                       COALESCE(
+                                       json_agg(
+                                       json_build_object(
+                                               'id', cc.id,
+                                               'contents', cc.contents,
+                                               'author', cc.user_email,
+                                               'create_time', cc.create_time
+                                       )
+                                               ) FILTER (WHERE cc.id IS NOT NULL), '[]'
+                       )                                AS comments
+                FROM community_posts cp
+                         LEFT JOIN user_info ui ON cp.user_email = ui.email
+                         LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
+                         LEFT JOIN community_comments cc_all ON cc_all.post_id = cp.id
+                         LEFT JOIN community_comments cc ON cc.post_id = cp.id AND cc.contents ILIKE :word
+                         LEFT JOIN community_posts_reactions cpr ON cpr.post_id = cp.id
+                WHERE cp.delete_by_admin = false
+                  AND cp.delete_by_user = false
+                  AND cc.contents ILIKE :word
+                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
+                ORDER BY cp.create_time DESC
+                LIMIT :limit OFFSET :offset
+            """,
+            "author": """
+                SELECT cp.id::text                      AS id,
+                       cp.slug,
+                       cp.user_email,
+                       cp.category,
+                       ui.nickname,
+                       cp.title,
+                       cp.contents,
+                       cpv.view_count,
+                       COUNT(DISTINCT cc_all.id)        AS comment_count,
+                       COALESCE(SUM(CASE
+                                        WHEN cpr.reaction_type = 1 THEN 1
+                                        WHEN cpr.reaction_type = 0 THEN -1
+                                        ELSE 0 END), 0) AS reaction_score,
+                       cp.thumbnail,
+                       cp.delete_by_user,
+                       cp.delete_by_admin,
+                       cp.create_time,
+                       cp.update_time,
+                       COALESCE(
+                                       json_agg(
+                                       json_build_object(
+                                               'id', cc.id,
+                                               'content', cc.contents,
+                                               'author', cc.user_email,
+                                               'create_time', cc.create_time
+                                       )
+                                               ) FILTER (WHERE cc.id IS NOT NULL), '[]'
+                       )                                AS comments
+                FROM community_posts cp
+                         LEFT JOIN user_info ui ON cp.user_email = ui.email
+                         LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
+                         LEFT JOIN community_comments cc_all ON cc_all.post_id = cp.id
+                         LEFT JOIN community_comments cc ON cc.post_id = cp.id
+                    AND (cc.user_email ILIKE :word) -- 댓글 작성자 JSON에 담음
+                         LEFT JOIN community_posts_reactions cpr ON cpr.post_id = cp.id
+                WHERE cp.delete_by_admin = false
+                  AND cp.delete_by_user = false
+                  AND (cp.user_email ILIKE :word OR ui.nickname ILIKE :word OR cc_all.user_email ILIKE :word)
+                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
+                ORDER BY cp.create_time DESC
+                LIMIT :limit OFFSET :offset
+            """,
+            "all": """
+                SELECT cp.id::text                      AS id,
+                       cp.slug,
+                       cp.user_email,
+                       cp.category,
+                       ui.nickname,
+                       cp.title,
+                       cp.contents,
+                       cpv.view_count,
+                       COUNT(DISTINCT cc_all.id)        AS comment_count,
+                       COALESCE(SUM(CASE
+                                        WHEN cpr.reaction_type = 1 THEN 1
+                                        WHEN cpr.reaction_type = 0 THEN -1
+                                        ELSE 0 END), 0) AS reaction_score,
+                       cp.thumbnail,
+                       cp.delete_by_user,
+                       cp.delete_by_admin,
+                       cp.create_time,
+                       cp.update_time,
+                       COALESCE(
+                                       json_agg(
+                                       json_build_object(
+                                               'id', cc.id,
+                                               'content', cc.contents,
+                                               'author', cc.user_email,
+                                               'create_time', cc.create_time
+                                       )
+                                               ) FILTER (WHERE cc.id IS NOT NULL), '[]'
+                       )                                AS comments
+                FROM community_posts cp
+                         LEFT JOIN user_info ui ON cp.user_email = ui.email
+                         LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
+                         LEFT JOIN community_comments cc_all ON cc_all.post_id = cp.id
+                         LEFT JOIN community_comments cc ON cc.post_id = cp.id
+                    AND (cc.contents ILIKE :word) -- 댓글 중 검색된 것만 JSON에 담음
+                         LEFT JOIN community_posts_reactions cpr ON cpr.post_id = cp.id
+                WHERE cp.delete_by_admin = false
+                  AND cp.delete_by_user = false
+                  AND (cp.title ILIKE :word OR cp.contents ILIKE :word OR cc_all.contents ILIKE :word)
+                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
+                ORDER BY cp.create_time DESC
+                LIMIT :limit OFFSET :offset
+            """,
+        }
+
+        return queries[search_type]
+
+    @staticmethod
+    def get_search_total_count_sql(search_type: str):
+        queries = {
+            "title": """
+                SELECT COUNT(*)
+                FROM community_posts cp
+                WHERE cp.delete_by_admin = false
+                  AND cp.delete_by_user = false
+                  AND cp.title ILIKE :word
+            """,
+            "titleContent": """
+                SELECT COUNT(*)
+                FROM community_posts cp
+                WHERE cp.delete_by_admin = false
+                  AND cp.delete_by_user = false
+                  AND (cp.title ILIKE :word OR cp.contents ILIKE :word)
+            """,
+            "comment": """
+                SELECT COUNT(*)
+                FROM community_comments cc
+                         JOIN community_posts cp ON cc.post_id = cp.id
+                WHERE cp.delete_by_admin = false
+                  AND cp.delete_by_user = false
+                  AND cc.contents ILIKE :word
+            """,
+            "author": """
+                SELECT COUNT(*)
+                FROM (SELECT cp.id
+                      FROM community_posts cp
+                               JOIN user_info ui ON cp.user_email = ui.email
+                      WHERE cp.delete_by_admin = false
+                        AND cp.delete_by_user = false
+                        AND ui.nickname ILIKE :word
+                
+                      UNION
+                
+                      SELECT cp.id
+                      FROM community_posts cp
+                               JOIN community_comments cc ON cp.id = cc.post_id
+                               JOIN user_info ui ON cc.user_email = ui.email
+                      WHERE cp.delete_by_admin = false
+                        AND cp.delete_by_user = false
+                        AND ui.nickname ILIKE :word) sub
+            """,
+            "all": """
+                SELECT COUNT(*)
+                FROM (
+                         -- 게시글 검색
+                         SELECT cp.id
+                         FROM community_posts cp
+                         WHERE cp.delete_by_admin = false
+                           AND cp.delete_by_user = false
+                           AND (cp.title ILIKE :word OR cp.contents ILIKE :word)
+                
+                         UNION
+                
+                         -- 댓글 검색
+                         SELECT cp.id
+                         FROM community_posts cp
+                                  JOIN community_comments cc ON cc.post_id = cp.id
+                         WHERE cp.delete_by_admin = false
+                           AND cp.delete_by_user = false
+                           AND cc.contents ILIKE :word) sub
+            """,
+        }
+
+        return queries[search_type]
