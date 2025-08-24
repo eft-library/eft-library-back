@@ -44,7 +44,7 @@ def create_posts(post_info: CreateCommunity, token: str = Depends(oauth2_scheme)
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.get("/{category}")
+@router.get("/get/{category}")
 def get_posts(category: str, page_num: int):
     result = CommunityService.get_posts(category, page_num)
     if result is None:
