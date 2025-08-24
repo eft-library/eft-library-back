@@ -142,14 +142,20 @@ class CommunityService:
                 max_page_count = (total + limit - 1) // limit
 
                 # issue_posts & notice_posts 조회
-                result_issue_posts = CommunityFunction.fetch_issue_posts(s)
+                side_issue_posts_query = text(CommunityUtil.get_posts_with_issue())
+                get_side_issue_posts = s.execute(
+                    side_issue_posts_query, {"limit": 3, offset: 0}
+                )
+                get_side_issue_posts_data = [
+                    dict(row) for row in get_side_issue_posts.mappings()
+                ]
                 notice_posts = CommunityFunction.fetch_notice_posts(s)
 
                 return {
                     "total": total,
                     "max_page_count": max_page_count,
                     "posts": get_post_data,
-                    "issue_posts": result_issue_posts,
+                    "issue_posts": get_side_issue_posts_data,
                     "notice_posts": notice_posts,
                 }
 
