@@ -21,28 +21,6 @@ class CommunityFunction:
         return None
 
     @staticmethod
-    def fetch_issue_posts(s):
-        issue_posts = (
-            s.query(CommunityPosts)
-            .join(
-                CommunityPostsHotIssue,
-                CommunityPosts.id == CommunityPostsHotIssue.post_id,
-            )
-            .order_by(CommunityPostsHotIssue.issue_time.desc())
-            .limit(5)
-            .all()
-        )
-
-        result_issue_posts = []
-        for post in issue_posts:
-            post_dict = post.__dict__.copy()
-            post_dict.pop("_sa_instance_state", None)
-            post_dict["id"] = str(post_dict["id"])
-            result_issue_posts.append(post_dict)
-
-        return result_issue_posts
-
-    @staticmethod
     def fetch_post_detail(session, post_id: int, user_email: str):
         query = text(CommunityUtil.get_post_detail())
         params = {"post_id": post_id, "user_email": user_email}

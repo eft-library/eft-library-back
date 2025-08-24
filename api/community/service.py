@@ -171,11 +171,19 @@ class CommunityService:
             with session() as s:
                 post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
 
+                side_issue_posts_query = text(CommunityUtil.get_posts_with_issue())
+                get_side_issue_posts = s.execute(
+                    side_issue_posts_query, {"limit": 3, "offset": 0}
+                )
+                get_side_issue_posts_data = [
+                    dict(row) for row in get_side_issue_posts.mappings()
+                ]
+
                 return {
                     "post_detail": CommunityFunction.fetch_post_detail(
                         s, post_id, user_email
                     ),
-                    "issue_posts": CommunityFunction.fetch_issue_posts(s),
+                    "issue_posts": get_side_issue_posts_data,
                     "notice_posts": CommunityFunction.fetch_notice_posts(s),
                     "author_detail": CommunityFunction.fetch_author_meta(
                         s, post_id, user_email
