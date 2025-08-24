@@ -519,7 +519,7 @@ class CommunityService:
 
                 return {
                     "search_result": get_search_result_data,
-                    "total": total,
+                    "total_count": total,
                     "max_page_count": max_page_count,
                 }
         except Exception as e:
