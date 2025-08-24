@@ -177,9 +177,10 @@ class CommunityFunction:
                cp.update_time,
                json_build_object(
                    'id', cc.id,
-                   'content', cc.contents,
-                   'author', cc.user_email,
-                   'create_time', cc.create_time
+                   'contents', cc.contents,
+                   'user_email', cc.user_email,
+                   'create_time', cc.create_time,
+                   'update_time', cc.update_time
                ) AS comment
         FROM community_posts cp
                  LEFT JOIN user_info ui ON cp.user_email = ui.email
@@ -221,9 +222,10 @@ class CommunityFunction:
                cp.update_time,
                json_build_object(
                    'id', cc.id,
-                   'content', cc.contents,
-                   'author', cc.user_email,
-                   'create_time', cc.create_time
+                   'contents', cc.contents,
+                   'user_email', cc.user_email,
+                   'create_time', cc.create_time,
+                   'update_time', cc.update_time
                ) AS comment
         FROM community_posts cp
                  LEFT JOIN user_info ui ON cp.user_email = ui.email
@@ -266,9 +268,10 @@ class CommunityFunction:
                cp.update_time,
                json_build_object(
                    'id', cc.id,
-                   'content', cc.contents,
-                   'author', cc.user_email,
-                   'create_time', cc.create_time
+                   'contents', cc.contents,
+                   'user_email', cc.user_email,
+                   'create_time', cc.create_time,
+                   'update_time', cc.update_time
                ) AS comment
         FROM community_posts cp
                  LEFT JOIN user_info ui ON cp.user_email = ui.email
