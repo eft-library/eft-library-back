@@ -52,6 +52,14 @@ def get_posts(category: str, page_num: int):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
+@router.get("/search")
+def get_search_posts(page_num: int, word: str, search_type: str):
+    result = CommunityService.get_search(search_type, word, page_num)
+    if result is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
 @router.post("/detail")
 def get_posts_detail(request_info: GetPostDetail):
     result = CommunityService.get_detail_post(
