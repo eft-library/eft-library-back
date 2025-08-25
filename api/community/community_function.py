@@ -226,7 +226,7 @@ class CommunityFunction:
                           OR cp.contents ILIKE :word 
                           OR c.id IS NOT NULL
                       )
-                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
+                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time, cc.comment_count, r.reaction_score
                 ORDER BY cp.create_time DESC
                 LIMIT :limit OFFSET :offset
     """,
@@ -333,7 +333,7 @@ class CommunityFunction:
                           c.id IS NOT NULL
                           OR cp.user_email ILIKE :word 
                       )
-                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
+                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time, cc.comment_count, r.reaction_score
                 ORDER BY cp.create_time DESC
                 LIMIT :limit OFFSET :offset
     """,
@@ -415,7 +415,7 @@ class CommunityFunction:
                           OR cp.contents ILIKE :word 
                           OR c.id IS NOT NULL
                       )
-                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
+                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time, cc.comment_count, r.reaction_score
     """,
             "all": """
         SELECT count(*)
@@ -474,7 +474,7 @@ class CommunityFunction:
                           c.id IS NOT NULL
                           OR cp.user_email ILIKE :word 
                       )
-                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
+                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time, cc.comment_count, r.reaction_score
     """,
         }
 
