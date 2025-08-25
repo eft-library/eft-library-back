@@ -70,7 +70,7 @@ def get_posts_detail(request_info: GetPostDetail):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("side_post")
+@router.get("/side_post")
 def get_side_post():
     result = CommunityService.get_side_info()
     if result is None:
