@@ -134,7 +134,7 @@ class CommunityFunction:
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
-                  AND cp.title ILIKE '%' || :word || '%'
+                  AND cp.title ILIKE :word 
                 ORDER BY cp.create_time DESC
                 LIMIT :limit OFFSET :offset
             """,
@@ -218,12 +218,12 @@ class CommunityFunction:
                          LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                          LEFT JOIN comment_count cc ON cc.post_id = cp.id
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
-                         LEFT JOIN community_comments c ON c.post_id = cp.id AND c.contents ILIKE '%' || :word || '%'
+                         LEFT JOIN community_comments c ON c.post_id = cp.id AND c.contents ILIKE :word 
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                   AND (
-                          cp.title ILIKE '%' || :word || '%'
-                          OR cp.contents ILIKE '%' || :word || '%'
+                          cp.title ILIKE :word 
+                          OR cp.contents ILIKE :word 
                           OR c.id IS NOT NULL
                       )
                 GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
@@ -274,8 +274,8 @@ class CommunityFunction:
         WHERE cp.delete_by_admin = false
           AND cp.delete_by_user = false
           AND (
-                cp.contents ILIKE '%' || :word || '%'
-                OR cc.contents ILIKE '%' || :word || '%'
+                cp.contents ILIKE :word 
+                OR cc.contents ILIKE :word 
               )
         ORDER BY cp.create_time DESC
         LIMIT :limit OFFSET :offset
@@ -326,12 +326,12 @@ class CommunityFunction:
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
                          LEFT JOIN community_comments c 
                                    ON c.post_id = cp.id 
-                                  AND c.user_email ILIKE '%' || :word || '%'
+                                  AND c.user_email ILIKE :word 
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                   AND (
                           c.id IS NOT NULL
-                          OR cp.user_email ILIKE '%' || :word || '%'
+                          OR cp.user_email ILIKE :word 
                       )
                 GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
                 ORDER BY cp.create_time DESC
@@ -367,7 +367,7 @@ class CommunityFunction:
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
-                  AND cp.title ILIKE '%' || :word || '%'
+                  AND cp.title ILIKE :word 
             """,
             "titleContent": """
                 SELECT count(*)
@@ -407,12 +407,12 @@ class CommunityFunction:
                          LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                          LEFT JOIN comment_count cc ON cc.post_id = cp.id
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
-                         LEFT JOIN community_comments c ON c.post_id = cp.id AND c.contents ILIKE '%' || :word || '%'
+                         LEFT JOIN community_comments c ON c.post_id = cp.id AND c.contents ILIKE :word 
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                   AND (
-                          cp.title ILIKE '%' || :word || '%'
-                          OR cp.contents ILIKE '%' || :word || '%'
+                          cp.title ILIKE :word 
+                          OR cp.contents ILIKE :word 
                           OR c.id IS NOT NULL
                       )
                 GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
@@ -440,8 +440,8 @@ class CommunityFunction:
         WHERE cp.delete_by_admin = false
           AND cp.delete_by_user = false
           AND (
-                cp.contents ILIKE '%' || :word || '%'
-                OR cc.contents ILIKE '%' || :word || '%'
+                cp.contents ILIKE :word 
+                OR cc.contents ILIKE :word 
               )
     """,
             "author": """
@@ -467,12 +467,12 @@ class CommunityFunction:
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
                          LEFT JOIN community_comments c 
                                    ON c.post_id = cp.id 
-                                  AND c.user_email ILIKE '%' || :word || '%'
+                                  AND c.user_email ILIKE :word 
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                   AND (
                           c.id IS NOT NULL
-                          OR cp.user_email ILIKE '%' || :word || '%'
+                          OR cp.user_email ILIKE :word 
                       )
                 GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time
     """,
