@@ -64,7 +64,7 @@ class CommunityFunction:
         # 게시글 목록
         posts_result = session.execute(
             get_post_query,
-            {"limit": limit, "offset": offset},
+            {"limit": limit, "offset": offset, "post_id": post_id},
         )
         posts = [dict(row) for row in posts_result.mappings()]
 
