@@ -54,7 +54,7 @@ class CommunityFunction:
         # 현재 페이지 번호
         current_page_num_result = session.execute(
             get_post_current_page_num_query,
-            {"category": page_category, "post_id": post_id},
+            {"post_id": post_id},
         )
         current_page_num = (current_page_num_result.scalar() - 1) // limit + 1
 
@@ -64,14 +64,12 @@ class CommunityFunction:
         # 게시글 목록
         posts_result = session.execute(
             get_post_query,
-            {"limit": limit, "offset": offset, "category": page_category},
+            {"limit": limit, "offset": offset},
         )
         posts = [dict(row) for row in posts_result.mappings()]
 
         # 전체 개수
-        total_result = session.execute(
-            get_post_count_query, {"category": page_category}
-        )
+        total_result = session.execute(get_post_count_query, {"post_id": post_id})
         total = total_result.scalar()
         max_page_count = (total + limit - 1) // limit
 

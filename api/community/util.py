@@ -16,22 +16,23 @@ class CommunityUtil:
                    cp.create_time,
                    cp.update_time,
                    cpv.view_count                           as view_count,
-                    coalesce((SELECT COUNT(*)
-                              FROM community_comments cc
-                              WHERE cc.post_id = cp.id), 0) AS comment_count,
+                   coalesce((SELECT COUNT(*)
+                             FROM community_comments cc
+                             WHERE cc.post_id = cp.id), 0) AS comment_count,
                    coalesce((SELECT SUM(CASE
                                             WHEN cpr.reaction_type = 1 THEN 1
                                             WHEN cpr.reaction_type = 0 THEN -1
-                                            ELSE 0 END) AS reaction_score
+                                            ELSE 0 END)
                              FROM community_posts_reactions cpr
-                             where cpr.post_id = cp.id), 0) as reaction_score
+                             WHERE cpr.post_id = cp.id), 0) as reaction_score
             from community_posts cp
                      LEFT JOIN user_info ui on cp.user_email = ui.email
                      LEFT JOIN community_posts_views cpv on cp.id = cpv.post_id
-            where cp.category = :category
-            and cp.delete_by_user = false and cp.delete_by_admin = false
+            where cp.category = (select category from community_posts where id = :post_id)
+              and cp.delete_by_user = false
+              and cp.delete_by_admin = false
             order by cp.create_time desc
-            limit :limit 
+            limit :limit
             offset :offset
         """
 
@@ -40,7 +41,9 @@ class CommunityUtil:
         return """
             select count(*)
             from community_posts
-            where category = :category     
+            where category = (select category from community_posts where id = :post_id)
+              and delete_by_user = false
+              and delete_by_admin = false
         """
 
     @staticmethod
@@ -177,16 +180,22 @@ class CommunityUtil:
     @staticmethod
     def get_current_post_category_page_num():
         return """
-            WITH ordered_posts AS (
+            WITH post_category AS (
+                SELECT category
+                FROM community_posts
+                WHERE id = :post_id
+            ),
+            ordered_posts AS (
                 SELECT id,
                        ROW_NUMBER() OVER (ORDER BY create_time DESC) AS rn
-                FROM community_posts
-                WHERE category = :category
-                and delete_by_user = false and delete_by_admin = false
+                FROM community_posts cp
+                WHERE cp.category = (SELECT category FROM post_category)
+                  AND delete_by_user = false
+                  AND delete_by_admin = false
             )
             SELECT rn
             FROM ordered_posts
-            WHERE id = :post_id        
+            WHERE id = :post_id  
         """
 
     @staticmethod
