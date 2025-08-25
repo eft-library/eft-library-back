@@ -503,7 +503,7 @@ class CommunityService:
                 get_search_params = {
                     "limit": limit,
                     "offset": offset,
-                    "word": f"%{word}%",
+                    "word": word,
                 }
                 get_search_result = s.execute(get_search_sql, get_search_params)
                 get_search_result_data = [
