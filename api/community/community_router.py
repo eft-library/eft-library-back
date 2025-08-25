@@ -70,6 +70,14 @@ def get_posts_detail(request_info: GetPostDetail):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
+@router.get("side_post")
+def get_side_post():
+    result = CommunityService.get_side_info()
+    if result is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
 @router.post("/detail-meta-data")
 def get_posts_detail_meta_data(request_info: GetPostDetail):
     result = CommunityService.get_detail_post_meta_data(

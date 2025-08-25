@@ -141,23 +141,10 @@ class CommunityService:
 
                 max_page_count = (total + limit - 1) // limit
 
-                # issue_posts & notice_posts 조회
-                side_issue_posts_query = text(CommunityUtil.get_posts_with_issue())
-                get_side_issue_posts = s.execute(
-                    side_issue_posts_query, {"limit": 3, "offset": 0}
-                )
-                get_side_issue_posts_data = [
-                    dict(row) for row in get_side_issue_posts.mappings()
-                ]
-
-                notice_posts = CommunityFunction.fetch_notice_posts(s)
-
                 return {
                     "total": total,
                     "max_page_count": max_page_count,
                     "posts": get_post_data,
-                    "issue_posts": get_side_issue_posts_data,
-                    "notice_posts": notice_posts,
                 }
 
         except Exception as e:
@@ -170,27 +157,38 @@ class CommunityService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
-
-                side_issue_posts_query = text(CommunityUtil.get_posts_with_issue())
-                get_side_issue_posts = s.execute(
-                    side_issue_posts_query, {"limit": 3, "offset": 0}
-                )
-                get_side_issue_posts_data = [
-                    dict(row) for row in get_side_issue_posts.mappings()
-                ]
-
                 return {
                     "post_detail": CommunityFunction.fetch_post_detail(
                         s, post_id, user_email
                     ),
-                    "issue_posts": get_side_issue_posts_data,
-                    "notice_posts": CommunityFunction.fetch_notice_posts(s),
                     "author_detail": CommunityFunction.fetch_author_meta(
                         s, post_id, user_email
                     ),
                     "posts": CommunityFunction.fetch_posts_with_paging(
                         s, post_id, page_category
                     ),
+                }
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_side_info():
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+
+                side_issue_posts_query = text(CommunityUtil.get_posts_with_issue())
+                get_side_issue_posts = s.execute(
+                    side_issue_posts_query, {"limit": 5, "offset": 0}
+                )
+                get_side_issue_posts_data = [
+                    dict(row) for row in get_side_issue_posts.mappings()
+                ]
+
+                return {
+                    "issue_posts": get_side_issue_posts_data,
+                    "notice_posts": CommunityFunction.fetch_notice_posts(s),
                 }
         except Exception as e:
             print("오류 발생:", e)
