@@ -37,6 +37,42 @@ class CommunityUtil:
         """
 
     @staticmethod
+    def get_posts_with_post_id():
+        return """
+            select cp.id::text AS id,
+                   cp.slug,
+                   cp.user_email,
+                   ui.nickname,
+                   cp.category,
+                   cp.title,
+                   cp.contents,
+                   cp.thumbnail,
+                   cp.delete_by_user,
+                   cp.delete_by_admin,
+                   cp.create_time,
+                   cp.update_time,
+                   cpv.view_count                           as view_count,
+                   coalesce((SELECT COUNT(*)
+                             FROM community_comments cc
+                             WHERE cc.post_id = cp.id), 0) AS comment_count,
+                   coalesce((SELECT SUM(CASE
+                                            WHEN cpr.reaction_type = 1 THEN 1
+                                            WHEN cpr.reaction_type = 0 THEN -1
+                                            ELSE 0 END)
+                             FROM community_posts_reactions cpr
+                             WHERE cpr.post_id = cp.id), 0) as reaction_score
+            from community_posts cp
+                     LEFT JOIN user_info ui on cp.user_email = ui.email
+                     LEFT JOIN community_posts_views cpv on cp.id = cpv.post_id
+            where cp.category = :category
+              and cp.delete_by_user = false
+              and cp.delete_by_admin = false
+            order by cp.create_time desc
+            limit :limit
+            offset :offset
+        """
+
+    @staticmethod
     def get_post_category_count():
         return """
             select count(*)

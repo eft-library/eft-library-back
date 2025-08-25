@@ -45,7 +45,7 @@ class CommunityFunction:
                 CommunityUtil.get_current_post_issue_page_num()
             )
         else:
-            get_post_query = text(CommunityUtil.get_posts_with_category())
+            get_post_query = text(CommunityUtil.get_posts_with_post_id())
             get_post_count_query = text(CommunityUtil.get_post_category_count())
             get_post_current_page_num_query = text(
                 CommunityUtil.get_current_post_category_page_num()
