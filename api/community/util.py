@@ -1,7 +1,7 @@
 class CommunityUtil:
 
     @staticmethod
-    def get_posts_with_category():
+    def get_posts_with_post_id():
         return """
             select cp.id::text AS id,
                    cp.slug,
@@ -37,7 +37,7 @@ class CommunityUtil:
         """
 
     @staticmethod
-    def get_posts_with_post_id():
+    def get_posts_with_category():
         return """
             select cp.id::text AS id,
                    cp.slug,
