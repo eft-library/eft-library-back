@@ -77,6 +77,16 @@ class CommunityUtil:
         return """
             select count(*)
             from community_posts
+            where category = :category
+              and delete_by_user = false
+              and delete_by_admin = false
+        """
+
+    @staticmethod
+    def get_post_category_count_with_post_id():
+        return """
+            select count(*)
+            from community_posts
             where category = (select category from community_posts where id = :post_id)
               and delete_by_user = false
               and delete_by_admin = false
