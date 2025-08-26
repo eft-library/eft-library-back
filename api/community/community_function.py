@@ -204,29 +204,23 @@ class CommunityFunction:
                        cp.delete_by_admin,
                        cp.create_time,
                        cp.update_time,
-                       json_agg(
-                           json_build_object(
-                               'id', c.id,
-                               'contents', c.contents,
-                               'user_email', c.user_email,
-                               'create_time', c.create_time,
-                               'update_time', c.update_time
-                           )
-                       ) FILTER (WHERE c.id IS NOT NULL) AS comments
+                       json_build_object(
+                           'id', c.id,
+                           'contents', c.contents,
+                           'user_email', c.user_email,
+                           'create_time', c.create_time,
+                           'update_time', c.update_time
+                       ) AS comment
                 FROM community_posts cp
                          LEFT JOIN user_info ui ON cp.user_email = ui.email
                          LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                          LEFT JOIN comment_count cc ON cc.post_id = cp.id
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
-                         LEFT JOIN community_comments c ON c.post_id = cp.id AND c.contents ILIKE :word 
+                         INNER JOIN community_comments c 
+                                 ON c.post_id = cp.id 
+                                AND c.contents ILIKE :word
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
-                  AND (
-                          cp.title ILIKE :word 
-                          OR cp.contents ILIKE :word 
-                          OR c.id IS NOT NULL
-                      )
-                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time, cc.comment_count, r.reaction_score
                 ORDER BY cp.create_time DESC
                 LIMIT :limit OFFSET :offset
     """,
@@ -324,14 +318,13 @@ class CommunityFunction:
                          LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                          LEFT JOIN comment_count cc ON cc.post_id = cp.id
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
-                         LEFT JOIN community_comments c 
+                         LEFT JOIN community_comments c
                                    ON c.post_id = cp.id 
-                                  AND c.user_email ILIKE :word 
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                   AND (
-                          c.id IS NOT NULL
-                          OR cp.user_email ILIKE :word 
+                          ui.nickname ILIKE :word  -- 게시글 작성자 닉네임 검색
+                          OR c.id IS NOT NULL       -- 댓글 매칭
                       )
                 GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time, cc.comment_count, r.reaction_score
                 ORDER BY cp.create_time DESC
@@ -407,15 +400,11 @@ class CommunityFunction:
                          LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                          LEFT JOIN comment_count cc ON cc.post_id = cp.id
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
-                         LEFT JOIN community_comments c ON c.post_id = cp.id AND c.contents ILIKE :word 
+                         INNER JOIN community_comments c 
+                                 ON c.post_id = cp.id 
+                                AND c.contents ILIKE :word
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
-                  AND (
-                          cp.title ILIKE :word 
-                          OR cp.contents ILIKE :word 
-                          OR c.id IS NOT NULL
-                      )
-                GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time, cc.comment_count, r.reaction_score
     """,
             "all": """
         SELECT count(*)
@@ -465,14 +454,13 @@ class CommunityFunction:
                          LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                          LEFT JOIN comment_count cc ON cc.post_id = cp.id
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
-                         LEFT JOIN community_comments c 
+                         LEFT JOIN community_comments c
                                    ON c.post_id = cp.id 
-                                  AND c.user_email ILIKE :word 
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                   AND (
-                          c.id IS NOT NULL
-                          OR cp.user_email ILIKE :word 
+                          ui.nickname ILIKE :word  -- 게시글 작성자 닉네임 검색
+                          OR c.id IS NOT NULL       -- 댓글 매칭
                       )
                 GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time, cc.comment_count, r.reaction_score
     """,
