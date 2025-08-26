@@ -225,56 +225,56 @@ class CommunityFunction:
                 LIMIT :limit OFFSET :offset
     """,
             "all": """
-        SELECT cp.id::text AS id,
-               cp.slug,
-               cp.user_email,
-               cp.category,
-               ui.nickname,
-               cp.title,
-               cp.contents,
-               cpv.view_count,
-               cc_all.comment_count,
-               COALESCE(cpr_sum.reaction_score, 0) AS reaction_score,
-               cp.thumbnail,
-               cp.delete_by_user,
-               cp.delete_by_admin,
-               cp.create_time,
-               cp.update_time,
-               json_build_object(
-                   'id', cc.id,
-                   'contents', cc.contents,
-                   'user_email', cc.user_email,
-                   'create_time', cc.create_time,
-                   'update_time', cc.update_time
-               ) AS comment
-        FROM community_posts cp
-                 LEFT JOIN user_info ui ON cp.user_email = ui.email
-                 LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
-                 LEFT JOIN (
-                     SELECT post_id, COUNT(*) AS comment_count
-                     FROM community_comments
-                     GROUP BY post_id
-                 ) cc_all ON cc_all.post_id = cp.id
-                 LEFT JOIN (
-                     SELECT post_id,
-                            SUM(CASE
-                                    WHEN reaction_type = 1 THEN 1
-                                    WHEN reaction_type = 0 THEN -1
-                                    ELSE 0 END) AS reaction_score
-                     FROM community_posts_reactions
-                     GROUP BY post_id
-                 ) cpr_sum ON cpr_sum.post_id = cp.id
-                 LEFT JOIN community_comments cc ON cc.post_id = cp.id
-        WHERE cp.delete_by_admin = false
-          AND cp.delete_by_user = false
-          AND (
-                cp.contents ILIKE :word 
-                OR cc.contents ILIKE :word 
-                or cp.title ILIKE :word  
-              )
-        ORDER BY cp.create_time DESC
-        LIMIT :limit OFFSET :offset
-    """,
+                SELECT cp.id::text AS id,
+                       cp.slug,
+                       cp.user_email,
+                       cp.category,
+                       ui.nickname,
+                       cp.title,
+                       cp.contents,
+                       cpv.view_count,
+                       cc_all.comment_count,
+                       COALESCE(cpr_sum.reaction_score, 0) AS reaction_score,
+                       cp.thumbnail,
+                       cp.delete_by_user,
+                       cp.delete_by_admin,
+                       cp.create_time,
+                       cp.update_time,
+                       json_build_object(
+                           'id', cc.id,
+                           'contents', cc.contents,
+                           'user_email', cc.user_email,
+                           'create_time', cc.create_time,
+                           'update_time', cc.update_time
+                       ) AS comment
+                FROM community_posts cp
+                         LEFT JOIN user_info ui ON cp.user_email = ui.email
+                         LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
+                         LEFT JOIN (
+                             SELECT post_id, COUNT(*) AS comment_count
+                             FROM community_comments
+                             GROUP BY post_id
+                         ) cc_all ON cc_all.post_id = cp.id
+                         LEFT JOIN (
+                             SELECT post_id,
+                                    SUM(CASE
+                                            WHEN reaction_type = 1 THEN 1
+                                            WHEN reaction_type = 0 THEN -1
+                                            ELSE 0 END) AS reaction_score
+                             FROM community_posts_reactions
+                             GROUP BY post_id
+                         ) cpr_sum ON cpr_sum.post_id = cp.id
+                         LEFT JOIN community_comments cc ON cc.post_id = cp.id
+                WHERE cp.delete_by_admin = false
+                  AND cp.delete_by_user = false
+                  AND (
+                        cp.contents ILIKE :word 
+                        OR cc.contents ILIKE :word 
+                        or cp.title ILIKE :word  
+                      )
+                ORDER BY cp.create_time DESC
+                LIMIT :limit OFFSET :offset
+            """,
             "author": """
                 WITH comment_count AS (
                     SELECT post_id, COUNT(*) AS comment_count
@@ -330,7 +330,7 @@ class CommunityFunction:
                 GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time, cc.comment_count, r.reaction_score
                 ORDER BY cp.create_time DESC
                 LIMIT :limit OFFSET :offset
-    """,
+            """,
         }
 
         return queries[search_type]
@@ -408,33 +408,33 @@ class CommunityFunction:
                   AND cp.delete_by_user = false
     """,
             "all": """
-        SELECT count(*)
-        FROM community_posts cp
-                 LEFT JOIN user_info ui ON cp.user_email = ui.email
-                 LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
-                 LEFT JOIN (
-                     SELECT post_id, COUNT(*) AS comment_count
-                     FROM community_comments
-                     GROUP BY post_id
-                 ) cc_all ON cc_all.post_id = cp.id
-                 LEFT JOIN (
-                     SELECT post_id,
-                            SUM(CASE
-                                    WHEN reaction_type = 1 THEN 1
-                                    WHEN reaction_type = 0 THEN -1
-                                    ELSE 0 END) AS reaction_score
-                     FROM community_posts_reactions
-                     GROUP BY post_id
-                 ) cpr_sum ON cpr_sum.post_id = cp.id
-                 LEFT JOIN community_comments cc ON cc.post_id = cp.id
-        WHERE cp.delete_by_admin = false
-          AND cp.delete_by_user = false
-          AND (
-                cp.contents ILIKE :word 
-                OR cc.contents ILIKE :word 
-                or cp.title ILIKE :word  
-              )
-    """,
+                SELECT count(*)
+                FROM community_posts cp
+                         LEFT JOIN user_info ui ON cp.user_email = ui.email
+                         LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
+                         LEFT JOIN (
+                             SELECT post_id, COUNT(*) AS comment_count
+                             FROM community_comments
+                             GROUP BY post_id
+                         ) cc_all ON cc_all.post_id = cp.id
+                         LEFT JOIN (
+                             SELECT post_id,
+                                    SUM(CASE
+                                            WHEN reaction_type = 1 THEN 1
+                                            WHEN reaction_type = 0 THEN -1
+                                            ELSE 0 END) AS reaction_score
+                             FROM community_posts_reactions
+                             GROUP BY post_id
+                         ) cpr_sum ON cpr_sum.post_id = cp.id
+                         LEFT JOIN community_comments cc ON cc.post_id = cp.id
+                WHERE cp.delete_by_admin = false
+                  AND cp.delete_by_user = false
+                  AND (
+                        cp.contents ILIKE :word 
+                        OR cc.contents ILIKE :word 
+                        or cp.title ILIKE :word  
+                      )
+            """,
             "author": """
                 WITH comment_count AS (
                     SELECT post_id, COUNT(*) AS comment_count
@@ -465,7 +465,7 @@ class CommunityFunction:
                           OR c.id IS NOT NULL       -- 댓글 매칭
                       )
                 GROUP BY cp.id, ui.nickname, cpv.view_count, cp.create_time, cc.comment_count, r.reaction_score
-    """,
+            """,
         }
 
         return queries[search_type]
