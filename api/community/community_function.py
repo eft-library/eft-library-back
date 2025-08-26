@@ -270,6 +270,7 @@ class CommunityFunction:
           AND (
                 cp.contents ILIKE :word 
                 OR cc.contents ILIKE :word 
+                or cp.title ILIKE :word  
               )
         ORDER BY cp.create_time DESC
         LIMIT :limit OFFSET :offset
@@ -431,6 +432,7 @@ class CommunityFunction:
           AND (
                 cp.contents ILIKE :word 
                 OR cc.contents ILIKE :word 
+                or cp.title ILIKE :word  
               )
     """,
             "author": """
