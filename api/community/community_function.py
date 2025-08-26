@@ -217,10 +217,10 @@ class CommunityFunction:
                          LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                          LEFT JOIN comment_count cc ON cc.post_id = cp.id
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
-                         LEFT JOIN user_info cui ON c.user_email = cui.email
                          INNER JOIN community_comments c 
                                  ON c.post_id = cp.id 
                                 AND c.contents ILIKE :word
+                         LEFT JOIN user_info cui ON c.user_email = cui.email
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                 ORDER BY cp.create_time DESC
@@ -253,7 +253,6 @@ class CommunityFunction:
                 FROM community_posts cp
                          LEFT JOIN user_info ui ON cp.user_email = ui.email
                          LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
-                         LEFT JOIN user_info cui ON c.user_email = cui.email
                          LEFT JOIN (
                              SELECT post_id, COUNT(*) AS comment_count
                              FROM community_comments
@@ -269,6 +268,7 @@ class CommunityFunction:
                              GROUP BY post_id
                          ) cpr_sum ON cpr_sum.post_id = cp.id
                          LEFT JOIN community_comments cc ON cc.post_id = cp.id
+                         LEFT JOIN user_info cui ON cc.user_email = cui.email
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                   AND (
@@ -324,9 +324,9 @@ class CommunityFunction:
                          LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                          LEFT JOIN comment_count cc ON cc.post_id = cp.id
                          LEFT JOIN reaction_sum r ON r.post_id = cp.id
-                         LEFT JOIN user_info cui ON c.user_email = cui.email
                          LEFT JOIN community_comments c
                                    ON c.post_id = cp.id 
+                         LEFT JOIN user_info cui ON c.user_email = cui.email
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                   AND (
