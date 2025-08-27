@@ -815,3 +815,61 @@ COMMENT ON COLUMN community_comments_reactions.comment_id IS '댓글 nano 아이
 COMMENT ON COLUMN community_comments_reactions.user_email IS '리액션 누른 사용자 이메일';
 COMMENT ON COLUMN community_comments_reactions.reaction_type IS '리액션 종류 (1: 좋아요, 0: 싫어요, -1:무반응)';
 COMMENT ON COLUMN community_comments_reactions.update_time IS '리액선 시간';
+
+CREATE TABLE user_block (
+    id SERIAL PRIMARY KEY,
+    blocker_email TEXT NOT NULL,
+    blocked_email TEXT NOT NULL,
+    create_time TIMESTAMP DEFAULT NOW()
+);
+COMMENT ON COLUMN user_block.id IS '자동 생성 ID';
+COMMENT ON COLUMN user_block.blocker_email IS '차단한 사용자';
+COMMENT ON COLUMN user_block.blocked_email IS '차단 당한 사용자';
+COMMENT ON COLUMN user_block.create_time IS '차단 시간';
+
+CREATE TABLE user_penalty (
+    id SERIAL PRIMARY KEY,
+    user_email TEXT,
+    reason TEXT,
+    start_time TIMESTAMP DEFAULT NOW(),
+    end_time TIMESTAMP
+);
+COMMENT ON COLUMN user_penalty.id IS '자동 생성 ID';
+COMMENT ON COLUMN user_penalty.user_email IS '사용자 이메일';
+COMMENT ON COLUMN user_penalty.reason IS '패널티 사유';
+COMMENT ON COLUMN user_penalty.start_time IS '패널티 시작 시간';
+COMMENT ON COLUMN user_penalty.end_time IS '패널티 종료 시간';
+
+CREATE TABLE comment_report (
+    id SERIAL PRIMARY KEY,
+    comment_id TEXT NOT NULL,
+    reporter_email TEXT NOT NULL,
+    reported_email TEXT NOT NULL,
+    reason_type TEXT,
+    reason TEXT,
+    create_time TIMESTAMP DEFAULT NOW()
+);
+COMMENT ON COLUMN comment_report.id IS '자동 생성 ID';
+COMMENT ON COLUMN comment_report.comment_id IS '댓글 ID';
+COMMENT ON COLUMN comment_report.reporter_email IS '신고자';
+COMMENT ON COLUMN comment_report.reported_email IS '신고 당한 댓글 작성자';
+COMMENT ON COLUMN comment_report.reason_type IS '신고 종류';
+COMMENT ON COLUMN comment_report.reason IS '사유';
+COMMENT ON COLUMN comment_report.create_time IS '신고 시간';
+
+CREATE TABLE post_report (
+    id SERIAL PRIMARY KEY,
+    post_id BIGINT NOT NULL,
+    reporter_email TEXT NOT NULL,
+    reported_email TEXT NOT NULL,
+    reason_type TEXT,
+    reason TEXT,
+    create_time TIMESTAMP DEFAULT NOW()
+);
+COMMENT ON COLUMN post_report.id IS '자동 생성 ID';
+COMMENT ON COLUMN post_report.post_id IS '글 ID';
+COMMENT ON COLUMN post_report.reporter_email IS '신고자';
+COMMENT ON COLUMN post_report.reported_email IS '신고 당한 작성자';
+COMMENT ON COLUMN post_report.reason_type IS '신고 종류';
+COMMENT ON COLUMN post_report.reason IS '사유';
+COMMENT ON COLUMN post_report.create_time IS '신고 시간';
