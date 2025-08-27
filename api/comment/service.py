@@ -268,7 +268,7 @@ class CommentService:
                     reported_email=request_info.reported_email,
                     reason_type=request_info.reason_type,
                     reason=request_info.reason,
-                    creatime=datetime.now(),
+                    create_time=datetime.now(),
                 )
                 s.add(new_post_report)
                 s.commit()
