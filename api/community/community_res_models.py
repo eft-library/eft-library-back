@@ -66,3 +66,16 @@ class CommunityPostsBookmark(DataBaseConnector.Base):
     user_email = Column(TEXT, primary_key=True)
     post_id = Column(BIGINT, primary_key=True)
     create_time = Column(TIMESTAMP)
+
+
+class PostReport(DataBaseConnector.Base):
+
+    __tablename__ = "post_report"
+
+    id = Column(INTEGER, primary_key=True)
+    post_id = Column(BIGINT)
+    reporter_email = Column(TEXT)
+    reported_email = Column(TEXT)
+    reason_type = Column(TEXT)
+    reason = Column(TEXT)
+    create_time = Column(TIMESTAMP)

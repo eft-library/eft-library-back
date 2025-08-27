@@ -5,11 +5,10 @@ from api.community.community_res_models import (
     CommunityPostsReactions,
     CommunityPostsBookmark,
     UserFollows,
+    PostReport,
 )
 from api.community.util import CommunityUtil
-from api.community.community_req_models import (
-    CreateCommunity,
-)
+from api.community.community_req_models import CreateCommunity, ReqPostReport
 from database import DataBaseConnector
 from util.snowflake_id import SnowflakeGenerator
 from slugify import slugify
@@ -520,6 +519,28 @@ class CommunityService:
                     "total_count": total,
                     "max_page_count": max_page_count,
                 }
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def report_post(request_info: ReqPostReport, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                bigint_post_id = int(request_info.post_id)
+                new_post_report = PostReport(
+                    post_id=bigint_post_id,
+                    reporter_email=user_email,
+                    reported_email=request_info.reported_email,
+                    reason_type=request_info.reason_type,
+                    reason=request_info.reason,
+                    creatime=datetime.now(),
+                )
+                s.add(new_post_report)
+                s.commit()
+
+                return {"result": 1}
         except Exception as e:
             print("오류 발생:", e)
             return None

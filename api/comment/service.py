@@ -2,8 +2,9 @@ from api.comment.util import CommentUtil
 from database import DataBaseConnector
 from sqlalchemy import text
 from nanoid import generate
-from api.comment.comment_res_models import CommentReaction
+from api.comment.comment_res_models import CommentReaction, CommentReport
 from datetime import datetime
+from api.comment.comment_req_models import ReqCommentReport
 
 
 class CommentService:
@@ -252,6 +253,27 @@ class CommentService:
                 s.commit()
                 return {"result": reaction.reaction_type}  # 현재 상태 반환
 
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def report_comment(request_info: ReqCommentReport, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                new_post_report = CommentReport(
+                    comment_id=request_info.comment_id,
+                    reporter_email=user_email,
+                    reported_email=request_info.reported_email,
+                    reason_type=request_info.reason_type,
+                    reason=request_info.reason,
+                    creatime=datetime.now(),
+                )
+                s.add(new_post_report)
+                s.commit()
+
+                return {"result": 1}
         except Exception as e:
             print("오류 발생:", e)
             return None

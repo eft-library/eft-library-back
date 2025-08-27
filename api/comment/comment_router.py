@@ -12,6 +12,7 @@ from api.comment.comment_req_models import (
     GetComments,
     UpdateComment,
     DeleteComment,
+    ReqCommentReport,
 )
 
 
@@ -127,6 +128,18 @@ def delete_comment_by_user(
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
         result = CommentService.delete_comment_by_user(request_info.comment_id)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/report_comment")
+def report_post(request_info: ReqCommentReport, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommentService.report_comment(request_info, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

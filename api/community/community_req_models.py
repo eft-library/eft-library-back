@@ -45,3 +45,10 @@ class GetPostDetail(BaseModel):
     url: str
     user_email: str
     page_category: str
+
+
+class ReqPostReport(BaseModel):
+    post_id: str
+    reported_email: str
+    reason_type: str
+    reason: str

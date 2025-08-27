@@ -16,6 +16,7 @@ from api.community.community_req_models import (
     CheckFollow,
     PostDelete,
     GetUpdatePostDetail,
+    ReqPostReport,
 )
 
 
@@ -200,6 +201,18 @@ def delete_post_by_user(request_info: PostDelete, token: str = Depends(oauth2_sc
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
         result = CommunityService.delete_post_by_user(request_info.post_id)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/report_post")
+def report_post(request_info: ReqPostReport, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = CommunityService.report_post(request_info, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

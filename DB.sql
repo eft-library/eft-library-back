@@ -873,3 +873,18 @@ COMMENT ON COLUMN post_report.reported_email IS '신고 당한 작성자';
 COMMENT ON COLUMN post_report.reason_type IS '신고 종류';
 COMMENT ON COLUMN post_report.reason IS '사유';
 COMMENT ON COLUMN post_report.create_time IS '신고 시간';
+
+CREATE TABLE user_report (
+    id SERIAL PRIMARY KEY,
+    reporter_email TEXT NOT NULL,
+    reported_email TEXT NOT NULL,
+    reason_type TEXT,
+    reason TEXT,
+    create_time TIMESTAMP DEFAULT NOW()
+);
+COMMENT ON COLUMN user_report.id IS '자동 생성 ID';
+COMMENT ON COLUMN user_report.reporter_email IS '신고자';
+COMMENT ON COLUMN user_report.reported_email IS '신고 당한 작성자';
+COMMENT ON COLUMN user_report.reason_type IS '신고 종류';
+COMMENT ON COLUMN user_report.reason IS '사유';
+COMMENT ON COLUMN user_report.create_time IS '신고 시간';

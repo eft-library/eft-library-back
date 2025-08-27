@@ -30,3 +30,10 @@ class GetComments(BaseModel):
     issue_comment_id: str
     page_num: int
     user_email: str
+
+
+class ReqCommentReport(BaseModel):
+    comment_id: str
+    reported_email: str
+    reason_type: str
+    reason: str
