@@ -58,7 +58,8 @@ class CommunityFunction:
             get_post_current_page_num_query,
             {"post_id": post_id},
         )
-        current_page_num = (current_page_num_result.scalar() - 1) // limit + 1
+        current_page_num_raw = current_page_num_result.scalar()
+        current_page_num = ((current_page_num_raw or 1) - 1) // limit + 1
 
         # 페이징 offset
         offset = (current_page_num - 1) * limit

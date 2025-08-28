@@ -136,7 +136,7 @@ class CommunityService:
                 get_post_count_result = s.execute(
                     get_post_count_query, {"category": category}
                 )
-                total = get_post_count_result.scalar()
+                total = get_post_count_result.scalar() or 0
 
                 max_page_count = (total + limit - 1) // limit
 
