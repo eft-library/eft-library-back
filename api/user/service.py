@@ -239,7 +239,7 @@ class UserService:
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                new_block = UserReport(
+                new_block = UserBlock(
                     blocker_email=user_email,
                     blocked_email=request_info.blocked_email,
                     reason=request_info.reason,
