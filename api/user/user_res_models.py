@@ -37,3 +37,14 @@ class UserReport(DataBaseConnector.Base):
     reason_type = Column(TEXT)
     reason = Column(TEXT)
     create_time = Column(TIMESTAMP)
+
+
+class UserBlock(DataBaseConnector.Base):
+
+    __tablename__ = "user_block"
+
+    id = Column(INTEGER, primary_key=True)
+    blocker_email = Column(TEXT)
+    blocked_email = Column(TEXT)
+    reason = Column(TEXT)
+    create_time = Column(TIMESTAMP)

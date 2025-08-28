@@ -1,9 +1,9 @@
 from datetime import datetime, timezone, timedelta
 import re
-from api.user.user_req_models import AddUserReq, ReqUserReport
+from api.user.user_req_models import AddUserReq, ReqUserReport, ReqUserBlock
 from database import DataBaseConnector
 from api.user.user_function import UserFunction
-from api.user.user_res_models import UserReport
+from api.user.user_res_models import UserReport, UserBlock
 
 
 class UserService:
@@ -227,6 +227,25 @@ class UserService:
                     create_time=datetime.now(),
                 )
                 s.add(new_post_report)
+                s.commit()
+
+                return {"result": 1}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def block_user(request_info: ReqUserBlock, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                new_block = UserReport(
+                    blocker_email=user_email,
+                    blocked_email=request_info.reported_email,
+                    reason=request_info.reason,
+                    create_time=datetime.now(),
+                )
+                s.add(new_block)
                 s.commit()
 
                 return {"result": 1}

@@ -20,3 +20,9 @@ class ReqUserReport(BaseModel):
     reported_email: str
     reason_type: str
     reason: str
+
+
+class ReqUserBlock(BaseModel):
+    blocker_email: str
+    blocked_email: str
+    reason: str

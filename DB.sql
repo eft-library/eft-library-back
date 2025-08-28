@@ -820,11 +820,13 @@ CREATE TABLE user_block (
     id SERIAL PRIMARY KEY,
     blocker_email TEXT NOT NULL,
     blocked_email TEXT NOT NULL,
+    reason TEXT,
     create_time TIMESTAMP DEFAULT NOW()
 );
 COMMENT ON COLUMN user_block.id IS '자동 생성 ID';
 COMMENT ON COLUMN user_block.blocker_email IS '차단한 사용자';
 COMMENT ON COLUMN user_block.blocked_email IS '차단 당한 사용자';
+COMMENT ON COLUMN user_block.reason IS '차단 사유';
 COMMENT ON COLUMN user_block.create_time IS '차단 시간';
 
 CREATE TABLE user_penalty (
