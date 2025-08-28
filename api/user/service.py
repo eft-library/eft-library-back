@@ -241,7 +241,7 @@ class UserService:
             with session() as s:
                 new_block = UserReport(
                     blocker_email=user_email,
-                    blocked_email=request_info.reported_email,
+                    blocked_email=request_info.blocked_email,
                     reason=request_info.reason,
                     create_time=datetime.now(),
                 )

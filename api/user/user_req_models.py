@@ -23,6 +23,5 @@ class ReqUserReport(BaseModel):
 
 
 class ReqUserBlock(BaseModel):
-    blocker_email: str
     blocked_email: str
     reason: str
