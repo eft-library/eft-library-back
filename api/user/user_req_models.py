@@ -14,3 +14,9 @@ class AddUserReq(BaseModel):
 
 class UpdateUserNickname(BaseModel):
     nickname: str
+
+
+class ReqUserReport(BaseModel):
+    reported_email: str
+    reason_type: str
+    reason: str

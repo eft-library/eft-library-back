@@ -1,8 +1,9 @@
 from datetime import datetime, timezone, timedelta
 import re
-from api.user.user_req_models import AddUserReq
+from api.user.user_req_models import AddUserReq, ReqUserReport
 from database import DataBaseConnector
 from api.user.user_function import UserFunction
+from api.user.user_res_models import UserReport
 
 
 class UserService:
@@ -209,6 +210,26 @@ class UserService:
                 # 30일 이상 지났거나 처음 업데이트
                 return {"result": 1}
 
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def report_user(request_info: ReqUserReport, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                new_post_report = UserReport(
+                    reporter_email=user_email,
+                    reported_email=request_info.reported_email,
+                    reason_type=request_info.reason_type,
+                    reason=request_info.reason,
+                    create_time=datetime.now(),
+                )
+                s.add(new_post_report)
+                s.commit()
+
+                return {"result": 1}
         except Exception as e:
             print("오류 발생:", e)
             return None

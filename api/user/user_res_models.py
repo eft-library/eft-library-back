@@ -5,6 +5,7 @@ from sqlalchemy import (
     TIMESTAMP,
     TEXT,
     Boolean,
+    INTEGER,
 )
 
 
@@ -24,3 +25,15 @@ class User(DataBaseConnector.Base):
     last_update_nickname = Column(TIMESTAMP)
     create_time = Column(TIMESTAMP)
     attendance_time = Column(TIMESTAMP)
+
+
+class UserReport(DataBaseConnector.Base):
+
+    __tablename__ = "user_report"
+
+    id = Column(INTEGER, primary_key=True)
+    reporter_email = Column(TEXT)
+    reported_email = Column(TEXT)
+    reason_type = Column(TEXT)
+    reason = Column(TEXT)
+    create_time = Column(TIMESTAMP)

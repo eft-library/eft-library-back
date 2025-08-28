@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from util.constants import HTTPCode
 from api.constants import Message
 from api.user.service import UserService
-from api.user.user_req_models import AddUserReq, UpdateUserNickname
+from api.user.user_req_models import AddUserReq, UpdateUserNickname, ReqUserReport
 from api.user.util import UserUtil
 
 router = APIRouter(tags=["User"])
@@ -91,6 +91,18 @@ def check_last_update_nickname(token: str = Depends(oauth2_scheme)):
             return CustomResponse.response(
                 None, HTTPCode.OK, Message.UPDATE_NICK_NAME_FAIL
             )
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/report_user")
+def report_post(request_info: ReqUserReport, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = UserService.report_user(request_info, user_email)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
