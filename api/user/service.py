@@ -1,9 +1,14 @@
 from datetime import datetime, timezone, timedelta
 import re
-from api.user.user_req_models import AddUserReq, ReqUserReport, ReqUserBlock
+from api.user.user_req_models import (
+    AddUserReq,
+    ReqUserReport,
+    ReqUserBlock,
+    ReqUserPenalty,
+)
 from database import DataBaseConnector
 from api.user.user_function import UserFunction
-from api.user.user_res_models import UserReport, UserBlock
+from api.user.user_res_models import UserReport, UserBlock, UserPenalty
 
 
 class UserService:
@@ -244,6 +249,46 @@ class UserService:
                     blocked_email=request_info.blocked_email,
                     reason=request_info.reason,
                     create_time=datetime.now(),
+                )
+                s.add(new_block)
+                s.commit()
+
+                return {"result": 1}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def calculate_end_time(duration_value: str):
+        """
+        duration_value: "1day", "3days", "permanent" 등
+        """
+        now = datetime.now()
+
+        if duration_value == "permanent":
+            return None  # or datetime(9999, 12, 31, 23, 59, 59) 등
+
+        # 숫자만 추출해서 int로 변환
+        days = int("".join(filter(str.isdigit, duration_value)))
+
+        # ban 종료일(자정)
+        # 현재 날짜 + days => 그 날짜의 00:00:00
+        target_date = (now + timedelta(days=days)).date()
+        end_time = datetime.combine(target_date, datetime.min.time())
+
+        return end_time
+
+    @staticmethod
+    def penalty_user(request_info: ReqUserPenalty):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                end_time = UserService.calculate_end_time(request_info.penalty)
+                new_block = UserPenalty(
+                    user_email=request_info.user_email,
+                    reason=request_info.reason,
+                    start_time=datetime.now(),
+                    end_time=end_time,
                 )
                 s.add(new_block)
                 s.commit()

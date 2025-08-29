@@ -48,3 +48,14 @@ class UserBlock(DataBaseConnector.Base):
     blocked_email = Column(TEXT)
     reason = Column(TEXT)
     create_time = Column(TIMESTAMP)
+
+
+class UserPenalty(DataBaseConnector.Base):
+
+    __tablename__ = "user_penalty"
+
+    id = Column(INTEGER, primary_key=True)
+    user_email = Column(TEXT)
+    reason = Column(TEXT)
+    start_time = Column(TIMESTAMP)
+    end_time = Column(TIMESTAMP)
