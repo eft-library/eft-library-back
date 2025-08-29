@@ -3,6 +3,9 @@ from api.planner.planner_res_models import UserQuest
 from api.user.user_req_models import AddUserReq
 from datetime import datetime, date
 import pytz
+from sqlalchemy import text
+
+from api.user.util import UserUtil
 
 
 class UserFunction:
@@ -66,5 +69,6 @@ class UserFunction:
 
     @staticmethod
     def _get_user_data(session, user_email: str):
-        user = session.query(User).filter(User.email == user_email).first()
-        return user
+        user_info_query = text(UserUtil.get_user_info_with_penalty())
+        result = session.execute(user_info_query, {"user_email": user_email})
+        return [dict(row) for row in result.mappings()][0]
