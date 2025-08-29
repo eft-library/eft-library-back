@@ -1,5 +1,4 @@
 from datetime import datetime, timezone, timedelta
-import re
 from api.user.user_req_models import (
     AddUserReq,
     ReqUserReport,
@@ -12,49 +11,6 @@ from api.user.user_res_models import UserReport, UserBlock, UserPenalty
 
 
 class UserService:
-    @staticmethod
-    def _validate_nickname_rules(nickname: str):
-        forbidden_words = [
-            "욕설1",
-            "욕설2",
-            "admin",
-            "운영진",
-            "관리자",
-            "운영자",
-            "시발",
-            "개새끼",
-        ]
-
-        # 1. 길이 체크
-        if len(nickname) < 2 or len(nickname) > 12:
-            return False, {
-                "ko": "닉네임은 2~12자 사이여야 합니다.",
-                "jp": "ニックネームは2〜12文字である必要があります。",
-                "en": "Nickname must be between 2 and 12 characters.",
-            }
-
-        # 2. 허용 문자 체크 (한글, 영문, 숫자, _, -)
-        if not re.match(r"^[가-힣a-zA-Z0-9_-]+$", nickname):
-            return False, {
-                "ko": "닉네임에는 한글, 영문, 숫자, _, -만 사용할 수 있습니다.",
-                "jp": "ニックネームには韓国語、英語、数字、_, -のみ使用できます。",
-                "en": "Nickname can only contain Korean, English letters, numbers, _, -.",
-            }
-
-        # 3. 금지 단어 체크
-        lower_nick = nickname.lower()
-        if any(word.lower() in lower_nick for word in forbidden_words):
-            return False, {
-                "ko": "사용할 수 없는 단어가 포함되어 있습니다.",
-                "jp": "使用できない単語が含まれています。",
-                "en": "Nickname contains forbidden words.",
-            }
-
-        return True, {
-            "ko": "사용 가능한 닉네임입니다.",
-            "jp": "使用可能なニックネームです。",
-            "en": "Nickname is available.",
-        }
 
     @staticmethod
     def add_new_user(addUserReq: AddUserReq):
@@ -101,7 +57,7 @@ class UserService:
     def update_nickname(nickname: str, user_email: str):
         try:
             # 1️⃣ 닉네임 규칙 체크
-            valid, message = UserService._validate_nickname_rules(nickname)
+            valid, message = UserFunction._validate_nickname_rules(nickname)
             if not valid:
                 return {
                     "success": False,
@@ -253,37 +209,23 @@ class UserService:
                 s.add(new_block)
                 s.commit()
 
-                return {"result": 1}
+                update_data = (
+                    s.query(UserBlock)
+                    .filter(UserBlock.blocker_email == user_email)
+                    .all()
+                )
+
+                return {"result": update_data}
         except Exception as e:
             print("오류 발생:", e)
             return None
-
-    @staticmethod
-    def calculate_end_time(duration_value: str):
-        """
-        duration_value: "1day", "3days", "permanent" 등
-        """
-        now = datetime.now()
-
-        if duration_value == "permanent":
-            return None  # or datetime(9999, 12, 31, 23, 59, 59) 등
-
-        # 숫자만 추출해서 int로 변환
-        days = int("".join(filter(str.isdigit, duration_value)))
-
-        # ban 종료일(자정)
-        # 현재 날짜 + days => 그 날짜의 00:00:00
-        target_date = (now + timedelta(days=days)).date()
-        end_time = datetime.combine(target_date, datetime.min.time())
-
-        return end_time
 
     @staticmethod
     def penalty_user(request_info: ReqUserPenalty):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                end_time = UserService.calculate_end_time(request_info.penalty)
+                end_time = UserFunction.calculate_end_time(request_info.penalty)
                 new_block = UserPenalty(
                     user_email=request_info.user_email,
                     reason=request_info.reason,
