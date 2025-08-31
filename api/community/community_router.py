@@ -18,7 +18,7 @@ from api.community.community_req_models import (
     GetUpdatePostDetail,
     ReqPostReport,
 )
-
+from typing import Optional
 
 router = APIRouter(tags=["Community"])
 
@@ -46,8 +46,22 @@ def create_posts(post_info: CreateCommunity, token: str = Depends(oauth2_scheme)
 
 
 @router.get("/get/{category}")
-def get_posts(category: str, page_num: int):
-    result = CommunityService.get_posts(category, page_num)
+def get_posts(
+    category: str,
+    page_num: int,
+    token: Optional[str] = Depends(oauth2_scheme),  # Optional 처리
+):
+    user_email: Optional[str] = None
+
+    if token:  # 토큰이 있을 때만 검증
+        user_email = UserUtil.verify_google_token(access_token=token)
+        if not user_email:
+            # 토큰은 있지만 검증 실패 → 비로그인 처리로 넘어갈 수도 있고, 401로 반환 가능
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+    # CommunityService.get_posts 내부에서 user_email=None이면 비로그인 조회 처리
+    result = CommunityService.get_posts(category, page_num, user_email)
+
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

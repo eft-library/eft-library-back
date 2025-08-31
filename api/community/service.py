@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import UploadFile, File, HTTPException
 from api.community.community_res_models import (
     CommunityPosts,
@@ -114,7 +116,7 @@ class CommunityService:
             return None
 
     @staticmethod
-    def get_posts(category: str, page_num: int):
+    def get_posts(category: str, page_num: int, user_email: Optional[str] = None):
         try:
             limit, offset = 20, (page_num - 1) * 20
             session = DataBaseConnector.create_session_factory()
@@ -130,6 +132,7 @@ class CommunityService:
                     "limit": limit,
                     "offset": offset,
                     "category": category,
+                    "user_email": user_email,
                 }
                 get_post_data_result = s.execute(get_post_query, get_post_params)
                 get_post_data = [dict(row) for row in get_post_data_result.mappings()]
