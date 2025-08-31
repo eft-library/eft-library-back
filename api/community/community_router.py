@@ -55,7 +55,7 @@ def get_posts(
     if token:
         user_email = UserUtil.verify_google_token(access_token=token)
     result = CommunityService.get_posts(category, page_num, user_email)
-    print(toekn)
+    print(token)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
