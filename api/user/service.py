@@ -221,6 +221,34 @@ class UserService:
             return None
 
     @staticmethod
+    def unblock_user(request_info: ReqUserBlock, user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                block_info = (
+                    s.query(UserBlock)
+                    .filter(
+                        UserBlock.blocker_email == user_email,
+                        UserBlock.blocked_email == request_info.blocked_email,
+                    )
+                    .first()
+                )
+                if block_info:
+                    s.delete()
+                s.commit()
+
+                update_data = (
+                    s.query(UserBlock)
+                    .filter(UserBlock.blocker_email == user_email)
+                    .all()
+                )
+
+                return {"result": update_data}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
     def penalty_user(request_info: ReqUserPenalty):
         try:
             session = DataBaseConnector.create_session_factory()
