@@ -234,8 +234,8 @@ class UserService:
                     .first()
                 )
                 if block_info:
-                    s.delete()
-                s.commit()
+                    s.delete(block_info)
+                    s.commit()
 
                 update_data = (
                     s.query(UserBlock)
