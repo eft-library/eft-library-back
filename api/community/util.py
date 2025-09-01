@@ -108,13 +108,14 @@ class CommunityUtil:
     def get_post_issue_count():
         return """
             select count(*)
-            from community_posts_hot_issue
-            AND NOT EXISTS (
+            from community_posts_hot_issue cphi
+            left join community_posts cp on cphi.post_id = cp.id
+            where NOT EXISTS (
                   SELECT 1
                   FROM user_block ub
                   WHERE ub.blocker_email = :user_email
                     AND ub.blocked_email = cp.user_email
-              )        
+              )     
         """
 
     @staticmethod
