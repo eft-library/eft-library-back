@@ -82,7 +82,7 @@ class CommunityUtil:
     def get_post_category_count():
         return """
             select count(*)
-            from community_posts
+            from community_posts cp
             where category = :category
               and delete_by_user = false
               and delete_by_admin = false
@@ -98,7 +98,7 @@ class CommunityUtil:
     def get_post_category_count_with_post_id():
         return """
             select count(*)
-            from community_posts
+            from community_posts cp
             where category = (select category from community_posts where id = :post_id)
               and delete_by_user = false
               and delete_by_admin = false
