@@ -237,6 +237,8 @@ class CommunityFunction:
                          LEFT JOIN user_info cui ON c.user_email = cui.email
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
+                  AND c.delete_by_admin = false
+                  AND c.delete_by_user = false
                   AND NOT EXISTS (
                       SELECT 1
                       FROM user_block ub
@@ -270,6 +272,7 @@ class CommunityFunction:
                        ui.nickname ,
                        cp.title,
                        cp.contents,
+                       cpv.view_count,
                        COALESCE(cc.comment_count, 0) AS comment_count,
                        COALESCE(r.reaction_score, 0) AS reaction_score,
                        cp.thumbnail,
@@ -278,6 +281,7 @@ class CommunityFunction:
                 FROM community_posts cp
                 LEFT JOIN user_info ui ON cp.user_email = ui.email
                 LEFT JOIN comment_count cc ON cc.post_id = cp.id
+                LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                 LEFT JOIN reaction_sum r ON r.post_id = cp.id
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
@@ -298,6 +302,7 @@ class CommunityFunction:
                        ui.nickname ,
                        cp.title,
                        cp.contents,
+                       cpv.view_count,
                        COALESCE(cc.comment_count, 0) AS comment_count,
                        COALESCE(r.reaction_score, 0) AS reaction_score,
                        cp.thumbnail,
@@ -314,10 +319,13 @@ class CommunityFunction:
                 LEFT JOIN user_info ui ON cp.user_email = ui.email
                 LEFT JOIN comment_count cc ON cc.post_id = cp.id
                 LEFT JOIN reaction_sum r ON r.post_id = cp.id
+                LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                 INNER JOIN community_comments c ON c.post_id = cp.id
                 LEFT JOIN user_info cui ON c.user_email = cui.email
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
+                  AND c.delete_by_admin = false
+                  AND c.delete_by_user = false
                   AND NOT EXISTS (
                       SELECT 1
                       FROM user_block ub
@@ -335,6 +343,7 @@ class CommunityFunction:
                        ui.nickname,
                        cp.title,
                        cp.contents,
+                       cpv.view_count,
                        COALESCE(cc.comment_count, 0) AS comment_count,
                        COALESCE(r.reaction_score, 0) AS reaction_score,
                        cp.thumbnail,
@@ -352,9 +361,12 @@ class CommunityFunction:
                 LEFT JOIN comment_count cc ON cc.post_id = cp.id
                 LEFT JOIN reaction_sum r ON r.post_id = cp.id
                 LEFT JOIN community_comments c ON c.post_id = cp.id
+                LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
                 LEFT JOIN user_info cui ON c.user_email = cui.email
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
+                  AND c.delete_by_admin = false
+                  AND c.delete_by_user = false
                   AND NOT EXISTS (
                       SELECT 1
                       FROM user_block ub
@@ -415,6 +427,8 @@ class CommunityFunction:
                 LEFT JOIN user_info cui ON c.user_email = cui.email
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
+                  AND c.delete_by_admin = false
+                  AND c.delete_by_user = false
                   AND (
                         ui.nickname ILIKE :word 
                         OR cui.nickname ILIKE :word 
@@ -469,6 +483,8 @@ class CommunityFunction:
                                 AND c.contents ILIKE :word
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
+                  AND c.delete_by_admin = false
+                  AND c.delete_by_user = false
                   AND NOT EXISTS (
                       SELECT 1
                       FROM user_block ub
@@ -503,6 +519,8 @@ class CommunityFunction:
                     LEFT JOIN user_info cui ON c.user_email = cui.email
                     WHERE cp.delete_by_admin = false
                       AND cp.delete_by_user = false
+                      AND c.delete_by_admin = false
+                      AND c.delete_by_user = false
                       AND NOT EXISTS (
                           SELECT 1
                           FROM user_block ub
@@ -521,6 +539,8 @@ class CommunityFunction:
                     LEFT JOIN user_info cui ON c.user_email = cui.email
                     WHERE cp.delete_by_admin = false
                       AND cp.delete_by_user = false
+                      AND c.delete_by_admin = false
+                      AND c.delete_by_user = false
                       AND NOT EXISTS (
                           SELECT 1
                           FROM user_block ub
@@ -538,6 +558,8 @@ class CommunityFunction:
                 LEFT JOIN user_info cui ON c.user_email = cui.email
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
+                  AND c.delete_by_admin = false
+                  AND c.delete_by_user = false
                   AND (
                         ui.nickname ILIKE :word 
                         OR cui.nickname ILIKE :word 
