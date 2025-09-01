@@ -375,6 +375,12 @@ class CommunityFunction:
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                   AND cp.title ILIKE :word 
+                  AND NOT EXISTS (
+                        SELECT 1
+                        FROM user_block ub
+                        WHERE ub.blocker_email = :user_email
+                          AND ub.blocked_email = cp.user_email
+                    )
             """,
             "titleContent": """
                 SELECT count(*)

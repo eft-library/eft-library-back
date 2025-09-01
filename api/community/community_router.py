@@ -49,7 +49,7 @@ def create_posts(post_info: CreateCommunity, token: str = Depends(oauth2_scheme)
 def get_posts(
     category: str,
     page_num: int,
-    token: Optional[str] = Depends(oauth2_scheme),  # Optional 처리
+    token: Optional[str] = Depends(oauth2_scheme),
 ):
     user_email: Optional[str] = None
     if token:
@@ -62,8 +62,17 @@ def get_posts(
 
 
 @router.get("/search")
-def get_search_posts(page_num: int, word: str, search_type: str):
-    result = CommunityService.get_search(search_type, word, page_num)
+def get_search_posts(
+    page_num: int,
+    word: str,
+    search_type: str,
+    token: Optional[str] = Depends(oauth2_scheme),
+):
+    user_email: Optional[str] = None
+    if token:
+        user_email = UserUtil.verify_google_token(access_token=token)
+    result = CommunityService.get_search(search_type, word, page_num, user_email)
+
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

@@ -491,7 +491,9 @@ class CommunityService:
             return None
 
     @staticmethod
-    def get_search(search_type: str, word: str, page_num: int):
+    def get_search(
+        search_type: str, word: str, page_num: int, user_email: Optional[str] = None
+    ):
         limit, offset = 20, (page_num - 1) * 20
         try:
             session = DataBaseConnector.create_session_factory()
@@ -504,6 +506,7 @@ class CommunityService:
                     "limit": limit,
                     "offset": offset,
                     "word": f"%{word}%",
+                    "user_email": user_email,
                 }
                 get_search_result = s.execute(get_search_sql, get_search_params)
                 get_search_result_data = [
