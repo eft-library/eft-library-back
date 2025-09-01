@@ -67,6 +67,12 @@ class CommunityUtil:
             where cp.category = :category
               and cp.delete_by_user = false
               and cp.delete_by_admin = false
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM user_block ub
+                  WHERE ub.blocker_email = :user_email
+                    AND ub.blocked_email = cp.user_email
+              )
             order by cp.create_time desc
             limit :limit
             offset :offset
@@ -80,6 +86,12 @@ class CommunityUtil:
             where category = :category
               and delete_by_user = false
               and delete_by_admin = false
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM user_block ub
+                  WHERE ub.blocker_email = :user_email
+                    AND ub.blocked_email = cp.user_email
+              )
         """
 
     @staticmethod
@@ -96,7 +108,13 @@ class CommunityUtil:
     def get_post_issue_count():
         return """
             select count(*)
-            from community_posts_hot_issue        
+            from community_posts_hot_issue
+            AND NOT EXISTS (
+                  SELECT 1
+                  FROM user_block ub
+                  WHERE ub.blocker_email = :user_email
+                    AND ub.blocked_email = cp.user_email
+              )        
         """
 
     @staticmethod
@@ -131,6 +149,12 @@ class CommunityUtil:
             LEFT JOIN user_info ui ON cp.user_email = ui.email
             LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
             where cp.delete_by_user = false and cp.delete_by_admin = false
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM user_block ub
+                  WHERE ub.blocker_email = :user_email
+                    AND ub.blocked_email = cp.user_email
+              )
             ORDER BY cphi.issue_time DESC
             LIMIT :limit 
             OFFSET :offset

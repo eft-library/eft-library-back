@@ -136,9 +136,7 @@ class CommunityService:
                 }
                 get_post_data_result = s.execute(get_post_query, get_post_params)
                 get_post_data = [dict(row) for row in get_post_data_result.mappings()]
-                get_post_count_result = s.execute(
-                    get_post_count_query, {"category": category}
-                )
+                get_post_count_result = s.execute(get_post_count_query, get_post_params)
                 total = get_post_count_result.scalar() or 0
 
                 max_page_count = (total + limit - 1) // limit
