@@ -264,10 +264,10 @@ class CommunityFunction:
             SELECT *
             FROM (
                 -- 1. 게시글 제목/내용 검색
-                SELECT cp.id::text AS post_id,
+                SELECT cp.id::text AS id,
                        cp.slug,
-                       cp.user_email AS post_user_email,
-                       ui.nickname AS post_nickname,
+                       cp.user_email,
+                       ui.nickname ,
                        cp.title,
                        cp.contents,
                        COALESCE(cc.comment_count, 0) AS comment_count,
@@ -292,10 +292,10 @@ class CommunityFunction:
                 UNION ALL
             
                 -- 2. 댓글 내용 검색
-                SELECT cp.id::text AS post_id,
+                SELECT cp.id::text AS id,
                        cp.slug,
-                       cp.user_email AS post_user_email,
-                       ui.nickname AS post_nickname,
+                       cp.user_email,
+                       ui.nickname ,
                        cp.title,
                        cp.contents,
                        COALESCE(cc.comment_count, 0) AS comment_count,
@@ -329,10 +329,10 @@ class CommunityFunction:
                 UNION ALL
             
                 -- 3. 작성자 검색 (게시글 작성자 + 댓글 작성자)
-                SELECT cp.id::text AS post_id,
+                SELECT cp.id::text AS id,
                        cp.slug,
-                       cp.user_email AS post_user_email,
-                       ui.nickname AS post_nickname,
+                       cp.user_email,
+                       ui.nickname,
                        cp.title,
                        cp.contents,
                        COALESCE(cc.comment_count, 0) AS comment_count,
@@ -382,11 +382,11 @@ class CommunityFunction:
                     FROM community_posts_reactions
                     GROUP BY post_id
                 )
-                SELECT cp.id::text AS post_id,
+                SELECT cp.id::text AS id,
                        cp.slug,
-                       cp.user_email AS post_user_email,
+                       cp.user_email,
                        cp.category,
-                       ui.nickname AS post_nickname,
+                       ui.nickname ,
                        cp.title,
                        cp.contents,
                        cpv.view_count,
@@ -480,7 +480,7 @@ class CommunityFunction:
                 SELECT COUNT(*) AS total_count
                 FROM (
                     -- 1. 게시글 제목/내용 검색
-                    SELECT cp.id::text AS post_id
+                    SELECT cp.id::text AS id
                     FROM community_posts cp
                     LEFT JOIN user_info ui ON cp.user_email = ui.email
                     WHERE cp.delete_by_admin = false
@@ -496,7 +496,7 @@ class CommunityFunction:
                     UNION ALL
                 
                     -- 2. 댓글 내용 검색
-                    SELECT cp.id::text AS post_id
+                    SELECT cp.id::text AS id
                     FROM community_posts cp
                     INNER JOIN community_comments c ON c.post_id = cp.id
                     LEFT JOIN user_info ui ON cp.user_email = ui.email
@@ -514,7 +514,7 @@ class CommunityFunction:
                     UNION ALL
                 
                     -- 3. 작성자 검색 (게시글 작성자 + 댓글 작성자)
-                    SELECT cp.id::text AS post_id
+                    SELECT cp.id::text AS id
                     FROM community_posts cp
                     LEFT JOIN user_info ui ON cp.user_email = ui.email
                     LEFT JOIN community_comments c ON c.post_id = cp.id
