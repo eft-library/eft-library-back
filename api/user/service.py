@@ -267,3 +267,85 @@ class UserService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    # 사용자 기본 정보
+    @staticmethod
+    def get_my_page_default(user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_data = UserFunction.get_my_page_default(s, user_email)
+                return user_data
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    # 사용자 정보 페이지
+    @staticmethod
+    def get_my_page_info(user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_data = UserFunction._get_user_data(s, user_email)
+                return user_data
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    # 작성글 목록
+    @staticmethod
+    def get_my_page_posts(user_email: str, page_num: int):
+        try:
+            limit, offset = 10, (page_num - 1) * 10
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_data = UserFunction.get_my_page_posts(s, user_email, limit, offset)
+                return user_data
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    # 작성 댓글 목록
+    @staticmethod
+    def get_my_page_comments(user_email: str, page_num: int):
+        try:
+            limit, offset = 10, (page_num - 1) * 10
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_data = UserFunction.get_my_page_comments(
+                    s, user_email, limit, offset
+                )
+                return user_data
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    # 북마크 목록
+    @staticmethod
+    def get_my_page_bookmarks(user_email: str, page_num: int):
+        try:
+            limit, offset = 10, (page_num - 1) * 10
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_data = UserFunction.get_my_page_bookmarks(
+                    s, user_email, limit, offset
+                )
+                return user_data
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    # 차단한 사람 목록
+    @staticmethod
+    def get_my_page_blocks(user_email: str, page_num: int):
+        try:
+            limit, offset = 10, (page_num - 1) * 10
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_data = UserFunction.get_my_page_blocks(
+                    s, user_email, limit, offset
+                )
+                return user_data
+        except Exception as e:
+            print("오류 발생:", e)
+            return None

@@ -74,6 +74,96 @@ class UserFunction:
         return [dict(row) for row in result.mappings()][0]
 
     @staticmethod
+    def get_my_page_default(session, user_email: str):
+        my_page_default_query = text(UserUtil.get_my_page_default())
+        result = session.execute(my_page_default_query, {"user_email": user_email})
+        return [dict(row) for row in result.mappings()][0]
+
+    @staticmethod
+    def get_my_page_posts(session, user_email: str, limit: int, offset: int):
+        my_page_posts_query = text(UserUtil.get_my_page_posts())
+        my_page_posts_result = session.execute(
+            my_page_posts_query,
+            {"limit": limit, "offset": offset, "user_email": user_email},
+        )
+        my_page_posts_total_query = text(UserUtil.get_my_page_posts_total())
+        my_page_posts_total_result = session.execute(
+            my_page_posts_total_query,
+            {"user_email": user_email},
+        )
+        total = my_page_posts_total_result.scalar()
+        max_page_count = (total + limit - 1) // limit
+
+        return {
+            "posts": [dict(row) for row in my_page_posts_result.mappings()][0],
+            "total_count": total,
+            "max_page_count": max_page_count,
+        }
+
+    @staticmethod
+    def get_my_page_bookmarks(session, user_email: str, limit: int, offset: int):
+        my_page_bookmarks_query = text(UserUtil.get_my_page_bookmarks())
+        my_page_bookmarks_result = session.execute(
+            my_page_bookmarks_query,
+            {"limit": limit, "offset": offset, "user_email": user_email},
+        )
+        my_page_bookmarks_total_query = text(UserUtil.get_my_page_bookmarks_total())
+        my_page_bookmarks_total_result = session.execute(
+            my_page_bookmarks_total_query,
+            {"user_email": user_email},
+        )
+        total = my_page_bookmarks_total_result.scalar()
+        max_page_count = (total + limit - 1) // limit
+
+        return {
+            "bookmarks": [dict(row) for row in my_page_bookmarks_result.mappings()][0],
+            "total_count": total,
+            "max_page_count": max_page_count,
+        }
+
+    @staticmethod
+    def get_my_page_blocks(session, user_email: str, limit: int, offset: int):
+        my_page_blocks_query = text(UserUtil.get_my_page_blocks())
+        my_page_blocks_result = session.execute(
+            my_page_blocks_query,
+            {"limit": limit, "offset": offset, "user_email": user_email},
+        )
+        my_page_blocks_total_query = text(UserUtil.get_my_page_blocks_total())
+        my_page_blocks_total_result = session.execute(
+            my_page_blocks_total_query,
+            {"user_email": user_email},
+        )
+        total = my_page_blocks_total_result.scalar()
+        max_page_count = (total + limit - 1) // limit
+
+        return {
+            "blocks": [dict(row) for row in my_page_blocks_result.mappings()][0],
+            "total_count": total,
+            "max_page_count": max_page_count,
+        }
+
+    @staticmethod
+    def get_my_page_comments(session, user_email: str, limit: int, offset: int):
+        my_page_comments_query = text(UserUtil.get_my_page_comments())
+        my_page_comments_result = session.execute(
+            my_page_comments_query,
+            {"limit": limit, "offset": offset, "user_email": user_email},
+        )
+        my_page_comments_total_query = text(UserUtil.get_my_page_comments_total())
+        my_page_comments_total_result = session.execute(
+            my_page_comments_total_query,
+            {"user_email": user_email},
+        )
+        total = my_page_comments_total_result.scalar()
+        max_page_count = (total + limit - 1) // limit
+
+        return {
+            "comments": [dict(row) for row in my_page_comments_result.mappings()][0],
+            "total_count": total,
+            "max_page_count": max_page_count,
+        }
+
+    @staticmethod
     def calculate_end_time(duration_value: str):
         """
         duration_value: "1day", "3days", "permanent" 등
