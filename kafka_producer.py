@@ -6,7 +6,8 @@ import logging
 load_dotenv()
 
 BOOTSTRAP_SERVER = os.getenv("BOOTSTRAP_SERVER")
-TOPIC = os.getenv("TOPIC")
+LOG_TOPIC = os.getenv("LOG_TOPIC")
+NOTIFICATION_TOPIC = os.getenv("NOTIFICATION_TOPIC")
 
 producer_conf = {"bootstrap.servers": BOOTSTRAP_SERVER, "client.id": "fastapi-producer"}
 producer = Producer(producer_conf)
@@ -20,5 +21,12 @@ def delivery_report(err, msg):
 
 
 def produce_message(value: str):
-    producer.produce(TOPIC, value=value.encode("utf-8"), callback=delivery_report)
+    producer.produce(LOG_TOPIC, value=value.encode("utf-8"), callback=delivery_report)
+    producer.poll(0)
+
+
+def produce_notification(value: str):
+    producer.produce(
+        NOTIFICATION_TOPIC, value=value.encode("utf-8"), callback=delivery_report
+    )
     producer.poll(0)
