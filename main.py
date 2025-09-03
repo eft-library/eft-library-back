@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.middleware(KafkaProducerMiddleware)
+app.add_middleware(KafkaProducerMiddleware)
 
 
 @app.get("/docs")
