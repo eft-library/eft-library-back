@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 
 from fastapi import UploadFile, File, HTTPException
@@ -23,6 +24,7 @@ from minio import Minio
 from minio.error import S3Error
 import io
 from sqlalchemy import text
+from util.kafka_producer import produce_notification
 
 load_dotenv()
 snowflake = SnowflakeGenerator(datacenter_id=1, worker_id=1)
@@ -87,6 +89,7 @@ class CommunityService:
 
         try:
             session = DataBaseConnector.create_session_factory()
+            now_time = datetime.now()
             with session() as s:
                 # 삽입
                 new_post = CommunityPosts(
@@ -99,8 +102,8 @@ class CommunityService:
                     thumbnail=thumbnail,
                     delete_by_user=False,
                     delete_by_admin=False,
-                    create_time=datetime.now(),
-                    update_time=datetime.now(),
+                    create_time=now_time,
+                    update_time=now_time,
                 )
                 s.add(new_post)
 
@@ -108,6 +111,15 @@ class CommunityService:
                 new_view_count = CommunityPostsView(post_id=new_id, view_count=1)
                 s.add(new_view_count)
                 s.commit()
+
+                kafka_message = {
+                    "url": f"{new_id}-{slug}",
+                    "title": post_info.title,
+                    "author_email": user_email,
+                    "noti_type": "create_post",
+                }
+                json_str = json.dumps(kafka_message)
+                produce_notification(json_str)
 
                 # 리턴은 snowflake-slug
                 return {"url": f"{new_id}-{slug}"}
