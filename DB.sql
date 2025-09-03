@@ -890,3 +890,19 @@ COMMENT ON COLUMN user_report.reported_email IS '신고 당한 작성자';
 COMMENT ON COLUMN user_report.reason_type IS '신고 종류';
 COMMENT ON COLUMN user_report.reason IS '사유';
 COMMENT ON COLUMN user_report.create_time IS '신고 시간';
+
+CREATE TABLE user_notifications (
+    id SERIAL PRIMARY KEY,
+    user_email TEXT NOT NULL,
+    noti_type TEXT NOT NULL,
+    payload JSONB,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_time TIMESTAMP DEFAULT NOW()
+);
+COMMENT ON COLUMN user_notifications.id IS '자동 생성 ID';
+COMMENT ON COLUMN user_notifications.user_email IS '사용자 이메일';
+COMMENT ON COLUMN user_notifications.noti_type IS '알림 타입';
+COMMENT ON COLUMN user_notifications.payload IS '알림 내용';
+COMMENT ON COLUMN user_notifications.is_read IS '알림 읽기 여부';
+COMMENT ON COLUMN user_notifications.created_time IS '알림 생성 시간';
+
