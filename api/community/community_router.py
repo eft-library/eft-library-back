@@ -89,8 +89,14 @@ def get_posts_detail(request_info: GetPostDetail):
 
 
 @router.get("/side_post")
-def get_side_post():
-    result = CommunityService.get_side_info()
+def get_side_post(
+    token: Optional[str] = Depends(oauth2_scheme),
+):
+    user_email: Optional[str] = None
+    if token:
+        user_email = UserUtil.verify_google_token(access_token=token)
+    result = CommunityService.get_side_info(user_email)
+
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

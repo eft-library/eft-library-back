@@ -186,14 +186,15 @@ class CommunityService:
             return None
 
     @staticmethod
-    def get_side_info():
+    def get_side_info(user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
 
                 side_issue_posts_query = text(CommunityUtil.get_posts_with_issue())
                 get_side_issue_posts = s.execute(
-                    side_issue_posts_query, {"limit": 5, "offset": 0}
+                    side_issue_posts_query,
+                    {"limit": 5, "offset": 0, "user_email": user_email},
                 )
                 get_side_issue_posts_data = [
                     dict(row) for row in get_side_issue_posts.mappings()
