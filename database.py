@@ -23,7 +23,7 @@ class DataBaseConnector:
             database=os.getenv("DB_NAME"),
             port=os.getenv("DB_PORT"),
         )
-        engine = create_engine(url_object, echo=True)
+        engine = create_engine(url_object, echo=False)
         return engine
 
     # 세션 팩토리 생성

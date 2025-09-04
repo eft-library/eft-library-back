@@ -116,6 +116,7 @@ class CommunityService:
                     "url": f"{new_id}-{slug}",
                     "title": post_info.title,
                     "author_email": user_email,
+                    "author_nickname": post_info.nickname,
                     "noti_type": "create_post",
                 }
                 json_str = json.dumps(kafka_message)

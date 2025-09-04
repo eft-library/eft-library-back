@@ -5,6 +5,7 @@ class CreateCommunity(BaseModel):
     title: str
     category: str
     contents: str
+    nickname: str
 
 
 class UpdateCommunity(CreateCommunity):
