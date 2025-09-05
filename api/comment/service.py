@@ -36,6 +36,7 @@ class CommentService:
                 kafka_message = {
                     "url": f"{bigint_post_id}-{request_info.slug}?comment_id={new_id}",
                     "author_email": user_email,
+                    "post_id": bigint_post_id,
                     "author_nickname": request_info.nickname,
                     "noti_type": "create_parent_comment",
                 }
@@ -70,6 +71,7 @@ class CommentService:
                 kafka_message = {
                     "url": f"{bigint_post_id}-{request_info.slug}?comment_id={new_id}",
                     "author_email": user_email,
+                    "post_id": bigint_post_id,
                     "author_nickname": request_info.nickname,
                     "noti_type": "create_child_comment",
                 }
