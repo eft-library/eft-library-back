@@ -4,52 +4,78 @@ from sqlalchemy import text
 from nanoid import generate
 from api.comment.comment_res_models import CommentReaction, CommentReport
 from datetime import datetime
-from api.comment.comment_req_models import ReqCommentReport
+from api.comment.comment_req_models import (
+    ReqCommentReport,
+    InsertParentComment,
+    InsertChildComment,
+)
+from util.kafka_producer import produce_notification
+import json
 
 
 class CommentService:
     @staticmethod
-    def insert_parent_comment(post_id: str, contents: str, user_email: str):
+    def insert_parent_comment(request_info: InsertParentComment, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 # nano id 생성
                 new_id = generate(size=12)
+                bigint_post_id = int(request_info.post_id)
 
                 insert_comment_query = text(CommentUtil.insert_parent_comment())
                 insert_comment_params = {
                     "comment_id": new_id,
-                    "post_id": post_id,
-                    "contents": contents,
+                    "post_id": bigint_post_id,
+                    "contents": request_info.contents,
                     "user_email": user_email,
                 }
                 s.execute(insert_comment_query, insert_comment_params)
                 s.commit()
+
+                kafka_message = {
+                    "url": f"{bigint_post_id}-{request_info.slug}?comment_id={new_id}",
+                    "author_email": user_email,
+                    "author_nickname": request_info.nickname,
+                    "noti_type": "create_parent_comment",
+                }
+                json_str = json.dumps(kafka_message)
+                produce_notification(json_str)
+
                 return {"result": 1}
         except Exception as e:
             print("오류 발생:", e)
             return None
 
     @staticmethod
-    def inset_child_comment(
-        post_id: str, parent_comment_id: str, contents: str, user_email: str
-    ):
+    def inset_child_comment(request_info: InsertChildComment, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 # nano id 생성
                 new_id = generate(size=12)
+                bigint_post_id = int(request_info.post_id)
 
                 insert_comment_query = text(CommentUtil.insert_child_comment())
                 insert_comment_params = {
                     "comment_id": new_id,
-                    "parent_comment_id": parent_comment_id,
-                    "post_id": post_id,
-                    "contents": contents,
+                    "parent_comment_id": request_info.parent_comment_id,
+                    "post_id": bigint_post_id,
+                    "contents": request_info.contents,
                     "user_email": user_email,
                 }
                 s.execute(insert_comment_query, insert_comment_params)
                 s.commit()
+
+                kafka_message = {
+                    "url": f"{bigint_post_id}-{request_info.slug}?comment_id={new_id}",
+                    "author_email": user_email,
+                    "author_nickname": request_info.nickname,
+                    "noti_type": "create_child_comment",
+                }
+                json_str = json.dumps(kafka_message)
+                produce_notification(json_str)
+
                 return {"result": 1}
         except Exception as e:
             print("오류 발생:", e)

@@ -4,12 +4,16 @@ from pydantic import BaseModel
 class InsertParentComment(BaseModel):
     post_id: str
     contents: str
+    nickname: str
+    slug: str
 
 
 class InsertChildComment(InsertParentComment):
     parent_comment_id: str
     contents: str
     post_id: str
+    nickname: str
+    slug: str
 
 
 class UpdateComment(BaseModel):

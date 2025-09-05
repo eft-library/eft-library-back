@@ -27,9 +27,7 @@ def insert_parent_comment(
 ):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = CommentService.insert_parent_comment(
-            request_info.post_id, request_info.contents, user_email
-        )
+        result = CommentService.insert_parent_comment(request_info, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
