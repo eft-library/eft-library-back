@@ -152,9 +152,7 @@ def bookmark_post(request_info: PostBookmark, token: str = Depends(oauth2_scheme
 def follow_user(request_info: FollowUser, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = CommunityService.toggle_follow(
-            request_info.following_user_email, user_email
-        )
+        result = CommunityService.toggle_follow(request_info, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

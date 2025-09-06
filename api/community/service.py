@@ -1,6 +1,4 @@
-import json
 from typing import Optional
-
 from fastapi import UploadFile, File, HTTPException
 from api.community.community_res_models import (
     CommunityPosts,
@@ -11,7 +9,11 @@ from api.community.community_res_models import (
     PostReport,
 )
 from api.community.util import CommunityUtil
-from api.community.community_req_models import CreateCommunity, ReqPostReport
+from api.community.community_req_models import (
+    CreateCommunity,
+    ReqPostReport,
+    FollowUser,
+)
 from database import DataBaseConnector
 from util.snowflake_id import SnowflakeGenerator
 from slugify import slugify
@@ -25,6 +27,7 @@ from minio.error import S3Error
 import io
 from sqlalchemy import text
 from util.kafka_producer import produce_notification
+import json
 
 load_dotenv()
 snowflake = SnowflakeGenerator(datacenter_id=1, worker_id=1)
@@ -349,7 +352,7 @@ class CommunityService:
             return None
 
     @staticmethod
-    def toggle_follow(author_email: str, user_email: str):
+    def toggle_follow(request_info: FollowUser, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
@@ -357,7 +360,7 @@ class CommunityService:
                 follower_status = (
                     s.query(UserFollows)
                     .filter(
-                        UserFollows.follower_email == author_email,
+                        UserFollows.follower_email == request_info.following_user_email,
                         UserFollows.following_email == user_email,
                     )
                     .first()
@@ -369,11 +372,20 @@ class CommunityService:
                 else:
                     # 팔로우 중이 아니면 → 팔로우
                     new_follow = UserFollows(
-                        follower_email=author_email,
+                        follower_email=request_info.following_user_email,
                         following_email=user_email,
                         create_time=datetime.now(),
                     )
                     s.add(new_follow)
+
+                    kafka_message = {
+                        "follower_email": request_info.following_user_email,
+                        "following_email": user_email,
+                        "author_nickname": request_info.nickname,
+                        "noti_type": "follow_user",
+                    }
+                    json_str = json.dumps(kafka_message)
+                    produce_notification(json_str)
 
                 s.commit()
                 return {"result": 1}

@@ -31,6 +31,7 @@ class PostDelete(BaseModel):
 
 class FollowUser(BaseModel):
     following_user_email: str
+    nickname: str
 
 
 class CheckFollow(BaseModel):
