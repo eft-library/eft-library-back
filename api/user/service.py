@@ -267,6 +267,7 @@ class UserService:
                 s.commit()
 
                 kafka_message = {
+                    "user_email": request_info.user_email,
                     "start_time": start_time,
                     "end_time": end_time,
                     "noti_type": "user_penalty",
