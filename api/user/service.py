@@ -270,7 +270,7 @@ class UserService:
                     "user_email": request_info.user_email,
                     "start_time": start_time.isoformat(),
                     "end_time": end_time.isoformat(),
-                    "noti_type": "user_penalty",
+                    "noti_type": "penalty_user",
                 }
                 json_str = json.dumps(kafka_message)
                 produce_notification(json_str)
