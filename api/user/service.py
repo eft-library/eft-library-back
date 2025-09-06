@@ -8,6 +8,8 @@ from api.user.user_req_models import (
 from database import DataBaseConnector
 from api.user.user_function import UserFunction
 from api.user.user_res_models import UserReport, UserBlock, UserPenalty
+from util.kafka_producer import produce_notification
+import json
 
 
 class UserService:
@@ -254,14 +256,23 @@ class UserService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 end_time = UserFunction.calculate_end_time(request_info.penalty)
+                start_time = datetime.now()
                 new_block = UserPenalty(
                     user_email=request_info.user_email,
                     reason=request_info.reason,
-                    start_time=datetime.now(),
+                    start_time=start_time,
                     end_time=end_time,
                 )
                 s.add(new_block)
                 s.commit()
+
+                kafka_message = {
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "noti_type": "user_penalty",
+                }
+                json_str = json.dumps(kafka_message)
+                produce_notification(json_str)
 
                 return {"result": 1}
         except Exception as e:
