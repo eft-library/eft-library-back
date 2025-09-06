@@ -42,9 +42,7 @@ def insert_child_comment(
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
         result = CommentService.inset_child_comment(
-            request_info.post_id,
-            request_info.parent_comment_id,
-            request_info.contents,
+            request_info,
             user_email,
         )
         if result is None:
