@@ -268,8 +268,8 @@ class UserService:
 
                 kafka_message = {
                     "user_email": request_info.user_email,
-                    "start_time": start_time,
-                    "end_time": end_time,
+                    "start_time": start_time.isoformat(),
+                    "end_time": end_time.isoformat(),
                     "noti_type": "user_penalty",
                 }
                 json_str = json.dumps(kafka_message)
