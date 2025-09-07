@@ -265,3 +265,23 @@ class UserUtil:
                         AND ub.blocked_email = cp.user_email
                   )      
         """
+
+    @staticmethod
+    def get_my_page_follow():
+        return """
+            select uf.following_email, uf.follower_email, ui.nickname, uf.create_time
+            from user_follows uf
+                     left join user_info ui on uf.follower_email = ui.email
+            where ub.following_email = :user_email
+            order by ub.create_time desc  
+            limit :limit
+            offset :offset             
+        """
+
+    @staticmethod
+    def get_my_page_follow_total():
+        return """
+            select count(*)
+            from user_follows uf
+            where uf.following_email = :user_email        
+        """

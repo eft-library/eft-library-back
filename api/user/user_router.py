@@ -148,3 +148,87 @@ def penalty_user(request_info: ReqUserPenalty, token: str = Depends(oauth2_schem
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.get("/my_page/default")
+def get_my_page_default(token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = UserService.get_my_page_default(user_email)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.get("/my_page/info")
+def get_my_page_info(token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = UserService.get_my_page_info(user_email)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.get("/my_page/posts")
+def get_my_page_posts(page_num: int, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = UserService.get_my_page_posts(user_email, page_num)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.get("/my_page/comments")
+def get_my_page_comments(page_num: int, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = UserService.get_my_page_comments(user_email, page_num)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.get("/my_page/bookmarks")
+def get_my_page_bookmarks(page_num: int, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = UserService.get_my_page_bookmarks(user_email, page_num)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.get("/my_page/blocks")
+def get_my_page_blocks(page_num: int, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = UserService.get_my_page_blocks(user_email, page_num)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.get("/my_page/follow")
+def get_my_page_follow(page_num: int, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = UserService.get_my_page_follow(user_email, page_num)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
