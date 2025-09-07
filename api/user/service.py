@@ -376,3 +376,18 @@ class UserService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    # 차단한 사람 목록
+    @staticmethod
+    def get_my_page_notification(user_email: str, page_num: int):
+        try:
+            limit, offset = 10, (page_num - 1) * 10
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_data = UserFunction.get_my_page_notification(
+                    s, user_email, limit, offset
+                )
+                return user_data
+        except Exception as e:
+            print("오류 발생:", e)
+            return None

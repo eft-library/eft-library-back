@@ -285,3 +285,22 @@ class UserUtil:
             from user_follows uf
             where uf.following_email = :user_email        
         """
+
+    @staticmethod
+    def get_my_page_notification():
+        return """
+            select user_email, noti_type, payload, is_read, created_time 
+            from user_notifications un
+            where un.user_email = :user_email
+            order by un.created_time desc  
+            limit :limit
+            offset :offset             
+        """
+
+    @staticmethod
+    def get_my_page_notification_total():
+        return """
+            select count(*)
+            from user_notifications un
+            where un.user_email = :user_email        
+        """

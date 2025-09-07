@@ -164,6 +164,29 @@ class UserFunction:
         }
 
     @staticmethod
+    def get_my_page_notification(session, user_email: str, limit: int, offset: int):
+        my_page_notification_query = text(UserUtil.get_my_page_notification())
+        my_page_notification_result = session.execute(
+            my_page_notification_query,
+            {"limit": limit, "offset": offset, "user_email": user_email},
+        )
+        my_page_notification_total_query = text(
+            UserUtil.get_my_page_notification_total()
+        )
+        my_page_notification_total_result = session.execute(
+            my_page_notification_total_query,
+            {"user_email": user_email},
+        )
+        total = my_page_notification_total_result.scalar()
+        max_page_count = (total + limit - 1) // limit
+
+        return {
+            "follow": [dict(row) for row in my_page_notification_result.mappings()][0],
+            "total_count": total,
+            "max_page_count": max_page_count,
+        }
+
+    @staticmethod
     def get_my_page_comments(session, user_email: str, limit: int, offset: int):
         my_page_comments_query = text(UserUtil.get_my_page_comments())
         my_page_comments_result = session.execute(

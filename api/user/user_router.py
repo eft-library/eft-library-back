@@ -232,3 +232,15 @@ def get_my_page_follow(page_num: int, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.get("/my_page/notification")
+def get_my_page_notification(page_num: int, token: str = Depends(oauth2_scheme)):
+    user_email = UserUtil.verify_google_token(access_token=token)
+    if user_email:
+        result = UserService.get_my_page_notification(user_email, page_num)
+        if result is None:
+            return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+    else:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
