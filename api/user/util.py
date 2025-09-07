@@ -304,3 +304,11 @@ class UserUtil:
             from user_notifications un
             where un.user_email = :user_email        
         """
+
+    @staticmethod
+    def update_my_page_notification():
+        return """
+            UPDATE user_notifications
+            SET is_read = TRUE
+            WHERE id = ANY(:ids)
+        """

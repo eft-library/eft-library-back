@@ -165,11 +165,15 @@ class UserFunction:
 
     @staticmethod
     def get_my_page_notification(session, user_email: str, limit: int, offset: int):
+        # 1) 알림 조회
         my_page_notification_query = text(UserUtil.get_my_page_notification())
         my_page_notification_result = session.execute(
             my_page_notification_query,
             {"limit": limit, "offset": offset, "user_email": user_email},
         )
+        notifications = [dict(row) for row in my_page_notification_result.mappings()]
+
+        # 2) 전체 카운트 조회
         my_page_notification_total_query = text(
             UserUtil.get_my_page_notification_total()
         )
@@ -180,8 +184,16 @@ class UserFunction:
         total = my_page_notification_total_result.scalar()
         max_page_count = (total + limit - 1) // limit
 
+        # 3) 조회된 알림 읽음 처리 (is_read = TRUE)
+        if notifications:  # 조회된 알림이 있을 경우만 업데이트
+            ids = [n["id"] for n in notifications if not n.get("is_read", False)]
+            if ids:
+                mark_read_query = text(UserUtil.update_my_page_notification())
+                session.execute(mark_read_query, {"ids": ids})
+                session.commit()  # 커밋 필요 (트랜잭션 반영)
+
         return {
-            "follow": [dict(row) for row in my_page_notification_result.mappings()][0],
+            "follow": notifications,
             "total_count": total,
             "max_page_count": max_page_count,
         }
