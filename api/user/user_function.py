@@ -95,7 +95,7 @@ class UserFunction:
         max_page_count = (total + limit - 1) // limit
 
         return {
-            "posts": [dict(row) for row in my_page_posts_result.mappings()][0],
+            "posts": [dict(row) for row in my_page_posts_result.mappings()],
             "total_count": total,
             "max_page_count": max_page_count,
         }
@@ -116,7 +116,7 @@ class UserFunction:
         max_page_count = (total + limit - 1) // limit
 
         return {
-            "bookmarks": [dict(row) for row in my_page_bookmarks_result.mappings()][0],
+            "bookmarks": [dict(row) for row in my_page_bookmarks_result.mappings()],
             "total_count": total,
             "max_page_count": max_page_count,
         }
@@ -137,7 +137,7 @@ class UserFunction:
         max_page_count = (total + limit - 1) // limit
 
         return {
-            "blocks": [dict(row) for row in my_page_blocks_result.mappings()][0],
+            "blocks": [dict(row) for row in my_page_blocks_result.mappings()],
             "total_count": total,
             "max_page_count": max_page_count,
         }
@@ -158,7 +158,7 @@ class UserFunction:
         max_page_count = (total + limit - 1) // limit
 
         return {
-            "follow": [dict(row) for row in my_page_follow_result.mappings()][0],
+            "follow": [dict(row) for row in my_page_follow_result.mappings()],
             "total_count": total,
             "max_page_count": max_page_count,
         }
@@ -214,7 +214,7 @@ class UserFunction:
         max_page_count = (total + limit - 1) // limit
 
         return {
-            "comments": [dict(row) for row in my_page_comments_result.mappings()][0],
+            "comments": [dict(row) for row in my_page_comments_result.mappings()],
             "total_count": total,
             "max_page_count": max_page_count,
         }
