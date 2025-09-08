@@ -32,6 +32,7 @@ class UserUtil:
                    ui.last_update_nickname,
                    up.start_time,
                    up.end_time,
+                   up.reason,
                    COALESCE(jsonb_agg(
                             jsonb_build_object(
                                     'blocker_email', ub.blocker_email,
@@ -42,7 +43,7 @@ class UserUtil:
                                      ) FILTER (WHERE ub.blocker_email IS NOT NULL), '[]'::jsonb) AS user_blocks
             FROM user_info ui
                      LEFT JOIN LATERAL (
-                SELECT start_time, end_time
+                SELECT start_time, end_time, reason
                 FROM user_penalty
                 WHERE user_email = ui.email
                 ORDER BY start_time DESC
@@ -52,9 +53,9 @@ class UserUtil:
                                ON ui.email = ub.blocker_email
             WHERE ui.email = :user_email
             GROUP BY ui.email, ui.is_admin, ui.attendance_count, ui.nickname, ui.create_time, ui.last_update_nickname,
-                     up.start_time, up.end_time, ub.create_time
+                     up.start_time, up.end_time, up.reason, ub.create_time
             order by ub.create_time desc
-            LIMIT 1  
+            LIMIT 1
         """
 
     @staticmethod
