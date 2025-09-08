@@ -64,23 +64,30 @@ class UserUtil:
             SELECT ui.email,
                    COALESCE(c.comment_count, 0) AS comment_count,
                    COALESCE(p.post_count, 0) AS post_count,
-                   COALESCE(f.follow_count, 0) AS follow_count
+                   COALESCE(f.follow_count, 0) AS follow_count,
+                   COALESCE(n.notification_count, 0) AS notification_count
             FROM user_info ui
-            LEFT JOIN (
+                     LEFT JOIN (
                 SELECT user_email, COUNT(*) AS comment_count
                 FROM community_comments
                 GROUP BY user_email
             ) c ON ui.email = c.user_email
-            LEFT JOIN (
+                     LEFT JOIN (
                 SELECT user_email, COUNT(*) AS post_count
                 FROM community_posts
                 GROUP BY user_email
             ) p ON ui.email = p.user_email
-            LEFT JOIN (
+                     LEFT JOIN (
                 select following_email, COUNT(*) as follow_count
                 FROM user_follows
                 GROUP BY following_email
             ) f ON ui.email = f.following_email
+                    LEFT JOIN (
+               select user_email, COUNT(*) as notification_count
+               FROM user_notifications
+               WHERE is_read = false
+               GROUP BY user_email
+            ) n ON ui.email = n.user_email
             WHERE ui.email = :user_email        
         """
 
