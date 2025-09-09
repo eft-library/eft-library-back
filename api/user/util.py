@@ -139,8 +139,9 @@ class UserUtil:
     @staticmethod
     def get_my_page_bookmarks():
         return """
-            select cpb.post_id,
+            select cpb.post_id::text AS id,
                    cp.title,
+                   cp.slug,
                    cp.contents,
                    cp.create_time,
                    ui.nickname,
