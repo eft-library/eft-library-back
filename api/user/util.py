@@ -305,6 +305,7 @@ class UserUtil:
             select user_email, noti_type, payload, is_read, created_time 
             from user_notifications un
             where un.user_email = :user_email
+            and is_read = false
             order by un.created_time desc  
             limit :limit
             offset :offset             
@@ -315,7 +316,8 @@ class UserUtil:
         return """
             select count(*)
             from user_notifications un
-            where un.user_email = :user_email        
+            where un.user_email = :user_email
+            and is_read = false        
         """
 
     @staticmethod
