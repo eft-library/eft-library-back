@@ -140,11 +140,15 @@ class UserUtil:
     def get_my_page_bookmarks():
         return """
             select cpb.post_id::text AS id,
-                   cp.title,
                    cp.slug,
-                   cp.contents,
-                   cp.create_time,
                    ui.nickname,
+                   cp.user_email,
+                   cp.category,
+                   cp.title,
+                   cp.contents,
+                   cp.thumbnail,
+                   cp.delete_by_user,
+                   cp.delete_by_admin,
                    cpv.view_count,
                    coalesce((SELECT COUNT(*)
                              FROM community_comments cc
