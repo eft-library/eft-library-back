@@ -287,7 +287,7 @@ class UserUtil:
                    uf.follower_email,
                    ui.nickname,
                    uf.create_time,
-                   (select count(*) from community_posts cp where user_email = uf.following_email and cp.delete_by_admin = false and cp.delete_by_user = false)
+                   (select count(*) from community_posts cp where user_email = uf.following_email and cp.delete_by_admin = false and cp.delete_by_user = false) as post_count
             from user_follows uf
                      left join user_info ui on uf.follower_email = ui.email
             where uf.following_email = :user_email
