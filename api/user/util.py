@@ -303,7 +303,7 @@ class UserUtil:
     @staticmethod
     def get_my_page_notification():
         return """
-            select user_email, noti_type, payload, is_read, created_time 
+            select id, user_email, noti_type, payload, is_read, created_time 
             from user_notifications un
             where un.user_email = :user_email
             order by un.created_time desc  
