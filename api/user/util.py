@@ -272,12 +272,7 @@ class UserUtil:
                   AND cp.delete_by_user = false
                   AND c.delete_by_admin = false
                   AND c.delete_by_user = false
-                  AND NOT EXISTS (
-                      SELECT 1
-                      FROM user_block ub
-                      WHERE ub.blocker_email = :user_email
-                        AND ub.blocked_email = cp.user_email
-                  )      
+                  AND c.user_email = :user_email
         """
 
     @staticmethod
