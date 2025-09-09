@@ -150,6 +150,7 @@ class UserUtil:
                    cp.delete_by_user,
                    cp.delete_by_admin,
                    cpv.view_count,
+                   cpb.create_time,
                    coalesce((SELECT COUNT(*)
                              FROM community_comments cc
                              WHERE cc.post_id = cp.id), 0)  AS comment_count,
