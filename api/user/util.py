@@ -263,7 +263,6 @@ class UserUtil:
                 FROM community_posts cp
                          INNER JOIN community_comments c 
                                  ON c.post_id = cp.id 
-                                AND c.contents ILIKE :word
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                   AND c.delete_by_admin = false
