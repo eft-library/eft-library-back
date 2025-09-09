@@ -70,11 +70,13 @@ class UserUtil:
                      LEFT JOIN (
                 SELECT user_email, COUNT(*) AS comment_count
                 FROM community_comments
+                WHERE delete_by_user = false and delete_by_admin = false
                 GROUP BY user_email
             ) c ON ui.email = c.user_email
                      LEFT JOIN (
                 SELECT user_email, COUNT(*) AS post_count
                 FROM community_posts
+                WHERE delete_by_user = false and delete_by_admin = false
                 GROUP BY user_email
             ) p ON ui.email = p.user_email
                      LEFT JOIN (
