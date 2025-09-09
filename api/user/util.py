@@ -283,11 +283,15 @@ class UserUtil:
     @staticmethod
     def get_my_page_follow():
         return """
-            select uf.following_email, uf.follower_email, ui.nickname, uf.create_time
+            select uf.following_email,
+                   uf.follower_email,
+                   ui.nickname,
+                   uf.create_time,
+                   (select count(*) from community_posts cp where user_email = uf.following_email and cp.delete_by_admin = false and cp.delete_by_user = false)
             from user_follows uf
                      left join user_info ui on uf.follower_email = ui.email
-            where ub.following_email = :user_email
-            order by ub.create_time desc  
+            where uf.following_email = :user_email
+            order by uf.create_time desc
             limit :limit
             offset :offset             
         """
