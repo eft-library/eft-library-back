@@ -193,7 +193,7 @@ class UserFunction:
                 session.commit()  # 커밋 필요 (트랜잭션 반영)
 
         return {
-            "follow": notifications,
+            "notifications": notifications,
             "total_count": total,
             "max_page_count": max_page_count,
         }
