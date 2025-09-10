@@ -4,8 +4,10 @@ from dotenv import load_dotenv
 import os
 from api.router import api_router
 from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, Query
 from util.middleware import KafkaProducerMiddleware
+from api.user.util import UserUtil
+from util.websocket import websocket_handler
 
 load_dotenv()
 
@@ -21,6 +23,20 @@ app.add_middleware(
 )
 
 app.add_middleware(KafkaProducerMiddleware)
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
+    """
+    로그인한 사용자만 WebSocket 연결
+    토큰은 query param으로 전달
+    """
+    user_email = UserUtil.verify_google_token(token)
+    if not user_email:
+        await websocket.close(code=1008)  # 정책 위반
+        return
+
+    await websocket_handler(websocket, user_email)
 
 
 @app.get("/docs")

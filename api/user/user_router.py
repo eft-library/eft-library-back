@@ -40,7 +40,7 @@ def get_user(token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/delete")
+@router.get("/delete")
 def delete_user(token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
 
