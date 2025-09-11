@@ -12,9 +12,7 @@ redis = aioredis.from_url(f"redis://{os.getenv('REDIS_HOST')}", decode_responses
 # WebSocket 연결 저장
 connected_websockets: Dict[str, WebSocket] = {}  # user_email -> websocket
 user_listeners: Dict[str, asyncio.Task] = {}  # user_email -> listener task
-sent_notifications: Dict[str, Set[str]] = (
-    {}
-)  # user_email -> 이미 전송된 notification id
+sent_notifications: Dict[str, Set[str]] = {}  # user_email -> 전송한 알림 고유 키
 
 
 async def websocket_handler(websocket: WebSocket, user_email: str):
@@ -24,13 +22,26 @@ async def websocket_handler(websocket: WebSocket, user_email: str):
     await websocket.accept()
     connected_websockets[user_email] = websocket
 
-    # 초기 알림 전송 (Redis에 저장된 값은 이미 json.dumps 처리됨)
-    existing_notifications = await redis.lrange(f"notifications:{user_email}", 0, 9)
+    # --------------------------
+    # 1️⃣ 초기 알림 가져오기 + 제거
+    # --------------------------
+    existing_notifications = []
+    while True:
+        n = await redis.lpop(f"notifications:{user_email}")
+        if not n:
+            break
+        existing_notifications.append(json.loads(n))  # Redis에는 json.dumps로 저장됨
+
+    # 최신 순서대로 전달
+    existing_notifications.reverse()
+
     await websocket.send_text(
         json.dumps({"type": "init", "notifications": existing_notifications})
     )
 
-    # 이미 listener가 없을 때만 생성
+    # --------------------------
+    # 2️⃣ listener 생성 (없으면)
+    # --------------------------
     if user_email not in user_listeners:
         user_listeners[user_email] = asyncio.create_task(redis_listener(user_email))
 
@@ -44,7 +55,7 @@ async def websocket_handler(websocket: WebSocket, user_email: str):
 
 async def redis_listener(user_email: str):
     """
-    Redis pub/sub 구독 및 실시간 알림 전송
+    Redis Pub/Sub 구독 및 실시간 알림 전송
     """
     pubsub = redis.pubsub()
     await pubsub.subscribe(f"notifications_channel:{user_email}")
@@ -57,16 +68,18 @@ async def redis_listener(user_email: str):
             if message["type"] != "message":
                 continue
 
-            # Redis에서 발행된 문자열 그대로 사용
             raw_data = message["data"]
             data = json.loads(raw_data)
-            notification_id = data.get("id")
 
-            # 이미 보낸 알림이면 skip
-            if notification_id in sent_notifications[user_email]:
+            # --------------------------
+            # 1️⃣ 고유 키 생성 (중복 방지)
+            # --------------------------
+            notification_key = f"{data['noti_type']}_{data.get('post_id')}_{data.get('parent_comment_id')}_{data.get('author_email')}_{data.get('id')}"
+
+            if notification_key in sent_notifications[user_email]:
                 continue
 
-            sent_notifications[user_email].add(notification_id)
+            sent_notifications[user_email].add(notification_key)
 
             ws = connected_websockets.get(user_email)
             if ws:
@@ -74,9 +87,9 @@ async def redis_listener(user_email: str):
                     # 항상 JSON 문자열로 통일
                     await ws.send_text(json.dumps({"type": "message", "data": data}))
                 except Exception:
-                    # 연결 끊기면 cleanup
                     await cleanup_user(user_email)
                     break
+
     except asyncio.CancelledError:
         pass
     finally:
