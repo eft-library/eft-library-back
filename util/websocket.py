@@ -24,12 +24,10 @@ async def websocket_handler(websocket: WebSocket, user_email: str):
     await websocket.accept()
     connected_websockets[user_email] = websocket
 
-    # 초기 알림 전송
+    # 초기 알림 전송 (Redis에 저장된 값은 이미 json.dumps 처리됨)
     existing_notifications = await redis.lrange(f"notifications:{user_email}", 0, 9)
-    # Redis에는 문자열로 저장되어 있으므로 JSON.parse 필요
-    initial_notifications = [json.loads(n) for n in existing_notifications]
     await websocket.send_text(
-        json.dumps({"type": "init", "notifications": initial_notifications})
+        json.dumps({"type": "init", "notifications": existing_notifications})
     )
 
     # 이미 listener가 없을 때만 생성
@@ -41,17 +39,7 @@ async def websocket_handler(websocket: WebSocket, user_email: str):
             # 클라이언트에서 메시지 수신(예: ping용)
             await websocket.receive_text()
     except Exception:
-        # 연결 종료 시 cleanup
-        connected_websockets.pop(user_email, None)
-
-        # listener 취소
-        if user_email in user_listeners:
-            user_listeners[user_email].cancel()
-            await user_listeners.pop(user_email, None)
-
-        # 전송 기록 초기화
-        if user_email in sent_notifications:
-            sent_notifications.pop(user_email, None)
+        await cleanup_user(user_email)
 
 
 async def redis_listener(user_email: str):
@@ -69,30 +57,41 @@ async def redis_listener(user_email: str):
             if message["type"] != "message":
                 continue
 
-            # Redis에서 발행된 문자열을 dict로 변환
-            data = json.loads(message["data"])
+            # Redis에서 발행된 문자열 그대로 사용
+            raw_data = message["data"]
+            data = json.loads(raw_data)
             notification_id = data.get("id")
 
-            # 이미 보낸 알림이면 건너뛰기
+            # 이미 보낸 알림이면 skip
             if notification_id in sent_notifications[user_email]:
                 continue
 
             sent_notifications[user_email].add(notification_id)
 
-            # WebSocket 연결이 있는 경우에만 전송
             ws = connected_websockets.get(user_email)
             if ws:
                 try:
+                    # 항상 JSON 문자열로 통일
                     await ws.send_text(json.dumps({"type": "message", "data": data}))
                 except Exception:
                     # 연결 끊기면 cleanup
-                    connected_websockets.pop(user_email, None)
-                    sent_notifications.pop(user_email, None)
-                    if user_email in user_listeners:
-                        user_listeners[user_email].cancel()
-                        await user_listeners.pop(user_email, None)
-                    break  # listener 종료
+                    await cleanup_user(user_email)
+                    break
     except asyncio.CancelledError:
-        # listener task 취소 시 정상 종료
+        pass
+    finally:
         await pubsub.unsubscribe(f"notifications_channel:{user_email}")
         await pubsub.close()
+
+
+async def cleanup_user(user_email: str):
+    """
+    특정 유저 관련 WebSocket, listener, sent_notifications 정리
+    """
+    connected_websockets.pop(user_email, None)
+
+    if user_email in user_listeners:
+        user_listeners[user_email].cancel()
+        await user_listeners.pop(user_email, None)
+
+    sent_notifications.pop(user_email, None)
