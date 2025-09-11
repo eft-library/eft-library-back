@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 
 import aioredis
@@ -13,12 +14,19 @@ async def websocket_handler(websocket: WebSocket, user_email: str):
     await websocket.accept()
     connected_websockets[user_email] = websocket
 
-    # 사용자별 Redis 구독
+    # ✅ 기존 알림 불러오기 (예: 최근 10개)
+    redis_key = f"notifications:{user_email}"
+    existing_notifications = await redis.lrange(redis_key, 0, 9)
+    await websocket.send_text(
+        json.dumps({"type": "init", "notifications": existing_notifications})
+    )
+
+    # ✅ 실시간 알림 수신
     asyncio.create_task(redis_listener(user_email))
 
     try:
         while True:
-            await websocket.receive_text()  # 클라이언트 메시지 무시
+            await websocket.receive_text()
     except:
         connected_websockets.pop(user_email, None)
 
