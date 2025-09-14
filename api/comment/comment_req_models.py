@@ -7,6 +7,7 @@ class InsertParentComment(BaseModel):
     nickname: str
     slug: str
     title: str
+    post_author_email: str
 
 
 class InsertChildComment(InsertParentComment):
@@ -16,6 +17,7 @@ class InsertChildComment(InsertParentComment):
     nickname: str
     slug: str
     title: str
+    post_author_email: str
 
 
 class UpdateComment(BaseModel):
