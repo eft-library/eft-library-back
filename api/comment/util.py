@@ -106,12 +106,30 @@ class CommentUtil:
             ),
             aggregated AS (
                 SELECT
-                    t.*,
+                    t.id,
+                    t.parent_id,
+                    t.post_id,
+                    t.user_email,
+            
+                    -- ✅ 차단된 경우 contents를 'blocked'로 치환
+                    CASE 
+                        WHEN ub.id IS NOT NULL THEN 'blocked'
+                        ELSE t.contents
+                    END AS contents,
+            
+                    t.delete_by_admin,
+                    t.delete_by_user,
+                    t.create_time,
+                    t.update_time,
+                    t.depth,
+                    t.sort_path,
+            
                     COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
                     COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS dislike_count,
-                    ui.nickname AS nickname,  -- 댓글 작성자 닉네임
-                    pui.nickname AS parent_nickname, -- 부모 댓글 작성자 닉네임
+                    ui.nickname AS nickname,
+                    pui.nickname AS parent_nickname,
                     COALESCE(ccr.reaction_type, -1) AS is_like
+            
                 FROM tree t
                 LEFT JOIN community_comments_reactions r 
                        ON r.comment_id = t.id
@@ -123,10 +141,16 @@ class CommentUtil:
                        ON t.parent_id = pc.id
                 LEFT JOIN user_info pui
                        ON pc.user_email = pui.email
+            
+                -- ✅ 로그인 사용자가 차단한 사용자와 조인
+                LEFT JOIN user_block ub
+                       ON ub.blocker_email = :user_email
+                      AND ub.blocked_email = t.user_email
+            
                 GROUP BY 
                     t.id, t.parent_id, t.post_id, t.user_email, t.contents,
                     t.delete_by_admin, t.delete_by_user, t.create_time, t.update_time, 
-                    t.depth, t.sort_path, ui.nickname, pui.nickname, ccr.reaction_type
+                    t.depth, t.sort_path, ui.nickname, pui.nickname, ccr.reaction_type, ub.id
             ),
             ranked AS (
                 SELECT a.*,
