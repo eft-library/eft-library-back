@@ -300,6 +300,7 @@ class UserUtil:
             select user_email, noti_type, payload, is_read, created_time 
             from user_notifications un
             where un.user_email = :user_email
+            and un.created_time >= NOW() - INTERVAL '7 days'
             order by un.created_time desc  
             limit :limit
             offset :offset             
