@@ -578,12 +578,12 @@ class CommunityService:
             return None
 
     @staticmethod
-    def increase_view_count(post_id: str):
+    def increase_view_count(post_id_slug: str):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 increase_sql = text(CommunityUtil.increase_view_count())
-                bigint_post_id = int(post_id)
+                bigint_post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
                 param = {"post_id": bigint_post_id}
                 s.execute(increase_sql, param)
                 s.commit()
