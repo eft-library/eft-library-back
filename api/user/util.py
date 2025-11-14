@@ -317,7 +317,8 @@ class UserUtil:
         return """
             select count(*)
             from user_notifications un
-            where un.user_email = :user_email        
+            where un.user_email = :user_email  
+            and un.created_time >= NOW() - INTERVAL '7 days'      
         """
 
     @staticmethod
