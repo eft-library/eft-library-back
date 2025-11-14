@@ -576,3 +576,19 @@ class CommunityService:
         except Exception as e:
             print("오류 발생:", e)
             return None
+
+    @staticmethod
+    def increase_view_count(post_id: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                increase_sql = text(CommunityUtil.increase_view_count())
+                bigint_post_id = int(post_id)
+                param = {"post_id": bigint_post_id}
+                s.execute(increase_sql, param)
+                s.commit()
+
+                return {"result": 1}
+        except Exception as e:
+            print("오류 발생:", e)
+            return None

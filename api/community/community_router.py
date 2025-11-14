@@ -239,3 +239,11 @@ def report_post(request_info: ReqPostReport, token: str = Depends(oauth2_scheme)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+
+
+@router.post("/increase-view-count")
+def increase_view_count(request_info: PostReaction):
+    result = CommunityService.increase_view_count(request_info.post_id)
+    if result is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

@@ -281,3 +281,11 @@ class CommunityUtil:
             FROM ordered_posts
             WHERE id = :post_id     
         """
+
+    @staticmethod
+    def increase_view_count():
+        return """
+        UPDATE community_posts_views
+        SET view_count = view_count + 1
+        WHERE post_id = :post_id   
+        """
