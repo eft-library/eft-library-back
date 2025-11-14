@@ -36,10 +36,10 @@ class MenuService:
                     s.query(DynamicInfo).filter(DynamicInfo.id == "NEWS_COLUMN").first()
                 )
 
-                main_info['main_info'] = main_info_list
-                main_info['menu'] = main_menu_list
-                main_info['news'] = news_data
-                main_info['issue_posts'] = get_side_issue_posts_data
+                main_info["main_info"] = main_info_list
+                main_info["menu"] = main_menu_list
+                main_info["news"] = news_data
+                main_info["issue_posts"] = get_side_issue_posts_data
 
                 return main_info
         except Exception as e:
