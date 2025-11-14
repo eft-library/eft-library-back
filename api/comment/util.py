@@ -239,7 +239,13 @@ class CommentUtil:
             GROUP BY 
                 c.id, c.parent_id, c.post_id, c.path, c.user_email, ui.nickname, 
                 pui.nickname, c.contents, c.delete_by_user, c.delete_by_admin, c.create_time, c.update_time
-            ORDER BY score DESC, like_count DESC, c.create_time ASC
+            HAVING 
+                (COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0)
+                 + COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0)) >= 5
+            ORDER BY 
+                score DESC, 
+                like_count DESC, 
+                c.create_time ASC
             LIMIT 3
         """
 
