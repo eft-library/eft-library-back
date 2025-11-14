@@ -378,14 +378,16 @@ class CommunityService:
                     )
                     s.add(new_follow)
 
-                    kafka_message = {
-                        "follower_email": request_info.following_user_email,
-                        "following_email": user_email,
-                        "author_nickname": request_info.nickname,
-                        "noti_type": "follow_user",
-                    }
-                    json_str = json.dumps(kafka_message)
-                    produce_notification(json_str)
+                    # 본인이 본인 팔로우 한 거는 무시
+                    if request_info.following_user_email != user_email:
+                        kafka_message = {
+                            "follower_email": request_info.following_user_email,
+                            "following_email": user_email,
+                            "author_nickname": request_info.nickname,
+                            "noti_type": "follow_user",
+                        }
+                        json_str = json.dumps(kafka_message)
+                        produce_notification(json_str)
 
                 s.commit()
                 return {"result": 1}

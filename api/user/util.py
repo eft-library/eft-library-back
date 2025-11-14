@@ -70,11 +70,13 @@ class UserUtil:
                      LEFT JOIN (
                 SELECT user_email, COUNT(*) AS comment_count
                 FROM community_comments
+                WHERE delete_by_user = false and delete_by_admin = false
                 GROUP BY user_email
             ) c ON ui.email = c.user_email
                      LEFT JOIN (
                 SELECT user_email, COUNT(*) AS post_count
                 FROM community_posts
+                WHERE delete_by_user = false and delete_by_admin = false
                 GROUP BY user_email
             ) p ON ui.email = p.user_email
                      LEFT JOIN (
@@ -137,12 +139,18 @@ class UserUtil:
     @staticmethod
     def get_my_page_bookmarks():
         return """
-            select cpb.post_id,
+            select cpb.post_id::text AS id,
+                   cp.slug,
+                   ui.nickname,
+                   cp.user_email,
+                   cp.category,
                    cp.title,
                    cp.contents,
-                   cp.create_time,
-                   ui.nickname,
+                   cp.thumbnail,
+                   cp.delete_by_user,
+                   cp.delete_by_admin,
                    cpv.view_count,
+                   cpb.create_time,
                    coalesce((SELECT COUNT(*)
                              FROM community_comments cc
                              WHERE cc.post_id = cp.id), 0)  AS comment_count,
@@ -261,27 +269,25 @@ class UserUtil:
                 FROM community_posts cp
                          INNER JOIN community_comments c 
                                  ON c.post_id = cp.id 
-                                AND c.contents ILIKE :word
                 WHERE cp.delete_by_admin = false
                   AND cp.delete_by_user = false
                   AND c.delete_by_admin = false
                   AND c.delete_by_user = false
-                  AND NOT EXISTS (
-                      SELECT 1
-                      FROM user_block ub
-                      WHERE ub.blocker_email = :user_email
-                        AND ub.blocked_email = cp.user_email
-                  )      
+                  AND c.user_email = :user_email
         """
 
     @staticmethod
     def get_my_page_follow():
         return """
-            select uf.following_email, uf.follower_email, ui.nickname, uf.create_time
+            select uf.following_email,
+                   uf.follower_email,
+                   ui.nickname,
+                   uf.create_time,
+                   (select count(*) from community_posts cp where user_email = uf.follower_email and cp.delete_by_admin = false and cp.delete_by_user = false) as post_count
             from user_follows uf
                      left join user_info ui on uf.follower_email = ui.email
-            where ub.following_email = :user_email
-            order by ub.create_time desc  
+            where uf.following_email = :user_email
+            order by uf.create_time desc
             limit :limit
             offset :offset             
         """
@@ -297,7 +303,7 @@ class UserUtil:
     @staticmethod
     def get_my_page_notification():
         return """
-            select user_email, noti_type, payload, is_read, created_time 
+            select id, user_email, noti_type, payload, is_read, created_time 
             from user_notifications un
             where un.user_email = :user_email
             and un.created_time >= NOW() - INTERVAL '7 days'
