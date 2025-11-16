@@ -8,7 +8,10 @@ class CreateCommunity(BaseModel):
     nickname: str
 
 
-class UpdateCommunity(CreateCommunity):
+class UpdateCommunity(BaseModel):
+    title: str
+    category: str
+    contents: str
     id: str
     slug: str
 
