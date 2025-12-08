@@ -82,4 +82,5 @@ pip install python-slugify
 pip install pillow
 pip install minio
 pip install nanoid
+pip install setuptools
 -->
