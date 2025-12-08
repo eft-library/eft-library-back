@@ -2,10 +2,10 @@ from pydantic import BaseModel
 
 
 class CreateCommunity(BaseModel):
-    title: str
-    category: str
-    contents: str
-    nickname: str
+    title: str | None
+    category: str| None
+    contents: str| None
+    nickname: str| None
 
 
 class UpdateCommunity(BaseModel):

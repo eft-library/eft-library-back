@@ -115,15 +115,15 @@ class CommunityService:
                 s.add(new_view_count)
                 s.commit()
 
-                kafka_message = {
-                    "url": f"{new_id}-{slug}",
-                    "title": post_info.title,
-                    "author_email": user_email,
-                    "author_nickname": post_info.nickname,
-                    "noti_type": "create_post",
-                }
-                json_str = json.dumps(kafka_message)
-                produce_notification(json_str)
+                # kafka_message = {
+                #     "url": f"{new_id}-{slug}",
+                #     "title": post_info.title,
+                #     "author_email": user_email,
+                #     "author_nickname": post_info.nickname,
+                #     "noti_type": "create_post",
+                # }
+                # json_str = json.dumps(kafka_message)
+                # produce_notification(json_str)
 
                 # 리턴은 snowflake-slug
                 return {"url": f"{new_id}-{slug}"}
@@ -379,15 +379,15 @@ class CommunityService:
                     s.add(new_follow)
 
                     # 본인이 본인 팔로우 한 거는 무시
-                    if request_info.following_user_email != user_email:
-                        kafka_message = {
-                            "follower_email": request_info.following_user_email,
-                            "following_email": user_email,
-                            "author_nickname": request_info.nickname,
-                            "noti_type": "follow_user",
-                        }
-                        json_str = json.dumps(kafka_message)
-                        produce_notification(json_str)
+                    # if request_info.following_user_email != user_email:
+                    #     kafka_message = {
+                    #         "follower_email": request_info.following_user_email,
+                    #         "following_email": user_email,
+                    #         "author_nickname": request_info.nickname,
+                    #         "noti_type": "follow_user",
+                    #     }
+                    #     json_str = json.dumps(kafka_message)
+                    #     produce_notification(json_str)
 
                 s.commit()
                 return {"result": 1}
