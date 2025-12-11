@@ -12,7 +12,7 @@ class QuestService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 npc_list = (
-                    s.query(NPC.id, NPC.name, NPC.image).order_by(NPC.order).all()
+                    s.query(NPC.id, NPC.name, NPC.image).filter(NPC.order != None).order_by(NPC.order).all()
                 )
 
                 return [

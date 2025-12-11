@@ -39,7 +39,7 @@ class QuestUtil:
                    qi.task_next,
                    qi.task_requirements
             FROM quest_i18n qi
-                     LEFT JOIN npc_i18n ni on qi.npc_id = ni.id
+                     LEFT JOIN npc_i18n ni on qi.npc_id = ni.id and ni.order is not null
             ORDER BY qi."order"
         """
 
