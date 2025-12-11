@@ -26,8 +26,8 @@ from minio import Minio
 from minio.error import S3Error
 import io
 from sqlalchemy import text
-from util.kafka_producer import produce_notification
-import json
+# from util.kafka_producer import produce_notification
+# import json
 
 load_dotenv()
 snowflake = SnowflakeGenerator(datacenter_id=1, worker_id=1)
