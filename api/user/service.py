@@ -8,7 +8,7 @@ from api.user.user_req_models import (
 from database import DataBaseConnector
 from api.user.user_function import UserFunction
 from api.user.user_res_models import UserReport, UserBlock, UserPenalty
-from util.kafka_producer import produce_notification
+# from util.kafka_producer import produce_notification
 import json
 
 

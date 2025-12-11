@@ -9,7 +9,7 @@ from api.comment.comment_req_models import (
     InsertParentComment,
     InsertChildComment,
 )
-from util.kafka_producer import produce_notification
+# from util.kafka_producer import produce_notification
 import json
 
 

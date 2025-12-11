@@ -72,8 +72,10 @@ class CommunityService:
             )
 
         except S3Error as e:
+            print(e)
             raise HTTPException(status_code=500, detail=f"MinIO 업로드 실패: {e}")
         except Exception as e:
+            print(e)
             raise HTTPException(status_code=500, detail=f"이미지 처리 실패: {e}")
 
         url = f"https://image.eftlibrary.com/{bucket_name}/{object_name}"
