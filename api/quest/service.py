@@ -89,7 +89,7 @@ class QuestService:
                 param = {"npc_id": trader_id}
                 quest_list = s.execute(query, param)
                 npc_list = (
-                    s.query(NPC.id, NPC.name, NPC.image).order_by(NPC.order).all()
+                    s.query(NPC.id, NPC.name, NPC.image).filter(NPC.order != None).order_by(NPC.order).all()
                 )
                 info['quest_list'] = [dict(row) for row in quest_list.mappings()]
                 info['trader_list'] =[
