@@ -77,7 +77,7 @@ pip install requests
 pip install pytz
 pip install confluent-kafka
 pip install tzdata
-pip install aioredis
+pip install redis
 pip install python-slugify
 pip install pillow
 pip install minio
