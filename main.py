@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import os
 from api.router import api_router
 from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi import FastAPI
 from fastapi import FastAPI, WebSocket, Query
 from util.middleware import KafkaProducerMiddleware
 from api.user.util import UserUtil
