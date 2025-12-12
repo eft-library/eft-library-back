@@ -30,5 +30,6 @@ def produce_notification(value: str):
     producer.produce(
         NOTIFICATION_TOPIC, value=value.encode("utf-8"), callback=delivery_report
     )
+    print(value)
     producer.poll(0)
     producer.flush(0.2)
