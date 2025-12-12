@@ -8,7 +8,7 @@ from api.user.user_req_models import (
 from database import DataBaseConnector
 from api.user.user_function import UserFunction
 from api.user.user_res_models import UserReport, UserBlock, UserPenalty
-# from util.kafka_producer import produce_notification
+from util.kafka_producer import produce_notification
 import json
 
 
@@ -266,14 +266,14 @@ class UserService:
                 s.add(new_block)
                 s.commit()
 
-                # kafka_message = {
-                #     "user_email": request_info.user_email,
-                #     "start_time": start_time.isoformat(),
-                #     "end_time": end_time.isoformat(),
-                #     "noti_type": "penalty_user",
-                # }
-                # json_str = json.dumps(kafka_message)
-                # produce_notification(json_str)
+                kafka_message = {
+                    "user_email": request_info.user_email,
+                    "start_time": start_time.isoformat(),
+                    "end_time": end_time.isoformat(),
+                    "noti_type": "penalty_user",
+                }
+                json_str = json.dumps(kafka_message)
+                produce_notification(json_str)
 
                 return {"result": 1}
         except Exception as e:

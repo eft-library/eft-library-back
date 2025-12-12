@@ -9,7 +9,7 @@ from api.comment.comment_req_models import (
     InsertParentComment,
     InsertChildComment,
 )
-# from util.kafka_producer import produce_notification
+from util.kafka_producer import produce_notification
 import json
 
 
@@ -34,17 +34,17 @@ class CommentService:
                 s.commit()
 
                 # 본인이 작성한 거는 무시
-                # if request_info.post_author_email != user_email:
-                #     kafka_message = {
-                #         "url": f"{bigint_post_id}-{request_info.slug}?comment_id={new_id}",
-                #         "author_email": user_email,
-                #         "post_id": bigint_post_id,
-                #         "author_nickname": request_info.nickname,
-                #         "title": request_info.title,
-                #         "noti_type": "create_parent_comment",
-                #     }
-                #     json_str = json.dumps(kafka_message)
-                #     produce_notification(json_str)
+                if request_info.post_author_email != user_email:
+                    kafka_message = {
+                        "url": f"{bigint_post_id}-{request_info.slug}?comment_id={new_id}",
+                        "author_email": user_email,
+                        "post_id": bigint_post_id,
+                        "author_nickname": request_info.nickname,
+                        "title": request_info.title,
+                        "noti_type": "create_parent_comment",
+                    }
+                    json_str = json.dumps(kafka_message)
+                    produce_notification(json_str)
 
                 return {"result": 1}
         except Exception as e:
@@ -72,18 +72,18 @@ class CommentService:
                 s.commit()
 
                 # 본인이 작성한 거는 무시
-                # if request_info.post_author_email != user_email:
-                #     kafka_message = {
-                #         "url": f"{bigint_post_id}-{request_info.slug}?comment_id={new_id}",
-                #         "author_email": user_email,
-                #         "post_id": bigint_post_id,
-                #         "parent_comment_id": request_info.parent_comment_id,
-                #         "author_nickname": request_info.nickname,
-                #         "title": request_info.title,
-                #         "noti_type": "create_child_comment",
-                #     }
-                #     json_str = json.dumps(kafka_message)
-                #     produce_notification(json_str)
+                if request_info.post_author_email != user_email:
+                    kafka_message = {
+                        "url": f"{bigint_post_id}-{request_info.slug}?comment_id={new_id}",
+                        "author_email": user_email,
+                        "post_id": bigint_post_id,
+                        "parent_comment_id": request_info.parent_comment_id,
+                        "author_nickname": request_info.nickname,
+                        "title": request_info.title,
+                        "noti_type": "create_child_comment",
+                    }
+                    json_str = json.dumps(kafka_message)
+                    produce_notification(json_str)
 
                 return {"result": 1}
         except Exception as e:
