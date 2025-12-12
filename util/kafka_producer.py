@@ -23,6 +23,8 @@ def delivery_report(err, msg):
 def produce_message(value: str):
     producer.produce(LOG_TOPIC, value=value.encode("utf-8"), callback=delivery_report)
     producer.poll(0)
+    print(value)
+    producer.flush(0.2)
 
 
 def produce_notification(value: str):
@@ -30,3 +32,4 @@ def produce_notification(value: str):
         NOTIFICATION_TOPIC, value=value.encode("utf-8"), callback=delivery_report
     )
     producer.poll(0)
+    producer.flush(0.2)
