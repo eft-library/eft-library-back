@@ -16,9 +16,9 @@ class KafkaProducerMiddleware(BaseHTTPMiddleware):
         }
         json_str = json.dumps(data)
         produce_message(json_str)
-
+        print(data)
         response = await call_next(request)
-
+        print(response)
         for header in ("x-frame-options", "X-Frame-Options"):
             if header in response.headers:
                 del response.headers[header]
