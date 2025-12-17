@@ -78,18 +78,5 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
 
 
 <!--
-pip install 'fastapi[all]'
-pip install sqlalchemy
-pip install python-dotenv
-pip install psycopg2-binary
-pip install requests
-pip install pytz
-pip install confluent-kafka
-pip install tzdata
-pip install redis
-pip install python-slugify
-pip install pillow
-pip install minio
-pip install nanoid
-pip install setuptools
+pip install 'fastapi[all]' sqlalchemy python-dotenv psycopg2-binary requests pytz confluent-kafka tzdata redis python-slugify pillow minio nanoid setuptools
 -->
