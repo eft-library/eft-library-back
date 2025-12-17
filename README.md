@@ -18,20 +18,27 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
 - 회원가입은 무조건 Google OAuth를 사용하고, **사용자 이메일 정보만 사용합니다. (비밀번호 사용 X)**
 - Middleware를 추가하여, 모든 요청을 Kafka를 통해 History를 남깁니다.
 - 가능하면 모든 데이터의 가공을 FastAPI에서 처리합니다.
+- WebSocket과 Redis를 사용하여 실시간 알림 기능을 제공합니다.
 
 
 ## 패키지 정보
 
-| 패키지명            | 버전       |
-|-----------------|----------|
-| Python          | 3.10.12  |
-| FastAPI         | 0.115.12 |
-| psycopg2-binary | 2.9.10   |
-| python-dotenv   | 1.1.0    |
-| pytz            | 2025.2   |
-| requests        | 2.32.3   |
-| SQLAlchemy      | 2.0.40   |
-| confluent-kafka | 2.10.0   |
+| 패키지명            | 버전      |
+|-----------------|---------|
+| Python          | 3.12.11 |
+| FastAPI         | 0.124.0 |
+| psycopg2-binary | 2.9.11  |
+| python-dotenv   | 1.1.0   |
+| pytz            | 2025.2  |
+| requests        | 2.32.5  |
+| SQLAlchemy      | 2.0.44  |
+| confluent-kafka | 2.12.2  |
+| minio           | 7.2.20  |
+| nanoid          | 2.0.0   |
+| pillow          | 12.0.0  |
+| python-slugify  | 8.0.4   |
+| redis           | 7.1.0   |
+
 
 
 ## 구조
@@ -54,6 +61,8 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
   - **search** : 메인 페이지 검색 및 sitemap.xml 조회 API
   - **dynamic info** : 사이트 내의 상수 조회 API - footer, etc...
   - **user** : 사용자 관련 API
+  - **community** : 커뮤니티 관련 API
+  - **comment** : 댓글 관련 API
 - **util**
   - **constants** : HTTP Code 정의
 - **database** : PostgreSQL Connection 정의
