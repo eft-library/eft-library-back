@@ -8,7 +8,7 @@
 
 EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 데이터를 적재하거나 조회합니다.
 
-<img width="1923" height="1366" alt="arc" src="https://github.com/user-attachments/assets/ee949526-d6ce-4f69-bf64-6c350097a593" />
+<img width="1923" height="1366" alt="last" src="https://github.com/user-attachments/assets/3a17adc2-e80b-4042-93fa-dda30bbaf947" />
 
 ## 주요 사항
 
