@@ -15,7 +15,7 @@ def get_all_item_filter():
     return CustomResponse.response(item_filter, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/sub_info")
+@router.get("/sub-info")
 def get_all_item_filter():
     item_filter = ItemFilterService.get_all_sub_item_filter_categories()
     if item_filter is None:

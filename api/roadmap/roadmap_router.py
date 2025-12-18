@@ -13,7 +13,7 @@ router = APIRouter(tags=["Roadmap"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-@router.post("/get_quest")
+@router.post("/get-quest")
 def get_all_quest(getRoadMap: GetRoadMap):
     result = RoadmapService.get_roadmap(getRoadMap.user_email)
     if result is None:
@@ -21,7 +21,7 @@ def get_all_quest(getRoadMap: GetRoadMap):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/save_roadmap")
+@router.post("/save-roadmap")
 def save_roadmap(roadmap: SaveRoadmap, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:

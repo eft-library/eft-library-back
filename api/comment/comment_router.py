@@ -21,7 +21,7 @@ router = APIRouter(tags=["Comment"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
-@router.post("/insert_parent_comment")
+@router.post("/insert-parent-comment")
 def insert_parent_comment(
     request_info: InsertParentComment, token: str = Depends(oauth2_scheme)
 ):
@@ -35,7 +35,7 @@ def insert_parent_comment(
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/insert_child_comment")
+@router.post("/insert-child-comment")
 def insert_child_comment(
     request_info: InsertChildComment, token: str = Depends(oauth2_scheme)
 ):
@@ -52,7 +52,7 @@ def insert_child_comment(
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/get_comments")
+@router.post("/get-comments")
 def get_comments(request_info: GetComments):
     result = CommentService.get_comment(
         request_info.post_id,
@@ -65,7 +65,7 @@ def get_comments(request_info: GetComments):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/like_comment")
+@router.post("/like-comment")
 def like_comment(request_info: CommentReaction, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -77,7 +77,7 @@ def like_comment(request_info: CommentReaction, token: str = Depends(oauth2_sche
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/dislike_comment")
+@router.post("/dislike-comment")
 def dislike_comment(request_info: CommentReaction, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -89,7 +89,7 @@ def dislike_comment(request_info: CommentReaction, token: str = Depends(oauth2_s
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/update_comment")
+@router.post("/update-comment")
 def update_comment(request_info: UpdateComment, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -103,7 +103,7 @@ def update_comment(request_info: UpdateComment, token: str = Depends(oauth2_sche
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/delete_comment_by_admin")
+@router.post("/delete-comment-by-admin")
 def delete_comment_by_admin(
     request_info: DeleteComment, token: str = Depends(oauth2_scheme)
 ):
@@ -117,7 +117,7 @@ def delete_comment_by_admin(
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/delete_comment_by_user")
+@router.post("/delete-comment-by-user")
 def delete_comment_by_user(
     request_info: DeleteComment, token: str = Depends(oauth2_scheme)
 ):
@@ -131,7 +131,7 @@ def delete_comment_by_user(
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/report_comment")
+@router.post("/report-comment")
 def report_post(request_info: ReqCommentReport, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:

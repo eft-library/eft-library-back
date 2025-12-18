@@ -15,7 +15,7 @@ def get_menu():
     return CustomResponse.response(menu_list, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/menu-wtih-search")
+@router.get("/menu-with-search")
 def get_menu():
     menu_list = MenuService.get_menu_with_search()
     if menu_list is None:

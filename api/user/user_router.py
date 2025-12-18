@@ -27,7 +27,7 @@ def add_user(addUserReq: AddUserReq):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/user_info")
+@router.get("/user-info")
 def get_user(token: str = Depends(oauth2_scheme)):
 
     user_email = UserUtil.verify_google_token(access_token=token)
@@ -53,7 +53,7 @@ def delete_user(token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/update_nickname")
+@router.post("/update-nickname")
 def update_nickname(
     request_info: UpdateUserNickname, token: str = Depends(oauth2_scheme)
 ):
@@ -70,7 +70,7 @@ def update_nickname(
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/check_nickname_duplicate")
+@router.post("/check-nickname-duplicate")
 def check_nickname_duplicate(
     request_info: UpdateUserNickname, token: str = Depends(oauth2_scheme)
 ):
@@ -87,7 +87,7 @@ def check_nickname_duplicate(
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/check_last_update_nickname")
+@router.post("/check-last-update-nickname")
 def check_last_update_nickname(token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
 
@@ -102,7 +102,7 @@ def check_last_update_nickname(token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/report_user")
+@router.post("/report-user")
 def report_post(request_info: ReqUserReport, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -114,7 +114,7 @@ def report_post(request_info: ReqUserReport, token: str = Depends(oauth2_scheme)
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/block_user")
+@router.post("/block-user")
 def block_user(request_info: ReqUserBlock, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -126,7 +126,7 @@ def block_user(request_info: ReqUserBlock, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/unblock_user")
+@router.post("/unblock-user")
 def unblock_user(request_info: ReqUserBlock, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -138,7 +138,7 @@ def unblock_user(request_info: ReqUserBlock, token: str = Depends(oauth2_scheme)
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.post("/penalty_user")
+@router.post("/penalty-user")
 def penalty_user(request_info: ReqUserPenalty, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -150,7 +150,7 @@ def penalty_user(request_info: ReqUserPenalty, token: str = Depends(oauth2_schem
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.get("/my_page/default")
+@router.get("/my-page/default")
 def get_my_page_default(token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -162,7 +162,7 @@ def get_my_page_default(token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.get("/my_page/info")
+@router.get("/my-page/info")
 def get_my_page_info(token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -174,7 +174,7 @@ def get_my_page_info(token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.get("/my_page/posts")
+@router.get("/my-page/posts")
 def get_my_page_posts(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -186,7 +186,7 @@ def get_my_page_posts(page_num: int, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.get("/my_page/comments")
+@router.get("/my-page/comments")
 def get_my_page_comments(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -198,7 +198,7 @@ def get_my_page_comments(page_num: int, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.get("/my_page/bookmarks")
+@router.get("/my-page/bookmarks")
 def get_my_page_bookmarks(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -210,7 +210,7 @@ def get_my_page_bookmarks(page_num: int, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.get("/my_page/blocks")
+@router.get("/my-page/blocks")
 def get_my_page_blocks(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -222,7 +222,7 @@ def get_my_page_blocks(page_num: int, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.get("/my_page/follow")
+@router.get("/my-page/follow")
 def get_my_page_follow(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -234,7 +234,7 @@ def get_my_page_follow(page_num: int, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
 
 
-@router.get("/my_page/notification")
+@router.get("/my-page/notification")
 def get_my_page_notification(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
