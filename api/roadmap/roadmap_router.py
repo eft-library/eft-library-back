@@ -12,7 +12,7 @@ from api.roadmap.roadmap_service import RoadmapService
 router = APIRouter(tags=["Roadmap"])
 
 # JWT를 헤더에서 추출하는 의존성 함수
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
 @router.post("/get-quest")
