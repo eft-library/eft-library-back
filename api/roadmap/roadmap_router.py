@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends
 from api.response import CustomResponse
 from api.roadmap.roadmap_req_models import GetRoadMap, SaveRoadmap
@@ -16,6 +18,17 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 @router.post("/get-quest")
 def get_all_quest(getRoadMap: GetRoadMap):
     result = RoadmapService.get_roadmap(getRoadMap.user_email)
+    if result is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.USER_ADD_FAIL)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/get-quest")
+def get_all_quest(token: Optional[str] = Depends(oauth2_scheme)):
+    user_email: Optional[str] = None
+    if token:
+        user_email = UserUtil.verify_google_token(access_token=token)
+    result = RoadmapService.get_roadmap(user_email)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.USER_ADD_FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
