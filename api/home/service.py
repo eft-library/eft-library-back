@@ -23,13 +23,10 @@ class MenuService:
                     .all()
                 )
 
-                side_issue_posts_query = text(CommunityUtil.get_posts_with_issue())
-                get_side_issue_posts = s.execute(
-                    side_issue_posts_query,
-                    {"limit": 5, "offset": 0, "user_email": None},
-                )
-                get_side_issue_posts_data = [
-                    dict(row) for row in get_side_issue_posts.mappings()
+                side_home_posts_query = text(CommunityUtil.get_home_post())
+                get_side_home_posts = s.execute(side_home_posts_query)
+                get_side_home_posts_data = [
+                    dict(row) for row in get_side_home_posts.mappings()
                 ]
 
                 news_data = (
@@ -39,7 +36,7 @@ class MenuService:
                 main_info["main_info"] = main_info_list
                 main_info["menu"] = main_menu_list
                 main_info["news"] = news_data
-                main_info["issue_posts"] = get_side_issue_posts_data
+                main_info["home_posts"] = get_side_home_posts_data
 
                 return main_info
         except Exception as e:
