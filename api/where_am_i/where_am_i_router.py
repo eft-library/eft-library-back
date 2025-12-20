@@ -1,0 +1,24 @@
+from fastapi import APIRouter
+from api.response import CustomResponse
+from util.constants import HTTPCode
+from api.constants import Message
+from api.where_am_i.req_models import CheckWpfUser, ReqWhereAmI
+from api.where_am_i.service import WhereAmIService
+
+router = APIRouter(tags=["WhereAmI"])
+
+
+@router.post("/check-wpf-user")
+def check_wpf_user(user: CheckWpfUser):
+    result = WhereAmIService.check_wpf_user(user.email)
+    if result is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.post("/save-where-am-i")
+def save_where_am_i(where_am_i: ReqWhereAmI):
+    result = WhereAmIService.save_where_am_i(where_am_i)
+    if result is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

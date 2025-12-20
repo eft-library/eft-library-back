@@ -21,6 +21,7 @@ from api.home import home_router
 from api.menu import menu_router
 from api.community import community_router
 from api.comment import comment_router
+from api.where_am_i import where_am_i_router
 
 api_router = APIRouter()
 
@@ -46,3 +47,4 @@ api_router.include_router(price_router.router, prefix="/price")
 api_router.include_router(dashboard_router.router, prefix="/dashboard")
 api_router.include_router(community_router.router, prefix="/community")
 api_router.include_router(comment_router.router, prefix="/comment")
+api_router.include_router(where_am_i_router.router, prefix="/where-am-i")
