@@ -16,9 +16,9 @@ def check_wpf_user(user: CheckWpfUser):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/save-where-am-i")
-def save_where_am_i(where_am_i: ReqWhereAmI):
-    result = WhereAmIService.save_where_am_i(where_am_i)
+@router.post("/send-location")
+def send_location(where_am_i: ReqWhereAmI):
+    result = WhereAmIService.send_location(where_am_i)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

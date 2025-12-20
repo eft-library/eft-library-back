@@ -22,7 +22,7 @@ class WhereAmIService:
             return None
 
     @staticmethod
-    def save_where_am_i(req: ReqWhereAmI):
+    def send_location(req: ReqWhereAmI):
         exists_user = WhereAmIService.check_wpf_user(req.user_email)
         if exists_user:
             send_wpf_data_ws_direct(user_email=req.user_email, location=req.location)
