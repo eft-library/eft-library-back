@@ -18,6 +18,8 @@ def check_wpf_user(user: CheckWpfUser):
 
 @router.post("/send-location")
 def send_location(where_am_i: ReqWhereAmI):
+    print(where_am_i.email)
+    print(where_am_i.location)
     result = WhereAmIService.send_location(where_am_i)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
