@@ -26,6 +26,7 @@ class WhereAmIService:
         exists_user = WhereAmIService.check_wpf_user(req.email)
         if exists_user:
             await send_wpf_data_ws_direct(user_email=req.email, location=req.location)
+            return True
         else:
             print("존재하지 않는 사용자: ", req.email)
             return None
