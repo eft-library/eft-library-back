@@ -23,9 +23,9 @@ class WhereAmIService:
 
     @staticmethod
     def send_location(req: ReqWhereAmI):
-        exists_user = WhereAmIService.check_wpf_user(req.user_email)
+        exists_user = WhereAmIService.check_wpf_user(req.email)
         if exists_user:
-            send_wpf_data_ws_direct(user_email=req.user_email, location=req.location)
+            send_wpf_data_ws_direct(user_email=req.email, location=req.location)
         else:
-            print("존재하지 않는 사용자: ", req.user_email)
+            print("존재하지 않는 사용자: ", req.email)
             return None
