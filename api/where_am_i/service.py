@@ -1,3 +1,4 @@
+from api.where_am_i.res_models import UserLocationRequest
 from database import DataBaseConnector
 from sqlalchemy import exists
 from api.user.user_res_models import User
@@ -27,8 +28,13 @@ class WhereAmIService:
         if exists_user:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
-                user_location = {"user_email": req.email, "location": req.location}
+                user_location = UserLocationRequest(
+                    user_email=req.email,
+                    location=req.location,
+                )
+
                 s.add(user_location)
+                s.commit()
                 await send_wpf_data_ws_direct(
                     user_email=req.email, location=req.location
                 )
