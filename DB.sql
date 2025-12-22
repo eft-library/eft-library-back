@@ -906,3 +906,13 @@ COMMENT ON COLUMN user_notifications.payload IS '알림 내용';
 COMMENT ON COLUMN user_notifications.is_read IS '알림 읽기 여부';
 COMMENT ON COLUMN user_notifications.created_time IS '알림 생성 시간';
 
+CREATE TABLE IF NOT EXISTS user_location_request (
+    id SERIAL PRIMARY KEY,
+    user_email TEXT NOT NULL,
+    location TEXT NOT NULL,
+    created_time TIMESTAMP DEFAULT NOW()
+);
+COMMENT ON COLUMN user_location_request.id IS '자동 생성 ID';
+COMMENT ON COLUMN user_location_request.user_email IS '사용자 이메일';
+COMMENT ON COLUMN user_location_request.location IS '스크린샷 이름';
+COMMENT ON COLUMN user_location_request.created_time IS '생성 시간';

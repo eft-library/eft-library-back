@@ -25,8 +25,14 @@ class WhereAmIService:
     async def send_location(req: ReqWhereAmI):
         exists_user = WhereAmIService.check_wpf_user(req.email)
         if exists_user:
-            await send_wpf_data_ws_direct(user_email=req.email, location=req.location)
-            return True
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_location = {"user_email": req.email, "location": req.location}
+                s.add(user_location)
+                await send_wpf_data_ws_direct(
+                    user_email=req.email, location=req.location
+                )
+                return True
         else:
             print("존재하지 않는 사용자: ", req.email)
             return None
