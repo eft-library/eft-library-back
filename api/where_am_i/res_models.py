@@ -14,4 +14,4 @@ class UserLocationRequest(DataBaseConnector.Base):
     id = Column(TEXT, primary_key=True)
     user_email = Column(TEXT)
     location = Column(TEXT)
-    create_time = Column(TIMESTAMP, server_default=func.now())
+    created_time = Column(TIMESTAMP, server_default=func.now())
