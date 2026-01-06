@@ -950,3 +950,16 @@ COMMENT ON COLUMN USER_PROGRESS_ITEM.USER_EMAIL IS '사용자 이메일';
 COMMENT ON COLUMN USER_PROGRESS_ITEM.PROGRESS_TYPE IS 'Progress Type: Rebirth, Kappa';
 COMMENT ON COLUMN USER_PROGRESS_ITEM.ITEM_LIST IS '아이템 리스트';
 COMMENT ON COLUMN USER_PROGRESS_ITEM.UPDATE_TIME IS '업데이트 시간';
+
+CREATE TABLE IF NOT EXISTS progress_item_i18n (
+    id TEXT NOT NULL PRIMARY KEY,
+    name jsonb,
+    PROGRESS_TYPE text,
+    IMAGE TEXT,
+    UPDATE_TIME timestamp with time zone default now()
+);
+COMMENT ON COLUMN progress_item_i18n.id IS '아이템 아이디';
+COMMENT ON COLUMN progress_item_i18n.name IS '아이템 이름';
+COMMENT ON COLUMN progress_item_i18n.PROGRESS_TYPE IS 'Progress Type: Rebirth, Kappa';
+COMMENT ON COLUMN progress_item_i18n.IMAGE IS '이미지 링크';
+COMMENT ON COLUMN progress_item_i18n.UPDATE_TIME IS '업데이트 시간';

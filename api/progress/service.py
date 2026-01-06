@@ -1,5 +1,5 @@
 from api.progress.progress_req_models import ProgressItemList
-from api.progress.progress_res_models import UserProgressItem
+from api.progress.progress_res_models import UserProgressItem, ProgressItem
 from database import DataBaseConnector
 from sqlalchemy import text
 from datetime import datetime
@@ -9,22 +9,45 @@ import pytz
 class ProgressService:
 
     @staticmethod
-    def get_user_progress(user_email):
+    def get_user_progress(user_email: str | None):
         try:
             session = DataBaseConnector.create_session_factory()
+
             with session() as s:
-                query = text("")
-                kappa_result = s.execute(query, {"user_email": user_email})
-                rebirth_result = s.execute(query, {"user_email": user_email})
-                if kappa_result and rebirth_result:
-                    return {
-                        "rebirthItemList": [
-                            dict(row) for row in rebirth_result.mappings()
-                        ],
-                        "kappaItemList": [dict(row) for row in kappa_result.mappings()],
-                    }
-                else:
-                    return {"rebirthItemList": [], "kappaItemList": []}
+                # 전체 아이템 목록
+                all_kappa_list = (
+                    s.query(ProgressItem)
+                    .filter(ProgressItem.progress_type == "Kappa")
+                    .all()
+                )
+
+                all_rebirth_list = (
+                    s.query(ProgressItem)
+                    .filter(ProgressItem.progress_type == "Rebirth")
+                    .all()
+                )
+
+                user_kappa = None
+                user_rebirth = None
+
+                if user_email:
+                    user_kappa = s.get(
+                        UserProgressItem,
+                        {"user_email": user_email, "progress_type": "Kappa"},
+                    )
+
+                    user_rebirth = s.get(
+                        UserProgressItem,
+                        {"user_email": user_email, "progress_type": "Rebirth"},
+                    )
+
+                return {
+                    "userRebirthList": user_rebirth,
+                    "userKappaList": user_kappa,
+                    "allKappaItemList": all_kappa_list,
+                    "allRebirthList": all_rebirth_list,
+                }
+
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -33,52 +56,40 @@ class ProgressService:
     def update_progress(progress_item_list: ProgressItemList, user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
+
             with session() as s:
 
+                def now_kst():
+                    return datetime.now(pytz.timezone("Asia/Seoul"))
+
                 def upsert_progress(progress_type: str, item_list):
-                    item = (
-                        s.query(UserProgressItem)
-                        .filter(
-                            UserProgressItem.user_email == user_email,
-                            UserProgressItem.progress_type == progress_type,
-                        )
-                        .first()
+                    item = s.get(
+                        UserProgressItem,
+                        {
+                            "user_email": user_email,
+                            "progress_type": progress_type,
+                        },
                     )
 
                     if item is None:
-                        utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
-                        kst = pytz.timezone("Asia/Seoul")
-                        kst_now = utc_now.astimezone(kst)
                         item = UserProgressItem(
                             user_email=user_email,
                             progress_type=progress_type,
                             item_list=item_list,
-                            update_time=kst_now,
+                            update_time=now_kst(),
                         )
                         s.add(item)
                     else:
                         item.item_list = item_list
+                        item.update_time = now_kst()
 
-                # Rebirth
                 upsert_progress("Rebirth", progress_item_list.rebirthItemList)
-
-                # Kappa
                 upsert_progress("Kappa", progress_item_list.kappaItemList)
 
                 s.commit()
 
-                # 이후 조회 로직 (예시)
-                query = text(
-                    """
-                    SELECT *
-                    FROM user_progress_items
-                    WHERE user_email = :user_email
-                """
-                )
-                result = s.execute(query, {"user_email": user_email})
-                new_user_quests = [dict(row) for row in result.mappings()]
-
-                return new_user_quests
+            # commit 이후 새 세션으로 조회 (권장)
+            return ProgressService.get_user_progress(user_email)
 
         except Exception as e:
             print("오류 발생:", e)
