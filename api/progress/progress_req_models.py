@@ -3,5 +3,5 @@ from typing import List
 
 
 class ProgressItemList(BaseModel):
-    rebirthItemList: List[str]
-    kappaItemList: List[str]
+    userRebirth: List[str]
+    userKappa: List[str]

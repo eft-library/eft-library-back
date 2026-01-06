@@ -27,8 +27,8 @@ class ProgressService:
                     .all()
                 )
 
-                user_kappa = None
-                user_rebirth = None
+                user_kappa = []
+                user_rebirth = []
 
                 if user_email:
                     user_kappa = s.get(
@@ -83,8 +83,8 @@ class ProgressService:
                         item.item_list = item_list
                         item.update_time = now_kst()
 
-                upsert_progress("Rebirth", progress_item_list.rebirthItemList)
-                upsert_progress("Kappa", progress_item_list.kappaItemList)
+                upsert_progress("Rebirth", progress_item_list.userRebirth)
+                upsert_progress("Kappa", progress_item_list.userKappa)
 
                 s.commit()
 
