@@ -31,14 +31,22 @@ class ProgressService:
                 user_rebirth = []
 
                 if user_email:
-                    user_kappa = s.get(
-                        UserProgressItem,
-                        {"user_email": user_email, "progress_type": "Kappa"},
+                    user_kappa = (
+                        s.query(UserProgressItem)
+                        .filter(
+                            UserProgressItem.user_email == user_email,
+                            UserProgressItem.progress_type == "Kappa",
+                        )
+                        .all()
                     )
 
-                    user_rebirth = s.get(
-                        UserProgressItem,
-                        {"user_email": user_email, "progress_type": "Rebirth"},
+                    user_rebirth = (
+                        s.query(UserProgressItem)
+                        .filter(
+                            UserProgressItem.user_email == user_email,
+                            UserProgressItem.progress_type == "Rebirth",
+                        )
+                        .all()
                     )
 
                 return {
@@ -63,12 +71,13 @@ class ProgressService:
                     return datetime.now(pytz.timezone("Asia/Seoul"))
 
                 def upsert_progress(progress_type: str, item_list):
-                    item = s.get(
-                        UserProgressItem,
-                        {
-                            "user_email": user_email,
-                            "progress_type": progress_type,
-                        },
+                    item = (
+                        s.query(UserProgressItem)
+                        .filter(
+                            UserProgressItem.user_email == user_email,
+                            UserProgressItem.progress_type == progress_type,
+                        )
+                        .first()
                     )
 
                     if item is None:
