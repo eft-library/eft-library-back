@@ -1,7 +1,7 @@
 from api.progress.progress_req_models import ProgressItemList
 from api.progress.progress_res_models import UserProgressItem, ProgressItem
 from database import DataBaseConnector
-from sqlalchemy import text
+from itertools import chain
 from datetime import datetime
 import pytz
 
