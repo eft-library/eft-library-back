@@ -31,23 +31,26 @@ class ProgressService:
                 user_rebirth = []
 
                 if user_email:
-                    user_kappa = (
-                        s.query(UserProgressItem)
+                    user_kappa_items = [
+                        upi.item_list
+                        for upi in s.query(UserProgressItem)
                         .filter(
                             UserProgressItem.user_email == user_email,
                             UserProgressItem.progress_type == "Kappa",
                         )
                         .all()
-                    )
+                    ]
 
-                    user_rebirth = (
-                        s.query(UserProgressItem)
+                    # Rebirth item_list만 가져오기
+                    user_rebirth_items = [
+                        upi.item_list
+                        for upi in s.query(UserProgressItem)
                         .filter(
                             UserProgressItem.user_email == user_email,
                             UserProgressItem.progress_type == "Rebirth",
                         )
                         .all()
-                    )
+                    ]
 
                 return {
                     "userRebirthList": user_rebirth,
