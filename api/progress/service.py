@@ -31,7 +31,7 @@ class ProgressService:
                 user_rebirth = []
 
                 if user_email:
-                    user_kappa_items = [
+                    user_kappa = [
                         upi.item_list
                         for upi in s.query(UserProgressItem)
                         .filter(
@@ -42,7 +42,7 @@ class ProgressService:
                     ]
 
                     # Rebirth item_list만 가져오기
-                    user_rebirth_items = [
+                    user_rebirth = [
                         upi.item_list
                         for upi in s.query(UserProgressItem)
                         .filter(
