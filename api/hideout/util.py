@@ -117,3 +117,11 @@ class HideoutUtil:
                   GROUP BY hideout_master_i18n.id, hideout_master_i18n.name, lid) as a
             GROUP BY master_id, master_name
                     """
+
+    @staticmethod
+    def get_item_require_info():
+        return """
+            select hiri.item_id, hiri.name, SUM(hiri.quantity) as sum_quantity, hiri.image
+            from hideout_item_require_i18n hiri
+            group by hiri.item_id, hiri.name, hiri.image
+        """

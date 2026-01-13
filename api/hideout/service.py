@@ -20,6 +20,14 @@ class HideoutService:
                 hideouts = [dict(row) for row in result.mappings()]
                 user_hideout["hideout_info"] = hideouts
 
+                item_require_query = text(HideoutUtil.get_item_require_info())
+                require_result = s.execute(item_require_query)
+                item_require = [dict(row) for row in require_result.mappings()]
+                user_hideout["item_require_info"] = item_require
+
+                user_item_save = []
+                user_hideout["item_save_list"] = user_item_save
+
                 if user_email is not None:
                     complete_list = (
                         s.query(UserHideOut)
