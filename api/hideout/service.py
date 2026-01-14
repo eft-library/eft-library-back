@@ -85,27 +85,30 @@ class HideoutService:
     def save_station_item(item_list: List[ItemType], user_email: str):
         try:
             session = DataBaseConnector.create_session_factory()
+            item_list_json = [item.model_dump() for item in item_list]
+
+            utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
+            kst_now = utc_now.astimezone(pytz.timezone("Asia/Seoul"))
+
             with session() as s:
                 user_hideout = (
                     s.query(UserHideOut).filter_by(user_email=user_email).first()
                 )
-                utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
-                kst = pytz.timezone("Asia/Seoul")
-                kst_now = utc_now.astimezone(kst)
 
                 if user_hideout:
-                    user_hideout.item_list = item_list
+                    user_hideout.item_list = item_list_json
                     user_hideout.update_time = kst_now
-                    s.commit()
                 else:
-                    new_user_hideout = UserHideOut(
+                    user_hideout = UserHideOut(
                         user_email=user_email,
-                        item_list=item_list,
+                        item_list=item_list_json,
                         update_time=kst_now,
                     )
-                    s.add(new_user_hideout)
-                    s.commit()
+                    s.add(user_hideout)
+
+                s.commit()
                 return user_hideout
+
         except Exception as e:
             print("오류 발생:", e)
             return None
