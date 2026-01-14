@@ -103,6 +103,7 @@ class HideoutService:
                     user_hideout = UserHideOut(
                         user_email=user_email,
                         item_list=item_list_json,
+                        complete_list=[],
                         update_time=kst_now,
                     )
                     s.add(user_hideout)
