@@ -24,3 +24,12 @@ class GetHideoutStation(BaseModel):
     """
 
     user_email: str
+
+
+class ItemType(BaseModel):
+    id: str
+    count: int
+
+
+class UpdateStationItemRequest(BaseModel):
+    user_item_list: List[ItemType]

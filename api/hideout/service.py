@@ -4,6 +4,7 @@ from database import DataBaseConnector
 from api.hideout.util import HideoutUtil
 from datetime import datetime
 from api.hideout.hideout_res_models import UserHideOut
+from api.hideout.hideout_req_models import ItemType
 import pytz
 
 
@@ -71,6 +72,35 @@ class HideoutService:
                     new_user_hideout = UserHideOut(
                         user_email=user_email,
                         complete_list=complete_list,
+                        update_time=kst_now,
+                    )
+                    s.add(new_user_hideout)
+                    s.commit()
+                return user_hideout
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def save_station_item(item_list: List[ItemType], user_email: str):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                user_hideout = (
+                    s.query(UserHideOut).filter_by(user_email=user_email).first()
+                )
+                utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
+                kst = pytz.timezone("Asia/Seoul")
+                kst_now = utc_now.astimezone(kst)
+
+                if user_hideout:
+                    user_hideout.item_list = item_list
+                    user_hideout.update_time = kst_now
+                    s.commit()
+                else:
+                    new_user_hideout = UserHideOut(
+                        user_email=user_email,
+                        item_list=item_list,
                         update_time=kst_now,
                     )
                     s.add(new_user_hideout)
