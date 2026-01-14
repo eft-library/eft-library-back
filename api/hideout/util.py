@@ -121,7 +121,20 @@ class HideoutUtil:
     @staticmethod
     def get_item_require_info():
         return """
-            select hiri.item_id, hiri.name, SUM(hiri.quantity) as sum_quantity, hiri.image
-            from hideout_item_require_i18n hiri
-            group by hiri.item_id, hiri.name, hiri.image
+            SELECT
+                hiri.item_id,
+                hiri.name,
+                SUM(
+                    CASE
+                        WHEN uh.complete_list IS NOT NULL
+                             AND hiri.level_id::text = ANY (uh.complete_list)
+                        THEN 0
+                        ELSE hiri.quantity
+                    END
+                ) AS quantity,
+                hiri.image
+            FROM hideout_item_require_i18n hiri
+            LEFT JOIN user_hideout uh
+              ON uh.user_email = :user_email
+            GROUP BY hiri.item_id, hiri.name, hiri.image;
         """

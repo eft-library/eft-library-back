@@ -1,10 +1,5 @@
 from database import DataBaseConnector
-from sqlalchemy import (
-    Column,
-    TIMESTAMP,
-    ARRAY,
-    TEXT,
-)
+from sqlalchemy import Column, TIMESTAMP, ARRAY, TEXT, JSON
 
 
 class UserHideOut(DataBaseConnector.Base):
@@ -16,4 +11,5 @@ class UserHideOut(DataBaseConnector.Base):
 
     user_email = Column(TEXT, primary_key=True)
     complete_list = Column(ARRAY(TEXT))
+    item_list = Column(JSON)
     update_time = Column(TIMESTAMP)

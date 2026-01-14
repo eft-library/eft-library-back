@@ -10,38 +10,43 @@ import pytz
 class HideoutService:
 
     @staticmethod
-    def get_station(user_email: str):
+    def get_station(user_email: str | None):
         try:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 user_hideout = {}
-                query = text(HideoutUtil.get_hideout_query())
-                result = s.execute(query)
-                hideouts = [dict(row) for row in result.mappings()]
-                user_hideout["hideout_info"] = hideouts
 
-                item_require_query = text(HideoutUtil.get_item_require_info())
-                require_result = s.execute(item_require_query)
-                item_require = [dict(row) for row in require_result.mappings()]
-                user_hideout["item_require_info"] = item_require
+                # 은신처 기본 정보
+                hideout_query = text(HideoutUtil.get_hideout_query())
+                hideouts = s.execute(hideout_query).mappings().all()
+                user_hideout["hideout_info"] = list(hideouts)
 
-                user_item_save = []
-                user_hideout["item_save_list"] = user_item_save
-
-                if user_email is not None:
-                    complete_list = (
+                # 완료 레벨 목록
+                user_info = None
+                if user_email:
+                    user_info = (
                         s.query(UserHideOut)
                         .filter(UserHideOut.user_email == user_email)
                         .first()
                     )
-                    if complete_list is not None:
-                        user_hideout["complete_list"] = complete_list.complete_list
-                    else:
-                        user_hideout["complete_list"] = []
-                    return user_hideout
-                else:
-                    user_hideout["complete_list"] = []
-                    return user_hideout
+
+                user_hideout["complete_list"] = (
+                    user_info.complete_list if user_info else []
+                )
+
+                user_hideout["item_list"] = user_info.item_list if user_info else []
+
+                # 아이템 필요 정보
+                item_require_query = text(HideoutUtil.get_item_require_info())
+                item_require = (
+                    s.execute(item_require_query, {"user_email": user_email})
+                    .mappings()
+                    .all()
+                )
+                user_hideout["item_require_info"] = list(item_require)
+
+                return user_hideout
+
         except Exception as e:
             print("오류 발생:", e)
             return None
