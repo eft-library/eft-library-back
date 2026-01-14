@@ -76,7 +76,7 @@ class HideoutService:
                     )
                     s.add(new_user_hideout)
                     s.commit()
-                return user_hideout
+                return HideoutService.get_station(user_email)
         except Exception as e:
             print("오류 발생:", e)
             return None
