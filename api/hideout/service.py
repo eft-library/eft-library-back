@@ -71,6 +71,7 @@ class HideoutService:
                 else:
                     new_user_hideout = UserHideOut(
                         user_email=user_email,
+                        item_list=[],
                         complete_list=complete_list,
                         update_time=kst_now,
                     )
