@@ -138,5 +138,6 @@ class HideoutUtil:
             FROM hideout_item_require_i18n hiri
             LEFT JOIN user_hideout uh ON uh.user_email = :user_email
             WHERE hiri.item_id not in ('5449016a4bdc2d6f028b456f', '569668774bdc2da2298b4568', '5696686a4bdc2da3298b456a')
-            GROUP BY hiri.item_id, hiri.name, hiri.image, hiri.found_in_raid;
+            GROUP BY hiri.item_id, hiri.name, hiri.image, hiri.found_in_raid
+            ORDER BY hiri.name;
         """
