@@ -31,7 +31,7 @@ class HideoutUtil:
                                                  'name', hideout_item_require_i18n.name,
                                                  'count', hideout_item_require_i18n.count,
                                                  'quantity', hideout_item_require_i18n.quantity,
-                                                 'find_in_raid', hideout_item_require_i18n.find_in_raid,
+                                                 'found_in_raid', hideout_item_require_i18n.found_in_raid,
                                                  'image', hideout_item_require_i18n.image
                                                   )
                                                  )
