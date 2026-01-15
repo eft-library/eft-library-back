@@ -8,7 +8,6 @@ class MapUtil:
                 a.name,
                 a.three_image,
                 a.parent_value,
-                a.three_item_path,
                 a.depth,
                 a."order",
                 a.link,

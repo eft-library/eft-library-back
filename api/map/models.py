@@ -13,7 +13,6 @@ class Map(DataBaseConnector.Base):
     id = Column(String, primary_key=True)
     name = Column(JSON)
     three_image = Column(String)
-    three_item_path = Column(JSON)
     depth = Column(Integer)
     order = Column(Integer)
     link = Column(String)
