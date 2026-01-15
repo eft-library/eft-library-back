@@ -29,6 +29,7 @@ class GetHideoutStation(BaseModel):
 class ItemType(BaseModel):
     id: str
     count: int
+    found_in_raid: bool
 
 
 class UpdateStationItemRequest(BaseModel):
