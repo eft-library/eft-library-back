@@ -21,7 +21,6 @@ class Message(Enum):
     COLUMN_NOT_FOUND = "Column not found"
     SEARCH_NOT_FOUND = "SEARCH not found"
     SITE_LIST_NOT_FOUND = "Site list not found"
-    ITEM_FILTER_NOT_FOUND = "Item filter not found"
     ITEM_LIST_NOT_FOUNT = "Item list not found"
     HIDEOUT_NOT_FOUND = "Hideout not found"
     USER_ADD_FAIL = "User add fail"

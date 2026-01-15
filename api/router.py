@@ -6,7 +6,6 @@ from api.boss import boss_router
 from api.map_of_tarkov import map_of_tarkov_router
 from api.dynamic_info import dynamic_info_router
 from api.search import search_router
-from api.item_filter import item_filter_router
 from api.item import item_router
 from api.hideout import hideout_router
 from api.user import user_router
@@ -35,7 +34,6 @@ api_router.include_router(boss_router.router, prefix="/boss")
 api_router.include_router(map_of_tarkov_router.router, prefix="/map-of-tarkov")
 api_router.include_router(dynamic_info_router.router, prefix="/dynamic-info")
 api_router.include_router(search_router.router, prefix="/search")
-api_router.include_router(item_filter_router.router, prefix="/item-filter")
 api_router.include_router(item_router.router, prefix="/item")
 api_router.include_router(user_router.router, prefix="/user")
 api_router.include_router(planner_router.router, prefix="/planner")

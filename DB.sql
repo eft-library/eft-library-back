@@ -86,26 +86,6 @@ COMMENT ON COLUMN TRANSIT_I18N.MAP IS 'Transit 지역';
 COMMENT ON COLUMN TRANSIT_I18N.IMAGE_THUMBNAIL IS 'Transit 썸네일';
 COMMENT ON COLUMN TRANSIT_I18N.UPDATE_TIME IS 'Transit 업데이트 시간';
 
-CREATE TABLE IF NOT EXISTS FILTER_GROUP_I18N (
-    VALUE TEXT NOT NULL PRIMARY KEY,
-    NAME JSONB,
-    UPDATE_TIME timestamp with time zone default now()
-);
-COMMENT ON COLUMN FILTER_GROUP_I18N.VALUE IS 'Filter 값';
-COMMENT ON COLUMN FILTER_GROUP_I18N.NAME IS 'Filter 이름';
-COMMENT ON COLUMN FILTER_GROUP_I18N.UPDATE_TIME IS 'Filter 업데이트 시간';
-
-CREATE TABLE IF NOT EXISTS FILTER_SUB_GROUP_I18N (
-    VALUE TEXT NOT NULL PRIMARY KEY,
-    NAME JSONB,
-    PARENT_VALUE TEXT,
-    UPDATE_TIME timestamp with time zone default now()
-);
-COMMENT ON COLUMN FILTER_SUB_GROUP_I18N.VALUE IS 'Filter Sub 값';
-COMMENT ON COLUMN FILTER_SUB_GROUP_I18N.NAME IS 'Filter Sub 이름';
-COMMENT ON COLUMN FILTER_SUB_GROUP_I18N.PARENT_VALUE IS 'Filter Sub 상위 키';
-COMMENT ON COLUMN FILTER_SUB_GROUP_I18N.UPDATE_TIME IS 'Filter Sub 업데이트 시간';
-
 CREATE TABLE IF NOT EXISTS MAIN_I18N
 (
   VALUE TEXT NOT NULL PRIMARY KEY,
@@ -915,27 +895,6 @@ COMMENT ON COLUMN user_location_request.id IS '자동 생성 ID';
 COMMENT ON COLUMN user_location_request.user_email IS '사용자 이메일';
 COMMENT ON COLUMN user_location_request.location IS '스크린샷 이름';
 COMMENT ON COLUMN user_location_request.created_time IS '생성 시간';
-
-CREATE TABLE IF NOT EXISTS map_group_marker_i18n (
-    id SERIAL PRIMARY KEY,
-    category TEXT,
-    map_id TEXT,
-    name JSONB,
-    x_coordinate NUMERIC,
-    y_coordinate NUMERIC,
-    link TEXT,
-    info TEXT,
-    created_time TIMESTAMP DEFAULT NOW()
-);
-COMMENT ON COLUMN map_group_marker_i18n.id IS '자동 생성 ID';
-COMMENT ON COLUMN map_group_marker_i18n.category IS '카테고리';
-COMMENT ON COLUMN map_group_marker_i18n.map_id IS '지도 ID';
-COMMENT ON COLUMN map_group_marker_i18n.name IS '이름';
-COMMENT ON COLUMN map_group_marker_i18n.X_COORDINATE IS 'X좌표';
-COMMENT ON COLUMN map_group_marker_i18n.y_COORDINATE IS 'Y좌표';
-COMMENT ON COLUMN map_group_marker_i18n.link IS '주소';
-COMMENT ON COLUMN map_group_marker_i18n.info IS '퀘스트ID 또는 종류';
-COMMENT ON COLUMN map_group_marker_i18n.created_time IS '생성 시간';
 
 CREATE TABLE IF NOT EXISTS USER_PROGRESS_ITEM
 (
