@@ -31,6 +31,7 @@ class HideoutUtil:
                                                  'name', hideout_item_require_i18n.name,
                                                  'count', hideout_item_require_i18n.count,
                                                  'quantity', hideout_item_require_i18n.quantity,
+                                                 'find_in_raid', hideout_item_require_i18n.find_in_raid,
                                                  'image', hideout_item_require_i18n.image
                                                   )
                                                  )
@@ -132,6 +133,7 @@ class HideoutUtil:
                         ELSE hiri.quantity
                     END
                 ) AS quantity,
+                hiri.found_in_raid,
                 hiri.image
             FROM hideout_item_require_i18n hiri
             LEFT JOIN user_hideout uh ON uh.user_email = :user_email
