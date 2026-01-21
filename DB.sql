@@ -514,6 +514,35 @@ COMMENT ON COLUMN ITEM_PRICE_I18N.CATEGORY IS '아이템 카테고리';
 COMMENT ON COLUMN ITEM_PRICE_I18N.TRADER IS '트레이더 정보';
 COMMENT ON COLUMN ITEM_PRICE_I18N.UPDATE_TIME IS '업데이트 날짜';
 
+-- 미니게임 전용 테이블
+CREATE MATERIALIZED VIEW item_flea_summary AS
+WITH pve_prices AS (SELECT id,
+                           name,
+                           image,
+                           width,
+                           height,
+                           category,
+                           jsonb_array_elements(trader -> 'pve_trader') AS trade_info,
+                           update_time
+                    FROM item_price_i18n
+                    WHERE jsonb_typeof(trader -> 'pve_trader') = 'array')
+SELECT id,
+       name,
+       image,
+       width,
+       height,
+       category,
+       MAX((trade_info ->> 'price')::INT)                                   AS flea_market_price,
+       update_time
+FROM pve_prices
+WHERE trade_info -> 'trader' ->> 'npc_id' = 'FLEA_MARKET'
+  AND category != 'Etc'
+GROUP BY id, name, image, width, height, category, update_time
+ORDER BY category, flea_market_price DESC;
+
+CREATE UNIQUE INDEX idx_item_flea_summary_id
+ON item_flea_summary (id);
+
 CREATE TABLE IF NOT EXISTS ITEM_PRICE_HISTORY_I18N
 (
     ID TEXT,

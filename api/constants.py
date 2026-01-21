@@ -35,3 +35,4 @@ class Message(Enum):
     COMMENT_FAIL = "Comment fail"
     STATION_SAVE_FAIL = "Station save fail"
     IMAGE_UPLOAD_FAIL = "Image upload fail"
+    MINIGAME_FAIL = "Minigame fail"
