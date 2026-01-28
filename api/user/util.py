@@ -17,7 +17,7 @@ class UserUtil:
         )
 
         if response.status_code != 200:
-            return False
+            return None
         data = response.json()
         return data["email"]
 
