@@ -24,7 +24,7 @@ def save_rng_score(request: SaveScore):
     return CustomResponse.response(rng_item_list, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/rng-item/all-rank")
+@router.get("/rng-item/all-rank")
 def get_rng_item_rank():
     all_rng_item_rank = MinigameService.get_all_rng_item_rank()
     if all_rng_item_rank is None:
