@@ -950,3 +950,19 @@ COMMENT ON COLUMN progress_item_i18n.name IS '아이템 이름';
 COMMENT ON COLUMN progress_item_i18n.PROGRESS_TYPE IS 'Progress Type: Rebirth, Kappa';
 COMMENT ON COLUMN progress_item_i18n.IMAGE IS '이미지 링크';
 COMMENT ON COLUMN progress_item_i18n.UPDATE_TIME IS '업데이트 시간';
+
+CREATE TABLE IF NOT EXISTS user_minigame_score (
+  ID SERIAL PRIMARY KEY,
+  NICKNAME TEXT,
+  GAME_TYPE TEXT,
+  SCORE BIGINT,
+  CREATE_TIME timestamp with time zone default now()
+);
+COMMENT ON COLUMN user_minigame_score.id IS '자동 생성 아이디';
+COMMENT ON COLUMN user_minigame_score.NICKNAME IS '닉네임';
+COMMENT ON COLUMN user_minigame_score.GAME_TYPE IS '미니게임 타입';
+COMMENT ON COLUMN user_minigame_score.SCORE IS '점수';
+COMMENT ON COLUMN user_minigame_score.CREATE_TIME IS '적재 시간';
+
+CREATE INDEX idx_minigame_score_rank
+ON user_minigame_score (game_type, score DESC, create_time ASC);
