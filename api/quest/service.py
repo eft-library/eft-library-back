@@ -64,6 +64,7 @@ class QuestService:
 
             return quest[0]
         except Exception as e:
+            print("get_quest_by_id 호출, url_mapping:", url_mapping)
             print("get_quest_by_id 오류:", e)
             return None
 
