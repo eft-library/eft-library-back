@@ -55,7 +55,7 @@ class MinigameService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 query = text(MinigameUtil.get_rng_item_my_rank_list())
-                param = {"score", score}
+                param = {"score": score}
                 result = s.execute(query, param)
                 data = [dict(row) for row in result.mappings()]
             return data
