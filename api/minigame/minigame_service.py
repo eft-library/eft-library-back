@@ -1,6 +1,8 @@
 from api.minigame.res_models import ItemFleaSummary, UserMinigameScore
 from database import DataBaseConnector
 from api.minigame.req_models import SaveScore
+from sqlalchemy import text
+from api.minigame.util import MinigameUtil
 
 
 class MinigameService:
@@ -30,6 +32,33 @@ class MinigameService:
                 s.commit()
                 s.refresh(new_score)  # 자동 생성 id 반영
                 return new_score
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_all_rng_item_rank():
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                query = text(MinigameUtil.get_rng_item_rank())
+                result = s.execute(query)
+                data = [dict(row) for row in result.mappings()]
+            return result
+        except Exception as e:
+            print("오류 발생:", e)
+            return None
+
+    @staticmethod
+    def get_rng_item_my_rank(score: int):
+        try:
+            session = DataBaseConnector.create_session_factory()
+            with session() as s:
+                query = text(MinigameUtil.get_rng_item_my_rank_list())
+                param = {"score", score}
+                result = s.execute(query, param)
+                data = [dict(row) for row in result.mappings()]
+            return result
         except Exception as e:
             print("오류 발생:", e)
             return None
