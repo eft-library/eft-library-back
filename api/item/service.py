@@ -19,7 +19,7 @@ class ItemService:
                 item = result.mappings().first()
                 return item
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_item_detail 오류:", e)
             return None
 
     @staticmethod
@@ -50,7 +50,7 @@ class ItemService:
 
             return result_rig
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_rig_list 오류:", e)
             return None
 
     @staticmethod
@@ -81,7 +81,7 @@ class ItemService:
 
             return result_glasses
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_glasses_list 오류:", e)
             return None
 
     @staticmethod
@@ -114,7 +114,7 @@ class ItemService:
 
             return result_face_cover
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_face_cover_list 오류:", e)
             return None
 
     @staticmethod
@@ -144,7 +144,7 @@ class ItemService:
 
                 return result
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_medical_list 오류:", e)
             return None
 
     @staticmethod
@@ -163,7 +163,7 @@ class ItemService:
                 )
                 return container
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_container_list 오류:", e)
             return None
 
     @staticmethod
@@ -177,7 +177,7 @@ class ItemService:
                 arm_band = s.query(Item).filter(Item.category == "Armband").all()
                 return arm_band
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_arm_band_list 오류:", e)
             return None
 
     @staticmethod
@@ -191,7 +191,7 @@ class ItemService:
                 loot = s.query(Item).filter(Item.category == "Loot").all()
                 return loot
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_loot_list 오류:", e)
             return None
 
     @staticmethod
@@ -210,7 +210,7 @@ class ItemService:
                 )
                 return ammo
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_ammo_list 오류:", e)
             return None
 
     @staticmethod
@@ -224,7 +224,7 @@ class ItemService:
                 provisions = s.query(Item).filter(Item.category == "Provisions").all()
                 return provisions
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_provisions_list 오류:", e)
             return None
 
     @staticmethod
@@ -238,7 +238,7 @@ class ItemService:
                 key = s.query(Item).filter(Item.category == "Key").all()
                 return key
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_key_list 오류:", e)
             return None
 
     @staticmethod
@@ -254,7 +254,7 @@ class ItemService:
                 armor_vest = [dict(row) for row in result.mappings()]
                 return armor_vest
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_armor_vest_list 오류:", e)
             return None
 
     @staticmethod
@@ -273,7 +273,7 @@ class ItemService:
                 )
                 return backpack
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_backpack_list 오류:", e)
             return None
 
     @staticmethod
@@ -287,7 +287,7 @@ class ItemService:
                 headset = s.query(Item).filter(Item.category == "Headset").all()
                 return headset
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_headset_list 오류:", e)
             return None
 
     @staticmethod
@@ -304,7 +304,7 @@ class ItemService:
                 }
             return weapon_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_weapon_list 오류:", e)
             return None
 
     @staticmethod
@@ -319,7 +319,7 @@ class ItemService:
                 )
             return weapon_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_weapon_list_new 오류:", e)
             return None
 
     @staticmethod
@@ -351,5 +351,5 @@ class ItemService:
 
             return result_headwear
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_headwear_list 오류:", e)
             return None

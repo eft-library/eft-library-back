@@ -21,7 +21,9 @@ class DashboardService:
                 endpoint_result = s.execute(endpoint_query, date_param)
                 endpoint = [dict(row) for row in endpoint_result.mappings()]
 
-                time_distribution_query = text(DashboardUtil.get_psql_time_distribution())
+                time_distribution_query = text(
+                    DashboardUtil.get_psql_time_distribution()
+                )
                 time_distribution_result = s.execute(
                     time_distribution_query, date_param
                 )
@@ -49,7 +51,6 @@ class DashboardService:
                 response_time_result = s.execute(response_time_query, date_param)
                 response_time = [dict(row) for row in response_time_result.mappings()]
 
-
                 return {
                     "endpoint": endpoint,
                     "time_distribution": time_distribution,
@@ -57,10 +58,9 @@ class DashboardService:
                     "total_user": total_user[0],
                     "total_request": total_request[0],
                     "health_check": health_check,
-                    "response_time": response_time
+                    "response_time": response_time,
                 }
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_chart_data 오류:", e)
             return None
-

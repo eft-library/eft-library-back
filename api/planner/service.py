@@ -20,7 +20,7 @@ class PlannerService:
                 else:
                     return []
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_user_quest 오류:", e)
             return None
 
     @staticmethod
@@ -42,7 +42,7 @@ class PlannerService:
                 new_user_quests = [dict(row) for row in result.mappings()]
                 return new_user_quests
         except Exception as e:
-            print("오류 발생:", e)
+            print("update_user_quest 오류:", e)
             return None
 
     @staticmethod
@@ -58,5 +58,5 @@ class PlannerService:
                 new_user_quests = [dict(row) for row in result.mappings()]
                 return new_user_quests
         except Exception as e:
-            print("오류 발생:", e)
+            print("delete_user_quest 오류:", e)
             return None

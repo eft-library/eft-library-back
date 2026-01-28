@@ -17,5 +17,5 @@ class DynamicInfoService:
                 )
                 return column_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_column 오류:", e)
         return None

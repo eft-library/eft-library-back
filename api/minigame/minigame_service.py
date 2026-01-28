@@ -15,7 +15,7 @@ class MinigameService:
                 rng_item_list = s.query(ItemFleaSummary).all()
                 return rng_item_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_rng_item_list 오류:", e)
             return None
 
     @staticmethod
@@ -33,7 +33,7 @@ class MinigameService:
                 s.refresh(new_score)  # 자동 생성 id 반영
                 return new_score
         except Exception as e:
-            print("오류 발생:", e)
+            print("insert_user_minigame_score 오류:", e)
             return None
 
     @staticmethod
@@ -46,7 +46,7 @@ class MinigameService:
                 data = [dict(row) for row in result.mappings()]
             return data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_all_rng_item_rank 오류:", e)
             return None
 
     @staticmethod
@@ -60,5 +60,5 @@ class MinigameService:
                 data = [dict(row) for row in result.mappings()]
             return data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_rng_item_my_rank 오류:", e)
             return None

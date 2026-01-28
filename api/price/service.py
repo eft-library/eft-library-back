@@ -71,7 +71,7 @@ class PriceService:
                 }
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_item_price 오류:", e)
             return None
 
     @staticmethod
@@ -163,5 +163,5 @@ class PriceService:
                 return {"pvp_top_list": pvp_tier_list, "pve_top_list": pve_tier_list}
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_price_top 오류:", e)
             return None

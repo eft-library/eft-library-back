@@ -37,7 +37,7 @@ class NoticeService:
                     "current_page": page,
                 }
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_notice 오류:", e)
             return None
 
     @staticmethod
@@ -57,5 +57,5 @@ class NoticeService:
 
                 return result_dict
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_notice_by_id 오류:", e)
             return None

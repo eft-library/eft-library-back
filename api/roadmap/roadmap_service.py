@@ -39,7 +39,7 @@ class RoadmapService:
                     user_roadmap["quest_list"] = []
                     return user_roadmap
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_roadmap 오류:", e)
             return None
 
     @staticmethod
@@ -66,5 +66,5 @@ class RoadmapService:
                     s.commit()
                 return questList
         except Exception as e:
-            print("오류 발생:", e)
+            print("save_roadmap 오류:", e)
             return None

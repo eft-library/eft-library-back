@@ -40,5 +40,5 @@ class MenuService:
 
                 return main_info
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_main 오류:", e)
             return None

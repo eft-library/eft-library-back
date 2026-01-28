@@ -37,7 +37,7 @@ class EventService:
                     "current_page": page,
                 }
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_event_quest 오류:", e)
             return None
 
     @staticmethod
@@ -60,5 +60,5 @@ class EventService:
 
                 return result_dict
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_event_by_id 오류:", e)
             return None

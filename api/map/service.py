@@ -34,7 +34,7 @@ class MapService:
                 }
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_map 오류:", e)
             return None
 
     @staticmethod
@@ -53,5 +53,5 @@ class MapService:
                 )
                 return response_map
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_sub_map 오류:", e)
             return None

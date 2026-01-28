@@ -130,7 +130,7 @@ class CommunityService:
                 # 리턴은 snowflake-slug
                 return {"url": f"{new_id}-{slug}"}
         except Exception as e:
-            print("오류 발생:", e)
+            print("create_posts 오류:", e)
             return None
 
     @staticmethod
@@ -166,7 +166,7 @@ class CommunityService:
                 }
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_posts 오류:", e)
             return None
 
     @staticmethod
@@ -187,7 +187,7 @@ class CommunityService:
                     ),
                 }
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_detail_post 오류:", e)
             return None
 
     @staticmethod
@@ -210,7 +210,7 @@ class CommunityService:
                     "notice_posts": CommunityFunction.fetch_notice_posts(s),
                 }
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_side_info 오류:", e)
             return None
 
     @staticmethod
@@ -226,7 +226,7 @@ class CommunityService:
 
                 return post_detail[0]
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_detail_post_meta_data 오류:", e)
             return None
 
     @staticmethod
@@ -270,7 +270,7 @@ class CommunityService:
                 return {"result": reaction.reaction_type}  # 현재 상태 반환
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("like_post 오류:", e)
             return None
 
     @staticmethod
@@ -314,7 +314,7 @@ class CommunityService:
                 return {"result": reaction.reaction_type}  # 현재 상태 반환
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("dislike_post 오류:", e)
             return None
 
     @staticmethod
@@ -350,7 +350,7 @@ class CommunityService:
                 return {"result": 1}  # 성공
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("bookmark_post 오류:", e)
             return None
 
     @staticmethod
@@ -395,7 +395,7 @@ class CommunityService:
                 return {"result": 1}
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("toggle_follow 오류:", e)
             return None
 
     @staticmethod
@@ -413,7 +413,7 @@ class CommunityService:
 
                 return check_follow[0]
         except Exception as e:
-            print("오류 발생:", e)
+            print("check_user_following 오류:", e)
             return None
 
     @staticmethod
@@ -451,7 +451,7 @@ class CommunityService:
 
                 return {"url": f"{bigint_post_id}-{slug}"}
         except Exception as e:
-            print("오류 발생:", e)
+            print("update_post 오류:", e)
             return None
 
     @staticmethod
@@ -473,7 +473,7 @@ class CommunityService:
 
                 return None
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_update_post_detail 오류:", e)
             return None
 
     @staticmethod
@@ -495,7 +495,7 @@ class CommunityService:
                 s.commit()
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("delete_post_by_admin 오류:", e)
             return None
 
     @staticmethod
@@ -517,7 +517,7 @@ class CommunityService:
                 s.commit()
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("delete_post_by_user 오류:", e)
             return None
 
     @staticmethod
@@ -554,7 +554,7 @@ class CommunityService:
                     "max_page_count": max_page_count,
                 }
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_search 오류:", e)
             return None
 
     @staticmethod
@@ -576,7 +576,7 @@ class CommunityService:
 
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("report_post 오류:", e)
             return None
 
     @staticmethod
@@ -592,5 +592,5 @@ class CommunityService:
 
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("increase_view_count 오류:", e)
             return None

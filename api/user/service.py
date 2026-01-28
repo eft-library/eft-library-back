@@ -26,7 +26,7 @@ class UserService:
                     UserFunction._create_new_user(s, addUserReq)
                 return True
         except Exception as e:
-            print("오류 발생:", e)
+            print("add_new_user 오류:", e)
             return None
 
     @staticmethod
@@ -37,7 +37,7 @@ class UserService:
                 user_data = UserFunction._get_user_data(s, user_email)
                 return user_data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_user 오류:", e)
             return None
 
     @staticmethod
@@ -52,7 +52,7 @@ class UserService:
                 else:
                     return False
         except Exception as e:
-            print("오류 발생:", e)
+            print("user_delete 오류:", e)
             return None
 
     @staticmethod
@@ -124,7 +124,7 @@ class UserService:
                     }
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("update_nickname 오류:", e)
             return {
                 "success": False,
                 "ko": "서버 오류 발생",
@@ -143,7 +143,7 @@ class UserService:
                 else:
                     return {"result": 0}
         except Exception as e:
-            print("오류 발생:", e)
+            print("check_nickname_duplicate 오류:", e)
             return None
 
     @staticmethod
@@ -174,7 +174,7 @@ class UserService:
                 return {"result": 1}
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("check_last_update_nickname 오류:", e)
             return None
 
     @staticmethod
@@ -194,7 +194,7 @@ class UserService:
 
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("report_user 오류:", e)
             return None
 
     @staticmethod
@@ -219,7 +219,7 @@ class UserService:
 
                 return {"result": update_data}
         except Exception as e:
-            print("오류 발생:", e)
+            print("block_user 오류:", e)
             return None
 
     @staticmethod
@@ -247,7 +247,7 @@ class UserService:
 
                 return {"result": update_data}
         except Exception as e:
-            print("오류 발생:", e)
+            print("unblock_user 오류:", e)
             return None
 
     @staticmethod
@@ -277,7 +277,7 @@ class UserService:
 
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("penalty_user 오류:", e)
             return None
 
     # 사용자 기본 정보
@@ -289,7 +289,7 @@ class UserService:
                 user_data = UserFunction.get_my_page_default(s, user_email)
                 return user_data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_my_page_default 오류:", e)
             return None
 
     # 사용자 정보 페이지
@@ -301,7 +301,7 @@ class UserService:
                 user_data = UserFunction._get_user_data(s, user_email)
                 return user_data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_my_page_info 오류:", e)
             return None
 
     # 작성글 목록
@@ -314,7 +314,7 @@ class UserService:
                 user_data = UserFunction.get_my_page_posts(s, user_email, limit, offset)
                 return user_data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_my_page_posts 오류:", e)
             return None
 
     # 작성 댓글 목록
@@ -329,7 +329,7 @@ class UserService:
                 )
                 return user_data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_my_page_comments 오류:", e)
             return None
 
     # 북마크 목록
@@ -344,7 +344,7 @@ class UserService:
                 )
                 return user_data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_my_page_bookmarks 오류:", e)
             return None
 
     # 차단한 사람 목록
@@ -359,7 +359,7 @@ class UserService:
                 )
                 return user_data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_my_page_blocks 오류:", e)
             return None
 
     # 차단한 사람 목록
@@ -374,7 +374,7 @@ class UserService:
                 )
                 return user_data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_my_page_follow 오류:", e)
             return None
 
     # 차단한 사람 목록
@@ -389,5 +389,5 @@ class UserService:
                 )
                 return user_data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_my_page_notification 오류:", e)
             return None

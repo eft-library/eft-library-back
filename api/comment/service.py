@@ -48,7 +48,7 @@ class CommentService:
 
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("insert_parent_comment 오류:", e)
             return None
 
     @staticmethod
@@ -87,7 +87,7 @@ class CommentService:
 
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("inset_child_comment 오류:", e)
             return None
 
     @staticmethod
@@ -153,7 +153,7 @@ class CommentService:
                     "current_page_num": current_page_num,
                 }
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_comment 오류:", e)
             return None
 
     @staticmethod
@@ -171,7 +171,7 @@ class CommentService:
                 s.commit()
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("update_comment 오류:", e)
             return None
 
     @staticmethod
@@ -188,7 +188,7 @@ class CommentService:
                 s.commit()
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("delete_comment_by_user 오류:", e)
             return None
 
     @staticmethod
@@ -205,7 +205,7 @@ class CommentService:
                 s.commit()
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("delete_comment_by_admin 오류:", e)
             return None
 
     @staticmethod
@@ -247,7 +247,7 @@ class CommentService:
                 return {"result": reaction.reaction_type}  # 현재 상태 반환
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("like_comment 오류:", e)
             return None
 
     @staticmethod
@@ -289,7 +289,7 @@ class CommentService:
                 return {"result": reaction.reaction_type}  # 현재 상태 반환
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("dislike_comment 오류:", e)
             return None
 
     @staticmethod
@@ -310,5 +310,5 @@ class CommentService:
 
                 return {"result": 1}
         except Exception as e:
-            print("오류 발생:", e)
+            print("report_comment 오류:", e)
             return None

@@ -63,7 +63,7 @@ class ProgressService:
                 }
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_user_progress 오류:", e)
             return None
 
     @staticmethod
@@ -107,5 +107,5 @@ class ProgressService:
             return ProgressService.get_user_progress(user_email)
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("update_progress 오류:", e)
             return None

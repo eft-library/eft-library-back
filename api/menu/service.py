@@ -18,7 +18,7 @@ class MenuService:
                 )
                 return main_menu_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_all_menu 오류:", e)
             return None
 
     @staticmethod
@@ -39,7 +39,7 @@ class MenuService:
                 }
                 return menu_with_search
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_menu_with_search 오류:", e)
             return None
 
     @staticmethod
@@ -50,7 +50,7 @@ class MenuService:
                 main_info_list = s.query(MainInfo).order_by(MainInfo.order).all()
                 return main_info_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_main_info 오류:", e)
             return None
 
     @staticmethod
@@ -66,5 +66,5 @@ class MenuService:
                 )
                 return main_info_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_main_slide 오류:", e)
             return None

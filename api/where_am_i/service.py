@@ -19,26 +19,30 @@ class WhereAmIService:
                 exists_user = s.query(exists().where(User.email == user_email)).scalar()
                 return exists_user
         except Exception as e:
-            print("오류 발생:", e)
+            print("check_wpf_user 오류:", e)
             return None
 
     @staticmethod
     async def send_location(req: ReqWhereAmI):
         exists_user = WhereAmIService.check_wpf_user(req.email)
-        if exists_user:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
-                user_location = UserLocationRequest(
-                    user_email=req.email,
-                    location=req.location,
-                )
+        try:
+            if exists_user:
+                session = DataBaseConnector.create_session_factory()
+                with session() as s:
+                    user_location = UserLocationRequest(
+                        user_email=req.email,
+                        location=req.location,
+                    )
 
-                s.add(user_location)
-                s.commit()
-                await send_wpf_data_ws_direct(
-                    user_email=req.email, location=req.location
-                )
-                return True
-        else:
-            print("존재하지 않는 사용자: ", req.email)
+                    s.add(user_location)
+                    s.commit()
+                    await send_wpf_data_ws_direct(
+                        user_email=req.email, location=req.location
+                    )
+                    return True
+            else:
+                print("존재하지 않는 사용자: ", req.email)
+                return None
+        except Exception as e:
+            print("send_location 오류:", e)
             return None

@@ -37,7 +37,7 @@ class PatchNotesService:
                     "current_page": page,
                 }
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_patch_notes 오류:", e)
             return None
 
     @staticmethod
@@ -62,5 +62,5 @@ class PatchNotesService:
 
                 return result_dict
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_patch_notes_by_id 오류:", e)
             return None

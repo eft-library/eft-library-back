@@ -49,7 +49,7 @@ class HideoutService:
                 return user_hideout
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_station 오류:", e)
             return None
 
     @staticmethod
@@ -79,7 +79,7 @@ class HideoutService:
                     s.commit()
                 return HideoutService.get_station(user_email)
         except Exception as e:
-            print("오류 발생:", e)
+            print("save_station 오류:", e)
             return None
 
     @staticmethod
@@ -112,5 +112,5 @@ class HideoutService:
                 return user_hideout
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("save_station_item 오류:", e)
             return None

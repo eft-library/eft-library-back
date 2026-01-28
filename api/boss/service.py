@@ -35,5 +35,5 @@ class BossService:
                 return {"boss": boss_data[0], "boss_selector": boss_selector_list}
 
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_boss_by_id 오류:", e)
             return None

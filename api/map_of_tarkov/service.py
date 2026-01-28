@@ -15,7 +15,7 @@ class MapOfTarkovService:
                 maps = s.query(Map).filter(Map.depth == 1).order_by(Map.order).all()
             return [{"id": m.id, "name": m.name} for m in maps]
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_map_selector 오류:", e)
             return None
 
     @staticmethod
@@ -29,7 +29,7 @@ class MapOfTarkovService:
                 map_data = [dict(row) for row in map_result.mappings()]
             return map_data[0]
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_map_info 오류:", e)
             return None
 
     @staticmethod
@@ -43,7 +43,7 @@ class MapOfTarkovService:
                 boss_data = [dict(row) for row in boss_result.mappings()]
             return boss_data
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_boss_info 오류:", e)
             return None
 
     @staticmethod
@@ -59,7 +59,7 @@ class MapOfTarkovService:
                 )
             return extractions
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_extraction_info 오류:", e)
             return None
 
     @staticmethod
@@ -75,7 +75,7 @@ class MapOfTarkovService:
                 )
             return transits
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_transits_info 오류:", e)
             return None
 
     @staticmethod
@@ -86,8 +86,9 @@ class MapOfTarkovService:
                 find_info = s.query(WhereAmI).filter(WhereAmI.id == map_id).first()
             return find_info
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_find_info 오류:", e)
             return None
+
     @staticmethod
     def get_map_of_tarkov(map_id):
         """
@@ -138,5 +139,5 @@ class MapOfTarkovService:
 
             return map_of_tarkov
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_map_of_tarkov 오류:", e)
             return None

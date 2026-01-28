@@ -12,7 +12,10 @@ class QuestService:
             session = DataBaseConnector.create_session_factory()
             with session() as s:
                 npc_list = (
-                    s.query(NPC.id, NPC.name, NPC.image).filter(NPC.order != None).order_by(NPC.order).all()
+                    s.query(NPC.id, NPC.name, NPC.image)
+                    .filter(NPC.order != None)
+                    .order_by(NPC.order)
+                    .all()
                 )
 
                 return [
@@ -20,7 +23,7 @@ class QuestService:
                     for id_, name, image in npc_list
                 ]
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_npc_selector 오류:", e)
             return None
 
     @staticmethod
@@ -33,7 +36,7 @@ class QuestService:
                 quest_list = [dict(row) for row in result.mappings()]
                 return quest_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_all_quest 오류:", e)
             return None
 
     @staticmethod
@@ -46,7 +49,7 @@ class QuestService:
                 quest_list = [dict(row) for row in result.mappings()]
                 return quest_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_all_quest_detail 오류:", e)
             return None
 
     @staticmethod
@@ -61,7 +64,7 @@ class QuestService:
 
             return quest[0]
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_quest_by_id 오류:", e)
             return None
 
     @staticmethod
@@ -76,7 +79,7 @@ class QuestService:
 
             return quest_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_quest_by_npc 오류:", e)
             return None
 
     @staticmethod
@@ -89,16 +92,18 @@ class QuestService:
                 param = {"npc_id": trader_id}
                 quest_list = s.execute(query, param)
                 npc_list = (
-                    s.query(NPC.id, NPC.name, NPC.image).filter(NPC.order != None).order_by(NPC.order).all()
+                    s.query(NPC.id, NPC.name, NPC.image)
+                    .filter(NPC.order != None)
+                    .order_by(NPC.order)
+                    .all()
                 )
-                info['quest_list'] = [dict(row) for row in quest_list.mappings()]
-                info['trader_list'] =[
+                info["quest_list"] = [dict(row) for row in quest_list.mappings()]
+                info["trader_list"] = [
                     {"id": id_, "name": name, "image": image}
                     for id_, name, image in npc_list
                 ]
 
-
             return info
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_quest_with_trader 오류:", e)
             return None

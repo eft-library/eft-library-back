@@ -17,7 +17,7 @@ class SearchService:
                 search_list = s.query(Search).order_by(Search.order).all()
                 return search_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_all_search 오류:", e)
             return None
 
     @staticmethod
@@ -33,5 +33,5 @@ class SearchService:
                 sitemap_list = s.query(Sitemap).order_by(desc(Sitemap.priority)).all()
                 return sitemap_list
         except Exception as e:
-            print("오류 발생:", e)
+            print("get_all_site_list 오류:", e)
             return None
