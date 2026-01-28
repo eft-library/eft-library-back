@@ -44,7 +44,7 @@ class MinigameService:
                 query = text(MinigameUtil.get_rng_item_rank())
                 result = s.execute(query)
                 data = [dict(row) for row in result.mappings()]
-            return result
+            return data
         except Exception as e:
             print("오류 발생:", e)
             return None
@@ -58,7 +58,7 @@ class MinigameService:
                 param = {"score", score}
                 result = s.execute(query, param)
                 data = [dict(row) for row in result.mappings()]
-            return result
+            return data
         except Exception as e:
             print("오류 발생:", e)
             return None
