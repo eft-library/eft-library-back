@@ -1,9 +1,10 @@
 from sqlalchemy import text
-from sqlalchemy.orm import subqueryload
-
 from api.map.models import Map
 from api.map.util import MapUtil
 from database import DataBaseConnector
+import logging
+
+logger = logging.getLogger("api.map")
 
 
 class MapService:
@@ -34,7 +35,10 @@ class MapService:
                 }
 
         except Exception as e:
-            print("get_map 오류:", e)
+            logger.error(
+                f"get_map: {map_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -53,5 +57,8 @@ class MapService:
                 )
                 return response_map
         except Exception as e:
-            print("get_sub_map 오류:", e)
+            logger.error(
+                f"get_sub_map: {map_id}, error: {e}",
+                exc_info=True,
+            )
             return None

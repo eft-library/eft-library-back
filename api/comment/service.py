@@ -13,7 +13,7 @@ from util.kafka_producer import produce_notification
 import json
 import logging
 
-logger = logging.getLogger("api.boss")
+logger = logging.getLogger("api.comment")
 
 
 class CommentService:
@@ -163,7 +163,7 @@ class CommentService:
                 }
         except Exception as e:
             logger.error(
-                f"get_comment: {post_id}, {page_num}, {issue_comment_id}, error: {e}",
+                f"get_comment error: {e}",
                 exc_info=True,
             )
             return None
@@ -204,7 +204,7 @@ class CommentService:
                 return {"result": 1}
         except Exception as e:
             logger.error(
-                f"delete_comment_by_user: {comment_id}, {comment_id}, error: {e}",
+                f"delete_comment_by_user: {comment_id}, error: {e}",
                 exc_info=True,
             )
             return None

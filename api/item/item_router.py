@@ -36,7 +36,6 @@ def get_item_list(item_type: str):
         "armor-vest": ItemService.get_armor_vest_list,
         "backpack": ItemService.get_backpack_list,
         "headset": ItemService.get_headset_list,
-        "weapon": ItemService.get_weapon_list,
         "weapon-new": ItemService.get_weapon_list_new,
         "headwear": ItemService.get_headwear_list,
     }

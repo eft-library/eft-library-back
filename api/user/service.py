@@ -10,6 +10,9 @@ from api.user.user_function import UserFunction
 from api.user.user_res_models import UserReport, UserBlock, UserPenalty
 from util.kafka_producer import produce_notification
 import json
+import logging
+
+logger = logging.getLogger("api.user")
 
 
 class UserService:
@@ -26,7 +29,10 @@ class UserService:
                     UserFunction._create_new_user(s, addUserReq)
                 return True
         except Exception as e:
-            print("add_new_user 오류:", e)
+            logger.error(
+                f"add_new_user: {addUserReq.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -37,7 +43,10 @@ class UserService:
                 user_data = UserFunction._get_user_data(s, user_email)
                 return user_data
         except Exception as e:
-            print("get_user 오류:", e)
+            logger.error(
+                f"get_user error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -52,13 +61,16 @@ class UserService:
                 else:
                     return False
         except Exception as e:
-            print("user_delete 오류:", e)
+            logger.error(
+                f"user_delete error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
     def update_nickname(nickname: str, user_email: str):
         try:
-            # 1️⃣ 닉네임 규칙 체크
+            # 닉네임 규칙 체크
             valid, message = UserFunction._validate_nickname_rules(nickname)
             if not valid:
                 return {
@@ -68,7 +80,7 @@ class UserService:
                     "en": message["en"],
                 }
 
-            # 2️⃣ 마지막 업데이트 30일 체크
+            # 마지막 업데이트 30일 체크
             last_check = UserService.check_last_update_nickname(user_email)
             if last_check is None:
                 return {
@@ -85,7 +97,7 @@ class UserService:
                     "en": "Nickname can only be changed once every 30 days.",
                 }
 
-            # 3️⃣ 중복 체크
+            # 중복 체크
             duplicate_check = UserService.check_nickname_duplicate(nickname)
             if duplicate_check is None:
                 return {
@@ -124,7 +136,10 @@ class UserService:
                     }
 
         except Exception as e:
-            print("update_nickname 오류:", e)
+            logger.error(
+                f"update_nickname: {nickname}, error: {e}",
+                exc_info=True,
+            )
             return {
                 "success": False,
                 "ko": "서버 오류 발생",
@@ -143,7 +158,10 @@ class UserService:
                 else:
                     return {"result": 0}
         except Exception as e:
-            print("check_nickname_duplicate 오류:", e)
+            logger.error(
+                f"check_nickname_duplicate: {nickname}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -174,7 +192,10 @@ class UserService:
                 return {"result": 1}
 
         except Exception as e:
-            print("check_last_update_nickname 오류:", e)
+            logger.error(
+                f"check_last_update_nickname error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -194,7 +215,10 @@ class UserService:
 
                 return {"result": 1}
         except Exception as e:
-            print("report_user 오류:", e)
+            logger.error(
+                f"report_user: {request_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -219,7 +243,10 @@ class UserService:
 
                 return {"result": update_data}
         except Exception as e:
-            print("block_user 오류:", e)
+            logger.error(
+                f"block_user: {request_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -247,7 +274,10 @@ class UserService:
 
                 return {"result": update_data}
         except Exception as e:
-            print("unblock_user 오류:", e)
+            logger.error(
+                f"unblock_user: {request_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -277,7 +307,10 @@ class UserService:
 
                 return {"result": 1}
         except Exception as e:
-            print("penalty_user 오류:", e)
+            logger.error(
+                f"penalty_user: {request_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     # 사용자 기본 정보
@@ -289,7 +322,10 @@ class UserService:
                 user_data = UserFunction.get_my_page_default(s, user_email)
                 return user_data
         except Exception as e:
-            print("get_my_page_default 오류:", e)
+            logger.error(
+                f"get_my_page_default error: {e}",
+                exc_info=True,
+            )
             return None
 
     # 사용자 정보 페이지
@@ -301,7 +337,10 @@ class UserService:
                 user_data = UserFunction._get_user_data(s, user_email)
                 return user_data
         except Exception as e:
-            print("get_my_page_info 오류:", e)
+            logger.error(
+                f"get_my_page_info error: {e}",
+                exc_info=True,
+            )
             return None
 
     # 작성글 목록
@@ -314,7 +353,10 @@ class UserService:
                 user_data = UserFunction.get_my_page_posts(s, user_email, limit, offset)
                 return user_data
         except Exception as e:
-            print("get_my_page_posts 오류:", e)
+            logger.error(
+                f"get_my_page_posts error: {e}",
+                exc_info=True,
+            )
             return None
 
     # 작성 댓글 목록
@@ -329,7 +371,10 @@ class UserService:
                 )
                 return user_data
         except Exception as e:
-            print("get_my_page_comments 오류:", e)
+            logger.error(
+                f"get_my_page_comments error: {e}",
+                exc_info=True,
+            )
             return None
 
     # 북마크 목록
@@ -344,7 +389,10 @@ class UserService:
                 )
                 return user_data
         except Exception as e:
-            print("get_my_page_bookmarks 오류:", e)
+            logger.error(
+                f"get_my_page_bookmarks error: {e}",
+                exc_info=True,
+            )
             return None
 
     # 차단한 사람 목록
@@ -359,7 +407,10 @@ class UserService:
                 )
                 return user_data
         except Exception as e:
-            print("get_my_page_blocks 오류:", e)
+            logger.error(
+                f"get_my_page_blocks error: {e}",
+                exc_info=True,
+            )
             return None
 
     # 차단한 사람 목록
@@ -374,7 +425,10 @@ class UserService:
                 )
                 return user_data
         except Exception as e:
-            print("get_my_page_follow 오류:", e)
+            logger.error(
+                f"get_my_page_follow error: {e}",
+                exc_info=True,
+            )
             return None
 
     # 차단한 사람 목록
@@ -389,5 +443,8 @@ class UserService:
                 )
                 return user_data
         except Exception as e:
-            print("get_my_page_notification 오류:", e)
+            logger.error(
+                f"get_my_page_notification error: {e}",
+                exc_info=True,
+            )
             return None

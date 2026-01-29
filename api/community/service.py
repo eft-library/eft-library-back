@@ -28,6 +28,9 @@ import io
 from sqlalchemy import text
 from util.kafka_producer import produce_notification
 import json
+import logging
+
+logger = logging.getLogger("api.community")
 
 load_dotenv()
 snowflake = SnowflakeGenerator(datacenter_id=1, worker_id=1)
@@ -72,10 +75,16 @@ class CommunityService:
             )
 
         except S3Error as e:
-            print(e)
+            logger.error(
+                f"upload_image error: {e}",
+                exc_info=True,
+            )
             raise HTTPException(status_code=500, detail=f"MinIO 업로드 실패: {e}")
         except Exception as e:
-            print(e)
+            logger.error(
+                f"upload_image error: {e}",
+                exc_info=True,
+            )
             raise HTTPException(status_code=500, detail=f"이미지 처리 실패: {e}")
 
         url = f"https://image.eftlibrary.com/{bucket_name}/{object_name}"
@@ -130,7 +139,10 @@ class CommunityService:
                 # 리턴은 snowflake-slug
                 return {"url": f"{new_id}-{slug}"}
         except Exception as e:
-            print("create_posts 오류:", e)
+            logger.error(
+                f"create_posts: {post_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -166,7 +178,10 @@ class CommunityService:
                 }
 
         except Exception as e:
-            print("get_posts 오류:", e)
+            logger.error(
+                f"get_posts error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -187,7 +202,10 @@ class CommunityService:
                     ),
                 }
         except Exception as e:
-            print("get_detail_post 오류:", e)
+            logger.error(
+                f"get_detail_post: {post_id_slug}, {page_category}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -210,7 +228,10 @@ class CommunityService:
                     "notice_posts": CommunityFunction.fetch_notice_posts(s),
                 }
         except Exception as e:
-            print("get_side_info 오류:", e)
+            logger.error(
+                f"get_side_info error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -226,7 +247,10 @@ class CommunityService:
 
                 return post_detail[0]
         except Exception as e:
-            print("get_detail_post_meta_data 오류:", e)
+            logger.error(
+                f"get_detail_post_meta_data: {post_id_slug}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -270,7 +294,10 @@ class CommunityService:
                 return {"result": reaction.reaction_type}  # 현재 상태 반환
 
         except Exception as e:
-            print("like_post 오류:", e)
+            logger.error(
+                f"like_post: {post_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -314,7 +341,10 @@ class CommunityService:
                 return {"result": reaction.reaction_type}  # 현재 상태 반환
 
         except Exception as e:
-            print("dislike_post 오류:", e)
+            logger.error(
+                f"dislike_post: {post_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -350,7 +380,10 @@ class CommunityService:
                 return {"result": 1}  # 성공
 
         except Exception as e:
-            print("bookmark_post 오류:", e)
+            logger.error(
+                f"bookmark_post: {post_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -395,7 +428,10 @@ class CommunityService:
                 return {"result": 1}
 
         except Exception as e:
-            print("toggle_follow 오류:", e)
+            logger.error(
+                f"toggle_follow: {request_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -413,7 +449,10 @@ class CommunityService:
 
                 return check_follow[0]
         except Exception as e:
-            print("check_user_following 오류:", e)
+            logger.error(
+                f"check_user_following: {author_email}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -451,7 +490,10 @@ class CommunityService:
 
                 return {"url": f"{bigint_post_id}-{slug}"}
         except Exception as e:
-            print("update_post 오류:", e)
+            logger.error(
+                f"update_post error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -473,7 +515,10 @@ class CommunityService:
 
                 return None
         except Exception as e:
-            print("get_update_post_detail 오류:", e)
+            logger.error(
+                f"get_update_post_detail: {post_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -495,7 +540,10 @@ class CommunityService:
                 s.commit()
                 return {"result": 1}
         except Exception as e:
-            print("delete_post_by_admin 오류:", e)
+            logger.error(
+                f"delete_post_by_admin: {post_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -517,7 +565,10 @@ class CommunityService:
                 s.commit()
                 return {"result": 1}
         except Exception as e:
-            print("delete_post_by_user 오류:", e)
+            logger.error(
+                f"delete_post_by_user: {post_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -554,7 +605,10 @@ class CommunityService:
                     "max_page_count": max_page_count,
                 }
         except Exception as e:
-            print("get_search 오류:", e)
+            logger.error(
+                f"get_search error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -576,7 +630,10 @@ class CommunityService:
 
                 return {"result": 1}
         except Exception as e:
-            print("report_post 오류:", e)
+            logger.error(
+                f"report_post: {request_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -592,5 +649,8 @@ class CommunityService:
 
                 return {"result": 1}
         except Exception as e:
-            print("increase_view_count 오류:", e)
+            logger.error(
+                f"increase_view_count: {post_id_slug}, error: {e}",
+                exc_info=True,
+            )
             return None

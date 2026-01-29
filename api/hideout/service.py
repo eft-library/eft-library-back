@@ -6,6 +6,9 @@ from datetime import datetime
 from api.hideout.hideout_res_models import UserHideOut
 from api.hideout.hideout_req_models import ItemType
 import pytz
+import logging
+
+logger = logging.getLogger("api.hideout")
 
 
 class HideoutService:
@@ -49,7 +52,10 @@ class HideoutService:
                 return user_hideout
 
         except Exception as e:
-            print("get_station 오류:", e)
+            logger.error(
+                f"get_station error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -79,7 +85,10 @@ class HideoutService:
                     s.commit()
                 return HideoutService.get_station(user_email)
         except Exception as e:
-            print("save_station 오류:", e)
+            logger.error(
+                f"save_station: {complete_list}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -112,5 +121,8 @@ class HideoutService:
                 return user_hideout
 
         except Exception as e:
-            print("save_station_item 오류:", e)
+            logger.error(
+                f"save_station_item: {item_list}, error: {e}",
+                exc_info=True,
+            )
             return None

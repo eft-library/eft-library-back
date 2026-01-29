@@ -29,26 +29,25 @@ class KafkaProducerMiddleware(BaseHTTPMiddleware):
             else "unknown"
         )
 
-        data = {
-            "method": request.method,
-            "link": request.url.path,
-            "footprint_time": footprint_time,
-            "client_ip": real_ip,
-        }
-        json_str = json.dumps(data)
-        produce_message(json_str)
-
         response = await call_next(request)
 
         # 처리 시간 계산
         process_time = time.time() - start_time
 
-        # 로그 (처리 시간 추가)
+        # 로그 (처리 시간 추가) - 서버 IP와 일치 하지 않는다면 전송
         if real_ip != os.getenv("IP"):
             logger.info(
                 f'{real_ip} - "{request.method} {request.url.path}" '
                 f"{response.status_code} - {process_time:.3f}s"
             )
+            data = {
+                "method": request.method,
+                "link": request.url.path,
+                "footprint_time": footprint_time,
+                "client_ip": real_ip,
+            }
+            json_str = json.dumps(data)
+            produce_message(json_str)
 
         for header in ("x-frame-options", "X-Frame-Options"):
             if header in response.headers:

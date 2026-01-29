@@ -2,6 +2,9 @@ from sqlalchemy import text
 from database import DataBaseConnector
 from api.dashboard.util import DashboardUtil
 from datetime import date
+import logging
+
+logger = logging.getLogger("api.dashboard")
 
 
 class DashboardService:
@@ -62,5 +65,8 @@ class DashboardService:
                 }
 
         except Exception as e:
-            print("get_chart_data 오류:", e)
+            logger.error(
+                f"get_chart_data: {start_date}, {end_date}, error: {e}",
+                exc_info=True,
+            )
             return None

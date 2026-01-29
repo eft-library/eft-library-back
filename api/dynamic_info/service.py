@@ -1,5 +1,8 @@
 from api.dynamic_info.models import DynamicInfo
 from database import DataBaseConnector
+import logging
+
+logger = logging.getLogger("api.dynamic")
 
 
 class DynamicInfoService:
@@ -17,5 +20,8 @@ class DynamicInfoService:
                 )
                 return column_list
         except Exception as e:
-            print("get_column 오류:", e)
+            logger.error(
+                f"get_column: {column_key}, error: {e}",
+                exc_info=True,
+            )
         return None

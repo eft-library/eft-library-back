@@ -47,7 +47,10 @@ class WhereAmIService:
                     )
                     return True
             else:
-                print("존재하지 않는 사용자: ", req.email)
+                logger.error(
+                    f"존재하지 않는 사용자: {req.email}",
+                    exc_info=True,
+                )
                 return None
         except Exception as e:
             logger.error(

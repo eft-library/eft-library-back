@@ -2,6 +2,9 @@ from sqlalchemy.orm import subqueryload
 from api.home.models import MenuGroup, MainInfo
 from api.search.models import Search
 from database import DataBaseConnector
+import logging
+
+logger = logging.getLogger("api.menu")
 
 
 class MenuService:
@@ -18,7 +21,10 @@ class MenuService:
                 )
                 return main_menu_list
         except Exception as e:
-            print("get_all_menu 오류:", e)
+            logger.error(
+                f"get_all_menu error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -39,7 +45,10 @@ class MenuService:
                 }
                 return menu_with_search
         except Exception as e:
-            print("get_menu_with_search 오류:", e)
+            logger.error(
+                f"get_menu_with_search error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -50,7 +59,10 @@ class MenuService:
                 main_info_list = s.query(MainInfo).order_by(MainInfo.order).all()
                 return main_info_list
         except Exception as e:
-            print("get_main_info 오류:", e)
+            logger.error(
+                f"get_main_info error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -66,5 +78,8 @@ class MenuService:
                 )
                 return main_info_list
         except Exception as e:
-            print("get_main_slide 오류:", e)
+            logger.error(
+                f"get_main_slide error: {e}",
+                exc_info=True,
+            )
             return None

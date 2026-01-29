@@ -5,6 +5,9 @@ from api.dynamic_info.models import DynamicInfo
 from api.home.models import MenuGroup, MainInfo
 from database import DataBaseConnector
 from sqlalchemy import text
+import logging
+
+logger = logging.getLogger("api.home")
 
 
 class MenuService:
@@ -40,5 +43,8 @@ class MenuService:
 
                 return main_info
         except Exception as e:
-            print("get_main 오류:", e)
+            logger.error(
+                f"get_main error: {e}",
+                exc_info=True,
+            )
             return None

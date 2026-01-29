@@ -3,6 +3,7 @@ from enum import Enum
 
 class Message(Enum):
     SUCCESS = "OK"
+    FAIL = "Error Raise"
     MAP_NOT_FOUND = "Map not found"
     NEWS_NOT_FOUND = "News not found"
     WIPE_NOT_FOUND = "Wipe not found"
