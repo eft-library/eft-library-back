@@ -1,8 +1,10 @@
 from sqlalchemy import text
-
-from api.quest.models import NPC, Quest
+from api.quest.models import NPC
 from api.quest.util import QuestUtil
 from database import DataBaseConnector
+import logging
+
+logger = logging.getLogger("api.quest")
 
 
 class QuestService:
@@ -23,7 +25,10 @@ class QuestService:
                     for id_, name, image in npc_list
                 ]
         except Exception as e:
-            print("get_npc_selector 오류:", e)
+            logger.error(
+                f"get_npc_selector error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -36,7 +41,10 @@ class QuestService:
                 quest_list = [dict(row) for row in result.mappings()]
                 return quest_list
         except Exception as e:
-            print("get_all_quest 오류:", e)
+            logger.error(
+                f"get_all_quest  error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -49,7 +57,10 @@ class QuestService:
                 quest_list = [dict(row) for row in result.mappings()]
                 return quest_list
         except Exception as e:
-            print("get_all_quest_detail 오류:", e)
+            logger.error(
+                f"get_all_quest_detail  error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -64,8 +75,10 @@ class QuestService:
 
             return quest[0]
         except Exception as e:
-            print("get_quest_by_id 호출, url_mapping:", url_mapping)
-            print("get_quest_by_id 오류:", e)
+            logger.error(
+                f"get_quest_by_id: {url_mapping}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -80,7 +93,10 @@ class QuestService:
 
             return quest_list
         except Exception as e:
-            print("get_quest_by_npc 오류:", e)
+            logger.error(
+                f"get_quest_by_npc: {npc_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -106,5 +122,8 @@ class QuestService:
 
             return info
         except Exception as e:
-            print("get_quest_with_trader 오류:", e)
+            logger.error(
+                f"get_quest_with_trader: {trader_id}, error: {e}",
+                exc_info=True,
+            )
             return None

@@ -1,8 +1,10 @@
 from sqlalchemy import text
-
 from api.boss.models import Boss
 from api.boss.util import BossUtil
 from database import DataBaseConnector
+import logging
+
+logger = logging.getLogger("api.boss")
 
 
 class BossService:
@@ -35,5 +37,8 @@ class BossService:
                 return {"boss": boss_data[0], "boss_selector": boss_selector_list}
 
         except Exception as e:
-            print("get_boss_by_id 오류:", e)
+            logger.error(
+                f"get_boss_by_id: {url_mapping}, error: {e}",
+                exc_info=True,
+            )
             return None

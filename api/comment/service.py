@@ -11,6 +11,9 @@ from api.comment.comment_req_models import (
 )
 from util.kafka_producer import produce_notification
 import json
+import logging
+
+logger = logging.getLogger("api.boss")
 
 
 class CommentService:
@@ -48,7 +51,10 @@ class CommentService:
 
                 return {"result": 1}
         except Exception as e:
-            print("insert_parent_comment 오류:", e)
+            logger.error(
+                f"insert_parent_comment: {request_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -87,7 +93,10 @@ class CommentService:
 
                 return {"result": 1}
         except Exception as e:
-            print("inset_child_comment 오류:", e)
+            logger.error(
+                f"inset_child_comment: {request_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -153,7 +162,10 @@ class CommentService:
                     "current_page_num": current_page_num,
                 }
         except Exception as e:
-            print("get_comment 오류:", e)
+            logger.error(
+                f"get_comment: {post_id}, {page_num}, {issue_comment_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -171,7 +183,10 @@ class CommentService:
                 s.commit()
                 return {"result": 1}
         except Exception as e:
-            print("update_comment 오류:", e)
+            logger.error(
+                f"update_comment: {comment_id}, {contents}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -188,7 +203,10 @@ class CommentService:
                 s.commit()
                 return {"result": 1}
         except Exception as e:
-            print("delete_comment_by_user 오류:", e)
+            logger.error(
+                f"delete_comment_by_user: {comment_id}, {comment_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -205,7 +223,10 @@ class CommentService:
                 s.commit()
                 return {"result": 1}
         except Exception as e:
-            print("delete_comment_by_admin 오류:", e)
+            logger.error(
+                f"delete_comment_by_admin: {comment_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -247,7 +268,10 @@ class CommentService:
                 return {"result": reaction.reaction_type}  # 현재 상태 반환
 
         except Exception as e:
-            print("like_comment 오류:", e)
+            logger.error(
+                f"like_comment: {comment_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -289,7 +313,10 @@ class CommentService:
                 return {"result": reaction.reaction_type}  # 현재 상태 반환
 
         except Exception as e:
-            print("dislike_comment 오류:", e)
+            logger.error(
+                f"dislike_comment: {comment_id}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -310,5 +337,8 @@ class CommentService:
 
                 return {"result": 1}
         except Exception as e:
-            print("report_comment 오류:", e)
+            logger.error(
+                f"report_comment: {request_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None

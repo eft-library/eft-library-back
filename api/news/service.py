@@ -2,6 +2,10 @@ from api.news.models import Wipe
 from database import DataBaseConnector
 from sqlalchemy import desc
 
+import logging
+
+logger = logging.getLogger("api.wipe")
+
 
 class NewsService:
 
@@ -13,5 +17,8 @@ class NewsService:
                 wipe = s.query(Wipe).order_by(desc(Wipe.season_start)).all()
                 return wipe
         except Exception as e:
-            print("get_wipe 오류:", e)
+            logger.error(
+                f"get_wipe error: {e}",
+                exc_info=True,
+            )
             return None

@@ -12,11 +12,12 @@ WHERE_AM_I_TOPIC = os.getenv("WHERE_AM_I_TOPIC")
 
 producer_conf = {"bootstrap.servers": BOOTSTRAP_SERVER, "client.id": "fastapi-producer"}
 producer = Producer(producer_conf)
+logger = logging.getLogger("kafka.producer")
 
 
 def delivery_report(err, msg):
     if err:
-        logging.error(f"Delivery failed: {err}")
+        logger.error(f"Delivery failed: {err}")
 
 
 def produce_message(value: str):

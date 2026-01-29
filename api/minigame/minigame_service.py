@@ -3,6 +3,9 @@ from database import DataBaseConnector
 from api.minigame.req_models import SaveScore
 from sqlalchemy import text
 from api.minigame.util import MinigameUtil
+import logging
+
+logger = logging.getLogger("api.minigame")
 
 
 class MinigameService:
@@ -15,7 +18,10 @@ class MinigameService:
                 rng_item_list = s.query(ItemFleaSummary).all()
                 return rng_item_list
         except Exception as e:
-            print("get_rng_item_list 오류:", e)
+            logger.error(
+                f"get_rng_item_list error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -33,7 +39,10 @@ class MinigameService:
                 s.refresh(new_score)  # 자동 생성 id 반영
                 return new_score
         except Exception as e:
-            print("insert_user_minigame_score 오류:", e)
+            logger.error(
+                f"insert_user_minigame_score: {result.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -46,7 +55,10 @@ class MinigameService:
                 data = [dict(row) for row in result.mappings()]
             return data
         except Exception as e:
-            print("get_all_rng_item_rank 오류:", e)
+            logger.error(
+                f"get_all_rng_item_rank error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -60,5 +72,8 @@ class MinigameService:
                 data = [dict(row) for row in result.mappings()]
             return data
         except Exception as e:
-            print("get_rng_item_my_rank 오류:", e)
+            logger.error(
+                f"get_rng_item_my_rank: {score}, error: {e}",
+                exc_info=True,
+            )
             return None

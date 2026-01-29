@@ -1,10 +1,13 @@
 from typing import List
 from datetime import datetime
-from api.roadmap.roadmap_res_models import UserRoadmap, RoadmapNode, RoadmapEdge
+from api.roadmap.roadmap_res_models import UserRoadmap, RoadmapEdge
 from database import DataBaseConnector
 from api.roadmap.util import RoadmapUtil
 from sqlalchemy import text
 import pytz
+import logging
+
+logger = logging.getLogger("api.roadmap")
 
 
 class RoadmapService:
@@ -39,7 +42,10 @@ class RoadmapService:
                     user_roadmap["quest_list"] = []
                     return user_roadmap
         except Exception as e:
-            print("get_roadmap 오류:", e)
+            logger.error(
+                f"get_roadmap error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -66,5 +72,8 @@ class RoadmapService:
                     s.commit()
                 return questList
         except Exception as e:
-            print("save_roadmap 오류:", e)
+            logger.error(
+                f"save_roadmap: {questList}, error: {e}",
+                exc_info=True,
+            )
             return None

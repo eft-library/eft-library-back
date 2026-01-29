@@ -5,8 +5,12 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from util.kafka_producer import produce_message
 import logging
 import time
+from dotenv import load_dotenv
+import os
 
 logger = logging.getLogger("api.access")
+
+load_dotenv()
 
 
 class KafkaProducerMiddleware(BaseHTTPMiddleware):
@@ -40,10 +44,11 @@ class KafkaProducerMiddleware(BaseHTTPMiddleware):
         process_time = time.time() - start_time
 
         # 로그 (처리 시간 추가)
-        logger.info(
-            f'{real_ip} - "{request.method} {request.url.path}" '
-            f"{response.status_code} - {process_time:.3f}s"
-        )
+        if real_ip != os.getenv("IP"):
+            logger.info(
+                f'{real_ip} - "{request.method} {request.url.path}" '
+                f"{response.status_code} - {process_time:.3f}s"
+            )
 
         for header in ("x-frame-options", "X-Frame-Options"):
             if header in response.headers:

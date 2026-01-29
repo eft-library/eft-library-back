@@ -1,9 +1,12 @@
-from sqlalchemy import func, desc, text, or_, String
+from sqlalchemy import func, text, or_, String
 from api.price.models import PriceModel, PriceRankReq
 from api.price.util import PriceUtil
 from database import DataBaseConnector
 from sqlalchemy.orm import subqueryload
 from collections import defaultdict
+import logging
+
+logger = logging.getLogger("api.price")
 
 
 class PriceService:
@@ -71,7 +74,10 @@ class PriceService:
                 }
 
         except Exception as e:
-            print("get_item_price 오류:", e)
+            logger.error(
+                f"get_item_price error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -163,5 +169,8 @@ class PriceService:
                 return {"pvp_top_list": pvp_tier_list, "pve_top_list": pve_tier_list}
 
         except Exception as e:
-            print("get_price_top 오류:", e)
+            logger.error(
+                f"get_price_top: {priceRankReq.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None

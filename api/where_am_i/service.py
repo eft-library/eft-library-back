@@ -4,6 +4,9 @@ from sqlalchemy import exists
 from api.user.user_res_models import User
 from api.where_am_i.req_models import ReqWhereAmI
 from util.websocket import send_wpf_data_ws_direct
+import logging
+
+logger = logging.getLogger("api.where_am_i")
 
 
 class WhereAmIService:
@@ -19,7 +22,10 @@ class WhereAmIService:
                 exists_user = s.query(exists().where(User.email == user_email)).scalar()
                 return exists_user
         except Exception as e:
-            print("check_wpf_user 오류:", e)
+            logger.error(
+                f"check_wpf_user:  error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -44,5 +50,8 @@ class WhereAmIService:
                 print("존재하지 않는 사용자: ", req.email)
                 return None
         except Exception as e:
-            print("send_location 오류:", e)
+            logger.error(
+                f"send_location: {req.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None

@@ -3,6 +3,9 @@ from sqlalchemy import desc
 from api.search.models import Search, Sitemap
 from database import DataBaseConnector
 from dotenv import load_dotenv
+import logging
+
+logger = logging.getLogger("api.search")
 
 
 class SearchService:
@@ -17,7 +20,10 @@ class SearchService:
                 search_list = s.query(Search).order_by(Search.order).all()
                 return search_list
         except Exception as e:
-            print("get_all_search 오류:", e)
+            logger.error(
+                f"get_all_search error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -33,5 +39,8 @@ class SearchService:
                 sitemap_list = s.query(Sitemap).order_by(desc(Sitemap.priority)).all()
                 return sitemap_list
         except Exception as e:
-            print("get_all_site_list 오류:", e)
+            logger.error(
+                f"get_all_site_list error: {e}",
+                exc_info=True,
+            )
             return None

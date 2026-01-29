@@ -4,6 +4,9 @@ from database import DataBaseConnector
 from itertools import chain
 from datetime import datetime
 import pytz
+import logging
+
+logger = logging.getLogger("api.progress")
 
 
 class ProgressService:
@@ -63,7 +66,10 @@ class ProgressService:
                 }
 
         except Exception as e:
-            print("get_user_progress 오류:", e)
+            logger.error(
+                f"get_user_progress error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -107,5 +113,8 @@ class ProgressService:
             return ProgressService.get_user_progress(user_email)
 
         except Exception as e:
-            print("update_progress 오류:", e)
+            logger.error(
+                f"update_progress: {progress_item_list.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None

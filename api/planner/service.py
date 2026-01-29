@@ -5,6 +5,9 @@ from sqlalchemy import text
 from datetime import datetime
 from api.planner.util import PlannerUtil
 import pytz
+import logging
+
+logger = logging.getLogger("api.planner")
 
 
 class PlannerService:
@@ -20,7 +23,10 @@ class PlannerService:
                 else:
                     return []
         except Exception as e:
-            print("get_user_quest 오류:", e)
+            logger.error(
+                f"get_user_quest error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -42,7 +48,10 @@ class PlannerService:
                 new_user_quests = [dict(row) for row in result.mappings()]
                 return new_user_quests
         except Exception as e:
-            print("update_user_quest 오류:", e)
+            logger.error(
+                f"update_user_quest: {userQuestList.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
 
     @staticmethod
@@ -58,5 +67,8 @@ class PlannerService:
                 new_user_quests = [dict(row) for row in result.mappings()]
                 return new_user_quests
         except Exception as e:
-            print("delete_user_quest 오류:", e)
+            logger.error(
+                f"delete_user_quest: {userQuestList.model_dump()}, error: {e}",
+                exc_info=True,
+            )
             return None
