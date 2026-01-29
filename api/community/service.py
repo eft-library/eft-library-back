@@ -183,7 +183,7 @@ class CommunityService:
                         s, post_id, user_email
                     ),
                     "posts": CommunityFunction.fetch_posts_with_paging(
-                        s, post_id, page_category
+                        s, post_id, page_category, user_email
                     ),
                 }
         except Exception as e:

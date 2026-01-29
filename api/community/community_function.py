@@ -36,7 +36,7 @@ class CommunityFunction:
 
     @staticmethod
     def fetch_posts_with_paging(
-        session, post_id: int, page_category: str, limit: int = 20
+        session, post_id: int, page_category: str, user_email: str, limit: int = 20
     ):
         if page_category == "issue":
             get_post_query = text(CommunityUtil.get_posts_with_issue())
@@ -67,12 +67,19 @@ class CommunityFunction:
         # 게시글 목록
         posts_result = session.execute(
             get_post_query,
-            {"limit": limit, "offset": offset, "post_id": post_id},
+            {
+                "limit": limit,
+                "offset": offset,
+                "post_id": post_id,
+                "user_email": user_email,
+            },
         )
         posts = [dict(row) for row in posts_result.mappings()]
 
         # 전체 개수
-        total_result = session.execute(get_post_count_query, {"post_id": post_id})
+        total_result = session.execute(
+            get_post_count_query, {"post_id": post_id, "user_email": user_email}
+        )
         total = total_result.scalar()
         max_page_count = (total + limit - 1) // limit
 
