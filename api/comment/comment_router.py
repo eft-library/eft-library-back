@@ -29,10 +29,10 @@ def insert_parent_comment(
     if user_email:
         result = CommentService.insert_parent_comment(request_info, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/insert-child-comment")
@@ -46,10 +46,10 @@ def insert_child_comment(
             user_email,
         )
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/get-comments")
@@ -61,7 +61,7 @@ def get_comments(request_info: GetComments):
         request_info.user_email,
     )
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -71,10 +71,10 @@ def like_comment(request_info: CommentReaction, token: str = Depends(oauth2_sche
     if user_email:
         result = CommentService.like_comment(request_info.comment_id, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/dislike-comment")
@@ -83,10 +83,10 @@ def dislike_comment(request_info: CommentReaction, token: str = Depends(oauth2_s
     if user_email:
         result = CommentService.dislike_comment(request_info.comment_id, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/update-comment")
@@ -97,10 +97,10 @@ def update_comment(request_info: UpdateComment, token: str = Depends(oauth2_sche
             request_info.comment_id, request_info.contents
         )
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/delete-comment-by-admin")
@@ -111,10 +111,10 @@ def delete_comment_by_admin(
     if user_email:
         result = CommentService.delete_comment_by_admin(request_info.comment_id)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/delete-comment-by-user")
@@ -125,10 +125,10 @@ def delete_comment_by_user(
     if user_email:
         result = CommentService.delete_comment_by_user(request_info.comment_id)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/report-comment")
@@ -137,7 +137,7 @@ def report_post(request_info: ReqCommentReport, token: str = Depends(oauth2_sche
     if user_email:
         result = CommentService.report_comment(request_info, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMENT_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)

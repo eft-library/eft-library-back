@@ -11,6 +11,5 @@ router = APIRouter(tags=["Home"])
 def get_main():
     main_info = MenuService.get_main()
     if main_info is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.MAIN_INFO_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(main_info, HTTPCode.OK, Message.SUCCESS)
-

@@ -39,10 +39,10 @@ def create_posts(post_info: CreateCommunity, token: str = Depends(oauth2_scheme)
     if user_email:
         result = CommunityService.create_posts(post_info, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.get("/get/{category}")
@@ -57,7 +57,7 @@ def get_posts(
     result = CommunityService.get_posts(category, page_num, user_email)
 
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -74,7 +74,7 @@ def get_search_posts(
     result = CommunityService.get_search(search_type, word, page_num, user_email)
 
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -84,7 +84,7 @@ def get_posts_detail(request_info: GetPostDetail):
         request_info.url, request_info.user_email, request_info.page_category
     )
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -98,7 +98,7 @@ def get_side_post(
     result = CommunityService.get_side_info(user_email)
 
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -108,7 +108,7 @@ def get_posts_detail_meta_data(request_info: GetPostDetail):
         request_info.url, request_info.user_email
     )
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -118,10 +118,10 @@ def like_post(request_info: PostReaction, token: str = Depends(oauth2_scheme)):
     if user_email:
         result = CommunityService.like_post(request_info.post_id, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/dislike-post")
@@ -130,10 +130,10 @@ def dislike_post(request_info: PostReaction, token: str = Depends(oauth2_scheme)
     if user_email:
         result = CommunityService.dislike_post(request_info.post_id, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/bookmark-post")
@@ -142,10 +142,10 @@ def bookmark_post(request_info: PostBookmark, token: str = Depends(oauth2_scheme
     if user_email:
         result = CommunityService.bookmark_post(request_info.post_id, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/follow-user")
@@ -154,10 +154,10 @@ def follow_user(request_info: FollowUser, token: str = Depends(oauth2_scheme)):
     if user_email:
         result = CommunityService.toggle_follow(request_info, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/check-follow")
@@ -168,7 +168,7 @@ def check_follow(
         request_info.following_user_email, request_info.user_email
     )
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -185,10 +185,10 @@ def update_post(post_info: UpdateCommunity, token: str = Depends(oauth2_scheme))
             user_email,
         )
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/get-update-post-detail")
@@ -199,10 +199,10 @@ def get_update_post_detail(
     if user_email:
         result = CommunityService.get_update_post_detail(post_info.post_id, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/delete-post-by-admin")
@@ -211,10 +211,10 @@ def delete_post_by_admin(request_info: PostDelete, token: str = Depends(oauth2_s
     if user_email:
         result = CommunityService.delete_post_by_admin(request_info.post_id)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/delete-post-by-user")
@@ -223,10 +223,10 @@ def delete_post_by_user(request_info: PostDelete, token: str = Depends(oauth2_sc
     if user_email:
         result = CommunityService.delete_post_by_user(request_info.post_id)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/report-post")
@@ -235,15 +235,15 @@ def report_post(request_info: ReqPostReport, token: str = Depends(oauth2_scheme)
     if user_email:
         result = CommunityService.report_post(request_info, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/increase-view-count")
 def increase_view_count(request_info: PostReaction):
     result = CommunityService.increase_view_count(request_info.post_id)
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.COMMUNITY_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

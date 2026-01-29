@@ -11,7 +11,7 @@ router = APIRouter(tags=["PatchNotes"])
 def get_patch_notes(page: int, page_size: int):
     patch_notes = PatchNotesService.get_patch_notes(page, page_size)
     if patch_notes is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.PATCH_NOTES_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(patch_notes, HTTPCode.OK, Message.SUCCESS)
 
 

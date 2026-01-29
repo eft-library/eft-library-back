@@ -12,7 +12,7 @@ router = APIRouter(tags=["WhereAmI"])
 def check_wpf_user(user: CheckWpfUser):
     result = WhereAmIService.check_wpf_user(user.email)
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -20,5 +20,5 @@ def check_wpf_user(user: CheckWpfUser):
 async def send_location(where_am_i: ReqWhereAmI):
     result = await WhereAmIService.send_location(where_am_i)
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

@@ -11,7 +11,7 @@ router = APIRouter(tags=["Notice"])
 def get_notice(page: int, page_size: int):
     notice_list = NoticeService.get_notice(page, page_size)
     if notice_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.NOTICE_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(notice_list, HTTPCode.OK, Message.SUCCESS)
 
 

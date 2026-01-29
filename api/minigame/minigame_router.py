@@ -12,7 +12,7 @@ router = APIRouter(tags=["Minigame"])
 def get_rng_item_list():
     rng_item_list = MinigameService.get_rng_item_list()
     if rng_item_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.MINIGAME_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(rng_item_list, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -20,7 +20,7 @@ def get_rng_item_list():
 def save_rng_score(request: SaveScore):
     rng_item_list = MinigameService.insert_user_minigame_score(request)
     if rng_item_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.MINIGAME_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(rng_item_list, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -28,7 +28,7 @@ def save_rng_score(request: SaveScore):
 def get_rng_item_rank():
     all_rng_item_rank = MinigameService.get_all_rng_item_rank()
     if all_rng_item_rank is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.MINIGAME_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(all_rng_item_rank, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -36,5 +36,5 @@ def get_rng_item_rank():
 def get_rng_item_my_rank(request: MyRank):
     rng_item_my_rank = MinigameService.get_rng_item_my_rank(request.score)
     if rng_item_my_rank is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.MINIGAME_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(rng_item_my_rank, HTTPCode.OK, Message.SUCCESS)

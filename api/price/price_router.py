@@ -13,7 +13,7 @@ router = APIRouter(tags=["Item Price"])
 def get_item_price(page: int, page_size: int, word: str):
     price_list = PriceService.get_item_price(page, page_size, word)
     if price_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.PRICE_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(price_list, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -21,5 +21,5 @@ def get_item_price(page: int, page_size: int, word: str):
 def get_item_top_price(priceRankReq: PriceRankReq):
     top_list = PriceService.get_price_top(priceRankReq)
     if top_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.PRICE_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(top_list, HTTPCode.OK, Message.SUCCESS)

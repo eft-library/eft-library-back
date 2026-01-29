@@ -11,7 +11,7 @@ router = APIRouter(tags=["Quest"])
 def get_npc():
     npc_list = QuestService.get_npc_selector()
     if npc_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.NPC_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(npc_list, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -19,7 +19,7 @@ def get_npc():
 def get_all_quest():
     quest_list = QuestService.get_all_quest()
     if quest_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.QUEST_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(quest_list, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -27,7 +27,7 @@ def get_all_quest():
 def get_all_quest_detail():
     quest_list = QuestService.get_all_quest_detail()
     if quest_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.QUEST_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(quest_list, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -44,7 +44,7 @@ def get_quest_by_id(quest_id: str):
 def get_quest_by_npc(npc_id: str):
     quest = QuestService.get_quest_by_npc(npc_id)
     if quest is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.QUEST_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(quest, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -52,5 +52,5 @@ def get_quest_by_npc(npc_id: str):
 def get_quest_with_trader(trader_id: str):
     quest = QuestService.get_quest_with_trader(trader_id)
     if quest is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.QUEST_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(quest, HTTPCode.OK, Message.SUCCESS)

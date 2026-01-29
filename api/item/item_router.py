@@ -42,6 +42,6 @@ def get_item_list(item_type: str):
 
     item_list = item_map.get(item_type)() if item_type in item_map else None
     if item_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.ITEM_LIST_NOT_FOUNT)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
     return CustomResponse.response(item_list, HTTPCode.OK, Message.SUCCESS)

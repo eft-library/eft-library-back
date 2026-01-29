@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends
 from api.response import CustomResponse
 from fastapi.security import OAuth2PasswordBearer
 from api.user.util import UserUtil
@@ -23,7 +23,7 @@ def get_progress_item(token: Optional[str] = Depends(oauth2_scheme)):
     result = ProgressService.get_user_progress(user_email)
 
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.PROGRESS_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -35,7 +35,7 @@ def update_progress_item(
     if user_email:
         result = ProgressService.update_progress(progress_item_list, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.PROGRESS_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)

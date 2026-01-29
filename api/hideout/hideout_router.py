@@ -25,7 +25,7 @@ def get_station(token: Optional[str] = Depends(oauth2_scheme)):
         user_email = UserUtil.verify_google_token(access_token=token)
     result = HideoutService.get_station(user_email)
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.HIDEOUT_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -37,10 +37,10 @@ def complete_station(
     if user_email:
         result = HideoutService.save_station(station.complete_list, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.STATION_SAVE_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/save-station-item")
@@ -51,7 +51,7 @@ def save_station_item(
     if user_email:
         result = HideoutService.save_station_item(req.user_item_list, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.STATION_SAVE_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)

@@ -11,9 +11,7 @@ router = APIRouter(tags=["Map Of Tarkov"])
 def get_map_selector():
     map_of_tarkov = MapOfTarkovService.get_map_selector()
     if map_of_tarkov is None:
-        return CustomResponse.response(
-            None, HTTPCode.OK, Message.MAP_OF_TARKOV_NOT_FOUND
-        )
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(map_of_tarkov, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -29,9 +27,7 @@ def get_map_info(map_id: str):
 def get_boss_info(map_id: str):
     map_of_tarkov = MapOfTarkovService.get_boss_info(map_id)
     if map_of_tarkov is None:
-        return CustomResponse.response(
-            None, HTTPCode.OK, Message.MAP_OF_TARKOV_NOT_FOUND
-        )
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(map_of_tarkov, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -39,9 +35,7 @@ def get_boss_info(map_id: str):
 def get_extraction_info(map_id: str):
     map_of_tarkov = MapOfTarkovService.get_extraction_info(map_id)
     if map_of_tarkov is None:
-        return CustomResponse.response(
-            None, HTTPCode.OK, Message.MAP_OF_TARKOV_NOT_FOUND
-        )
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(map_of_tarkov, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -49,9 +43,7 @@ def get_extraction_info(map_id: str):
 def get_transits_info(map_id: str):
     map_of_tarkov = MapOfTarkovService.get_transits_info(map_id)
     if map_of_tarkov is None:
-        return CustomResponse.response(
-            None, HTTPCode.OK, Message.MAP_OF_TARKOV_NOT_FOUND
-        )
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(map_of_tarkov, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -59,9 +51,7 @@ def get_transits_info(map_id: str):
 def get_find_info(map_id: str):
     map_of_tarkov = MapOfTarkovService.get_find_info(map_id)
     if map_of_tarkov is None:
-        return CustomResponse.response(
-            None, HTTPCode.OK, Message.MAP_OF_TARKOV_NOT_FOUND
-        )
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(map_of_tarkov, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -69,7 +59,5 @@ def get_find_info(map_id: str):
 def get_map_of_tarkov(map_id: str):
     map_of_tarkov = MapOfTarkovService.get_map_of_tarkov(map_id)
     if map_of_tarkov is None:
-        return CustomResponse.response(
-            None, HTTPCode.OK, Message.MAP_OF_TARKOV_NOT_FOUND
-        )
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(map_of_tarkov, HTTPCode.OK, Message.SUCCESS)

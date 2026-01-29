@@ -24,7 +24,7 @@ def get_user_quest(token: Optional[str] = Depends(oauth2_scheme)):
         user_email = UserUtil.verify_google_token(access_token=token)
     result = PlannerService.get_user_quest(user_email)
     if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.USER_ADD_FAIL)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -36,10 +36,10 @@ def update_user_quest(
     if user_email:
         result = PlannerService.update_user_quest(userQuestList, user_email)
         if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.USER_ADD_FAIL)
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/quest/delete")
@@ -50,9 +50,7 @@ def delete_user_quest(
     if user_email:
         result = PlannerService.delete_user_quest(userQuestList, user_email)
         if result is None:
-            return CustomResponse.response(
-                None, HTTPCode.OK, Message.SUCCESS_QUEST_FAIL
-            )
+            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
     else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.INVALID_USER)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)

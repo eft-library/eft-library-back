@@ -11,7 +11,7 @@ router = APIRouter(tags=["News"])
 def get_wipe():
     wipe = NewsService.get_wipe()
     if wipe is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.WIPE_NOT_FOUND)
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(wipe, HTTPCode.OK, Message.SUCCESS)
 
 
