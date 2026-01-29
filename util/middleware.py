@@ -3,6 +3,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from starlette.middleware.base import BaseHTTPMiddleware
 from util.kafka_producer import produce_message
+import logging
 
 
 class KafkaProducerMiddleware(BaseHTTPMiddleware):
@@ -26,7 +27,7 @@ class KafkaProducerMiddleware(BaseHTTPMiddleware):
             "footprint_time": footprint_time,
             # "client_ip": real_ip,  # IP 추가
         }
-        print(real_ip)
+        logging.info("real_ip" + real_ip)
         json_str = json.dumps(data)
         produce_message(json_str)
 
