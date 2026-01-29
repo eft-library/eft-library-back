@@ -1,13 +1,8 @@
 import re
 
 from sqlalchemy import text
-
-from api.community.community_res_models import (
-    CommunityPosts,
-    CommunityPostsHotIssue,
-)
 from api.community.util import CommunityUtil
-from api.notice.models import Notice
+from api.news.models import Notice
 
 
 class CommunityFunction:

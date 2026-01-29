@@ -9,9 +9,6 @@ from api.search import search_router
 from api.item import item_router
 from api.hideout import hideout_router
 from api.user import user_router
-from api.event import event_router
-from api.patch_notes import patch_notes_router
-from api.notice import notice_router
 from api.roadmap import roadmap_router
 from api.price import price_router
 from api.planner import planner_router
@@ -40,9 +37,6 @@ api_router.include_router(user_router.router, prefix="/user")
 api_router.include_router(planner_router.router, prefix="/planner")
 api_router.include_router(roadmap_router.router, prefix="/roadmap")
 api_router.include_router(hideout_router.router, prefix="/hideout")
-api_router.include_router(event_router.router, prefix="/event")
-api_router.include_router(patch_notes_router.router, prefix="/patch-notes")
-api_router.include_router(notice_router.router, prefix="/notice")
 api_router.include_router(price_router.router, prefix="/price")
 api_router.include_router(dashboard_router.router, prefix="/dashboard")
 api_router.include_router(community_router.router, prefix="/community")
