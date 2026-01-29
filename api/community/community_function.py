@@ -2,7 +2,7 @@ import re
 
 from sqlalchemy import text
 from api.community.util import CommunityUtil
-from api.news.models import Notice
+from api.news.models import Information
 
 
 class CommunityFunction:
@@ -87,7 +87,13 @@ class CommunityFunction:
 
     @staticmethod
     def fetch_notice_posts(s):
-        return s.query(Notice).order_by(Notice.update_time.desc()).limit(5).all()
+        return (
+            s.query(Information)
+            .filter(Information.type == "NOTICE")
+            .order_by(Information.update_time.desc())
+            .limit(5)
+            .all()
+        )
 
     @staticmethod
     def parse_id_and_slug(value: str):

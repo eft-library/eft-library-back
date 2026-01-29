@@ -16,40 +16,15 @@ class Wipe(DataBaseConnector.Base):
     create_time = Column(TIMESTAMP)
 
 
-class Event(DataBaseConnector.Base):
+class Information(DataBaseConnector.Base):
     """
-    Event
+    Information
     """
 
-    __tablename__ = "event_i18n"
+    __tablename__ = "information_i18n"
 
     id = Column(TEXT, primary_key=True)
+    type = Column(TEXT)
     name = Column(JSON)
     description = Column(TEXT)
-    update_time = Column(TIMESTAMP)
-
-
-class Notice(DataBaseConnector.Base):
-    """
-    Notice
-    """
-
-    __tablename__ = "notice_i18n"
-
-    id = Column("id", TEXT, primary_key=True)
-    name = Column(JSON)
-    description = Column(JSON)
-    update_time = Column(TIMESTAMP)
-
-
-class PatchNotes(DataBaseConnector.Base):
-    """
-    PatchNotes
-    """
-
-    __tablename__ = "patch_notes_i18n"
-
-    id = Column("id", TEXT, primary_key=True)
-    name = Column(JSON)
-    description = Column(JSON)
     update_time = Column(TIMESTAMP)
