@@ -18,6 +18,8 @@ logging.basicConfig(
 
 logger = logging.getLogger("api.access")  # 커스텀 로거 사용
 
+logging.getLogger("uvicorn.access").disabled = True
+
 load_dotenv()
 
 app = FastAPI(title="eft-library-back")
