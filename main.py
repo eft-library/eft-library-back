@@ -47,6 +47,11 @@ async def custom_swagger_ui_html():
     )
 
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+
 app.include_router(api_router, prefix=os.getenv("API_PREFIX"))
 
 
