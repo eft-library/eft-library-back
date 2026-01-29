@@ -8,11 +8,11 @@ import logging
 
 class KafkaProducerMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
-        print("=== All Headers ===")
+        logging.info("=== All Headers ===")
         for key, value in request.headers.items():
-            print(f"{key}: {value}")
-        print(f"request.client: {request.client}")
-        print("==================")
+            logging.info(f"{key}: {value}")
+        logging.info(f"request.client: {request.client}")
+        logging.info("==================")
         now_kst = datetime.now(ZoneInfo("Asia/Seoul"))
         footprint_time = now_kst.isoformat()
 

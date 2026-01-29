@@ -17,8 +17,6 @@ producer = Producer(producer_conf)
 def delivery_report(err, msg):
     if err:
         logging.error(f"Delivery failed: {err}")
-    else:
-        logging.info(f"Delivered message to {msg.topic()} [{msg.partition()}]")
 
 
 def produce_message(value: str):
