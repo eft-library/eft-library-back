@@ -10,21 +10,13 @@ from api.user.util import UserUtil
 from util.websocket import websocket_handler
 import logging
 
-# 로깅 포맷 설정
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
     level=logging.INFO,
 )
 
-# uvicorn.access 로거 설정
-logger = logging.getLogger("uvicorn.access")
-handler = logging.StreamHandler()
-handler.setFormatter(logging.Formatter(
-    '%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-))
-logger.handlers = [handler]
+logger = logging.getLogger("api.access")  # 커스텀 로거 사용
 
 load_dotenv()
 

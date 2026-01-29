@@ -4,16 +4,20 @@ from zoneinfo import ZoneInfo
 from starlette.middleware.base import BaseHTTPMiddleware
 from util.kafka_producer import produce_message
 import logging
+import time
+
+logger = logging.getLogger("api.access")
 
 
 class KafkaProducerMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
+        start_time = time.time()  # 시작 시간 기록
+
         now_kst = datetime.now(ZoneInfo("Asia/Seoul"))
         footprint_time = now_kst.isoformat()
 
-        # 실제 클라이언트 IP 추출 (소문자로 확인)
         real_ip = (
-            request.headers.get("cf-connecting-ip")  # Cloudflare (소문자)
+            request.headers.get("cf-connecting-ip")
             or request.headers.get("x-real-ip")
             or request.headers.get("x-forwarded-for", "").split(",")[0].strip()
             or request.client.host
@@ -25,13 +29,22 @@ class KafkaProducerMiddleware(BaseHTTPMiddleware):
             "method": request.method,
             "link": request.url.path,
             "footprint_time": footprint_time,
-            # "client_ip": real_ip,
+            "client_ip": real_ip,
         }
-        logging.info("request_ip" + real_ip)
         json_str = json.dumps(data)
         produce_message(json_str)
 
         response = await call_next(request)
+
+        # 처리 시간 계산
+        process_time = time.time() - start_time
+
+        # 로그 (처리 시간 추가)
+        logger.info(
+            f'{real_ip} - "{request.method} {request.url.path}" '
+            f"{response.status_code} - {process_time:.3f}s"
+        )
+
         for header in ("x-frame-options", "X-Frame-Options"):
             if header in response.headers:
                 del response.headers[header]
