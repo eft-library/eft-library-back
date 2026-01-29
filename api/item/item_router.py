@@ -9,6 +9,11 @@ router = APIRouter(tags=["Item"])
 
 @router.get("/detail/{item_url}")
 def get_item_detail(item_url: str):
+    raise HTTPException(status_code=410, detail="Removed")
+
+
+@router.get("/info/{item_url}")
+def get_item_info(item_url: str):
     item = ItemService.get_item_detail(item_url)
     if item is None:
         raise HTTPException(status_code=410, detail="Removed")
