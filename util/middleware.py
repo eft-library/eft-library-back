@@ -8,19 +8,14 @@ import logging
 
 class KafkaProducerMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
-        logging.info("=== All Headers ===")
-        for key, value in request.headers.items():
-            logging.info(f"{key}: {value}")
-        logging.info(f"request.client: {request.client}")
-        logging.info("==================")
         now_kst = datetime.now(ZoneInfo("Asia/Seoul"))
         footprint_time = now_kst.isoformat()
 
-        # 실제 클라이언트 IP 추출
+        # 실제 클라이언트 IP 추출 (소문자로 확인)
         real_ip = (
-            request.headers.get("CF-Connecting-IP")  # Cloudflare
-            or request.headers.get("X-Real-IP")  # Nginx
-            or request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+            request.headers.get("cf-connecting-ip")  # Cloudflare (소문자)
+            or request.headers.get("x-real-ip")
+            or request.headers.get("x-forwarded-for", "").split(",")[0].strip()
             or request.client.host
             if request.client
             else "unknown"
@@ -30,9 +25,9 @@ class KafkaProducerMiddleware(BaseHTTPMiddleware):
             "method": request.method,
             "link": request.url.path,
             "footprint_time": footprint_time,
-            # "client_ip": real_ip,  # IP 추가
+            # "client_ip": real_ip,
         }
-        logging.info("real_ip" + real_ip)
+        logging.info("request_ip" + real_ip)
         json_str = json.dumps(data)
         produce_message(json_str)
 
