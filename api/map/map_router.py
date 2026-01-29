@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from api.map.service import MapService
 from api.response import CustomResponse
 from util.constants import HTTPCode
@@ -11,7 +11,7 @@ router = APIRouter(tags=["Map"])
 def get_map(map_id: str):
     response_map = MapService.get_map(map_id)
     if response_map is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.MAP_NOT_FOUND)
+        raise HTTPException(status_code=410, detail="Removed")
     return CustomResponse.response(response_map, HTTPCode.OK, Message.SUCCESS)
 
 
@@ -19,5 +19,5 @@ def get_map(map_id: str):
 def get_sub_map(map_id: str):
     maps = MapService.get_sub_map(map_id)
     if maps is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.MAP_NOT_FOUND)
+        raise HTTPException(status_code=410, detail="Removed")
     return CustomResponse.response(maps, HTTPCode.OK, Message.SUCCESS)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from api.item.service import ItemService
 from api.response import CustomResponse
 from util.constants import HTTPCode
@@ -11,7 +11,7 @@ router = APIRouter(tags=["Item"])
 def get_item_detail(item_url: str):
     item = ItemService.get_item_detail(item_url)
     if item is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.ITEM_NOT_FOUND)
+        raise HTTPException(status_code=410, detail="Removed")
     return CustomResponse.response(item, HTTPCode.OK, Message.SUCCESS)
 
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from api.response import CustomResponse
 from util.constants import HTTPCode
 from api.constants import Message
@@ -19,5 +19,5 @@ def get_event_quest(page: int, page_size: int):
 def get_event_by_id(event_id: str):
     event = EventService.get_event_by_id(event_id)
     if event is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.EVENT_NOT_FOUND)
+        raise HTTPException(status_code=410, detail="Removed")
     return CustomResponse.response(event, HTTPCode.OK, Message.SUCCESS)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from api.boss.service import BossService
 from api.response import CustomResponse
 from util.constants import HTTPCode
@@ -11,5 +11,5 @@ router = APIRouter(tags=["Boss"])
 def get_boss_by_id(url_mapping: str):
     boss = BossService.get_boss_by_id(url_mapping)
     if boss is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.BOSS_NOT_FOUND)
+        raise HTTPException(status_code=410, detail="Removed")
     return CustomResponse.response(boss, HTTPCode.OK, Message.SUCCESS)

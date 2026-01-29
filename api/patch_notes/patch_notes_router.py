@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from api.response import CustomResponse
 from util.constants import HTTPCode
 from api.constants import Message
@@ -19,5 +19,5 @@ def get_patch_notes(page: int, page_size: int):
 def get_patch_notes_by_id(patch_notes_id: str):
     patch_notes = PatchNotesService.get_patch_notes_by_id(patch_notes_id)
     if patch_notes is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.PATCH_NOTES_NOT_FOUND)
+        raise HTTPException(status_code=410, detail="Removed")
     return CustomResponse.response(patch_notes, HTTPCode.OK, Message.SUCCESS)

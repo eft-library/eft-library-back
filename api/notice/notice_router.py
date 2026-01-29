@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from api.response import CustomResponse
 from util.constants import HTTPCode
 from api.constants import Message
@@ -19,5 +19,5 @@ def get_notice(page: int, page_size: int):
 def get_notice_by_id(notice_id: str):
     notice = NoticeService.get_notice_by_id(notice_id)
     if notice is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.NOTICE_NOT_FOUND)
+        raise HTTPException(status_code=410, detail="Removed")
     return CustomResponse.response(notice, HTTPCode.OK, Message.SUCCESS)
