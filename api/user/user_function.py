@@ -70,6 +70,7 @@ class UserFunction:
         session.execute(user_hideout)
         session.execute(user_roadmap)
         session.execute(user_progress_item)
+        session.commit()
         return True
 
     @staticmethod
