@@ -40,23 +40,7 @@ class UserFunction:
     @staticmethod
     def _create_delete_user(session, user: User):
         session.delete(user)
-
-    @staticmethod
-    def _create_new_user(session, addUserReq: AddUserReq):
-        new_user = User(
-            id=addUserReq.id,
-            name=addUserReq.name,
-            email=addUserReq.email,
-            is_admin=False,
-            attendance_count=1,
-            create_time=datetime.now(),
-            attendance_time=datetime.now(),
-        )
-        session.add(new_user)
-        UserFunction._create_user_related_entries(
-            session,
-            addUserReq.email,
-        )
+        session.commit()
 
     @staticmethod
     def delete_all_user_data(session):
