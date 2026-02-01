@@ -40,7 +40,6 @@ class UserFunction:
     @staticmethod
     def _create_delete_user(session, user: User):
         session.delete(user)
-        session.commit()
 
     @staticmethod
     def _create_new_user(session, addUserReq: AddUserReq):
@@ -58,7 +57,6 @@ class UserFunction:
             session,
             addUserReq.email,
         )
-        session.commit()
 
     @staticmethod
     def delete_all_user_data(session):
