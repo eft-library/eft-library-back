@@ -57,6 +57,8 @@ class UserService:
                 user = UserFunction._get_existing_user(s, user_email)
                 if user:
                     UserFunction._create_delete_user(s, user)
+                    UserFunction.delete_all_user_data(s)
+                    s.commit()
                     return True
                 else:
                     return False
