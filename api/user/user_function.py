@@ -61,6 +61,18 @@ class UserFunction:
         session.commit()
 
     @staticmethod
+    def delete_all_user_data(session):
+        user_quest = text(UserUtil.delete_user_quest())
+        user_hideout = text(UserUtil.delete_user_hideout())
+        user_roadmap = text(UserUtil.delete_user_roadmap())
+        user_progress_item = text(UserUtil.delete_user_progress_item())
+        session.execute(user_quest)
+        session.execute(user_hideout)
+        session.execute(user_roadmap)
+        session.execute(user_progress_item)
+        return True
+
+    @staticmethod
     def _create_user_related_entries(session, email: str):
         new_user_quest = UserQuest(
             user_email=email, quest_list=[], update_time=datetime.now()

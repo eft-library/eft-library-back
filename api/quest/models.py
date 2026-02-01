@@ -4,13 +4,11 @@ from sqlalchemy import (
     String,
     Integer,
     TIMESTAMP,
-    ARRAY,
     Boolean,
     TEXT,
     JSON,
     ForeignKey,
 )
-from sqlalchemy.orm import relationship
 
 
 class NPC(DataBaseConnector.Base):
