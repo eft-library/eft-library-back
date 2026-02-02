@@ -87,7 +87,6 @@ class KafkaProducerMiddleware(BaseHTTPMiddleware):
                 "method": request.method,
                 "link": path,
                 "footprint_time": datetime.now(ZoneInfo("Asia/Seoul")).isoformat(),
-                "client_ip": real_ip,
             }
             produce_message(json.dumps(data))
 
