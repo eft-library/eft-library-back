@@ -1,17 +1,24 @@
 import asyncio
 import json
 import os
+import logging
 from typing import Dict, Set
 from redis.asyncio import Redis
 from fastapi import WebSocket
+from starlette.websockets import WebSocketDisconnect, WebSocketState
+
+logger = logging.getLogger("websocket")
 
 # Redis 연결
-redis = Redis.from_url(f"redis://{os.getenv('REDIS_HOST')}", decode_responses=True)
+redis = Redis.from_url(
+    f"redis://{os.getenv('REDIS_HOST')}",
+    decode_responses=True,
+)
 
-# WebSocket 연결 저장
+# 연결 관리
 connected_websockets: Dict[str, WebSocket] = {}  # user_email -> websocket
-user_listeners: Dict[str, asyncio.Task] = {}  # user_email -> listener task
-sent_notifications: Dict[str, Set[str]] = {}  # user_email -> 전송한 알림 고유 키
+user_listeners: Dict[str, asyncio.Task] = {}  # user_email -> redis listener task
+sent_notifications: Dict[str, Set[str]] = {}  # user_email -> sent notification keys
 
 
 async def websocket_handler(websocket: WebSocket, user_email: str):
@@ -19,32 +26,54 @@ async def websocket_handler(websocket: WebSocket, user_email: str):
     클라이언트 WebSocket 연결 처리
     """
     await websocket.accept()
+
+    # 같은 유저의 기존 연결이 있으면 정리
+    old_ws = connected_websockets.get(user_email)
+    if old_ws and old_ws.client_state == WebSocketState.CONNECTED:
+        try:
+            await old_ws.close()
+        except Exception:
+            pass
+
     connected_websockets[user_email] = websocket
 
-    # 초기 알림 가져오기 + 제거
-    existing_notifications = []
-    while True:
-        n = await redis.lpop(f"notifications:{user_email}")
-        if not n:
-            break
-        existing_notifications.append(json.loads(n))  # Redis에는 json.dumps로 저장됨
-
-    # 최신 순서대로 전달
-    existing_notifications.reverse()
-
-    await websocket.send_text(
-        json.dumps({"type": "init", "notifications": existing_notifications})
-    )
-
-    # listener 생성 (없으면)
-    if user_email not in user_listeners:
-        user_listeners[user_email] = asyncio.create_task(redis_listener(user_email))
-
     try:
+        # 1) 초기 알림 전달
+        existing_notifications = []
         while True:
-            # 클라이언트에서 메시지 수신(예: ping용)
+            n = await redis.lpop(f"notifications:{user_email}")
+            if not n:
+                break
+            existing_notifications.append(json.loads(n))
+
+        existing_notifications.reverse()
+
+        await websocket.send_text(
+            json.dumps(
+                {
+                    "type": "init",
+                    "notifications": existing_notifications,
+                }
+            )
+        )
+
+        # 2) Redis listener 생성
+        if user_email not in user_listeners:
+            user_listeners[user_email] = asyncio.create_task(redis_listener(user_email))
+
+        # 3) 수신 루프 (ping 용)
+        while True:
             await websocket.receive_text()
-    except Exception:
+
+    except WebSocketDisconnect:
+        # 정상 종료 (브라우저 닫힘 / 새로고침)
+        logger.info(f"WebSocket disconnected: {user_email}")
+
+    except Exception as e:
+        # 진짜 예외만 로그
+        logger.exception(f"WebSocket error ({user_email})")
+
+    finally:
         await cleanup_user(user_email)
 
 
@@ -55,19 +84,23 @@ async def redis_listener(user_email: str):
     pubsub = redis.pubsub()
     await pubsub.subscribe(f"notifications_channel:{user_email}")
 
-    if user_email not in sent_notifications:
-        sent_notifications[user_email] = set()
+    sent_notifications.setdefault(user_email, set())
 
     try:
         async for message in pubsub.listen():
-            if message["type"] != "message":
+            if message.get("type") != "message":
                 continue
 
-            raw_data = message["data"]
-            data = json.loads(raw_data)
+            data = json.loads(message["data"])
 
-            # 고유 키 생성 (중복 방지)
-            notification_key = f"{data['noti_type']}_{data.get('post_id')}_{data.get('parent_comment_id')}_{data.get('author_email')}_{data.get('id')}"
+            # 고유 키 (중복 방지)
+            notification_key = (
+                f"{data.get('noti_type')}_"
+                f"{data.get('post_id')}_"
+                f"{data.get('parent_comment_id')}_"
+                f"{data.get('author_email')}_"
+                f"{data.get('id')}"
+            )
 
             if notification_key in sent_notifications[user_email]:
                 continue
@@ -75,19 +108,32 @@ async def redis_listener(user_email: str):
             sent_notifications[user_email].add(notification_key)
 
             ws = connected_websockets.get(user_email)
-            if ws:
-                try:
-                    # 항상 JSON 문자열로 통일
-                    await ws.send_text(json.dumps({"type": "message", "data": data}))
-                except Exception:
-                    await cleanup_user(user_email)
-                    break
+            if not ws or ws.client_state != WebSocketState.CONNECTED:
+                break
+
+            try:
+                await ws.send_text(
+                    json.dumps(
+                        {
+                            "type": "message",
+                            "data": data,
+                        }
+                    )
+                )
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.exception(f"Send error ({user_email}) : {e}")
+                break
 
     except asyncio.CancelledError:
         pass
+
     finally:
-        await pubsub.unsubscribe(f"notifications_channel:{user_email}")
-        await pubsub.close()
+        try:
+            await pubsub.unsubscribe(f"notifications_channel:{user_email}")
+        finally:
+            await pubsub.close()
 
 
 async def cleanup_user(user_email: str):
@@ -108,8 +154,8 @@ async def send_wpf_data_ws_direct(user_email: str, location: str):
     WPF 용 WebSocket 데이터 전달
     """
     ws = connected_websockets.get(user_email)
-    if not ws:
-        return  # 유실 OK 정책
+    if not ws or ws.client_state != WebSocketState.CONNECTED:
+        return  # 유실 허용 정책
 
     try:
         await ws.send_text(
@@ -120,5 +166,8 @@ async def send_wpf_data_ws_direct(user_email: str, location: str):
                 }
             )
         )
-    except Exception:
+    except WebSocketDisconnect:
+        await cleanup_user(user_email)
+    except Exception as e:
+        logger.exception(f"WPF send error ({user_email}) {e}")
         await cleanup_user(user_email)
