@@ -7,7 +7,10 @@ import logging
 import time
 from dotenv import load_dotenv
 import os
+import re
+from fastapi.responses import Response
 
+BLOCK_EXT = re.compile(r".*\.(php|jsp|asp|html)$", re.IGNORECASE)
 logger = logging.getLogger("api.access")
 
 load_dotenv()
@@ -16,6 +19,11 @@ load_dotenv()
 class KafkaProducerMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         start_time = time.time()  # 시작 시간 기록
+        path = request.url.path
+
+        # 확장자 스캔 요청 즉시 차단
+        if BLOCK_EXT.match(path):
+            return Response(status_code=410)
 
         now_kst = datetime.now(ZoneInfo("Asia/Seoul"))
         footprint_time = now_kst.isoformat()
