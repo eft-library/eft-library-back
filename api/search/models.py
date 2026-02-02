@@ -11,10 +11,10 @@ class Search(DataBaseConnector.Base):
     __tablename__ = "search_i18n"
 
     value = Column(String, primary_key=True)
+    page_value = Column(String, primary_key=True)
+    lang = Column(String, primary_key=True)
     link = Column(String)
     type = Column(String)
-    lang = Column(String)
-    page_value = Column(INTEGER)
     order = Column(INTEGER)
     update_time = Column(TIMESTAMP)
 
