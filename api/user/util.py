@@ -333,42 +333,26 @@ class UserUtil:
     def delete_user_roadmap():
         return """
         DELETE FROM user_roadmap uq
-        WHERE NOT EXISTS (
-            SELECT 1
-            FROM user_info ui
-            WHERE ui.email = uq.user_email
-        );
+        WHERE user_email = :email
         """
 
     @staticmethod
     def delete_user_quest():
         return """
         DELETE FROM user_quest uq
-        WHERE NOT EXISTS (
-            SELECT 1
-            FROM user_info ui
-            WHERE ui.email = uq.user_email
-        );
+        WHERE user_email = :email
         """
 
     @staticmethod
     def delete_user_hideout():
         return """
         DELETE FROM user_hideout uq
-        WHERE NOT EXISTS (
-            SELECT 1
-            FROM user_info ui
-            WHERE ui.email = uq.user_email
-        );
+        WHERE user_email = :email
         """
 
     @staticmethod
     def delete_user_progress_item():
         return """
         DELETE FROM user_progress_item uq
-        WHERE NOT EXISTS (
-            SELECT 1
-            FROM user_info ui
-            WHERE ui.email = uq.user_email
-        );
+        WHERE user_email = :email
         """
