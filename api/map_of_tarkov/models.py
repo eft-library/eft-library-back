@@ -65,3 +65,4 @@ class WhereAmI(DataBaseConnector.Base):
     map_bounds = Column(JSON)
     image_bounds = Column(JSON)
     default_zoom_level = Column(NUMERIC)
+    quests = Column(JSON)
