@@ -7,14 +7,6 @@ from api.story.service import StoryServices
 router = APIRouter(tags=["Story"])
 
 
-@router.get("/selector")
-def get_story_selector():
-    story_selector = StoryServices.get_story_selector()
-    if story_selector is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(story_selector, HTTPCode.OK, Message.SUCCESS)
-
-
 @router.get("/detail/{story_id}")
 def get_story_by_id(story_id: str):
     story_detail = StoryServices.get_story_by_id(story_id)
