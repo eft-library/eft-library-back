@@ -951,7 +951,7 @@ CREATE TABLE IF NOT EXISTS story_i18n (
     id TEXT NOT NULL PRIMARY KEY,
     name jsonb,
     objectives JSONB,
-    rewards JSONB,
+    requirements JSONB,
     guide JSONB,
     "order" INTEGER,
     UPDATE_TIME timestamp with time zone default now()
@@ -959,7 +959,7 @@ CREATE TABLE IF NOT EXISTS story_i18n (
 COMMENT ON COLUMN story_i18n.id IS '아이디';
 COMMENT ON COLUMN story_i18n.name IS '스토리 이름';
 COMMENT ON COLUMN story_i18n.objectives IS '스토리 목표';
-COMMENT ON COLUMN story_i18n.rewards IS '스토리 보상';
+COMMENT ON COLUMN story_i18n.requirements IS '스토리 요구사항';
 COMMENT ON COLUMN story_i18n.guide IS '스토리 가이드';
 COMMENT ON COLUMN story_i18n.order IS '스토리 순서';
 COMMENT ON COLUMN story_i18n.UPDATE_TIME IS '업데이트 시간';

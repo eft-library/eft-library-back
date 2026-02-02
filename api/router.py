@@ -20,6 +20,7 @@ from api.comment import comment_router
 from api.where_am_i import where_am_i_router
 from api.progress import progress_router
 from api.minigame import minigame_router
+from api.story import story_router
 
 api_router = APIRouter()
 
@@ -44,3 +45,4 @@ api_router.include_router(comment_router.router, prefix="/comment")
 api_router.include_router(where_am_i_router.router, prefix="/where-am-i")
 api_router.include_router(progress_router.router, prefix="/progress")
 api_router.include_router(minigame_router.router, prefix="/minigame")
+api_router.include_router(story_router.router, prefix="/story")

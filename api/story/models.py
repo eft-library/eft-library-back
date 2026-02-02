@@ -9,7 +9,7 @@ class Story(DataBaseConnector.Base):
     id = Column(TEXT, primary_key=True)
     name = Column(JSON)
     objectives = Column(JSON)
-    rewards = Column(JSON)
+    requirements = Column(JSON)
     guide = Column(JSON)
     order = Column(INTEGER)
     update_time = Column(TIMESTAMP)
