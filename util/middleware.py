@@ -11,7 +11,7 @@ import re
 from fastapi.responses import Response
 from collections import defaultdict
 
-BLOCK_EXT = re.compile(r".*\.(php|jsp|asp|exe|sh|cgi)$", re.IGNORECASE)
+BLOCK_EXT = re.compile(r".*\.(php|jsp|asp|exe|sh|cgi|html)$", re.IGNORECASE)
 BLOCK_TRAVERSAL = re.compile(r"\.\.|\/etc\/|\/usr\/|\/var\/|\\\\|%2e%2e", re.IGNORECASE)
 
 # 의심스러운 파라미터명 (실제 사용하는 파라미터 확인 후 조정)
