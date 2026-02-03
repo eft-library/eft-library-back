@@ -2,6 +2,7 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
+from starlette.responses import PlainTextResponse
 from api.router import api_router
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi import FastAPI, WebSocket, Query
@@ -61,6 +62,22 @@ async def custom_swagger_ui_html():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.get("/robots.txt", response_class=PlainTextResponse)
+def robots_txt():
+    return """User-agent: *
+Sitemap: https://eftlibrary.com/sitemap/main.xml
+Sitemap: https://eftlibrary.com/sitemap/boss.xml
+Sitemap: https://eftlibrary.com/sitemap/quest.xml
+Sitemap: https://eftlibrary.com/sitemap/legal.xml
+Sitemap: https://eftlibrary.com/sitemap/information.xml
+Sitemap: https://eftlibrary.com/sitemap/map.xml
+Sitemap: https://eftlibrary.com/sitemap/item.xml
+Sitemap: https://eftlibrary.com/sitemap/features.xml
+
+#DaumWebMasterTool:f9f3c352224a2c2a460baed45afaad021ca93fb7f26302959c7b4441d6f411da:KwfSfnXgL1bn4FKLKNMlhA==
+"""
 
 
 app.include_router(api_router, prefix=os.getenv("API_PREFIX"))
