@@ -14,9 +14,8 @@ class ProgressService:
     @staticmethod
     def get_user_progress(user_email: str | None):
         try:
-            session = DataBaseConnector.create_session_factory()
 
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 # 전체 아이템 목록
                 all_kappa_list = (
                     s.query(ProgressItem)
@@ -75,9 +74,8 @@ class ProgressService:
     @staticmethod
     def update_progress(progress_item_list: ProgressItemList, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
 
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
 
                 def now_kst():
                     return datetime.now(pytz.timezone("Asia/Seoul"))

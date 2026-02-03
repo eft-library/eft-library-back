@@ -14,8 +14,8 @@ class ItemService:
         item 상세 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(ItemUtil.get_item_detail_query())
                 param = {"url_mapping": item_url}
                 result = s.execute(query, param)
@@ -34,8 +34,8 @@ class ItemService:
         rig 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(ItemUtil.get_rig_query())
                 result = s.execute(query)
                 rig = [dict(row) for row in result.mappings()]
@@ -68,8 +68,8 @@ class ItemService:
         glasses 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(ItemUtil.get_glasses_query())
                 result = s.execute(query)
                 glasses = [dict(row) for row in result.mappings()]
@@ -102,8 +102,8 @@ class ItemService:
         face cover 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
 
                 query = text(ItemUtil.get_face_cover_query())
                 result = s.execute(query)
@@ -138,8 +138,8 @@ class ItemService:
         medical 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 medical = (
                     s.query(Item)
                     .filter(Item.category == "Medical")
@@ -171,8 +171,8 @@ class ItemService:
         container 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 container = (
                     s.query(Item)
                     .filter(Item.category == "Container")
@@ -193,8 +193,8 @@ class ItemService:
         arm band 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 arm_band = s.query(Item).filter(Item.category == "Armband").all()
                 return arm_band
         except Exception as e:
@@ -210,8 +210,8 @@ class ItemService:
         loot 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 loot = s.query(Item).filter(Item.category == "Loot").all()
                 return loot
         except Exception as e:
@@ -227,8 +227,8 @@ class ItemService:
         ammo 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 ammo = (
                     s.query(Item)
                     .filter(Item.category == "Ammo")
@@ -249,8 +249,8 @@ class ItemService:
         provisions 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 provisions = s.query(Item).filter(Item.category == "Provisions").all()
                 return provisions
         except Exception as e:
@@ -266,8 +266,8 @@ class ItemService:
         key 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 key = s.query(Item).filter(Item.category == "Key").all()
                 return key
         except Exception as e:
@@ -283,8 +283,8 @@ class ItemService:
         armor vest 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(ItemUtil.get_armor_vest_query())
                 result = s.execute(query)
                 armor_vest = [dict(row) for row in result.mappings()]
@@ -302,8 +302,8 @@ class ItemService:
         backpack 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 backpack = (
                     s.query(Item)
                     .filter(Item.category == "Backpack")
@@ -324,8 +324,8 @@ class ItemService:
         headset 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 headset = s.query(Item).filter(Item.category == "Headset").all()
                 return headset
         except Exception as e:
@@ -338,8 +338,8 @@ class ItemService:
     @staticmethod
     def get_weapon_list_new():
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 weapon_list = (
                     s.query(Item)
                     .filter(Item.category.in_(["Gun", "Knife", "Throwable"]))
@@ -359,8 +359,8 @@ class ItemService:
         headwear 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(ItemUtil.get_head_wear_query())
                 result = s.execute(query)
                 headwear = [dict(row) for row in result.mappings()]

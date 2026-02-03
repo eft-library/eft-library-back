@@ -14,8 +14,8 @@ class PriceService:
     @staticmethod
     def get_item_price(page: int, page_size: int, word: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 offset = (page - 1) * page_size
 
                 total_param = {"word": f"%{word}%"}
@@ -83,8 +83,8 @@ class PriceService:
     @staticmethod
     def get_price_top(priceRankReq: PriceRankReq):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 tiers = ["S", "A", "B", "C", "D", "E", "F"]
                 tier_size = 100
                 pvp_tier_dict = {

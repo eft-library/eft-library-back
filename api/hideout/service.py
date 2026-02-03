@@ -16,8 +16,8 @@ class HideoutService:
     @staticmethod
     def get_station(user_email: str | None):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_hideout = {}
 
                 # 은신처 기본 정보
@@ -61,8 +61,8 @@ class HideoutService:
     @staticmethod
     def save_station(complete_list: List[str], user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_hideout = (
                     s.query(UserHideOut).filter_by(user_email=user_email).first()
                 )
@@ -94,13 +94,13 @@ class HideoutService:
     @staticmethod
     def save_station_item(item_list: List[ItemType], user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
+
             item_list_json = [item.model_dump() for item in item_list]
 
             utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
             kst_now = utc_now.astimezone(pytz.timezone("Asia/Seoul"))
 
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 user_hideout = (
                     s.query(UserHideOut).filter_by(user_email=user_email).first()
                 )

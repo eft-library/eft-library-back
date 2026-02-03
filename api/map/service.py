@@ -14,8 +14,8 @@ class MapService:
         ID를 통한 map 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(MapUtil.get_map_detail_query())
                 param = {"map_id": map_id}
                 result = s.execute(query, param)
@@ -47,8 +47,8 @@ class MapService:
         ID를 통한 sub map 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 response_map = (
                     s.query(Map)
                     .filter(Map.parent_value == map_id)

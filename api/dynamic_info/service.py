@@ -13,8 +13,8 @@ class DynamicInfoService:
         column 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 column_list = (
                     s.query(DynamicInfo).filter(DynamicInfo.id == column_key).first()
                 )

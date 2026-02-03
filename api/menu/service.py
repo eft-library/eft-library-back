@@ -11,8 +11,7 @@ class MenuService:
     @staticmethod
     def get_all_menu():
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 main_menu_list = (
                     s.query(MenuGroup)
                     .options(subqueryload(MenuGroup.sub_menus))
@@ -30,8 +29,7 @@ class MenuService:
     @staticmethod
     def get_menu_with_search():
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 main_menu_list = (
                     s.query(MenuGroup)
                     .options(subqueryload(MenuGroup.sub_menus))
@@ -54,32 +52,12 @@ class MenuService:
     @staticmethod
     def get_main_info():
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 main_info_list = s.query(MainInfo).order_by(MainInfo.order).all()
                 return main_info_list
         except Exception as e:
             logger.error(
                 f"get_main_info error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_main_slide():
-        try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
-                main_info_list = (
-                    s.query(MainInfo)
-                    .order_by(MainInfo.order)
-                    .filter(MainInfo.use_slide.is_(True))
-                    .all()
-                )
-                return main_info_list
-        except Exception as e:
-            logger.error(
-                f"get_main_slide error: {e}",
                 exc_info=True,
             )
             return None

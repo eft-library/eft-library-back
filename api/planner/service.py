@@ -14,8 +14,8 @@ class PlannerService:
     @staticmethod
     def get_user_quest(user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(PlannerUtil.user_quest_query())
                 result = s.execute(query, {"user_email": user_email})
                 if result:
@@ -32,8 +32,8 @@ class PlannerService:
     @staticmethod
     def update_user_quest(userQuestList: UserQuestList, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
                 user_quest.quest_list = userQuestList.userQuestList
                 utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
@@ -57,8 +57,8 @@ class PlannerService:
     @staticmethod
     def delete_user_quest(userQuestList: UserQuestList, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_quest = s.query(UserQuest).filter_by(user_email=user_email).first()
                 user_quest.quest_list = userQuestList.userQuestList
                 s.commit()

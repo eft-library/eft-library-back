@@ -10,8 +10,8 @@ class StoryServices:
     @staticmethod
     def get_story_by_id(story_id: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 selector_list = (
                     s.query(Story.id, Story.name).order_by(Story.order).all()
                 )

@@ -20,8 +20,8 @@ class UserService:
     @staticmethod
     def add_new_user(addUserReq: AddUserReq):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 check_user = UserFunction._get_existing_user(s, addUserReq.email)
                 if check_user:
                     UserFunction._handle_existing_user(s, check_user)
@@ -38,8 +38,8 @@ class UserService:
     @staticmethod
     def get_user(user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_data = UserFunction._get_user_data(s, user_email)
                 return user_data
         except Exception as e:
@@ -52,8 +52,8 @@ class UserService:
     @staticmethod
     def user_delete(user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user = UserFunction._get_existing_user(s, user_email)
                 if user:
                     UserFunction._create_delete_user(s, user)
@@ -116,8 +116,7 @@ class UserService:
                     "en": "This nickname is already in use.",
                 }
 
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 user = UserFunction._get_existing_user(s, user_email)
                 if user:
                     user.nickname = nickname
@@ -152,8 +151,8 @@ class UserService:
     @staticmethod
     def check_nickname_duplicate(nickname: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user = UserFunction._check_nickname_duplicate(s, nickname)
                 if user:
                     return {"result": 1}
@@ -174,8 +173,8 @@ class UserService:
         - 30일 이상 지났거나 유저 존재하지 않으면 True 반환 (업데이트 가능)
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user = UserFunction._get_existing_user(s, user_email)
                 if not user:
                     return {"result": 0}  # 유저 존재하지 않음
@@ -203,8 +202,8 @@ class UserService:
     @staticmethod
     def report_user(request_info: ReqUserReport, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 new_post_report = UserReport(
                     reporter_email=user_email,
                     reported_email=request_info.reported_email,
@@ -226,8 +225,8 @@ class UserService:
     @staticmethod
     def block_user(request_info: ReqUserBlock, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 new_block = UserBlock(
                     blocker_email=user_email,
                     blocked_email=request_info.blocked_email,
@@ -254,8 +253,8 @@ class UserService:
     @staticmethod
     def unblock_user(request_info: ReqUserBlock, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 block_info = (
                     s.query(UserBlock)
                     .filter(
@@ -285,8 +284,8 @@ class UserService:
     @staticmethod
     def penalty_user(request_info: ReqUserPenalty):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 end_time = UserFunction.calculate_end_time(request_info.penalty)
                 start_time = datetime.now()
                 new_block = UserPenalty(
@@ -319,8 +318,8 @@ class UserService:
     @staticmethod
     def get_my_page_default(user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_data = UserFunction.get_my_page_default(s, user_email)
                 return user_data
         except Exception as e:
@@ -334,8 +333,8 @@ class UserService:
     @staticmethod
     def get_my_page_info(user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_data = UserFunction._get_user_data(s, user_email)
                 return user_data
         except Exception as e:
@@ -350,8 +349,8 @@ class UserService:
     def get_my_page_posts(user_email: str, page_num: int):
         try:
             limit, offset = 10, (page_num - 1) * 10
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_data = UserFunction.get_my_page_posts(s, user_email, limit, offset)
                 return user_data
         except Exception as e:
@@ -366,8 +365,8 @@ class UserService:
     def get_my_page_comments(user_email: str, page_num: int):
         try:
             limit, offset = 10, (page_num - 1) * 10
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_data = UserFunction.get_my_page_comments(
                     s, user_email, limit, offset
                 )
@@ -384,8 +383,8 @@ class UserService:
     def get_my_page_bookmarks(user_email: str, page_num: int):
         try:
             limit, offset = 10, (page_num - 1) * 10
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_data = UserFunction.get_my_page_bookmarks(
                     s, user_email, limit, offset
                 )
@@ -402,8 +401,8 @@ class UserService:
     def get_my_page_blocks(user_email: str, page_num: int):
         try:
             limit, offset = 10, (page_num - 1) * 10
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_data = UserFunction.get_my_page_blocks(
                     s, user_email, limit, offset
                 )
@@ -420,8 +419,8 @@ class UserService:
     def get_my_page_follow(user_email: str, page_num: int):
         try:
             limit, offset = 10, (page_num - 1) * 10
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_data = UserFunction.get_my_page_follow(
                     s, user_email, limit, offset
                 )
@@ -438,8 +437,8 @@ class UserService:
     def get_my_page_notification(user_email: str, page_num: int):
         try:
             limit, offset = 10, (page_num - 1) * 10
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_data = UserFunction.get_my_page_notification(
                     s, user_email, limit, offset
                 )

@@ -16,8 +16,8 @@ class DashboardService:
         시간대별 요청 분포
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 date_param = {"start_date": start_date, "end_date": end_date}
 
                 endpoint_query = text(DashboardUtil.get_psql_top_request())

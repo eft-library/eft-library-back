@@ -15,9 +15,9 @@ class MenuService:
     @staticmethod
     def get_main():
         try:
-            session = DataBaseConnector.create_session_factory()
+
             main_info = {}
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 main_info_list = s.query(MainInfo).order_by(MainInfo.order).all()
                 main_menu_list = (
                     s.query(MenuGroup)

@@ -20,8 +20,7 @@ class CommentService:
     @staticmethod
     def insert_parent_comment(request_info: InsertParentComment, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 # nano id 생성
                 new_id = generate(size=12)
                 bigint_post_id = int(request_info.post_id)
@@ -60,8 +59,8 @@ class CommentService:
     @staticmethod
     def inset_child_comment(request_info: InsertChildComment, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 # nano id 생성
                 new_id = generate(size=12)
                 bigint_post_id = int(request_info.post_id)
@@ -105,8 +104,8 @@ class CommentService:
     ):
         try:
             limit = 20
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 bigint_post_id = int(post_id)
                 # 전체 개수 조회
                 total_query = text(CommentUtil.get_comment_total_count())
@@ -171,8 +170,8 @@ class CommentService:
     @staticmethod
     def update_comment(comment_id: str, contents: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 update_comment_query = text(CommentUtil.update_comment())
                 update_comment_params = {
                     "comment_id": comment_id,
@@ -192,8 +191,8 @@ class CommentService:
     @staticmethod
     def delete_comment_by_user(comment_id: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 delete_comment_query = text(CommentUtil.delete_comment_by_user())
                 delete_comment_params = {
                     "comment_id": comment_id,
@@ -212,8 +211,8 @@ class CommentService:
     @staticmethod
     def delete_comment_by_admin(comment_id: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 delete_comment_query = text(CommentUtil.delete_comment_by_admin())
                 delete_comment_params = {
                     "comment_id": comment_id,
@@ -232,8 +231,8 @@ class CommentService:
     @staticmethod
     def like_comment(comment_id: str, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 # 기존 reaction 조회
                 reaction = (
                     s.query(CommentReaction)
@@ -277,8 +276,8 @@ class CommentService:
     @staticmethod
     def dislike_comment(comment_id: str, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 # 기존 reaction 조회
                 reaction = (
                     s.query(CommentReaction)
@@ -322,8 +321,8 @@ class CommentService:
     @staticmethod
     def report_comment(request_info: ReqCommentReport, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 new_post_report = CommentReport(
                     comment_id=request_info.comment_id,
                     reporter_email=user_email,

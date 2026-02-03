@@ -13,8 +13,8 @@ class MinigameService:
     @staticmethod
     def get_rng_item_list():
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 rng_item_list = s.query(ItemFleaSummary).all()
                 return rng_item_list
         except Exception as e:
@@ -27,8 +27,8 @@ class MinigameService:
     @staticmethod
     def insert_user_minigame_score(result: SaveScore):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 new_score = UserMinigameScore(
                     nickname=result.nickname,
                     game_type=result.game_type,
@@ -48,8 +48,8 @@ class MinigameService:
     @staticmethod
     def get_all_rng_item_rank():
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(MinigameUtil.get_rng_item_rank())
                 result = s.execute(query)
                 data = [dict(row) for row in result.mappings()]
@@ -64,8 +64,8 @@ class MinigameService:
     @staticmethod
     def get_rng_item_my_rank(score: int):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(MinigameUtil.get_rng_item_my_rank_list())
                 param = {"score": score}
                 result = s.execute(query, param)

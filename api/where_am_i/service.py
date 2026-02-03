@@ -13,17 +13,12 @@ class WhereAmIService:
 
     @staticmethod
     def check_wpf_user(user_email):
-        """
-        사용자 확인
-        """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
-                exists_user = s.query(exists().where(User.email == user_email)).scalar()
-                return exists_user
+            with DataBaseConnector.SessionLocal() as s:
+                return s.query(exists().where(User.email == user_email)).scalar()
         except Exception as e:
             logger.error(
-                f"check_wpf_user:  error: {e}",
+                f"check_wpf_user error: {e}",
                 exc_info=True,
             )
             return None
@@ -33,8 +28,7 @@ class WhereAmIService:
         exists_user = WhereAmIService.check_wpf_user(req.email)
         try:
             if exists_user:
-                session = DataBaseConnector.create_session_factory()
-                with session() as s:
+                with DataBaseConnector.SessionLocal() as s:
                     user_location = UserLocationRequest(
                         user_email=req.email,
                         location=req.location,

@@ -15,8 +15,8 @@ class SearchService:
         검색 정보 전체 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 search_list = s.query(Search).order_by(Search.order).all()
                 return search_list
         except Exception as e:
@@ -34,8 +34,8 @@ class SearchService:
         load_dotenv()
 
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 sitemap_list = s.query(Sitemap).order_by(desc(Sitemap.priority)).all()
                 return sitemap_list
         except Exception as e:

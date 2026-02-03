@@ -102,9 +102,9 @@ class CommunityService:
         thumbnail = CommunityFunction.extract_thumbnail_img(post_info.contents)
 
         try:
-            session = DataBaseConnector.create_session_factory()
+
             now_time = datetime.now()
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 # 삽입
                 new_post = CommunityPosts(
                     id=new_id,
@@ -149,9 +149,8 @@ class CommunityService:
     def get_posts(category: str, page_num: int, user_email: Optional[str] = None):
         try:
             limit, offset = 20, (page_num - 1) * 20
-            session = DataBaseConnector.create_session_factory()
 
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 if category == "issue":
                     get_post_query = text(CommunityUtil.get_posts_with_issue())
                     get_post_count_query = text(CommunityUtil.get_post_issue_count())
@@ -187,8 +186,8 @@ class CommunityService:
     @staticmethod
     def get_detail_post(post_id_slug: str, user_email: str, page_category: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
                 return {
                     "post_detail": CommunityFunction.fetch_post_detail(
@@ -211,8 +210,8 @@ class CommunityService:
     @staticmethod
     def get_side_info(user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
 
                 side_issue_posts_query = text(CommunityUtil.get_posts_with_issue())
                 get_side_issue_posts = s.execute(
@@ -237,8 +236,8 @@ class CommunityService:
     @staticmethod
     def get_detail_post_meta_data(post_id_slug: str, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
                 post_detail_query = text(CommunityUtil.get_post_detail_meta_data())
                 post_detail_param = {"post_id": post_id, "user_email": user_email}
@@ -256,8 +255,8 @@ class CommunityService:
     @staticmethod
     def like_post(post_id: str, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 bigint_post_id = int(post_id)
 
                 # 기존 reaction 조회
@@ -303,8 +302,8 @@ class CommunityService:
     @staticmethod
     def dislike_post(post_id: str, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 bigint_post_id = int(post_id)
 
                 # 기존 reaction 조회
@@ -350,8 +349,8 @@ class CommunityService:
     @staticmethod
     def bookmark_post(post_id: str, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 bigint_post_id = int(post_id)
 
                 # 기존 bookmark 조회 (ORM 방식)
@@ -389,8 +388,8 @@ class CommunityService:
     @staticmethod
     def toggle_follow(request_info: FollowUser, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 # 현재 팔로우 상태 확인
                 follower_status = (
                     s.query(UserFollows)
@@ -437,8 +436,8 @@ class CommunityService:
     @staticmethod
     def check_user_following(author_email: str, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 check_follow_query = text(CommunityUtil.check_follow())
                 check_follow_param = {
                     "author_email": author_email,
@@ -467,8 +466,8 @@ class CommunityService:
         new_slug = slugify(title)
         new_thumbnail = CommunityFunction.extract_thumbnail_img(contents)
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 bigint_post_id = int(post_id)
                 post_info = (
                     s.query(CommunityPosts)
@@ -499,8 +498,8 @@ class CommunityService:
     @staticmethod
     def get_update_post_detail(post_id: str, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 bigint_post_id = int(post_id)
                 post_info = (
                     s.query(CommunityPosts)
@@ -524,8 +523,8 @@ class CommunityService:
     @staticmethod
     def delete_post_by_admin(post_id: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 bigint_post_id = int(post_id)
                 post_info = (
                     s.query(CommunityPosts)
@@ -549,8 +548,8 @@ class CommunityService:
     @staticmethod
     def delete_post_by_user(post_id: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 bigint_post_id = int(post_id)
                 post_info = (
                     s.query(CommunityPosts)
@@ -577,8 +576,8 @@ class CommunityService:
     ):
         limit, offset = 20, (page_num - 1) * 20
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 get_search_sql = text(CommunityFunction.get_search_sql(search_type))
                 get_search_total_count_sql = text(
                     CommunityFunction.get_search_total_count_sql(search_type)
@@ -614,8 +613,8 @@ class CommunityService:
     @staticmethod
     def report_post(request_info: ReqPostReport, user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 bigint_post_id = int(request_info.post_id)
                 new_post_report = PostReport(
                     post_id=bigint_post_id,
@@ -639,8 +638,8 @@ class CommunityService:
     @staticmethod
     def increase_view_count(post_id_slug: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 increase_sql = text(CommunityUtil.increase_view_count())
                 bigint_post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
                 param = {"post_id": bigint_post_id}

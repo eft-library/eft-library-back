@@ -13,8 +13,8 @@ class MapOfTarkovService:
     @staticmethod
     def get_map_selector():
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 maps = s.query(Map).filter(Map.depth == 1).order_by(Map.order).all()
             return [{"id": m.id, "name": m.name} for m in maps]
         except Exception as e:
@@ -27,8 +27,8 @@ class MapOfTarkovService:
     @staticmethod
     def get_map_info(map_id):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 map_query = text(MapOfTarkovUtil.get_map_of_tarkov_detail_query())
                 map_param = {"map_id": map_id}
                 map_result = s.execute(map_query, map_param)
@@ -44,8 +44,8 @@ class MapOfTarkovService:
     @staticmethod
     def get_boss_info(map_id):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 boss_query = text(MapOfTarkovUtil.get_map_of_tarkov_boss_query())
                 boss_param = {"map_id": map_id}
                 boss_result = s.execute(boss_query, boss_param)
@@ -61,8 +61,8 @@ class MapOfTarkovService:
     @staticmethod
     def get_extraction_info(map_id):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 extractions = (
                     s.query(Extraction)
                     .filter(Extraction.map == map_id)
@@ -80,8 +80,8 @@ class MapOfTarkovService:
     @staticmethod
     def get_transits_info(map_id):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 transits = (
                     s.query(Transits)
                     .filter(Transits.map == map_id)
@@ -99,8 +99,8 @@ class MapOfTarkovService:
     @staticmethod
     def get_find_info(map_id):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 find_info = s.query(WhereAmI).filter(WhereAmI.id == map_id).first()
             return find_info
         except Exception as e:
@@ -116,8 +116,8 @@ class MapOfTarkovService:
         map of tarkov 지도 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 map_selector = (
                     s.query(Map).filter(Map.depth == 1).order_by(Map.order).all()
                 )

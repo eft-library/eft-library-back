@@ -11,8 +11,8 @@ class QuestService:
     @staticmethod
     def get_npc_selector():
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 npc_list = (
                     s.query(NPC.id, NPC.name, NPC.image)
                     .filter(NPC.order != None)
@@ -34,8 +34,8 @@ class QuestService:
     @staticmethod
     def get_all_quest():
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(QuestUtil.get_all_quest_query())
                 result = s.execute(query)
                 quest_list = [dict(row) for row in result.mappings()]
@@ -50,8 +50,8 @@ class QuestService:
     @staticmethod
     def get_all_quest_detail():
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(QuestUtil.get_all_quest_detail_query())
                 result = s.execute(query)
                 quest_list = [dict(row) for row in result.mappings()]
@@ -66,8 +66,8 @@ class QuestService:
     @staticmethod
     def get_quest_by_id(url_mapping):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(QuestUtil.get_quest_detail_query())
                 param = {"url_mapping": url_mapping}
                 result = s.execute(query, param)
@@ -84,8 +84,8 @@ class QuestService:
     @staticmethod
     def get_quest_by_npc(npc_id):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(QuestUtil.get_quest_by_npc())
                 param = {"npc_id": npc_id}
                 result = s.execute(query, param)
@@ -102,8 +102,8 @@ class QuestService:
     @staticmethod
     def get_quest_with_trader(trader_id):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 info = {}
                 query = text(QuestUtil.get_quest_by_npc())
                 param = {"npc_id": trader_id}

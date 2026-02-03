@@ -15,8 +15,7 @@ class BossService:
         특정 boss id 조회
         """
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 query = text(BossUtil.get_boss_query())
                 param = {"url_mapping": url_mapping}
                 result = s.execute(query, param)

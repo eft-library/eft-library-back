@@ -13,8 +13,8 @@ class NewsService:
     @staticmethod
     def get_wipe():
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 wipe = s.query(Wipe).order_by(desc(Wipe.season_start)).all()
                 return wipe
         except Exception as e:
@@ -27,9 +27,9 @@ class NewsService:
     @staticmethod
     def get_information_list(page: int, page_size: int, info_type: str):
         try:
-            session = DataBaseConnector.create_session_factory()
+
             offset = (page - 1) * page_size
-            with session() as s:
+            with DataBaseConnector.SessionLocal() as s:
                 total_count = (
                     s.query(func.count(Information.id))
                     .filter(Information.type == info_type)
@@ -64,8 +64,8 @@ class NewsService:
     @staticmethod
     def get_information_by_id(info_id: str, info_type: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 information = (
                     s.query(Information)
                     .filter(Information.id == info_id, Information.type == info_type)

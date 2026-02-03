@@ -14,8 +14,8 @@ class RoadmapService:
     @staticmethod
     def get_roadmap(user_email: str or None):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_roadmap = {}
 
                 node_query = text(RoadmapUtil.get_roadmap_node())
@@ -51,8 +51,8 @@ class RoadmapService:
     @staticmethod
     def save_roadmap(questList: List[str], user_email: str):
         try:
-            session = DataBaseConnector.create_session_factory()
-            with session() as s:
+
+            with DataBaseConnector.SessionLocal() as s:
                 user_roadmap = (
                     s.query(UserRoadmap).filter_by(user_email=user_email).first()
                 )
