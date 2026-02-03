@@ -51,6 +51,11 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
     await websocket_handler(websocket, user_email)
 
 
+@app.get("/")
+def root():
+    return {"status": "ok"}
+
+
 @app.get("/docs")
 async def custom_swagger_ui_html():
     return get_swagger_ui_html(
