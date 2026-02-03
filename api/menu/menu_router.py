@@ -7,25 +7,9 @@ from api.constants import Message
 router = APIRouter(tags=["Menu"])
 
 
-@router.get("/navi")
-def get_menu():
-    menu_list = MenuService.get_all_menu()
-    if menu_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(menu_list, HTTPCode.OK, Message.SUCCESS)
-
-
 @router.get("/menu-with-search")
 def get_menu():
     menu_list = MenuService.get_menu_with_search()
     if menu_list is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(menu_list, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/info")
-def get_main_info():
-    main_info_list = MenuService.get_main_info()
-    if main_info_list is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(main_info_list, HTTPCode.OK, Message.SUCCESS)

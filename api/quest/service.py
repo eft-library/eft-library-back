@@ -9,29 +9,6 @@ logger = logging.getLogger("api.quest")
 
 class QuestService:
     @staticmethod
-    def get_npc_selector():
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                npc_list = (
-                    s.query(NPC.id, NPC.name, NPC.image)
-                    .filter(NPC.order != None)
-                    .order_by(NPC.order)
-                    .all()
-                )
-
-                return [
-                    {"id": id_, "name": name, "image": image}
-                    for id_, name, image in npc_list
-                ]
-        except Exception as e:
-            logger.error(
-                f"get_npc_selector error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
     def get_all_quest():
         try:
 

@@ -11,20 +11,6 @@ logger = logging.getLogger("api.mot")
 class MapOfTarkovService:
 
     @staticmethod
-    def get_map_selector():
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                maps = s.query(Map).filter(Map.depth == 1).order_by(Map.order).all()
-            return [{"id": m.id, "name": m.name} for m in maps]
-        except Exception as e:
-            logger.error(
-                f"get_map_selector error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
     def get_map_info(map_id):
         try:
 
@@ -37,75 +23,6 @@ class MapOfTarkovService:
         except Exception as e:
             logger.error(
                 f"get_map_info: {map_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_boss_info(map_id):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                boss_query = text(MapOfTarkovUtil.get_map_of_tarkov_boss_query())
-                boss_param = {"map_id": map_id}
-                boss_result = s.execute(boss_query, boss_param)
-                boss_data = [dict(row) for row in boss_result.mappings()]
-            return boss_data
-        except Exception as e:
-            logger.error(
-                f"get_boss_info: {map_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_extraction_info(map_id):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                extractions = (
-                    s.query(Extraction)
-                    .filter(Extraction.map == map_id)
-                    .order_by(Extraction.faction, Extraction.name)
-                    .all()
-                )
-            return extractions
-        except Exception as e:
-            logger.error(
-                f"get_extraction_info: {map_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_transits_info(map_id):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                transits = (
-                    s.query(Transits)
-                    .filter(Transits.map == map_id)
-                    .order_by(Transits.faction, Transits.name)
-                    .all()
-                )
-            return transits
-        except Exception as e:
-            logger.error(
-                f"get_transits_info: {map_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_find_info(map_id):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                find_info = s.query(WhereAmI).filter(WhereAmI.id == map_id).first()
-            return find_info
-        except Exception as e:
-            logger.error(
-                f"get_find_info: {map_id}, error: {e}",
                 exc_info=True,
             )
             return None

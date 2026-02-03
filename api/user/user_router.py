@@ -83,19 +83,6 @@ def check_nickname_duplicate(
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/check-last-update-nickname")
-def check_last_update_nickname(token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-
-    if user_email:
-        result = UserService.check_last_update_nickname(user_email)
-        if result is False:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
 @router.post("/report-user")
 def report_post(request_info: ReqUserReport, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)

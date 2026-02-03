@@ -47,6 +47,4 @@ class MainInfo(DataBaseConnector.Base):
     link = Column(String)
     order = Column(Integer)
     image = Column(String)
-    use_slide = Column(Boolean)
-    slide_image = Column(String)
     update_time = Column(TIMESTAMP)
