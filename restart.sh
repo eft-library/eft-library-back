@@ -12,7 +12,7 @@ stop_server() {
 
 start_server() {
   echo "FastAPI 서버 실행 (포트 $PORT)"
-  nohup uvicorn main:app --reload --host=0.0.0.0 --port=$PORT --no-access-log > log.out 2>&1 &
+  nohup uvicorn main:app --workers 9 --host=0.0.0.0 --port=$PORT --no-access-log > log.out 2>&1 &
 }
 
 case "$ACTION" in
