@@ -1,14 +1,22 @@
 - [EFT Library의 Backend 운영 방식](#eft-library의-backend-운영-방식)
+  * [개발 History](#개발-history)
   * [주요 사항](#주요-사항)
   * [환경 및 패키지 정보](#환경-및-패키지-정보)
   * [구조](#구조)
-  * [개발 History](#개발-history)
+
 
 # EFT Library의 Backend 운영 방식
 
 EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 데이터를 적재하거나 조회합니다.
 
 <img width="1923" height="1366" alt="last" src="https://github.com/user-attachments/assets/3a17adc2-e80b-4042-93fa-dda30bbaf947" />
+
+## 개발 History
+
+- [다국어 지원](https://github.com/eft-library/eft-library-history/blob/main/backend/i18n_data.md)
+- [ORM 사용 (With SqlAlchemy)](https://github.com/eft-library/eft-library-history/blob/main/backend/orm.md)
+- [Google 로그인 도입기: 사용자 피드백으로 시작된 변화](https://github.com/eft-library/eft-library-history/blob/main/backend/token_check.md)
+- [사이트 공격 대비](https://github.com/eft-library/eft-library-history/blob/main/backend/defence.md)
 
 ## 주요 사항
 
@@ -66,13 +74,6 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
 - **database** : PostgreSQL Connection 정의
 - **kafka_producer** : Middleware에서 받은 사용자 페이지 요청 정보를 Kafka로 전달하는 서비스
 - **DB.sql** : PostgreSQL Table 정의
-
-
-## 개발 History
-
-- 🌐 [다국어 지원](https://github.com/eft-library/eft-library-history/blob/main/backend/i18n_data.md)
-- 🛠️ [ORM 사용 (With SqlAlchemy)](https://github.com/eft-library/eft-library-history/blob/main/backend/orm.md)
-- 🔐 [Google 로그인 도입기: 사용자 피드백으로 시작된 변화](https://github.com/eft-library/eft-library-history/blob/main/backend/token_check.md)
 
 
 <!--
