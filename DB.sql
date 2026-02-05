@@ -961,3 +961,30 @@ COMMENT ON COLUMN story_i18n.requirements IS '스토리 요구사항';
 COMMENT ON COLUMN story_i18n.guide IS '스토리 가이드';
 COMMENT ON COLUMN story_i18n.order IS '스토리 순서';
 COMMENT ON COLUMN story_i18n.UPDATE_TIME IS '업데이트 시간';
+
+CREATE TABLE IF NOT EXISTS story_roadmap_i18n (
+    id TEXT NOT NULL PRIMARY KEY,
+    story_id TEXT,
+    node_type TEXT,
+    title JSONB,
+    contents JSONB,
+    image TEXT,
+    x_coordinate NUMERIC,
+    y_coordinate NUMERIC,
+    edge JSONB,
+    node_meta JSONB,
+    UPDATE_TIME timestamp with time zone default now()
+);
+COMMENT ON COLUMN story_roadmap_i18n.id IS '아이디';
+COMMENT ON COLUMN story_roadmap_i18n.story_id IS '스토리 아이디';
+COMMENT ON COLUMN story_roadmap_i18n.node_type IS '노드 타입: default | image | condition | craft | pay | achievements | penalty | end';
+COMMENT ON COLUMN story_roadmap_i18n.title IS '제목';
+COMMENT ON COLUMN story_roadmap_i18n.contents IS '설명';
+COMMENT ON COLUMN story_roadmap_i18n.image IS '이미지';
+COMMENT ON COLUMN story_roadmap_i18n.x_coordinate IS 'X 좌표';
+COMMENT ON COLUMN story_roadmap_i18n.y_coordinate IS 'Y 좌표';
+COMMENT ON COLUMN story_roadmap_i18n.edge IS '엣지 정보';
+COMMENT ON COLUMN story_roadmap_i18n.node_meta IS '제작시간/비용 등 타입별 추가 정보';
+COMMENT ON COLUMN story_roadmap_i18n.UPDATE_TIME IS '업데이트 시간';
+
+
