@@ -29,7 +29,10 @@ def get_station(token: Optional[str] = Depends(oauth2_scheme)):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/save-station")
+@router.post(
+    "/save-station",
+    include_in_schema=False,
+)
 def complete_station(
     station: CompleteHideoutStation, token: str = Depends(oauth2_scheme)
 ):
@@ -43,7 +46,10 @@ def complete_station(
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/save-station-item")
+@router.post(
+    "/save-station-item",
+    include_in_schema=False,
+)
 def save_station_item(
     req: UpdateStationItemRequest, token: str = Depends(oauth2_scheme)
 ):

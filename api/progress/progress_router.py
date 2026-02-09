@@ -27,7 +27,10 @@ def get_progress_item(token: Optional[str] = Depends(oauth2_scheme)):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/update-progress-item")
+@router.post(
+    "/update-progress-item",
+    include_in_schema=False,
+)
 def update_progress_item(
     progress_item_list: ProgressItemList, token: str = Depends(oauth2_scheme)
 ):

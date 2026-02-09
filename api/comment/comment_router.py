@@ -21,7 +21,10 @@ router = APIRouter(tags=["Comment"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
-@router.post("/insert-parent-comment")
+@router.post(
+    "/insert-parent-comment",
+    include_in_schema=False,
+)
 def insert_parent_comment(
     request_info: InsertParentComment, token: str = Depends(oauth2_scheme)
 ):
@@ -35,7 +38,10 @@ def insert_parent_comment(
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/insert-child-comment")
+@router.post(
+    "/insert-child-comment",
+    include_in_schema=False,
+)
 def insert_child_comment(
     request_info: InsertChildComment, token: str = Depends(oauth2_scheme)
 ):
@@ -65,7 +71,10 @@ def get_comments(request_info: GetComments):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/like-comment")
+@router.post(
+    "/like-comment",
+    include_in_schema=False,
+)
 def like_comment(request_info: CommentReaction, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -77,7 +86,10 @@ def like_comment(request_info: CommentReaction, token: str = Depends(oauth2_sche
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/dislike-comment")
+@router.post(
+    "/dislike-comment",
+    include_in_schema=False,
+)
 def dislike_comment(request_info: CommentReaction, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -89,7 +101,10 @@ def dislike_comment(request_info: CommentReaction, token: str = Depends(oauth2_s
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/update-comment")
+@router.post(
+    "/update-comment",
+    include_in_schema=False,
+)
 def update_comment(request_info: UpdateComment, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -103,7 +118,10 @@ def update_comment(request_info: UpdateComment, token: str = Depends(oauth2_sche
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/delete-comment-by-admin")
+@router.post(
+    "/delete-comment-by-admin",
+    include_in_schema=False,
+)
 def delete_comment_by_admin(
     request_info: DeleteComment, token: str = Depends(oauth2_scheme)
 ):
@@ -117,7 +135,10 @@ def delete_comment_by_admin(
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/delete-comment-by-user")
+@router.post(
+    "/delete-comment-by-user",
+    include_in_schema=False,
+)
 def delete_comment_by_user(
     request_info: DeleteComment, token: str = Depends(oauth2_scheme)
 ):
@@ -131,7 +152,10 @@ def delete_comment_by_user(
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/report-comment")
+@router.post(
+    "/report-comment",
+    include_in_schema=False,
+)
 def report_post(request_info: ReqCommentReport, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:

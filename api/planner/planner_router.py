@@ -28,7 +28,10 @@ def get_user_quest(token: Optional[str] = Depends(oauth2_scheme)):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/quest/update")
+@router.post(
+    "/quest/update",
+    include_in_schema=False,
+)
 def update_user_quest(
     userQuestList: UserQuestList, token: str = Depends(oauth2_scheme)
 ):
@@ -42,7 +45,10 @@ def update_user_quest(
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/quest/delete")
+@router.post(
+    "/quest/delete",
+    include_in_schema=False,
+)
 def delete_user_quest(
     userQuestList: UserQuestList, token: str = Depends(oauth2_scheme)
 ):

@@ -8,7 +8,10 @@ from api.where_am_i.service import WhereAmIService
 router = APIRouter(tags=["WhereAmI"])
 
 
-@router.post("/check-wpf-user")
+@router.post(
+    "/check-wpf-user",
+    include_in_schema=False,
+)
 def check_wpf_user(user: CheckWpfUser):
     result = WhereAmIService.check_wpf_user(user.email)
     if result is None:

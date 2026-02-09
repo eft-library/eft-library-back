@@ -51,12 +51,18 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
     await websocket_handler(websocket, user_email)
 
 
-@app.get("/")
+@app.get(
+    "/",
+    include_in_schema=False,
+)
 def root():
     return {"status": "ok"}
 
 
-@app.get("/docs")
+@app.get(
+    "/docs",
+    include_in_schema=False,
+)
 async def custom_swagger_ui_html():
     return get_swagger_ui_html(
         openapi_url="/openapi.json",
@@ -64,12 +70,19 @@ async def custom_swagger_ui_html():
     )
 
 
-@app.get("/health")
+@app.get(
+    "/health",
+    include_in_schema=False,
+)
 def health_check():
     return {"status": "ok"}
 
 
-@app.get("/robots.txt", response_class=PlainTextResponse)
+@app.get(
+    "/robots.txt",
+    response_class=PlainTextResponse,
+    include_in_schema=False,
+)
 def robots_txt():
     return """User-agent: *
 Sitemap: https://eftlibrary.com/sitemap/main.xml
@@ -83,6 +96,15 @@ Sitemap: https://eftlibrary.com/sitemap/features.xml
 
 #DaumWebMasterTool:f9f3c352224a2c2a460baed45afaad021ca93fb7f26302959c7b4441d6f411da:KwfSfnXgL1bn4FKLKNMlhA==
 """
+
+
+@app.get(
+    "/.well-known/security.txt",
+    response_class=PlainTextResponse,
+    include_in_schema=False,
+)
+def security_txt():
+    return "Contact: mailto:poeynus@gmail.com\n" "Expires: 2030-12-31T23:59:59Z\n"
 
 
 app.include_router(api_router, prefix=os.getenv("API_PREFIX"))

@@ -16,7 +16,10 @@ def get_rng_item_list():
     return CustomResponse.response(rng_item_list, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/rng-item/save")
+@router.post(
+    "/rng-item/save",
+    include_in_schema=False,
+)
 def save_rng_score(request: SaveScore):
     rng_item_list = MinigameService.insert_user_minigame_score(request)
     if rng_item_list is None:

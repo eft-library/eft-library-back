@@ -19,7 +19,10 @@ router = APIRouter(tags=["User"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-@router.post("/add")
+@router.post(
+    "/add",
+    include_in_schema=False,
+)
 def add_user(addUserReq: AddUserReq):
     result = UserService.add_new_user(addUserReq)
     if result is None:
@@ -27,7 +30,10 @@ def add_user(addUserReq: AddUserReq):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.get("/user-info")
+@router.get(
+    "/user-info",
+    include_in_schema=False,
+)
 def get_user(token: str = Depends(oauth2_scheme)):
 
     user_email = UserUtil.verify_google_token(access_token=token)
@@ -40,7 +46,10 @@ def get_user(token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.get("/delete")
+@router.get(
+    "/delete",
+    include_in_schema=False,
+)
 def delete_user(token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
 
@@ -53,7 +62,10 @@ def delete_user(token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/update-nickname")
+@router.post(
+    "/update-nickname",
+    include_in_schema=False,
+)
 def update_nickname(
     request_info: UpdateUserNickname, token: str = Depends(oauth2_scheme)
 ):
@@ -68,7 +80,10 @@ def update_nickname(
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/check-nickname-duplicate")
+@router.post(
+    "/check-nickname-duplicate",
+    include_in_schema=False,
+)
 def check_nickname_duplicate(
     request_info: UpdateUserNickname, token: str = Depends(oauth2_scheme)
 ):
@@ -83,7 +98,10 @@ def check_nickname_duplicate(
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/report-user")
+@router.post(
+    "/report-user",
+    include_in_schema=False,
+)
 def report_post(request_info: ReqUserReport, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -95,7 +113,10 @@ def report_post(request_info: ReqUserReport, token: str = Depends(oauth2_scheme)
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/block-user")
+@router.post(
+    "/block-user",
+    include_in_schema=False,
+)
 def block_user(request_info: ReqUserBlock, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -107,7 +128,10 @@ def block_user(request_info: ReqUserBlock, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/unblock-user")
+@router.post(
+    "/unblock-user",
+    include_in_schema=False,
+)
 def unblock_user(request_info: ReqUserBlock, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -119,7 +143,10 @@ def unblock_user(request_info: ReqUserBlock, token: str = Depends(oauth2_scheme)
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/penalty-user")
+@router.post(
+    "/penalty-user",
+    include_in_schema=False,
+)
 def penalty_user(request_info: ReqUserPenalty, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -131,7 +158,10 @@ def penalty_user(request_info: ReqUserPenalty, token: str = Depends(oauth2_schem
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.get("/my-page/default")
+@router.get(
+    "/my-page/default",
+    include_in_schema=False,
+)
 def get_my_page_default(token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -143,7 +173,10 @@ def get_my_page_default(token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.get("/my-page/info")
+@router.get(
+    "/my-page/info",
+    include_in_schema=False,
+)
 def get_my_page_info(token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -155,7 +188,10 @@ def get_my_page_info(token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.get("/my-page/posts")
+@router.get(
+    "/my-page/posts",
+    include_in_schema=False,
+)
 def get_my_page_posts(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -167,7 +203,10 @@ def get_my_page_posts(page_num: int, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.get("/my-page/comments")
+@router.get(
+    "/my-page/comments",
+    include_in_schema=False,
+)
 def get_my_page_comments(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -179,7 +218,10 @@ def get_my_page_comments(page_num: int, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.get("/my-page/bookmarks")
+@router.get(
+    "/my-page/bookmarks",
+    include_in_schema=False,
+)
 def get_my_page_bookmarks(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -191,7 +233,10 @@ def get_my_page_bookmarks(page_num: int, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.get("/my-page/blocks")
+@router.get(
+    "/my-page/blocks",
+    include_in_schema=False,
+)
 def get_my_page_blocks(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -203,7 +248,10 @@ def get_my_page_blocks(page_num: int, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.get("/my-page/follow")
+@router.get(
+    "/my-page/follow",
+    include_in_schema=False,
+)
 def get_my_page_follow(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -215,7 +263,10 @@ def get_my_page_follow(page_num: int, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.get("/my-page/notification")
+@router.get(
+    "/my-page/notification",
+    include_in_schema=False,
+)
 def get_my_page_notification(page_num: int, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:

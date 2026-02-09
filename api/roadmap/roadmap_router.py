@@ -26,7 +26,10 @@ def get_all_quest(token: Optional[str] = Depends(oauth2_scheme)):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/save-roadmap")
+@router.post(
+    "/save-roadmap",
+    include_in_schema=False,
+)
 def save_roadmap(roadmap: SaveRoadmap, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:

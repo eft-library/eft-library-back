@@ -25,7 +25,10 @@ router = APIRouter(tags=["Community"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
-@router.post("/upload-image")
+@router.post(
+    "/upload-image",
+    include_in_schema=False,
+)
 async def upload_image(file: UploadFile = File(...)):
     result = CommunityService.upload_image(file)
     if result is None:
@@ -33,7 +36,10 @@ async def upload_image(file: UploadFile = File(...)):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/create-posts")
+@router.post(
+    "/create-posts",
+    include_in_schema=False,
+)
 def create_posts(post_info: CreateCommunity, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -112,7 +118,10 @@ def get_posts_detail_meta_data(request_info: GetPostDetail):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/like-post")
+@router.post(
+    "/like-post",
+    include_in_schema=False,
+)
 def like_post(request_info: PostReaction, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -124,7 +133,10 @@ def like_post(request_info: PostReaction, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/dislike-post")
+@router.post(
+    "/dislike-post",
+    include_in_schema=False,
+)
 def dislike_post(request_info: PostReaction, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -136,7 +148,10 @@ def dislike_post(request_info: PostReaction, token: str = Depends(oauth2_scheme)
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/bookmark-post")
+@router.post(
+    "/bookmark-post",
+    include_in_schema=False,
+)
 def bookmark_post(request_info: PostBookmark, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -148,7 +163,10 @@ def bookmark_post(request_info: PostBookmark, token: str = Depends(oauth2_scheme
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/follow-user")
+@router.post(
+    "/follow-user",
+    include_in_schema=False,
+)
 def follow_user(request_info: FollowUser, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -160,7 +178,10 @@ def follow_user(request_info: FollowUser, token: str = Depends(oauth2_scheme)):
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/check-follow")
+@router.post(
+    "/check-follow",
+    include_in_schema=False,
+)
 def check_follow(
     request_info: CheckFollow,
 ):
@@ -172,7 +193,10 @@ def check_follow(
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
-@router.post("/update-post")
+@router.post(
+    "/update-post",
+    include_in_schema=False,
+)
 def update_post(post_info: UpdateCommunity, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -191,7 +215,10 @@ def update_post(post_info: UpdateCommunity, token: str = Depends(oauth2_scheme))
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/get-update-post-detail")
+@router.post(
+    "/get-update-post-detail",
+    include_in_schema=False,
+)
 def get_update_post_detail(
     post_info: GetUpdatePostDetail, token: str = Depends(oauth2_scheme)
 ):
@@ -205,7 +232,10 @@ def get_update_post_detail(
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/delete-post-by-admin")
+@router.post(
+    "/delete-post-by-admin",
+    include_in_schema=False,
+)
 def delete_post_by_admin(request_info: PostDelete, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -217,7 +247,10 @@ def delete_post_by_admin(request_info: PostDelete, token: str = Depends(oauth2_s
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/delete-post-by-user")
+@router.post(
+    "/delete-post-by-user",
+    include_in_schema=False,
+)
 def delete_post_by_user(request_info: PostDelete, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
@@ -229,7 +262,10 @@ def delete_post_by_user(request_info: PostDelete, token: str = Depends(oauth2_sc
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
-@router.post("/report-post")
+@router.post(
+    "/report-post",
+    include_in_schema=False,
+)
 def report_post(request_info: ReqPostReport, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
