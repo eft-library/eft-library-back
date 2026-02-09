@@ -20,7 +20,6 @@ class StoryRoadmap(DataBaseConnector.Base):
     __tablename__ = "story_roadmap_i18n"
 
     id = Column(TEXT, primary_key=True)
-    story_id = Column(TEXT)
     node_type = Column(TEXT)
     title = Column(JSON)
     contents = Column(JSON)
