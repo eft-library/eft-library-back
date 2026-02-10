@@ -3,7 +3,7 @@ from database import DataBaseConnector
 from sqlalchemy import exists
 from api.user.user_res_models import User
 from api.where_am_i.req_models import ReqWhereAmI
-from util.websocket import send_wpf_data_ws_direct
+from util.websocket import send_wpf_location
 import logging
 
 logger = logging.getLogger("api.where_am_i")
@@ -36,9 +36,7 @@ class WhereAmIService:
 
                     s.add(user_location)
                     s.commit()
-                    await send_wpf_data_ws_direct(
-                        user_email=req.email, location=req.location
-                    )
+                    await send_wpf_location(user_email=req.email, location=req.location)
                     return True
             else:
                 logger.error(
