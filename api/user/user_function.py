@@ -44,7 +44,6 @@ class UserFunction:
     @staticmethod
     def _create_new_user(session, addUserReq: AddUserReq):
         new_user = User(
-            id=addUserReq.id,
             name=addUserReq.name,
             email=addUserReq.email,
             is_admin=False,
