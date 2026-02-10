@@ -72,7 +72,7 @@ async def redis_listener(user_email: str):
             if notification_key in sent_notifications[user_email]:
                 continue
 
-            sent_notifications[user_email].add(notification_key)
+            sent_notifications[user_email] = set()
 
             ws = connected_websockets.get(user_email)
             if ws:
