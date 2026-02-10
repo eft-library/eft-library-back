@@ -59,24 +59,6 @@ class QuestService:
             return None
 
     @staticmethod
-    def get_quest_by_npc(npc_id):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                query = text(QuestUtil.get_quest_by_npc())
-                param = {"npc_id": npc_id}
-                result = s.execute(query, param)
-                quest_list = [dict(row) for row in result.mappings()]
-
-            return quest_list
-        except Exception as e:
-            logger.error(
-                f"get_quest_by_npc: {npc_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
     def get_quest_with_trader(trader_id):
         try:
 
