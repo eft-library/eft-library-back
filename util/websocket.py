@@ -5,6 +5,7 @@ from typing import Dict, Set
 from fastapi import WebSocket
 from redis.asyncio import Redis
 import logging
+from starlette.websockets import WebSocketDisconnect
 
 logger = logging.getLogger("ws")
 
@@ -56,8 +57,11 @@ async def websocket_handler(websocket: WebSocket, user_email: str):
         # ping / keep-alive 용
         while True:
             await websocket.receive_text()
-    except Exception:
-        pass
+    except WebSocketDisconnect:
+        # 정상 종료
+        logger.info(f"[DISCONNECT] {user_email}")
+    except Exception as e:
+        logger.warning(f"[WS ERROR] {user_email} - {e}")
     finally:
         logger.info(f"[CLOSE] WebSocket 연결 종료: {user_email}")
         await cleanup_user(user_email)
@@ -87,7 +91,7 @@ async def redis_listener(user_email: str):
 
             # WPF 위치 메시지
             if data.get("type") == "wpf_location":
-                await ws.send_text(json.dumps(data))
+                await safe_send(json.dumps(data), user_email)
                 continue
 
             # 일반 알림 (중복 방지)
@@ -104,13 +108,14 @@ async def redis_listener(user_email: str):
 
             sent_notifications[user_email].add(notification_key)
 
-            await ws.send_text(
+            await safe_send(
                 json.dumps(
                     {
                         "type": "message",
                         "data": data,
                     }
-                )
+                ),
+                user_email,
             )
 
     except asyncio.CancelledError:
@@ -149,3 +154,13 @@ async def send_wpf_location(user_email: str, location: str):
             }
         ),
     )
+
+
+# 커넥션 강제 종료시 에러 로그가 너무 많이 뜸
+async def safe_send(ws: WebSocket, message: str, user_email: str):
+    try:
+        await ws.send_text(message)
+    except WebSocketDisconnect:
+        await cleanup_user(user_email)
+    except Exception as e:
+        logger.warning(f"[SEND ERROR] {user_email}: {e}")
