@@ -73,8 +73,16 @@ class UserFunction:
 
     @staticmethod
     def _create_user_related_entries(session, email: str):
+        exists = session.query(UserQuest).filter(UserQuest.user_email == email).first()
+
+        # 이미 존재
+        if exists:
+            return
+
         new_user_quest = UserQuest(
-            user_email=email, quest_list=[], update_time=datetime.now()
+            user_email=email,
+            quest_list=[],
+            update_time=datetime.now(),
         )
         session.add(new_user_quest)
 
