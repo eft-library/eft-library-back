@@ -43,11 +43,11 @@ CREATE TABLE IF NOT EXISTS chat_sessions (
 -- 채팅 메시지 테이블
 CREATE TABLE IF NOT EXISTS chat_messages (
     id            BIGSERIAL PRIMARY KEY,
-    session_id    UUID REFERENCES chat_sessions(session_id) ON DELETE SET NULL,
+    session_id    UUID,
     role          TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
     content       TEXT NOT NULL,
-    lang          TEXT,                        -- 세션 삭제 후에도 언어 분석 가능
-    source_docs   JSONB DEFAULT '[]',          -- 참조한 RAG 문서 목록
+    lang          TEXT,
+    source_docs   JSONB DEFAULT '[]',
     created_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
