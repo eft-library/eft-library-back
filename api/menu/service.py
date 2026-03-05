@@ -1,5 +1,5 @@
 from sqlalchemy.orm import subqueryload
-from api.home.models import MenuGroup, MainInfo
+from api.home.models import MenuGroup
 from api.search.models import Search
 from database import DataBaseConnector
 import logging

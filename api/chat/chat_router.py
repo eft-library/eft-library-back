@@ -1,22 +1,23 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from api.chat.chat_req_models import ChatRequest
-from api.chat.chat_res_models import ChatResponse
-from api.chat.service import request_chat, request_chat_stream
+from api.chat.service import request_chat_stream, get_chat_search
 import logging
+from api.response import CustomResponse
+from util.constants import HTTPCode
+from api.constants import Message
 
 log = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Chat"])
 
 
-@router.post("", response_model=ChatResponse)
-async def chat(req: ChatRequest):
-    try:
-        return await request_chat(req)
-    except Exception as e:
-        log.error(f"[chat_router] error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+@router.get("/search")
+def get_chat_search_list():
+    chat_search_list = get_chat_search()
+    if chat_search_list is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+    return CustomResponse.response(chat_search_list, HTTPCode.OK, Message.SUCCESS)
 
 
 @router.post("/stream")
