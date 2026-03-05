@@ -982,5 +982,13 @@ COMMENT ON COLUMN story_roadmap_i18n.edge IS '엣지 정보';
 COMMENT ON COLUMN story_roadmap_i18n.node_meta IS '제작시간/비용 등 타입별 추가 정보';
 COMMENT ON COLUMN story_roadmap_i18n.UPDATE_TIME IS '업데이트 시간';
 
--- eft chat vector
-CREATE EXTENSION IF NOT EXISTS vector;
+CREATE TABLE IF NOT EXISTS RAG_SEARCH_I18N
+(
+  VALUE TEXT NOT NULL,
+  LANG TEXT NOT NULL,
+  UPDATE_TIME timestamp with time zone default now(),
+  primary key (VALUE, LANG)
+);
+COMMENT ON COLUMN RAG_SEARCH_I18N.VALUE IS '검색 드롭다운 값';
+COMMENT ON COLUMN RAG_SEARCH_I18N.LANG IS '언어';
+COMMENT ON COLUMN RAG_SEARCH_I18N.UPDATE_TIME IS '검색 업데이트 시간';

@@ -2,7 +2,7 @@ import httpx
 import logging
 import os
 from api.chat.chat_req_models import ChatRequest
-from api.search.models import Search
+from api.chat.chat_res_models import RagSearch
 from database import DataBaseConnector
 
 log = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ MCP_CHAT_STREAM_URL = f"{MCP_SERVER_URL}/api/rag/chat/stream"
 def get_chat_search():
     try:
         with DataBaseConnector.SessionLocal() as s:
-            search_list = s.query(Search).order_by(Search.order).all()
+            search_list = s.query(RagSearch).all()
             return search_list
     except Exception as e:
         log.error(

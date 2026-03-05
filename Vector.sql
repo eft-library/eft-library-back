@@ -4,30 +4,28 @@ CREATE EXTENSION IF NOT EXISTS vector;
 -- RAG 문서 테이블
 CREATE TABLE IF NOT EXISTS rag_documents (
     id            BIGSERIAL PRIMARY KEY,
-    source_table  TEXT NOT NULL,              -- 'story_i18n'
-    source_id     TEXT NOT NULL,              -- story_i18n.id
-    lang          TEXT NOT NULL,              -- 'ko' | 'en' | 'ja'
-    content       TEXT NOT NULL,              -- 임베딩용 조합 텍스트
-    embedding     VECTOR(1024),               -- bge-m3 차원
-    metadata      JSONB DEFAULT '{}',         -- 검색 후 참조할 원본 데이터
+    source_table  TEXT NOT NULL,
+    source_id     TEXT NOT NULL,
+    lang          TEXT NOT NULL,
+    content       TEXT NOT NULL,
+    embedding     VECTOR(1024),
+    chunk_type    TEXT NOT NULL DEFAULT 'content',  -- 추가
+    ref_type      TEXT,                             -- 추가
+    ref_id        TEXT,                             -- 추가
+    metadata      JSONB DEFAULT '{}',
     created_at    TIMESTAMPTZ DEFAULT NOW(),
     updated_at    TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE (source_table, source_id, lang)    -- 중복 방지
+    UNIQUE (source_table, source_id, lang, chunk_type)  -- chunk_type 추가
 );
 
--- 벡터 검색 인덱스 (ivfflat 인덱스는 데이터가 어느 정도 적재된 후에 생성해야 정확도가 높다)
-CREATE INDEX IF NOT EXISTS rag_documents_embedding_idx
-    ON rag_documents
-    USING ivfflat (embedding vector_cosine_ops)
-    WITH (lists = 130);
-
--- lists 권장 공식
--- lists = sqrt(rows)
--- sqrt(17000) ≈ 130
-
+-- 벡터 검색 인덱스
+CREATE INDEX IF NOT EXISTS rag_documents_embedding_idx ON rag_documents USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
 -- 검색 필터용 인덱스
 CREATE INDEX IF NOT EXISTS rag_documents_source_idx
     ON rag_documents (source_table, lang);
+-- 추가
+CREATE INDEX IF NOT EXISTS rag_documents_chunk_type_idx
+    ON rag_documents (chunk_type, ref_type);
 
 -- 채팅 세션 테이블
 CREATE TABLE IF NOT EXISTS chat_sessions (
