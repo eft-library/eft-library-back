@@ -26,6 +26,11 @@ CREATE INDEX IF NOT EXISTS rag_documents_source_idx
 -- 추가
 CREATE INDEX IF NOT EXISTS rag_documents_chunk_type_idx
     ON rag_documents (chunk_type, ref_type);
+-- trgm 인덱스 추가
+CREATE INDEX idx_rag_documents_content_trgm
+ON rag_documents
+USING GIN (content gin_trgm_ops)
+WHERE chunk_type = 'identifier';
 
 -- 채팅 세션 테이블
 CREATE TABLE IF NOT EXISTS chat_sessions (
