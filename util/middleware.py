@@ -78,16 +78,16 @@ class KafkaProducerMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         process_time = time.time() - start_time
 
-        if real_ip != os.getenv("IP"):
-            logger.info(
-                f'{real_ip} - "{request.method} {path}" '
-                f"{response.status_code} - {process_time:.3f}s"
-            )
-            data = {
-                "method": request.method,
-                "link": path,
-                "footprint_time": datetime.now(ZoneInfo("Asia/Seoul")).isoformat(),
-            }
-            produce_message(json.dumps(data))
+        # if real_ip != os.getenv("IP"):
+        logger.info(
+            f'{real_ip} - "{request.method} {path}" '
+            f"{response.status_code} - {process_time:.3f}s"
+        )
+        data = {
+            "method": request.method,
+            "link": path,
+            "footprint_time": datetime.now(ZoneInfo("Asia/Seoul")).isoformat(),
+        }
+        produce_message(json.dumps(data))
 
         return response
