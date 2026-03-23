@@ -25,6 +25,7 @@ load_dotenv()
 
 
 def get_real_ip(request) -> str:
+    logger.info(dict(request.headers))
     # proxy.ts에서 심어준 헤더 우선
     if client_ip := request.headers.get("x-client-real-ip"):
         return client_ip
