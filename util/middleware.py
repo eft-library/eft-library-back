@@ -25,21 +25,9 @@ load_dotenv()
 
 
 def get_real_ip(request) -> str:
-    # logger.info(dict(request.headers))
-    # Cloudflare 사용 시
-    if cf_ip := request.headers.get("cf-connecting-ip"):
-        return cf_ip
-
-    # Nginx X-Real-IP
-    if real_ip := request.headers.get("x-real-ip"):
-        return real_ip
-
-    # X-Forwarded-For (첫 번째 = 실제 클라이언트)
-    forwarded_for = request.headers.get("x-forwarded-for", "")
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
-
-    # fallback
+    # proxy.ts에서 심어준 헤더 우선
+    if client_ip := request.headers.get("x-client-real-ip"):
+        return client_ip
     return request.client.host if request.client else "unknown"
 
 
