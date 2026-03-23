@@ -25,7 +25,7 @@ load_dotenv()
 
 
 def get_real_ip(request) -> str:
-    logger.info(dict(request.headers))
+    # logger.info(dict(request.headers))
     # Cloudflare 사용 시
     if cf_ip := request.headers.get("cf-connecting-ip"):
         return cf_ip
