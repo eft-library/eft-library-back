@@ -12,21 +12,28 @@ logger = logging.getLogger("api.roadmap")
 
 class RoadmapService:
     @staticmethod
-    def get_roadmap(user_email: str or None):
+    def get_roadmap():
         try:
-
             with DataBaseConnector.SessionLocal() as s:
-                user_roadmap = {}
-
+                roadmap = {}
                 node_query = text(RoadmapUtil.get_roadmap_node())
                 node_result = s.execute(node_query)
                 node_info = [dict(row) for row in node_result.mappings()]
-                user_roadmap["node_info"] = node_info
-
+                roadmap["node_info"] = node_info
                 edge_info = s.query(RoadmapEdge).all()
+                roadmap["edge_info"] = edge_info
+                return roadmap
+        except Exception as e:
+            logger.error(
+                f"get_roadmap error: {e}",
+                exc_info=True,
+            )
+            return None
 
-                user_roadmap["edge_info"] = edge_info
-
+    @staticmethod
+    def get_user_roadmap(user_email: str or None):
+        try:
+            with DataBaseConnector.SessionLocal() as s:
                 if user_email is not None:
                     user_quest_list = (
                         s.query(UserRoadmap)
@@ -34,16 +41,14 @@ class RoadmapService:
                         .first()
                     )
                     if user_quest_list is not None:
-                        user_roadmap["quest_list"] = user_quest_list.quest_list
+                        return user_quest_list.quest_list
                     else:
-                        user_roadmap["quest_list"] = []
-                    return user_roadmap
+                        return []
                 else:
-                    user_roadmap["quest_list"] = []
-                    return user_roadmap
+                    return []
         except Exception as e:
             logger.error(
-                f"get_roadmap error: {e}",
+                f"get_user_roadmap error: {e}",
                 exc_info=True,
             )
             return None

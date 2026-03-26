@@ -30,16 +30,58 @@ CREATE TABLE IF NOT EXISTS quest_relations (
 );
 CREATE INDEX ON quest_relations (quest_id);
 
--- quest 보상 정보
-CREATE TABLE quest_rewards (
-    id         text primary key,
-    quest_id   text,
-    reward_type text,  -- 'item', 'traderStanding', 'skill' ...
-    count      integer,
-    sort_order integer,
-    extra      jsonb
+-- 아이템 보상
+CREATE TABLE quest_reward_items (
+    id          text PRIMARY KEY,
+    quest_id    text,
+    item_id     text,  -- item_detail JOIN
+    count       integer,
+    sort_order  integer,
+    update_time timestamptz DEFAULT now()
 );
-CREATE INDEX ON quest_rewards (quest_id);
+
+-- 트레이더 호감도
+CREATE TABLE quest_reward_trader_standing (
+    id          text PRIMARY KEY,
+    quest_id    text,
+    trader_id   text,  -- traders JOIN
+    standing    numeric,
+    sort_order  integer,
+    update_time timestamptz DEFAULT now()
+);
+
+-- 거래 잠금해제
+CREATE TABLE quest_reward_offer_unlocks (
+    id          text PRIMARY KEY,
+    quest_id    text,
+    trader_id   text,  -- traders JOIN
+    item_id     text,  -- item_detail JOIN
+    level       integer,
+    sort_order  integer,
+    update_time timestamptz DEFAULT now()
+);
+
+-- 제작 잠금해제
+CREATE TABLE quest_reward_craft_unlocks (
+    id          text PRIMARY KEY,
+    quest_id    text,
+    station_id  text,  -- hideout_stations JOIN
+    item_id     text,  -- item_detail JOIN (결과물)
+    count       integer,
+    level       integer,
+    sort_order  integer,
+    update_time timestamptz DEFAULT now()
+);
+
+-- 스킬 보상 (JOIN 없어서 jsonb도 되지만 통일성 위해)
+CREATE TABLE quest_reward_skills (
+    id          text PRIMARY KEY,
+    quest_id    text,
+    skill_name  text,
+    level       integer,
+    sort_order  integer,
+    update_time timestamptz DEFAULT now()
+);
 
 -- quest 목표 정보
 CREATE TABLE IF NOT EXISTS quest_objectives (
