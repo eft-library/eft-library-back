@@ -105,6 +105,7 @@ create index idx_menu_sub_group_parent_group_id on menu_sub_groups(parent_group_
 create table if not exists maps
 (
     id text primary key,
+    normalized_name text,
     name_en text,
     name_ko text,
     name_ja text,
@@ -120,39 +121,115 @@ create table if not exists maps
     update_time timestamptz default now()
 );
 
-create table if not exists QUEST_I18N
+create table if not exists quests
 (
     id text primary key,
     normalized_name text,
-    name jsonb,
-    npc_id text,
-    lightkeeper_required boolean,
+    name_en text,
+    name_ko text,
+    name_ja text,
+    trader_id text,
+    experience integer,
+    delay_max integer,
+    delay_min integer,
     kappa_required boolean,
-    task_requirements jsonb,
-    task_next jsonb,
-    objectives jsonb,
-    WIKI_URL text,
-    finish_rewards jsonb,
     min_player_level integer,
-    guide jsonb,
     sort_order integer,
+    wiki_url text,
+    guide_en text,
+    guide_ko text,
+    guide_ja text,
     update_time timestamptz default now()
 );
-COMMENT ON COLUMN QUEST_I18N.id IS 'Quest ID';
-COMMENT ON COLUMN QUEST_I18N.name IS 'Quest 이름';
-COMMENT ON COLUMN QUEST_I18N.npc_id IS 'Quest npc id';
-COMMENT ON COLUMN QUEST_I18N.lightkeeper_required IS 'Quest 라이트키퍼 여부';
-COMMENT ON COLUMN QUEST_I18N.kappa_required IS 'Quest 카파 여부';
-COMMENT ON COLUMN QUEST_I18N.task_requirements IS 'Quest 선행 퀘스트 목록';
-COMMENT ON COLUMN QUEST_I18N.task_next IS 'Quest 후행 퀘스트 목록';
-COMMENT ON COLUMN QUEST_I18N.objectives IS 'Quest 목표 목록';
-COMMENT ON COLUMN QUEST_I18N.WIKI_URL IS 'Quest 위키 주소';
-COMMENT ON COLUMN QUEST_I18N.GUIDE IS 'Quest 가이드';
-COMMENT ON COLUMN QUEST_I18N.finish_rewards IS 'Quest 완료 보상 목록';
-COMMENT ON COLUMN QUEST_I18N.min_player_level IS 'Quest 레벨 조건';
-COMMENT ON COLUMN QUEST_I18N.normalized_name IS 'Quest url mapping';
-COMMENT ON COLUMN QUEST_I18N.sort_order IS 'Quest 정렬';
-COMMENT ON COLUMN QUEST_I18N.update_time IS 'Quest 업데이트 시간';
+
+create table if not exists quest_objectives
+(
+    objective_id text primary key,
+    quest_id text,
+    sort_order integer,
+    objective_type text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    location_in_map boolean,
+    raw_data jsonb,
+    update_time timestamptz default now()
+);
+create index idx_quest_objectives_quest_id on quest_objectives (quest_id);
+create index idx_quest_objectives_quest_id_sort_order on quest_objectives (quest_id, sort_order);
+create index idx_quest_objectives_objective_type on quest_objectives (objective_type);
+
+create table if not exists quest_objective_items
+(
+    objective_id text,
+    item_type text, -- all item / questItem / markerItem / requiredKey
+    item_id text,
+    sort_order integer,
+    update_time timestamptz default now(),
+    primary key (objective_id, item_type, item_id)
+);
+create index idx_quest_objective_items_item_id on quest_objective_items (item_id);
+create index idx_quest_objective_items_item_type on quest_objective_items (item_type);
+create index idx_quest_objective_items_objective_id_item_type on quest_objective_items (objective_id, item_type);
+
+create table if not exists quest_objective_maps
+(
+    objective_id text,
+    map_id text,
+    sort_order integer,
+    update_time timestamptz default now(),
+    primary key (objective_id, map_id)
+);
+create index idx_quest_objective_maps_map_id on quest_objective_maps (map_id);
+
+create table if not exists quest_relations
+(
+    quest_id text,
+    related_quest_id text,
+    relation_type text, -- require / next
+    sort_order integer,
+    update_time timestamptz default now(),
+    primary key (quest_id, related_quest_id, relation_type)
+);
+create index idx_quest_relations_related_quest_id on quest_relations (related_quest_id);
+create index idx_quest_relations_relation_type on quest_relations (relation_type);
+
+create table if not exists quest_finish_rewards
+(
+    quest_id text,
+    reward_type text, -- skill_level / offer_unlock / trader_standing
+    target_id text,   -- trader_id, skill_name 등
+    reward_value numeric,
+    sort_order integer,
+    raw_data jsonb,
+    update_time timestamptz default now(),
+    primary key (quest_id, reward_type, target_id, sort_order)
+);
+create index idx_quest_finish_rewards_quest_id on quest_finish_rewards (quest_id);
+create index idx_quest_finish_rewards_reward_type on quest_finish_rewards (reward_type);
+create index idx_quest_finish_rewards_target_id on quest_finish_rewards (target_id);
+
+create table if not exists quest_finish_reward_items
+(
+    quest_id text,
+    item_id text,
+    quantity integer,
+    sort_order integer,
+    update_time timestamptz default now(),
+    primary key (quest_id, item_id, sort_order)
+);
+create index idx_quest_finish_reward_items_item_id on quest_finish_reward_items (item_id);
+
+create table if not exists quest_finish_reward_craft_unlocks
+(
+    quest_id text,
+    craft_id text,
+    sation_level integer,
+    sort_order integer,
+    update_time timestamptz default now(),
+    primary key (quest_id, craft_id)
+);
+create index idx_quest_finish_reward_craft_unlocks_craft_id on quest_finish_reward_craft_unlocks (craft_id);
 
 create table if not exists traders
 (
@@ -165,7 +242,7 @@ create table if not exists traders
     update_time timestamptz default now()
 );
 
-create table trader_barters
+create table if not exists trader_barters
 (
     id text primary key,
     trader_id text,
@@ -175,7 +252,7 @@ create table trader_barters
 create index idx_trader_barters_trader_id on trader_barters(trader_id);
 create index idx_trader_barters_trader_id_level on trader_barters(trader_id, level);
 
-create table barter_required_items
+create table if not exists barter_required_items
 (
     id text primary key,
     barter_id text,
@@ -185,7 +262,7 @@ create table barter_required_items
 create index idx_barter_required_items_barter_id on barter_required_items(barter_id);
 create index idx_barter_required_items_item_id on barter_required_items(item_id);
 
-create table barter_reward_items
+create table if not exists barter_reward_items
 (
     id text primary key,
     barter_id text,
@@ -333,214 +410,224 @@ create table if not exists hideout_bonus
 );
 create index idx_hideout_bonus_level on hideout_bonus(hideout_level_id);
 
-create table if not exists USER_INFO
+-- 여기서 부터 인덱스 걸기
+create table if not exists user_info
 (
-  EMAIL text  primary key,
-  NAME text,
-  NICKNAME text,
-  IS_ADMIN boolean,
-  ATTENDANCE_COUNT integer,
-  LAST_UPDATE_NICKNAME timestamptz default now(),
-  CREATE_TIME timestamptz default now(),
-  ATTENDANCE_TIME timestamp with time zone
+  email text primary key,
+  name text,
+  nickname text,
+  is_admin boolean,
+  attendance_count integer,
+  attendance_time timestamptz default now(),
+  last_update_nickname timestamptz default now(),
+  create_time timestamptz default now()
 );
-COMMENT ON COLUMN USER_INFO.NAME IS '사용자 이름';
-COMMENT ON COLUMN USER_INFO.EMAIL IS '사용자 이메일';
-COMMENT ON COLUMN USER_INFO.NICKNAME IS '사용자 별명';
-COMMENT ON COLUMN USER_INFO.IS_ADMIN IS '사용자 운영자 여부';
-COMMENT ON COLUMN USER_INFO.ATTENDANCE_COUNT IS '사용자 출석일 수';
-COMMENT ON COLUMN USER_INFO.LAST_UPDATE_NICKNAME IS '사용자 닉네임 마지막 수정 일자';
-COMMENT ON COLUMN USER_INFO.CREATE_TIME IS '사용자 생성일';
-COMMENT ON COLUMN USER_INFO.ATTENDANCE_TIME IS '사용자 최근 출석 날짜';
 
-create table if not exists USER_QUEST
+create table if not exists user_quest
 (
-  user_email text,
-  QUEST_LIST text[],
-  update_time timestamptz default now(),
-  PRIMARY KEY (user_email)
+  email text primary key,
+  quest_list text[],
+  update_time timestamptz default now()
 );
-COMMENT ON COLUMN USER_QUEST.user_email IS '사용자 이메일';
-COMMENT ON COLUMN USER_QUEST.QUEST_LIST IS '사용자 퀘스트 리스트';
-COMMENT ON COLUMN USER_QUEST.UPDATE_TIME IS '사용자 퀘스트 업데이트 시간';
 
-create table if not exists INFORMATION_I18N
+create table if not exists information
 (
-    ID text primary key,
-    TYPE text,
-    NAME jsonb,
-    DESCRIPTION jsonb,
+    id text primary key,
+    information_type text,
+    title_en text,
+    title_ko text,
+    title_ja text,
+    content_en text,
+    content_ko text,
+    content_ja text,
     update_time timestamptz default now()
 );
-COMMENT ON COLUMN INFORMATION_I18N.ID IS '패치 노트 ID';
-COMMENT ON COLUMN INFORMATION_I18N.NAME IS '패치 노트 이름';
-COMMENT ON COLUMN INFORMATION_I18N.DESCRIPTION IS '패치 노트 내용';
-COMMENT ON COLUMN INFORMATION_I18N.UPDATE_TIME IS '패치 노트 업데이트 시간';
 
-CREATE INDEX idx_information_i18n_type ON INFORMATION_I18N(TYPE);
-CREATE INDEX idx_information_i18n_type_update_time ON INFORMATION_I18N(TYPE, UPDATE_TIME DESC);
-
-create table if not exists USER_ROADMAP
+create table if not exists user_roadmap
 (
-    user_email text primary key,
-    QUEST_LIST text[],
+    email text primary key,
+    quest_list text[],
     update_time timestamptz default now()
 );
-COMMENT ON COLUMN USER_ROADMAP.user_email IS '로드맵 사용자 이메일';
-COMMENT ON COLUMN USER_ROADMAP.QUEST_LIST IS '로드맵 완료한 퀘스트 정보';
-COMMENT ON COLUMN USER_ROADMAP.UPDATE_TIME IS '로드맵 업데이트 날짜';
 
 create table if not exists ROADMAP_NODE
 (
-    ID text primary key,
-    TOTAL_X_COORDINATE numeric,
-    TOTAL_Y_COORDINATE numeric,
-    SINGLE_X_COORDINATE numeric,
-    SINGLE_Y_COORDINATE numeric,
-    TOTAL_KAPPA_X_COORDINATE numeric,
-    TOTAL_KAPPA_Y_COORDINATE numeric,
-    SINGLE_KAPPA_X_COORDINATE numeric,
-    SINGLE_KAPPA_Y_COORDINATE numeric,
-    NODE_COLOR text,
+    id text primary key,
+    total_x_coordinate numeric,
+    total_y_coordinate numeric,
+    single_x_coordinate numeric,
+    single_y_coordinate numeric,
+    total_kappa_x_coordinate numeric,
+    total_kappa_y_coordinate numeric,
+    single_kappa_x_coordinate numeric,
+    single_kappa_y_coordinate numeric,
     update_time timestamptz default now()
 );
-COMMENT ON COLUMN ROADMAP_NODE.ID IS '로드맵 퀘스트 아이디';
-COMMENT ON COLUMN ROADMAP_NODE.TOTAL_X_COORDINATE IS '로드맵 전체 X 좌표';
-COMMENT ON COLUMN ROADMAP_NODE.TOTAL_Y_COORDINATE IS '로드맵 전체 Y 좌표';
-COMMENT ON COLUMN ROADMAP_NODE.SINGLE_X_COORDINATE IS '로드맵 싱글 X 좌표';
-COMMENT ON COLUMN ROADMAP_NODE.SINGLE_Y_COORDINATE IS '로드맵 싱글 Y 좌표';
-COMMENT ON COLUMN ROADMAP_NODE.TOTAL_X_COORDINATE IS '로드맵 카파 전체 X 좌표';
-COMMENT ON COLUMN ROADMAP_NODE.TOTAL_Y_COORDINATE IS '로드맵 카파 전체 Y 좌표';
-COMMENT ON COLUMN ROADMAP_NODE.SINGLE_X_COORDINATE IS '로드맵 카파 싱글 X 좌표';
-COMMENT ON COLUMN ROADMAP_NODE.SINGLE_Y_COORDINATE IS '로드맵 카파 싱글 Y 좌표';
-COMMENT ON COLUMN ROADMAP_NODE.NODE_COLOR IS '로드맵 노드 색상';
-COMMENT ON COLUMN ROADMAP_NODE.UPDATE_TIME IS '로드맵 업데이트 날짜';
 
 create table if not exists ROADMAP_EDGE
 (
-    ID text primary key,
-    SOURCE_ID text,
-    TARGET_ID text,
+    id text primary key,
+    source_id text,
+    target_id text,
     update_time timestamptz default now()
 );
-COMMENT ON COLUMN ROADMAP_EDGE.ID IS '로드맵 엣지 아이디';
-COMMENT ON COLUMN ROADMAP_EDGE.SOURCE_ID IS '로드맵 엣지 연결 시작 노드 아이디';
-COMMENT ON COLUMN ROADMAP_EDGE.TARGET_ID IS '로드맵 엣지 연결 끝 노드 아이디';
-COMMENT ON COLUMN ROADMAP_EDGE.UPDATE_TIME IS '로드맵 엣지 업데이트 날짜';
 
-create table if not exists ITEM_PRICE_I18N
+create table if not exists item_prices
 (
-    ID text primary key ,
-    NAME jsonb,
-    WIDTH numeric,
-    HEIGHT numeric,
-    CATEGORY text,
+    id text primary key,
     TRADER jsonb,
-    IMAGE text,
     update_time timestamptz default now()
 );
-COMMENT ON COLUMN ITEM_PRICE_I18N.ID IS '아이템 아이디';
-COMMENT ON COLUMN ITEM_PRICE_I18N.NAME IS '아이템 이름';
-COMMENT ON COLUMN ITEM_PRICE_I18N.IMAGE IS '아이템 사진';
-COMMENT ON COLUMN ITEM_PRICE_I18N.WIDTH IS '아이템 가로 크기';
-COMMENT ON COLUMN ITEM_PRICE_I18N.HEIGHT IS '아이템 세로 크기';
-COMMENT ON COLUMN ITEM_PRICE_I18N.CATEGORY IS '아이템 카테고리';
-COMMENT ON COLUMN ITEM_PRICE_I18N.TRADER IS '트레이더 정보';
-COMMENT ON COLUMN ITEM_PRICE_I18N.UPDATE_TIME IS '업데이트 날짜';
 
--- 미니게임 전용 테이블
-CREATE MATERIALIZED VIEW item_flea_summary AS
-WITH pve_prices AS (SELECT id,
-                           name,
-                           image,
-                           width,
-                           height,
-                           category,
-                           jsonb_array_elements(trader -> 'pve_trader') AS trade_info,
-                           update_time
-                    FROM item_price_i18n
-                    WHERE jsonb_typeof(trader -> 'pve_trader') = 'array')
-SELECT id,
-       name,
-       image,
-       width,
-       height,
-       category,
-       MAX((trade_info ->> 'price')::INT)                                   AS flea_market_price,
-       update_time
-FROM pve_prices
-WHERE trade_info -> 'trader' ->> 'npc_id' = 'FLEA_MARKET'
-  AND category != 'Etc'
-GROUP BY id, name, image, width, height, category, update_time
-ORDER BY category, flea_market_price DESC;
-
-CREATE UNIQUE INDEX idx_item_flea_summary_id
-ON item_flea_summary (id);
-
-create table if not exists ITEM_PRICE_HISTORY_I18N
+create table if not exists item_trader_prices
 (
-    ID text,
-    PRICE integer,
-    PRICE_TYPE text,
-    PRICE_TIME timestamptz default now(),
-    EXECUTE_TIME timestamptz default now(),
-    PRIMARY KEY (ID, PRICE_TYPE, PRICE_TIME)
+    id text primary key,
+    item_id text,
+    game_mode text, -- 'pve' | 'pvp'
+    trader_id text,
+    price numeric,
+    update_time timestamptz default now()
 );
-COMMENT ON COLUMN ITEM_PRICE_HISTORY_I18N.ID IS '아이템 아이디';
-COMMENT ON COLUMN ITEM_PRICE_HISTORY_I18N.PRICE IS '해당 시간대 금액';
-COMMENT ON COLUMN ITEM_PRICE_HISTORY_I18N.PRICE_TYPE IS '시세 종류 (pvp, pve)';
-COMMENT ON COLUMN ITEM_PRICE_HISTORY_I18N.PRICE_TIME IS '아이템 시세 시간대';
-COMMENT ON COLUMN ITEM_PRICE_HISTORY_I18N.EXECUTE_TIME IS '적재 날짜';
+create index idx_item_trader_prices_item_id on item_trader_prices(item_id);
+create index idx_item_trader_prices_trader_id on item_trader_prices(trader_id);
+create index idx_item_trader_prices_item_mode on item_trader_prices(item_id, game_mode);
 
-create table if not exists WIPE_I18N
+-- 아이템 시세 조회 별도 테이블 말고 조회 쿼리로 수정
+select
+    itp.item_id,
+    max(itp.price) as flea_market_price
+from item_trader_prices itp
+where itp.game_mode = 'pve'
+  and itp.trader_id = 'FLEA_MARKET'
+group by itp.item_id;
+
+create table if not exists item_price_history
 (
-    ID integer primary key ,
-    PATCH_VERSION text,
-    SEASON_START text,
-    SEASON_END text,
-    CREATE_TIME timestamptz default now()
+    item_id text,
+    price integer,
+    game_mode text,
+    price_time timestamptz default now(),
+    execute_time timestamptz default now(),
+    PRIMARY KEY (item_id, game_mode, price_time)
 );
-COMMENT ON COLUMN WIPE_I18N.ID IS '아이디';
-COMMENT ON COLUMN WIPE_I18N.PATCH_VERSION IS '패치 버전';
-COMMENT ON COLUMN WIPE_I18N.SEASON_START IS '시즌 시작 날짜';
-COMMENT ON COLUMN WIPE_I18N.SEASON_END IS '시즌 종료 날짜';
-COMMENT ON COLUMN WIPE_I18N.CREATE_TIME IS '생성 날짜';
+create index idx_item_price_history_time on item_price_history_i18n(price_time desc);
+
+create table if not exists wipe
+(
+    id integer primary key ,
+    patch_version text,
+    season_start text,
+    season_end text,
+    create_time timestamptz default now()
+);
 
 create table if not exists USER_HIDEOUT
 (
-    user_email text primary key,
-    COMPLETE_LIST text[],
-    ITEM_LIST jsonb,
+    email text primary key,
+    complete_list text[],
+    item_list jsonb,
     update_time timestamptz default now()
 );
-COMMENT ON COLUMN USER_HIDEOUT.user_email IS '하이드아웃 사용자 이메일';
-COMMENT ON COLUMN USER_HIDEOUT.COMPLETE_LIST IS '하이드아웃 완료 정보';
-COMMENT ON COLUMN USER_HIDEOUT.ITEM_LIST IS '하이드아웃 사용자 아이템 저장 정보';
-COMMENT ON COLUMN USER_HIDEOUT.UPDATE_TIME IS '하이드아웃 업데이트 날짜';
 
-create table if not exists ITEM_I18N
-(
-    ID text primary key,
-    NAME jsonb,
-    CATEGORY text,
-    IMAGE_WIDTH numeric,
-    IMAGE_HEIGHT numeric,
+create table if not exists items (
+    id text primary key,
+    category text,
+    name_en text,
+    name_ko text,
+    name_ja text,
+    weight numeric,
+    width integer,
+    height integer,
     normalized_name text,
-    IMAGE text,
-    INFO jsonb,
+    image text,
     update_time timestamptz default now()
 );
-COMMENT ON COLUMN ITEM_I18N.ID IS '아이템 아이디';
-COMMENT ON COLUMN ITEM_I18N.NAME IS '아이템 이름';
-COMMENT ON COLUMN ITEM_I18N.CATEGORY IS '아이템 카테고리';
-COMMENT ON COLUMN ITEM_I18N.IMAGE IS '아이템 사진';
-COMMENT ON COLUMN ITEM_I18N.IMAGE_WIDTH IS '아이템 사진 가로 크기';
-COMMENT ON COLUMN ITEM_I18N.IMAGE_HEIGHT IS '아이템 사진 세로 크기';
-COMMENT ON COLUMN ITEM_I18N.normalized_name IS '아이템 주소';
-COMMENT ON COLUMN ITEM_I18N.INFO IS '아이템 상세 정보';
-COMMENT ON COLUMN ITEM_I18N.UPDATE_TIME IS '아이템 업데이트 날짜';
+create index idx_items_category on items(category);
+create index idx_items_normalized_name on items(normalized_name);
+create index idx_items_update_time on items(update_time desc);
 
-create table if not exists ITEM_DETAIL_I18N
+create table if not exists ammo_items (
+    item_id text primary key,
+    damage integer,
+    armor_damage integer,
+    penetration_power integer,
+    recoil_modifier numeric,
+    accuracy_modifier numeric,
+    heavy_bleed_modifier numeric,
+    light_bleed_modifier numeric,
+    efficiency jsonb
+);
+
+create table if not exists armor_items (
+    item_id text primary key,
+    armor_type text, -- ArmorVest, Headwear, FaceCover, Rig ...
+    class_value integer,
+    durability integer,
+    material_name text,
+    ergo_penalty numeric,
+    turn_penalty numeric,
+    speed_penalty numeric,
+    ricochet_chance_en text,
+    ricochet_chance_ko text,
+    ricochet_chance_ja text,
+    deafening text,
+    blindness_protection numeric,
+    zones jsonb
+);
+create index idx_armor_items_armor_type on armor_items(armor_type);
+create index idx_armor_items_class_value on armor_items(class_value);
+
+create table if not exists storage_items (
+    item_id text primary key,
+    storage_type text, -- Backpack, Container, Rig
+    capacity integer,
+    grids jsonb
+);
+create index idx_storage_items_storage_type on storage_items(storage_type);
+
+create table if not exists gun_items (
+    item_id text primary key,
+    gun_category text,
+    caliber text,
+    fire_rate integer,
+    ergonomics numeric,
+    recoil_vertical numeric,
+    recoil_horizontal numeric,
+    default_ammo text,
+    modes jsonb
+);
+create index idx_gun_items_gun_category on gun_items(gun_category);
+
+create table if not exists gun_allowed_ammo (
+    item_id text,
+    ammo_id text,
+    primary key (item_id, ammo_id)
+);
+
+create table if not exists consumable_items (
+    item_id text primary key,
+    consumable_type text, -- Medical / Provisions
+    medical_category text,
+    uses integer,
+    use_time numeric,
+    hitpoints integer,
+    energy integer,
+    hydration integer,
+    painkiller_duration integer,
+    energy_impact integer,
+    hydration_impact integer,
+    units integer,
+    cures jsonb,
+    buff jsonb,
+    malus jsonb,
+    de_buff jsonb,
+    advantage jsonb,
+    stim_effects jsonb
+);
+create index idx_consumable_items_consumable_type on consumable_items(consumable_type);
+create index idx_consumable_items_medical_category on consumable_items(medical_category);
+
+create table if not exists item_details
 (
     ID text primary key,
     normalized_name text,
@@ -566,77 +653,131 @@ COMMENT ON COLUMN ITEM_DETAIL_I18N.REWARDED_BY_QUESTS_CRAFT_UNLOCK IS '아이템
 COMMENT ON COLUMN ITEM_DETAIL_I18N.REWARDED_BY_QUESTS_OFFER_UNLOCK IS '아이템 상세 구매 잠금 해제';
 COMMENT ON COLUMN ITEM_DETAIL_I18N.UPDATE_TIME IS '아이템 상세 업데이트 날짜';
 
-create table if not exists WHERE_AM_I_I18N
+create table if not exists where_am_i
 (
-    ID text primary key,
-    IMAGE text,
-    MAP_BOUNDS jsonb,
-    IMAGE_BOUNDS jsonb,
-    DEFAULT_ZOOM_LEVEL numeric,
-    QUESTS jsonb,
+    id text primary key,
+    image text,
+    map_bounds jsonb,
+    image_bounds jsonb,
+    default_zoom_level numeric,
     update_time timestamptz default now()
 );
-COMMENT ON COLUMN WHERE_AM_I_I18N.ID IS 'where am i 아이디';
-COMMENT ON COLUMN WHERE_AM_I_I18N.IMAGE IS 'where am i 이미지';
-COMMENT ON COLUMN WHERE_AM_I_I18N.MAP_BOUNDS IS 'where am i Map bounds';
-COMMENT ON COLUMN WHERE_AM_I_I18N.IMAGE_BOUNDS IS 'where am i image bounds';
-COMMENT ON COLUMN WHERE_AM_I_I18N.DEFAULT_ZOOM_LEVEL IS 'where am i default zoom level';
-COMMENT ON COLUMN WHERE_AM_I_I18N.QUESTS IS 'where am i 퀘스트 정보';
-COMMENT ON COLUMN WHERE_AM_I_I18N.UPDATE_TIME IS 'where am i 업데이트 날짜';
 
-create table if not exists USER_FOOTPRINT
+create table if not exists user_footprint
 (
-  ID serial primary key,
-  LINK text,
-  REQUEST text,
-  FOOTPRINT_TIME timestamp with time zone,
-  EXECUTE_TIME timestamptz default now()
+  id serial primary key,
+  url text,
+  request_type text,
+  request_time timestamptz default now(),
+  execute_time timestamptz default now()
 );
-COMMENT ON COLUMN USER_FOOTPRINT.ID IS '사용자 기록 아이디';
-COMMENT ON COLUMN USER_FOOTPRINT.REQUEST IS '사용자 기록 요청 타입';
-COMMENT ON COLUMN USER_FOOTPRINT.LINK IS '사용자 기록 주소';
-COMMENT ON COLUMN USER_FOOTPRINT.FOOTPRINT_TIME IS '사용자 기록 전송 시간';
-COMMENT ON COLUMN USER_FOOTPRINT.EXECUTE_TIME IS '사용자 기록 적재 시간';
+create index idx_user_footprint_request_time on user_footprint (request_time desc);
 
-create table if not exists SITEMAP
+create table if not exists sitemap
 (
-    ID serial primary key,
-    LINK text,
-    PRIORITY numeric,
-    CHANGE_FREQ text,
-    VALUE text,
-    CREATE_DATE timestamptz default now(),
+    id serial primary key,
+    url text,
+    priority numeric,
+    change_freq text,
+    sitemap_value text,
+    create_time timestamptz default now(),
     update_time timestamptz default now()
 );
-COMMENT ON COLUMN SITEMAP.ID IS 'sitemap 아이디';
-COMMENT ON COLUMN SITEMAP.LINK IS 'sitemap 주소';
-COMMENT ON COLUMN SITEMAP.PRIORITY IS 'sitemap 우선순위';
-COMMENT ON COLUMN SITEMAP.CHANGE_FREQ IS 'sitemap 업데이트 주기';
-COMMENT ON COLUMN SITEMAP.VALUE IS 'sitemap 분리 값';
-COMMENT ON COLUMN SITEMAP.CREATE_DATE IS 'sitemap 생성일';
-COMMENT ON COLUMN SITEMAP.UPDATE_TIME IS 'sitemap 업데이트 날짜';
 
-create table if not exists HEALTH_CHECK (
+create table if not exists health_check (
     id serial primary key,
     service_name text,
     status text,
     checked_time timestamptz default now()
 );
-COMMENT ON COLUMN HEALTH_CHECK.ID IS 'health check 아이디';
-COMMENT ON COLUMN HEALTH_CHECK.service_name IS 'health check 서비스 이름';
-COMMENT ON COLUMN HEALTH_CHECK.status IS 'health check 상태';
-COMMENT ON COLUMN HEALTH_CHECK.checked_time IS 'health check 점검 시간';
 
-create table if not exists RESPONSE_TIME (
+create table if not exists response_time (
     id serial primary key,
     service_name text,
     response_ms numeric,
     checked_time timestamptz default now()
 );
-COMMENT ON COLUMN RESPONSE_TIME.ID IS '응답 시간 아이디';
-COMMENT ON COLUMN RESPONSE_TIME.service_name IS '응답 시간 서비스 이름';
-COMMENT ON COLUMN RESPONSE_TIME.response_ms IS '응답 시간';
-COMMENT ON COLUMN RESPONSE_TIME.checked_time IS '응답 시간 점검 시간';
+
+create table if not exists user_location_request (
+    id serial primary key,
+    email text,
+    location text,
+    request_time timestamptz default now()
+);
+
+create table if not exists USER_PROGRESS_ITEM
+(
+  email text,
+  progress_type text,
+  item_list text[],
+  update_time timestamptz default now(),
+  PRIMARY KEY (email, progress_type)
+);
+
+create table if not exists progress_item (
+    id text primary key,
+    progress_type text,
+    update_time timestamptz default now()
+);
+CREATE INDEX idx_progress_item_type ON progress_item (progress_type);
+
+create table if not exists user_minigame_score (
+  id serial primary key,
+  nickname text,
+  game_type text,
+  score bigint,
+  create_time timestamptz default now()
+);
+CREATE INDEX idx_minigame_score_rank ON user_minigame_score (game_type, score DESC, create_time ASC);
+
+create table if not exists story (
+    id text primary key,
+    title_en text,
+    title_ko text,
+    title_ja text,
+    objectives_en text,
+    objectives_ko text,
+    objectives_ja text,
+    requirements_en text,
+    requirements_ko text,
+    requirements_ja text,
+    guide_en text,
+    guide_ja text,
+    guide_ko text,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+
+create table if not exists story_roadmap (
+    id text primary key,
+    node_type text,
+    title_en text,
+    title_ko text,
+    title_ja text,
+    contents_en text,
+    contents_ko text,
+    contents_ja text,
+    desc_en text,
+    desc_ko text,
+    desc_ja text,
+    value_text text,
+    image text,
+    x_coordinate numeric,
+    y_coordinate numeric,
+    edge jsonb,
+    update_time timestamptz default now()
+);
+
+create table if not exists RAG_SEARCH_I18N
+(
+  VALUE text,
+  LANG text,
+  update_time timestamptz default now(),
+  primary key (VALUE, LANG)
+);
+COMMENT ON COLUMN RAG_SEARCH_I18N.VALUE IS '검색 드롭다운 값';
+COMMENT ON COLUMN RAG_SEARCH_I18N.LANG IS '언어';
+COMMENT ON COLUMN RAG_SEARCH_I18N.UPDATE_TIME IS '검색 업데이트 시간';
 
 create table if not exists COMMUNITY_POSTS (
     id bigint PRIMARY KEY,
@@ -796,86 +937,3 @@ create table if not exists user_notifications (
     is_read boolean DEFAULT FALSE,
     create_time timestamptz default now()
 );
-
-create table if not exists user_location_request (
-    id serial primary key,
-    email text,
-    location text,
-    request_time timestamptz default now()
-);
-
-create table if not exists USER_PROGRESS_ITEM
-(
-  email text,
-  progress_type text,
-  item_list text[],
-  update_time timestamptz default now(),
-  PRIMARY KEY (email, progress_type)
-);
-        
-create table if not exists progress_item (
-    id text primary key,
-    progress_type text,
-    update_time timestamptz default now()
-);
-CREATE INDEX idx_progress_item_type
-ON progress_item (progress_type);
-
-create table if not exists user_minigame_score (
-  ID serial primary key,
-  NICKNAME text,
-  GAME_TYPE text,
-  SCORE bigint,
-  CREATE_TIME timestamptz default now()
-);
-CREATE INDEX idx_minigame_score_rank
-ON user_minigame_score (game_type, score DESC, create_time ASC);
-
-create table if not exists story (
-    id text primary key,
-    title_en text,
-    title_ko text,
-    title_ja text,
-    objectives_en text,
-    objectives_ko text,
-    objectives_ja text,
-    requirements_en text,
-    requirements_ko text,
-    requirements_ja text,
-    guide_en text,
-    guide_ja text,
-    guide_ko text,
-    sort_order integer,
-    update_time timestamptz default now()
-);
-
-create table if not exists story_roadmap (
-    id text primary key,
-    node_type text,
-    title_en text,
-    title_ko text,
-    title_ja text,
-    contents_en text,
-    contents_ko text,
-    contents_ja text,
-    desc_en text,
-    desc_ko text,
-    desc_ja text,
-    value_text text,
-    image text,
-    x_coordinate numeric,
-    y_coordinate numeric,
-    edge jsonb,
-    update_time timestamptz default now()
-);
-
-create table if not exists RAG_SEARCH_I18N
-(
-  VALUE text,
-  LANG text,
-  update_time timestamptz default now(),
-  primary key (VALUE, LANG)
-);
-COMMENT ON COLUMN RAG_SEARCH_I18N.VALUE IS '검색 드롭다운 값';
-COMMENT ON COLUMN RAG_SEARCH_I18N.LANG IS '언어';
-COMMENT ON COLUMN RAG_SEARCH_I18N.UPDATE_TIME IS '검색 업데이트 시간';
