@@ -39,7 +39,6 @@ create index idx_boss_spawn_map_id on boss_spawn (map_id);
 create table if not exists boss_item (
     boss_id text,
     item_id text,
-    count integer,
     quantity integer,
     sort_order integer,
     update_time timestamptz default now(),
@@ -109,13 +108,13 @@ create table if not exists maps
 (
     id text primary key,
     normalized_name text,
+    is_use boolean,
     name_en text,
     name_ko text,
     name_ja text,
     parent_map_id text,
     map_depth integer,
     sort_order integer,
-    url text,
     mot_image_en text,
     mot_image_ko text,
     mot_image_ja text,
