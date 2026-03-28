@@ -315,13 +315,13 @@ create table if not exists hideout_master
 create table if not exists hideout_levels
 (
     id text primary key,
-    hideout_id text,
+    master_id text,
     hideout_level integer,
     construction_time integer,
     update_time timestamptz default now()
 );
-create index idx_hideout_levels_hideout_id on hideout_levels(hideout_id);
-create index idx_hideout_levels_hideout_id_level on hideout_levels(hideout_id, hideout_level);
+create index idx_hideout_levels_hideout_id on hideout_levels(master_id);
+create index idx_hideout_levels_hideout_id_level on hideout_levels(master_id, hideout_level);
 
 create table if not exists hideout_item_require
 (
@@ -349,19 +349,18 @@ create index idx_hideout_trader_require_trader on hideout_trader_require(trader_
 create table if not exists hideout_station_require
 (
     id text primary key,
-    hideout_id text,
     hideout_level_id text,
+    require_master_id text,
     station_level integer,
     update_time timestamptz default now()
 );
 create index idx_hideout_station_require_level on hideout_station_require(hideout_level_id);
-create index idx_hideout_station_require_station on hideout_station_require(hideout_id);
+create index idx_hideout_station_require_station on hideout_station_require(require_master_id);
 
 create table if not exists hideout_crafts
 (
     id text primary key,
     hideout_level_id text,
-    station_level integer,
     reward_item_id text,
     duration numeric,
     reward_quantity numeric,
