@@ -535,6 +535,7 @@ create table if not exists USER_HIDEOUT
 
 create table if not exists items (
     id text primary key,
+    parent_category text,
     category text,
     name_en text,
     name_ko text,
@@ -547,6 +548,7 @@ create table if not exists items (
     update_time timestamptz default now()
 );
 create index idx_items_category on items(category);
+create index idx_items_parent_category on items(parent_category);
 create index idx_items_normalized_name on items(normalized_name);
 create index idx_items_update_time on items(update_time desc);
 
@@ -583,24 +585,25 @@ create index idx_armor_items_class_value on armor_items(class_value);
 
 create table if not exists storage_items (
     item_id text primary key,
-    storage_type text, -- Backpack, Container, Rig
+    storage_type text, -- Backpack, Container
     capacity integer,
-    grids jsonb
+    grid_width integer,
+    grid_height integer
 );
 create index idx_storage_items_storage_type on storage_items(storage_type);
 
 create table if not exists gun_items (
     item_id text primary key,
-    gun_category text,
     caliber text,
     fire_rate integer,
-    ergonomics numeric,
-    recoil_vertical numeric,
-    recoil_horizontal numeric,
-    default_ammo text,
-    modes jsonb
+    default_ammo_item_id text,
+    is_single_fire boolean,
+    is_full_auto boolean,
+    is_double_tap boolean,
+    is_burst_fire boolean,
+    is_semi_auto boolean,
+    is_double_action boolean
 );
-create index idx_gun_items_gun_category on gun_items(gun_category);
 
 create table if not exists gun_allowed_ammo (
     item_id text,
