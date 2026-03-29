@@ -40,8 +40,8 @@ create table if not exists boss_item (
     boss_id text,
     item_id text,
     quantity integer,
-    sort_order integer,
     update_time timestamptz default now(),
+    sort_order integer,
     primary key (boss_id, item_id)
 );
 create index idx_boss_item_item_id on boss_item (item_id);
@@ -76,8 +76,8 @@ create table if not exists main_contents
     name_ko text,
     name_ja text,
     url text,
-    sort_order integer,
     image text,
+    sort_order integer,
     update_time timestamptz default now()
 );
 
@@ -114,12 +114,12 @@ create table if not exists maps
     name_ja text,
     parent_map_id text,
     map_depth integer,
-    sort_order integer,
     mot_image_en text,
     mot_image_ko text,
     mot_image_ja text,
     three_image text,
     three_json jsonb,
+    sort_order integer,
     update_time timestamptz default now()
 );
 
@@ -136,26 +136,27 @@ create table if not exists quests
     delay_min integer,
     kappa_required boolean,
     min_player_level integer,
-    sort_order integer,
     wiki_url text,
     guide_en text,
     guide_ko text,
     guide_ja text,
+    sort_order integer,
     update_time timestamptz default now()
 );
 
 create table if not exists quest_objectives
 (
-    objective_id text primary key,
+    objective_id text,
     quest_id text,
-    sort_order integer,
     objective_type text,
     description_en text,
     description_ko text,
     description_ja text,
     location_in_map boolean,
     raw_data jsonb,
-    update_time timestamptz default now()
+    sort_order integer,
+    update_time timestamptz default now(),
+    primary key (objective_id, quest_id)
 );
 create index idx_quest_objectives_quest_id on quest_objectives (quest_id);
 create index idx_quest_objectives_quest_id_sort_order on quest_objectives (quest_id, sort_order);
@@ -202,10 +203,10 @@ create table if not exists quest_finish_rewards
     reward_type text, -- skill_level / offer_unlock / trader_standing
     target_id text,   -- trader_id, skill_name 등
     reward_value numeric,
-    sort_order integer,
     raw_data jsonb,
+    sort_order integer,
     update_time timestamptz default now(),
-    primary key (quest_id, reward_type, target_id, sort_order)
+    primary key (quest_id, reward_type, target_id)
 );
 create index idx_quest_finish_rewards_quest_id on quest_finish_rewards (quest_id);
 create index idx_quest_finish_rewards_reward_type on quest_finish_rewards (reward_type);
@@ -218,7 +219,7 @@ create table if not exists quest_finish_reward_items
     quantity integer,
     sort_order integer,
     update_time timestamptz default now(),
-    primary key (quest_id, item_id, sort_order)
+    primary key (quest_id, item_id)
 );
 create index idx_quest_finish_reward_items_item_id on quest_finish_reward_items (item_id);
 
@@ -226,7 +227,7 @@ create table if not exists quest_finish_reward_craft_unlocks
 (
     quest_id text,
     craft_id text,
-    sation_level integer,
+    station_level integer,
     sort_order integer,
     update_time timestamptz default now(),
     primary key (quest_id, craft_id)
@@ -240,6 +241,7 @@ create table if not exists traders
     name_ko text,
     name_ja text,
     image text,
+    is_use boolean,
     sort_order integer,
     update_time timestamptz default now()
 );
@@ -248,11 +250,12 @@ create table if not exists trader_barters
 (
     id text primary key,
     trader_id text,
-    level integer,
+    trader_level integer,
     update_time timestamptz default now()
 );
+
 create index idx_trader_barters_trader_id on trader_barters(trader_id);
-create index idx_trader_barters_trader_id_level on trader_barters(trader_id, level);
+create index idx_trader_barters_trader_id_level on trader_barters(trader_id, trader_level);
 
 create table if not exists barter_required_items
 (
@@ -297,8 +300,8 @@ create table if not exists news_items
     link text,
     is_new boolean default false,
     is_renewal boolean default false,
-    sort_order integer,
     is_active boolean default true,
+    sort_order integer,
     update_time timestamptz default now()
 );
 create index idx_news_items_sort_order on news_items(sort_order);
