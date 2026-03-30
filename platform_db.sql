@@ -529,7 +529,6 @@ create table if not exists item_price_history
     price integer,
     game_mode text,
     price_time timestamptz default now(),
-    execute_time timestamptz default now(),
     PRIMARY KEY (item_id, game_mode, price_time)
 );
 create index idx_item_price_history_time on item_price_history(price_time desc);
