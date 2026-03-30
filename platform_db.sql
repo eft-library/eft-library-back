@@ -31,7 +31,6 @@ create table if not exists boss_spawn (
     boss_id text,
     map_id text,
     spawn_chance numeric,
-    update_time timestamptz default now(),
     primary key (boss_id, map_id)
 );
 create index idx_boss_spawn_map_id on boss_spawn (map_id);
@@ -40,7 +39,6 @@ create table if not exists boss_item (
     boss_id text,
     item_id text,
     quantity integer,
-    update_time timestamptz default now(),
     sort_order integer,
     primary key (boss_id, item_id)
 );
@@ -155,7 +153,6 @@ create table if not exists quest_objectives
     location_in_map boolean,
     raw_data jsonb,
     sort_order integer,
-    update_time timestamptz default now(),
     primary key (objective_id, quest_id)
 );
 create index idx_quest_objectives_quest_id on quest_objectives (quest_id);
@@ -168,7 +165,6 @@ create table if not exists quest_objective_items
     item_type text, -- all item / questItem / markerItem / requiredKey
     item_id text,
     sort_order integer,
-    update_time timestamptz default now(),
     primary key (objective_id, item_type, item_id)
 );
 create index idx_quest_objective_items_item_id on quest_objective_items (item_id);
@@ -180,7 +176,6 @@ create table if not exists quest_objective_maps
     objective_id text,
     map_id text,
     sort_order integer,
-    update_time timestamptz default now(),
     primary key (objective_id, map_id)
 );
 create index idx_quest_objective_maps_map_id on quest_objective_maps (map_id);
@@ -191,7 +186,6 @@ create table if not exists quest_relations
     related_quest_id text,
     relation_type text, -- require / next
     sort_order integer,
-    update_time timestamptz default now(),
     primary key (quest_id, related_quest_id, relation_type)
 );
 create index idx_quest_relations_related_quest_id on quest_relations (related_quest_id);
@@ -205,7 +199,6 @@ create table if not exists quest_finish_rewards
     reward_value numeric,
     raw_data jsonb,
     sort_order integer,
-    update_time timestamptz default now(),
     primary key (quest_id, reward_type, target_id)
 );
 create index idx_quest_finish_rewards_quest_id on quest_finish_rewards (quest_id);
@@ -218,7 +211,6 @@ create table if not exists quest_finish_reward_items
     item_id text,
     quantity integer,
     sort_order integer,
-    update_time timestamptz default now(),
     primary key (quest_id, item_id)
 );
 create index idx_quest_finish_reward_items_item_id on quest_finish_reward_items (item_id);
@@ -229,7 +221,6 @@ create table if not exists quest_finish_reward_craft_unlocks
     craft_id text,
     station_level integer,
     sort_order integer,
-    update_time timestamptz default now(),
     primary key (quest_id, craft_id)
 );
 create index idx_quest_finish_reward_craft_unlocks_craft_id on quest_finish_reward_craft_unlocks (craft_id);
@@ -250,8 +241,7 @@ create table if not exists trader_barters
 (
     id text primary key,
     trader_id text,
-    trader_level integer,
-    update_time timestamptz default now()
+    trader_level integer
 );
 
 create index idx_trader_barters_trader_id on trader_barters(trader_id);
@@ -320,8 +310,7 @@ create table if not exists hideout_levels
     id text primary key,
     master_id text,
     hideout_level integer,
-    construction_time integer,
-    update_time timestamptz default now()
+    construction_time integer
 );
 create index idx_hideout_levels_hideout_id on hideout_levels(master_id);
 create index idx_hideout_levels_hideout_id_level on hideout_levels(master_id, hideout_level);
@@ -332,8 +321,7 @@ create table if not exists hideout_item_require
     hideout_level_id text,
     item_id text,
     quantity integer,
-    in_raid boolean,
-    update_time timestamptz default now()
+    in_raid boolean
 );
 create index idx_hideout_item_require_level on hideout_item_require(hideout_level_id);
 create index idx_hideout_item_require_item on hideout_item_require(item_id);
@@ -343,8 +331,7 @@ create table if not exists hideout_trader_require
     id text primary key,
     hideout_level_id text,
     trader_id text,
-    trader_level integer,
-    update_time timestamptz default now()
+    trader_level integer
 );
 create index idx_hideout_trader_require_level on hideout_trader_require(hideout_level_id);
 create index idx_hideout_trader_require_trader on hideout_trader_require(trader_id);
@@ -354,8 +341,7 @@ create table if not exists hideout_station_require
     id text primary key,
     hideout_level_id text,
     require_master_id text,
-    station_level integer,
-    update_time timestamptz default now()
+    station_level integer
 );
 create index idx_hideout_station_require_level on hideout_station_require(hideout_level_id);
 create index idx_hideout_station_require_station on hideout_station_require(require_master_id);
@@ -366,8 +352,7 @@ create table if not exists hideout_crafts
     hideout_level_id text,
     reward_item_id text,
     duration numeric,
-    reward_quantity numeric,
-    update_time timestamptz default now()
+    reward_quantity numeric
 );
 create index idx_hideout_crafts_hideout_level_id on hideout_crafts(hideout_level_id);
 create index idx_hideout_crafts_reward_item_id on hideout_crafts(reward_item_id);
@@ -378,8 +363,7 @@ create table if not exists hideout_craft_require_items
     id text primary key,
     craft_id text,
     item_id text,
-    quantity integer,
-    update_time timestamptz default now()
+    quantity integer
 );
 create index idx_craft_require_items_craft on hideout_craft_require_items(craft_id);
 create index idx_craft_require_items_item on hideout_craft_require_items(item_id);
@@ -393,8 +377,7 @@ create table if not exists hideout_skill_require
     name_en text,
     name_ko text,
     name_ja text,
-    image text,
-    update_time timestamptz default now()
+    image text
 );
 create index idx_hideout_skill_require_level on hideout_skill_require(hideout_level_id);
 
@@ -409,8 +392,7 @@ create table if not exists hideout_bonus
     skill_name_en text,
     skill_name_ko text,
     skill_name_ja text,
-    bonus_value numeric(10, 4),
-    update_time timestamptz default now()
+    bonus_value numeric(10, 4)
 );
 create index idx_hideout_bonus_level on hideout_bonus(hideout_level_id);
 
@@ -478,9 +460,15 @@ create table if not exists ROADMAP_EDGE
 
 create table if not exists item_prices
 (
-    id text primary key,
-    TRADER jsonb,
-    update_time timestamptz default now()
+    item_id text,
+    game_mode text,
+    highest_trader_price numeric,
+    highest_trader_id text,
+    flea_market_price numeric,
+    trader_count integer,
+    has_flea boolean,
+    update_time timestamptz default now(),
+    primary key (item_id, game_mode)
 );
 
 create table if not exists item_trader_prices
@@ -489,8 +477,7 @@ create table if not exists item_trader_prices
     item_id text,
     game_mode text, -- 'pve' | 'pvp'
     trader_id text,
-    price numeric,
-    update_time timestamptz default now()
+    price numeric
 );
 create index idx_item_trader_prices_item_id on item_trader_prices(item_id);
 create index idx_item_trader_prices_trader_id on item_trader_prices(trader_id);
@@ -545,12 +532,12 @@ create table if not exists items (
     width integer,
     height integer,
     image text,
-    updated_at timestamptz default now()
+    updated_time timestamptz default now()
 );
 create index if not exists idx_items_parent_category on items(parent_category);
 create index if not exists idx_items_category on items(category);
 create index if not exists idx_items_normalized_name on items(normalized_name);
-create index if not exists idx_items_updated_at on items(updated_at desc);
+create index if not exists idx_items_updated_time on items(updated_time desc);
 
 create table if not exists item_penalties (
     item_id text primary key,
@@ -596,19 +583,14 @@ create table if not exists ammo_items (
 );
 
 create table if not exists ammo_efficiency (
-    ammo_item_id text,
-    target_name text,
+    ammo_item_id text primary key,
     value_1 integer,
     value_2 integer,
     value_3 integer,
     value_4 integer,
     value_5 integer,
-    value_6 integer,
-    primary key (ammo_item_id, target_name)
+    value_6 integer
 );
-create index if not exists idx_ammo_efficiency_target_name
-    on ammo_efficiency(target_name);
-
 
 create table if not exists melee_items (
     item_id text primary key,
