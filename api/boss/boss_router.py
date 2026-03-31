@@ -13,3 +13,11 @@ def get_boss_by_id(url_mapping: str):
     if boss is None:
         raise HTTPException(status_code=410, detail="Removed")
     return CustomResponse.response(boss, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/detail/{normalized_name}")
+def get_boss_by_normalized_name(normalized_name: str):
+    boss = BossService.get_boss_by_normalized_name(normalized_name)
+    if boss is None:
+        raise HTTPException(status_code=410, detail="Removed")
+    return CustomResponse.response(boss, HTTPCode.OK, Message.SUCCESS)
