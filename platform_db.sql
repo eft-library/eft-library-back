@@ -313,7 +313,7 @@ create index idx_autocomplete_lang on autocomplete_items(lang);
 
 create table if not exists news_items
 (
-    id text primary key,
+    id serial primary key,
     news_type text not null, -- event, patch, notice, recommend, next_update, tarkov_info
     title_en text,
     title_ko text,
