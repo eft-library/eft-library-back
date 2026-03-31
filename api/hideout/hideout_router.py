@@ -29,6 +29,14 @@ def get_station(token: Optional[str] = Depends(oauth2_scheme)):
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
+@router.get("/detail/{normalized_name}")
+def get_station_by_normalized_name(normalized_name: str):
+    result = HideoutService.get_station_by_normalized_name(normalized_name)
+    if result is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
 @router.post(
     "/save-station",
     include_in_schema=False,

@@ -333,6 +333,7 @@ create table if not exists hideout_master
     name_en text,
     name_ko text,
     name_ja text,
+    normalized_name text,
     update_time timestamptz default now()
 );
 

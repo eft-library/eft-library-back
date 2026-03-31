@@ -1,7 +1,8 @@
 from typing import List
 from sqlalchemy import text
-from database import DataBaseConnector
+from database import DataBaseConnector, V3Database
 from api.hideout.util import HideoutUtil
+from api.hideout.query import HideoutQuery
 from datetime import datetime
 from api.hideout.hideout_res_models import UserHideOut
 from api.hideout.hideout_req_models import ItemType
@@ -12,7 +13,6 @@ logger = logging.getLogger("api.hideout")
 
 
 class HideoutService:
-
     @staticmethod
     def get_station(user_email: str | None):
         try:
@@ -54,6 +54,159 @@ class HideoutService:
         except Exception as e:
             logger.error(
                 f"get_station error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
+    def _group_rows_by_key(rows, key):
+        grouped = {}
+        for row in rows:
+            row_dict = dict(row)
+            grouped.setdefault(row_dict[key], []).append(row_dict)
+        return grouped
+
+    @staticmethod
+    def get_station_by_normalized_name(normalized_name: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                master_sql = text(HideoutQuery.hideout_master_sql())
+                levels_sql = text(HideoutQuery.hideout_levels_sql())
+
+                master = (
+                    s.execute(master_sql, {"normalized_name": normalized_name})
+                    .mappings()
+                    .first()
+                )
+                if master is None:
+                    return None
+
+                level_rows = (
+                    s.execute(levels_sql, {"master_id": master["id"]}).mappings().all()
+                )
+                levels = [dict(row) for row in level_rows]
+                if not levels:
+                    return {"master": dict(master), "levels": []}
+
+                level_ids = [level["id"] for level in levels]
+
+                trader_require_rows = (
+                    s.execute(
+                        text(HideoutQuery.hideout_trader_require_sql()),
+                        {"level_ids": level_ids},
+                    )
+                    .mappings()
+                    .all()
+                )
+                item_require_rows = (
+                    s.execute(
+                        text(HideoutQuery.hideout_item_require_sql()),
+                        {"level_ids": level_ids},
+                    )
+                    .mappings()
+                    .all()
+                )
+                station_require_rows = (
+                    s.execute(
+                        text(HideoutQuery.hideout_station_require_sql()),
+                        {"level_ids": level_ids},
+                    )
+                    .mappings()
+                    .all()
+                )
+                bonus_rows = (
+                    s.execute(
+                        text(HideoutQuery.hideout_bonus_sql()),
+                        {"level_ids": level_ids},
+                    )
+                    .mappings()
+                    .all()
+                )
+                skill_require_rows = (
+                    s.execute(
+                        text(HideoutQuery.hideout_skill_require_sql()),
+                        {"level_ids": level_ids},
+                    )
+                    .mappings()
+                    .all()
+                )
+                craft_rows = (
+                    s.execute(
+                        text(HideoutQuery.hideout_crafts_sql()),
+                        {"level_ids": level_ids},
+                    )
+                    .mappings()
+                    .all()
+                )
+
+                crafts = [dict(row) for row in craft_rows]
+                craft_ids = [craft["id"] for craft in crafts]
+
+                craft_require_rows = []
+                if craft_ids:
+                    craft_require_rows = (
+                        s.execute(
+                            text(HideoutQuery.hideout_craft_require_items_sql()),
+                            {"craft_ids": craft_ids},
+                        )
+                        .mappings()
+                        .all()
+                    )
+
+                trader_require_by_level = HideoutService._group_rows_by_key(
+                    trader_require_rows, "hideout_level_id"
+                )
+                item_require_by_level = HideoutService._group_rows_by_key(
+                    item_require_rows, "hideout_level_id"
+                )
+                station_require_by_level = HideoutService._group_rows_by_key(
+                    station_require_rows, "hideout_level_id"
+                )
+                bonus_by_level = HideoutService._group_rows_by_key(
+                    bonus_rows, "hideout_level_id"
+                )
+                skill_require_by_level = HideoutService._group_rows_by_key(
+                    skill_require_rows, "hideout_level_id"
+                )
+                craft_require_by_craft = HideoutService._group_rows_by_key(
+                    craft_require_rows, "craft_id"
+                )
+
+                crafts_by_level = {}
+                for craft in crafts:
+                    craft["require_items"] = craft_require_by_craft.get(craft["id"], [])
+                    crafts_by_level.setdefault(craft["hideout_level_id"], []).append(
+                        craft
+                    )
+
+                level_details = []
+                for level in levels:
+                    level_details.append(
+                        {
+                            **level,
+                            "trader_require": trader_require_by_level.get(
+                                level["id"], []
+                            ),
+                            "item_require": item_require_by_level.get(level["id"], []),
+                            "station_require": station_require_by_level.get(
+                                level["id"], []
+                            ),
+                            "skill_require": skill_require_by_level.get(
+                                level["id"], []
+                            ),
+                            "bonus": bonus_by_level.get(level["id"], []),
+                            "crafts": crafts_by_level.get(level["id"], []),
+                        }
+                    )
+
+                return {
+                    "master": dict(master),
+                    "levels": level_details,
+                }
+
+        except Exception as e:
+            logger.error(
+                f"get_station_by_normalized_name: {normalized_name}, error: {e}",
                 exc_info=True,
             )
             return None
