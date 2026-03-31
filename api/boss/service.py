@@ -57,7 +57,7 @@ class BossService:
 
                 param = {"normalized_name": normalized_name}
                 boss_id = s.execute(boss_id_sql, param).scalar()
-                logger.info("boss_id", boss_id)
+
                 if boss_id is None:
                     return None
 
