@@ -20,6 +20,22 @@ def get_item_info(item_url: str):
     return CustomResponse.response(item, HTTPCode.OK, Message.SUCCESS)
 
 
+@router.get("/v3/info/{normalized_name}")
+def get_item_info_v3(normalized_name: str):
+    item = ItemService.get_item_detail_v3(normalized_name)
+    if item is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+    return CustomResponse.response(item, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/v3/list/{item_type}")
+def get_item_list_v3(item_type: str):
+    item_list = ItemService.get_item_list_v3(item_type)
+    if item_list is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+    return CustomResponse.response(item_list, HTTPCode.OK, Message.SUCCESS)
+
+
 @router.get("/list/{item_type}")
 def get_item_list(item_type: str):
     item_map = {

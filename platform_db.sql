@@ -728,7 +728,7 @@ create table if not exists consumable_stim_effects (
 create index if not exists idx_consumable_stim_effects_effect_type
     on consumable_stim_effects(effect_type);
 
-create table if not exists 
+create table if not exists usage_items
  (
     item_id text primary key,
     max_uses integer
