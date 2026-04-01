@@ -1,3 +1,4 @@
+# TODO: 전체 삭제 예정 -> home과 통합
 from fastapi import APIRouter
 from api.menu.service import MenuService
 from api.response import CustomResponse

@@ -1,3 +1,4 @@
+# TODO: 전체 삭제 예정
 from fastapi import APIRouter
 from api.dynamic_info.service import DynamicInfoService
 from api.response import CustomResponse
