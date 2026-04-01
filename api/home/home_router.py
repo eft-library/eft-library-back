@@ -13,3 +13,11 @@ def get_main():
     if main_info is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(main_info, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/homepage")
+def get_home():
+    main_info = MenuService.get_home()
+    if main_info is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+    return CustomResponse.response(main_info, HTTPCode.OK, Message.SUCCESS)

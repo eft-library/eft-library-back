@@ -953,7 +953,7 @@ create table if not exists community_posts_bookmark (
     email text,
     post_id bigint,
     create_time timestamptz default now(),
-    PRIMARY KEY (user_email, post_id)
+    PRIMARY KEY (email, post_id)
 );
 
 -- 댓글
