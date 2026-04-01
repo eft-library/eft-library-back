@@ -22,15 +22,9 @@ class MapService:
         return {
             "id": map_data.id,
             "normalized_name": map_data.normalized_name,
-            "is_use": map_data.is_use,
             "name_en": map_data.name_en,
             "name_ko": map_data.name_ko,
             "name_ja": map_data.name_ja,
-            "parent_map_id": map_data.parent_map_id,
-            "map_depth": map_data.map_depth,
-            "mot_image_en": map_data.mot_image_en,
-            "mot_image_ko": map_data.mot_image_ko,
-            "mot_image_ja": map_data.mot_image_ja,
             "three_image": map_data.three_image,
             "three_json": map_data.three_json,
         }
