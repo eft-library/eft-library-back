@@ -262,6 +262,7 @@ create table if not exists traders
     name_en text,
     name_ko text,
     name_ja text,
+    normalized_name text,
     image text,
     is_use boolean,
     sort_order integer,
@@ -300,16 +301,14 @@ create index idx_barter_reward_items_item_id on barter_reward_items(item_id);
 
 create table if not exists autocomplete_items
 (
-    id serial primary key,
-    autocomplete_text text,
-    url text,
-    lang text,
+    url text primary key,
+    autocomplete_text_en text,
+    autocomplete_text_ko text,
+    autocomplete_text_ja text,
     category text,
     sort_order integer,
     update_time timestamptz default now()
 );
-create index idx_autocomplete_text on autocomplete_items using gin (autocomplete_text gin_trgm_ops);
-create index idx_autocomplete_lang on autocomplete_items(lang);
 
 create table if not exists news_items
 (
@@ -707,7 +706,8 @@ create table if not exists consumable_items (
 create index if not exists idx_consumable_items_consumable_type
     on consumable_items(consumable_type);
 
-create table if not exists consumable_cures (
+create table if not exists 
+ (
     item_id text,
     cure text,
     primary key (item_id, cure)
@@ -728,7 +728,8 @@ create table if not exists consumable_stim_effects (
 create index if not exists idx_consumable_stim_effects_effect_type
     on consumable_stim_effects(effect_type);
 
-create table if not exists usage_items (
+create table if not exists 
+ (
     item_id text primary key,
     max_uses integer
 );
