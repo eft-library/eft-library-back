@@ -1,13 +1,4 @@
 class DashboardUtil:
-    """
-    clickhouse와 postgresql은 서로 파라미터 바인딩 방식이 다름
-    # PostgreSQL
-    ":start_date", ":end_date"
-
-    # ClickHouse
-    "{start_date}", "{end_date}"
-    """
-
     @staticmethod
     def get_psql_top_request():
         return """

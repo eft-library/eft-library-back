@@ -7,6 +7,7 @@ from api.constants import Message
 router = APIRouter(tags=["Boss"])
 
 
+# TODO: 삭제 예정
 @router.get("/info/{url_mapping}")
 def get_boss_by_id(url_mapping: str):
     boss = BossService.get_boss_by_id(url_mapping)
