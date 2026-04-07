@@ -1,3 +1,5 @@
+-- 재설계 필요
+
 -- pgvector extension (아직 없으면)
 CREATE EXTENSION IF NOT EXISTS vector;
 
