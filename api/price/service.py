@@ -60,6 +60,13 @@ class PriceService:
                     categorized_history = defaultdict(list)
 
                     for history in price.history:
+                        if history.price_time is not None:
+                            history.price_time = history.price_time + timedelta(hours=9)
+                        if history.execute_time is not None:
+                            history.execute_time = history.execute_time + timedelta(
+                                hours=9
+                            )
+
                         categorized_history[history.price_type].append(history)
 
                     # 결과를 PriceModel에 추가
