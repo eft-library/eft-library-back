@@ -4,6 +4,7 @@ from api.price.util import PriceUtil
 from database import DataBaseConnector
 from sqlalchemy.orm import subqueryload
 from collections import defaultdict
+from datetime import timedelta
 import logging
 
 logger = logging.getLogger("api.price")
@@ -52,6 +53,9 @@ class PriceService:
                 )
 
                 for price in price_list:
+                    if price.update_time is not None:
+                        price.update_time = price.update_time + timedelta(hours=9)
+
                     # price_type별로 pvp, pve로 나누기
                     categorized_history = defaultdict(list)
 
