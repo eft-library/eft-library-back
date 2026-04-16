@@ -1,4 +1,4 @@
-class HideoutQuery:
+class HideoutQueryV3:
     @staticmethod
     def hideout_master_sql():
         return """

@@ -356,3 +356,195 @@ class UserUtil:
         DELETE FROM user_progress_item uq
         WHERE user_email = :email
         """
+
+
+class UserUtilV3:
+    @staticmethod
+    def verify_google_token(access_token: str):
+        return UserUtil.verify_google_token(access_token)
+
+    @staticmethod
+    def _to_v3_sql(sql: str):
+        return (
+            sql.replace("ub.blocker_email", "ub.request_email")
+            .replace("ub.blocked_email", "ub.target_email")
+            .replace("WHERE user_email = ui.email", "WHERE email = ui.email")
+            .replace("ON ui.email = ub.blocker_email", "ON ui.email = ub.request_email")
+            .replace("cpb.user_email", "cpb.email")
+            .replace("ub.blocker_email", "ub.request_email")
+            .replace("ub.blocked_email", "ub.target_email")
+            .replace("un.user_email", "un.email")
+            .replace("un.created_time", "un.create_time")
+            .replace("created_time", "create_time")
+            .replace("FROM user_notifications\n               WHERE is_read", "FROM user_notifications\n               WHERE is_read")
+            .replace("select user_email, COUNT(*) as notification_count", "select email, COUNT(*) as notification_count")
+            .replace("GROUP BY user_email", "GROUP BY email")
+            .replace("n.user_email", "n.email")
+        )
+
+    @staticmethod
+    def get_user_info_with_penalty():
+        return """
+            SELECT ui.email,
+                   ui.is_admin,
+                   ui.attendance_count,
+                   ui.nickname,
+                   ui.create_time,
+                   ui.last_update_nickname,
+                   up.start_time,
+                   up.end_time,
+                   up.reason,
+                   COALESCE(jsonb_agg(
+                            jsonb_build_object(
+                                    'blocker_email', ub.request_email,
+                                    'blocked_email', ub.target_email,
+                                    'reason', ub.reason,
+                                    'create_time', ub.create_time
+                            )
+                                     ) FILTER (WHERE ub.request_email IS NOT NULL), '[]'::jsonb) AS user_blocks
+            FROM user_info ui
+                     LEFT JOIN LATERAL (
+                SELECT start_time, end_time, reason
+                FROM user_penalty
+                WHERE email = ui.email
+                ORDER BY start_time DESC
+                LIMIT 1
+                ) up ON TRUE
+                     LEFT JOIN user_block ub
+                               ON ui.email = ub.request_email
+            WHERE ui.email = :user_email
+            GROUP BY ui.email, ui.is_admin, ui.attendance_count, ui.nickname, ui.create_time, ui.last_update_nickname,
+                     up.start_time, up.end_time, up.reason, ub.create_time
+            order by ub.create_time desc
+            LIMIT 1
+        """
+
+    @staticmethod
+    def get_my_page_default():
+        return """
+            SELECT ui.email,
+                   COALESCE(c.comment_count, 0) AS comment_count,
+                   COALESCE(p.post_count, 0) AS post_count,
+                   COALESCE(f.follow_count, 0) AS follow_count,
+                   COALESCE(n.notification_count, 0) AS notification_count
+            FROM user_info ui
+                     LEFT JOIN (
+                SELECT user_email, COUNT(*) AS comment_count
+                FROM community_comments
+                WHERE delete_by_user = false and delete_by_admin = false
+                GROUP BY user_email
+            ) c ON ui.email = c.user_email
+                     LEFT JOIN (
+                SELECT user_email, COUNT(*) AS post_count
+                FROM community_posts
+                WHERE delete_by_user = false and delete_by_admin = false
+                GROUP BY user_email
+            ) p ON ui.email = p.user_email
+                     LEFT JOIN (
+                select following_email, COUNT(*) as follow_count
+                FROM user_follows
+                GROUP BY following_email
+            ) f ON ui.email = f.following_email
+                    LEFT JOIN (
+               select email, COUNT(*) as notification_count
+               FROM user_notifications
+               WHERE is_read = false
+               GROUP BY email
+            ) n ON ui.email = n.email
+            WHERE ui.email = :user_email
+        """
+
+    @staticmethod
+    def get_my_page_posts():
+        return UserUtil.get_my_page_posts()
+
+    @staticmethod
+    def get_my_page_posts_total():
+        return UserUtil.get_my_page_posts_total()
+
+    @staticmethod
+    def get_my_page_bookmarks():
+        return UserUtilV3._to_v3_sql(UserUtil.get_my_page_bookmarks())
+
+    @staticmethod
+    def get_my_page_bookmarks_total():
+        return UserUtilV3._to_v3_sql(UserUtil.get_my_page_bookmarks_total())
+
+    @staticmethod
+    def get_my_page_blocks():
+        return """
+            select ub.request_email as blocker_email,
+                   ub.target_email as blocked_email,
+                   ui.nickname,
+                   ub.reason,
+                   ub.create_time
+            from user_block ub
+                     left join user_info ui on ub.target_email = ui.email
+            where ub.request_email = :user_email
+            order by ub.create_time desc
+            limit :limit
+            offset :offset
+        """
+
+    @staticmethod
+    def get_my_page_blocks_total():
+        return """
+            select count(*)
+            from user_block ub
+            where ub.request_email = :user_email
+        """
+
+    @staticmethod
+    def get_my_page_comments():
+        return UserUtilV3._to_v3_sql(UserUtil.get_my_page_comments())
+
+    @staticmethod
+    def get_my_page_comments_total():
+        return UserUtil.get_my_page_comments_total()
+
+    @staticmethod
+    def get_my_page_follow():
+        return UserUtil.get_my_page_follow()
+
+    @staticmethod
+    def get_my_page_follow_total():
+        return UserUtil.get_my_page_follow_total()
+
+    @staticmethod
+    def get_my_page_notification():
+        return """
+            select id, email as user_email, noti_type, payload, is_read, create_time
+            from user_notifications un
+            where un.email = :user_email
+            and un.create_time >= NOW() - INTERVAL '7 days'
+            order by un.create_time desc
+            limit :limit
+            offset :offset
+        """
+
+    @staticmethod
+    def get_my_page_notification_total():
+        return """
+            select count(*)
+            from user_notifications un
+            where un.email = :user_email
+            and un.create_time >= NOW() - INTERVAL '7 days'
+        """
+
+    @staticmethod
+    def update_my_page_notification():
+        return UserUtil.update_my_page_notification()
+
+    @staticmethod
+    def delete_user_roadmap():
+        return """
+        DELETE FROM user_roadmap uq
+        WHERE email = :email
+        """
+
+    @staticmethod
+    def delete_user_quest():
+        return """
+        DELETE FROM user_quest uq
+        WHERE email = :email
+        """

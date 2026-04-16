@@ -1,14 +1,12 @@
 from sqlalchemy import text
-from api.quest.models import NPC
-from api.quest.query import QuestQuery
-from api.quest.util import QuestUtil
-from database import DataBaseConnector, V3Database
+from api.quest.query import QuestQueryV3
+from database import V3Database
 import logging
 
 logger = logging.getLogger("api.quest")
 
 
-class QuestService:
+class QuestServiceV3:
     @staticmethod
     def _serialize_objective_related_item(row, id_key: str):
         return {
@@ -24,7 +22,7 @@ class QuestService:
     def get_all_quest_v3():
         try:
             with V3Database.SessionLocal() as s:
-                result = s.execute(text(QuestQuery.quest_list_sql()))
+                result = s.execute(text(QuestQueryV3.quest_list_sql()))
                 return [dict(row) for row in result.mappings()]
         except Exception as e:
             logger.error(
@@ -37,7 +35,7 @@ class QuestService:
     def get_all_quest_detail_v3():
         try:
             with V3Database.SessionLocal() as s:
-                result = s.execute(text(QuestQuery.quest_feed_sql()))
+                result = s.execute(text(QuestQueryV3.quest_feed_sql()))
                 return [dict(row) for row in result.mappings()]
         except Exception as e:
             logger.error(
@@ -51,7 +49,7 @@ class QuestService:
         try:
             with V3Database.SessionLocal() as s:
                 quest_result = s.execute(
-                    text(QuestQuery.quest_detail_sql()),
+                    text(QuestQueryV3.quest_detail_sql()),
                     {"normalized_name": normalized_name},
                 )
                 quest = quest_result.mappings().first()
@@ -63,35 +61,35 @@ class QuestService:
                 relations = [
                     dict(row)
                     for row in s.execute(
-                        text(QuestQuery.quest_relations_sql()),
+                        text(QuestQueryV3.quest_relations_sql()),
                         {"quest_id": quest_id},
                     ).mappings()
                 ]
                 objectives = [
                     dict(row)
                     for row in s.execute(
-                        text(QuestQuery.quest_objectives_sql()),
+                        text(QuestQueryV3.quest_objectives_sql()),
                         {"quest_id": quest_id},
                     ).mappings()
                 ]
                 objective_items = [
                     dict(row)
                     for row in s.execute(
-                        text(QuestQuery.quest_objective_items_sql()),
+                        text(QuestQueryV3.quest_objective_items_sql()),
                         {"quest_id": quest_id},
                     ).mappings()
                 ]
                 objective_required_keys = [
                     dict(row)
                     for row in s.execute(
-                        text(QuestQuery.quest_objective_required_keys_sql()),
+                        text(QuestQueryV3.quest_objective_required_keys_sql()),
                         {"quest_id": quest_id},
                     ).mappings()
                 ]
                 objective_maps = [
                     dict(row)
                     for row in s.execute(
-                        text(QuestQuery.quest_objective_maps_sql()),
+                        text(QuestQueryV3.quest_objective_maps_sql()),
                         {"quest_id": quest_id},
                     ).mappings()
                 ]
@@ -99,35 +97,35 @@ class QuestService:
                 reward_skills = [
                     dict(row)
                     for row in s.execute(
-                        text(QuestQuery.quest_reward_skills_sql()),
+                        text(QuestQueryV3.quest_reward_skills_sql()),
                         {"quest_id": quest_id},
                     ).mappings()
                 ]
                 reward_trader_standing = [
                     dict(row)
                     for row in s.execute(
-                        text(QuestQuery.quest_reward_trader_standing_sql()),
+                        text(QuestQueryV3.quest_reward_trader_standing_sql()),
                         {"quest_id": quest_id},
                     ).mappings()
                 ]
                 reward_offer_unlocks = [
                     dict(row)
                     for row in s.execute(
-                        text(QuestQuery.quest_reward_offer_unlock_sql()),
+                        text(QuestQueryV3.quest_reward_offer_unlock_sql()),
                         {"quest_id": quest_id},
                     ).mappings()
                 ]
                 reward_items = [
                     dict(row)
                     for row in s.execute(
-                        text(QuestQuery.quest_reward_items_sql()),
+                        text(QuestQueryV3.quest_reward_items_sql()),
                         {"quest_id": quest_id},
                     ).mappings()
                 ]
                 reward_craft_unlocks = [
                     dict(row)
                     for row in s.execute(
-                        text(QuestQuery.quest_reward_craft_unlocks_sql()),
+                        text(QuestQueryV3.quest_reward_craft_unlocks_sql()),
                         {"quest_id": quest_id},
                     ).mappings()
                 ]
@@ -341,13 +339,15 @@ class QuestService:
                 quest_list = [
                     dict(row)
                     for row in s.execute(
-                        text(QuestQuery.quest_list_by_trader_sql()),
+                        text(QuestQueryV3.quest_list_by_trader_sql()),
                         {"trader_normalized_name": trader_normalized_name},
                     ).mappings()
                 ]
                 trader_list = [
                     dict(row)
-                    for row in s.execute(text(QuestQuery.trader_list_sql())).mappings()
+                    for row in s.execute(
+                        text(QuestQueryV3.trader_list_sql())
+                    ).mappings()
                 ]
 
                 return {
@@ -357,85 +357,6 @@ class QuestService:
         except Exception as e:
             logger.error(
                 f"get_quest_with_trader_v3: {trader_normalized_name}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_all_quest():
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                query = text(QuestUtil.get_all_quest_query())
-                result = s.execute(query)
-                quest_list = [dict(row) for row in result.mappings()]
-                return quest_list
-        except Exception as e:
-            logger.error(
-                f"get_all_quest  error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_all_quest_detail():
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                query = text(QuestUtil.get_all_quest_detail_query())
-                result = s.execute(query)
-                quest_list = [dict(row) for row in result.mappings()]
-                return quest_list
-        except Exception as e:
-            logger.error(
-                f"get_all_quest_detail  error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_quest_by_id(url_mapping):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                query = text(QuestUtil.get_quest_detail_query())
-                param = {"url_mapping": url_mapping}
-                result = s.execute(query, param)
-                quest = [dict(row) for row in result.mappings()]
-
-            return quest[0]
-        except Exception as e:
-            logger.error(
-                f"get_quest_by_id: {url_mapping}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_quest_with_trader(trader_id):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                info = {}
-                query = text(QuestUtil.get_quest_by_npc())
-                param = {"npc_id": trader_id}
-                quest_list = s.execute(query, param)
-                npc_list = (
-                    s.query(NPC.id, NPC.name, NPC.image)
-                    .filter(NPC.order != None)
-                    .order_by(NPC.order)
-                    .all()
-                )
-                info["quest_list"] = [dict(row) for row in quest_list.mappings()]
-                info["trader_list"] = [
-                    {"id": id_, "name": name, "image": image}
-                    for id_, name, image in npc_list
-                ]
-
-            return info
-        except Exception as e:
-            logger.error(
-                f"get_quest_with_trader: {trader_id}, error: {e}",
                 exc_info=True,
             )
             return None

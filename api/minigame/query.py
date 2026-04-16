@@ -1,7 +1,6 @@
-class MinigameUtil:
-
+class MinigameQueryV3:
     @staticmethod
-    def get_rng_item_rank():
+    def get_rng_item_rank_v3():
         return """
             SELECT
               ROW_NUMBER() OVER (ORDER BY score DESC, create_time) AS rank,
@@ -17,7 +16,7 @@ class MinigameUtil:
         """
 
     @staticmethod
-    def get_rng_item_my_rank_list():
+    def get_rng_item_my_rank_list_v3():
         return """
             WITH ranked AS (
               SELECT

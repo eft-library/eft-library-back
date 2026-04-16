@@ -208,7 +208,7 @@ create table if not exists quest_finish_reward_skills (
     name_ja text,
     skill_level integer,
     sort_order integer,
-    primary key (quest_id, skill_name)
+    primary key (quest_id, name_en, name_ko, name_ja)
 );
 create index idx_quest_finish_reward_skills_quest_id on quest_finish_reward_skills (quest_id);
 

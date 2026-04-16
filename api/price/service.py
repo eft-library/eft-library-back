@@ -1,84 +1,136 @@
-from sqlalchemy import func, text, or_, String
-from api.price.models import PriceModel, PriceRankReq
-from api.price.util import PriceUtil
-from database import DataBaseConnector
-from sqlalchemy.orm import subqueryload
+from sqlalchemy import func, and_
+from api.item.models import ItemV3
+from api.price.models import (
+    ItemPriceHistoryV3,
+    ItemPriceV3,
+    PriceRankReqV3,
+)
+from database import V3Database
 from collections import defaultdict
-from datetime import timedelta
 import logging
 
 logger = logging.getLogger("api.price")
 
 
-class PriceService:
+class PriceServiceV3:
+    @staticmethod
+    def _to_float_v3(value):
+        return float(value) if value is not None else None
 
     @staticmethod
-    def get_item_price(page: int, page_size: int, word: str):
+    def _serialize_item_price_v3(item: ItemV3, prices_by_mode, histories_by_mode):
+        return {
+            "id": item.id,
+            "normalized_name": item.normalized_name,
+            "name_en": item.name_en,
+            "name_ko": item.name_ko,
+            "name_ja": item.name_ja,
+            "image": item.image,
+            "category": item.category,
+            "parent_category": item.parent_category,
+            "width": item.width,
+            "height": item.height,
+            "prices": prices_by_mode,
+            "history_by_type": histories_by_mode,
+        }
+
+    @staticmethod
+    def _serialize_price_row_v3(price: ItemPriceV3):
+        return {
+            "game_mode": price.game_mode,
+            "highest_trader_price": PriceServiceV3._to_float_v3(
+                price.highest_trader_price
+            ),
+            "highest_trader_id": price.highest_trader_id,
+            "flea_market_price": PriceServiceV3._to_float_v3(price.flea_market_price),
+            "trader_count": price.trader_count,
+            "has_flea": price.has_flea,
+            "update_time": price.update_time,
+        }
+
+    @staticmethod
+    def _serialize_history_row_v3(history: ItemPriceHistoryV3):
+        return {
+            "game_mode": history.game_mode,
+            "price": history.price,
+            "price_time": history.price_time,
+        }
+
+    @staticmethod
+    def get_item_price_v3(page: int, page_size: int, word: str):
         try:
+            offset = (page - 1) * page_size
+            search_word = f"%{word}%"
 
-            with DataBaseConnector.SessionLocal() as s:
-                offset = (page - 1) * page_size
-
-                total_param = {"word": f"%{word}%"}
-
-                max_count_query = text(
-                    """
-                        select count(*)
-                        from item_price_i18n
-                        where item_price_i18n.name ->> 'ko' ilike :word
-                           or item_price_i18n.name ->> 'ko' ilike :word
-                           or item_price_i18n.name ->> 'ja' ilike :word
-                    """
+            with V3Database.SessionLocal() as s:
+                priced_item_ids = s.query(ItemPriceV3.item_id).distinct().subquery()
+                word_filter = or_(
+                    ItemV3.name_ko.ilike(search_word),
+                    ItemV3.name_ja.ilike(search_word),
+                    ItemV3.name_en.ilike(search_word),
                 )
 
-                total_count = s.execute(max_count_query, total_param).scalar()
+                total_count = (
+                    s.query(func.count(ItemV3.id))
+                    .filter(ItemV3.id.in_(priced_item_ids), word_filter)
+                    .scalar()
+                )
 
                 max_pages = (total_count // page_size) + (
                     1 if total_count % page_size > 0 else 0
                 )
 
-                price_list = (
-                    s.query(PriceModel)
-                    .filter(
-                        or_(
-                            func.cast(PriceModel.name["ko"], String).ilike(f"%{word}%"),
-                            func.cast(PriceModel.name["ja"], String).ilike(f"%{word}%"),
-                            func.cast(PriceModel.name["en"], String).ilike(f"%{word}%"),
-                        )
-                    )
-                    .options(subqueryload(PriceModel.history))
+                item_list = (
+                    s.query(ItemV3)
+                    .filter(ItemV3.id.in_(priced_item_ids), word_filter)
+                    .order_by(ItemV3.name_en)
                     .limit(page_size)
                     .offset(offset)
                     .all()
                 )
+                item_ids = [item.id for item in item_list]
 
-                for price in price_list:
-                    if price.update_time is not None:
-                        price.update_time = price.update_time + timedelta(hours=9)
+                prices_by_item = defaultdict(dict)
+                histories_by_item = defaultdict(lambda: {"pvp": [], "pve": []})
 
-                    # price_type별로 pvp, pve로 나누기
-                    categorized_history = defaultdict(list)
+                if item_ids:
+                    prices = (
+                        s.query(ItemPriceV3)
+                        .filter(ItemPriceV3.item_id.in_(item_ids))
+                        .all()
+                    )
+                    for price in prices:
+                        prices_by_item[price.item_id][price.game_mode] = (
+                            PriceServiceV3._serialize_price_row_v3(price)
+                        )
 
-                    for history in price.history:
-                        if history.price_time is not None:
-                            history.price_time = history.price_time + timedelta(hours=9)
-                        if history.execute_time is not None:
-                            history.execute_time = history.execute_time + timedelta(
-                                hours=9
-                            )
-
-                        categorized_history[history.price_type].append(history)
-
-                    # 결과를 PriceModel에 추가
-                    price.history_by_type = {
-                        "pvp": categorized_history.get("PVP", []),
-                        "pve": categorized_history.get("PVE", []),
-                    }
-
-                    price.history = []
+                    histories = (
+                        s.query(ItemPriceHistoryV3)
+                        .filter(ItemPriceHistoryV3.item_id.in_(item_ids))
+                        .order_by(
+                            ItemPriceHistoryV3.item_id,
+                            ItemPriceHistoryV3.game_mode,
+                            ItemPriceHistoryV3.price_time,
+                        )
+                        .all()
+                    )
+                    for history in histories:
+                        histories_by_item[history.item_id].setdefault(
+                            history.game_mode, []
+                        ).append(PriceServiceV3._serialize_history_row_v3(history))
 
                 return {
-                    "data": price_list,
+                    "data": [
+                        PriceServiceV3._serialize_item_price_v3(
+                            item,
+                            {
+                                "pvp": prices_by_item[item.id].get("pvp"),
+                                "pve": prices_by_item[item.id].get("pve"),
+                            },
+                            histories_by_item[item.id],
+                        )
+                        for item in item_list
+                    ],
                     "total_count": total_count,
                     "max_pages": max_pages,
                     "current_page": page,
@@ -86,102 +138,108 @@ class PriceService:
 
         except Exception as e:
             logger.error(
-                f"get_item_price error: {e}",
+                f"get_item_price_v3 error: {e}",
                 exc_info=True,
             )
             return None
 
     @staticmethod
-    def get_price_top(priceRankReq: PriceRankReq):
+    def _build_price_tiers_v3(rows):
+        tiers = ["S", "A", "B", "C", "D", "E", "F"]
+        tier_size = 100
+        tier_dict = {
+            tier: {"min": float("inf"), "max": 0, "list": []} for tier in tiers
+        }
+
+        for index, row in enumerate(rows):
+            tier_index = index // tier_size
+            if tier_index >= len(tiers):
+                continue
+
+            tier_name = tiers[tier_index]
+            per_slot = row["per_slot"]
+
+            if per_slot < tier_dict[tier_name]["min"]:
+                tier_dict[tier_name]["min"] = per_slot
+            if per_slot > tier_dict[tier_name]["max"]:
+                tier_dict[tier_name]["max"] = per_slot
+
+            tier_dict[tier_name]["list"].append(row)
+
+        return [
+            {
+                "tier": tier,
+                "min": 0 if not tier_dict[tier]["list"] else tier_dict[tier]["min"],
+                "max": 0 if not tier_dict[tier]["list"] else tier_dict[tier]["max"],
+                "list": tier_dict[tier]["list"],
+            }
+            for tier in tiers
+        ]
+
+    @staticmethod
+    def _get_price_top_rows_v3(s, game_mode: str, categories: list[str]):
+        query = (
+            s.query(ItemV3, ItemPriceV3)
+            .join(ItemPriceV3, ItemPriceV3.item_id == ItemV3.id)
+            .filter(
+                ItemPriceV3.game_mode == game_mode,
+                ItemPriceV3.flea_market_price.isnot(None),
+                ItemV3.width.isnot(None),
+                ItemV3.height.isnot(None),
+                ItemV3.category.in_(categories),
+                and_(ItemV3.width > 0, ItemV3.height > 0),
+            )
+            .all()
+        )
+
+        rows = []
+        for item, price in query:
+            per_slot = PriceServiceV3._to_float_v3(price.flea_market_price) / (
+                item.width * item.height
+            )
+            rows.append(
+                {
+                    "id": item.id,
+                    "normalized_name": item.normalized_name,
+                    "name_en": item.name_en,
+                    "name_ko": item.name_ko,
+                    "name_ja": item.name_ja,
+                    "image": item.image,
+                    "width": item.width,
+                    "height": item.height,
+                    "category": item.category,
+                    "flea_market_price": PriceServiceV3._to_float_v3(
+                        price.flea_market_price
+                    ),
+                    "highest_trader_price": PriceServiceV3._to_float_v3(
+                        price.highest_trader_price
+                    ),
+                    "highest_trader_id": price.highest_trader_id,
+                    "per_slot": per_slot,
+                }
+            )
+
+        return sorted(rows, key=lambda row: row["per_slot"], reverse=True)[:700]
+
+    @staticmethod
+    def get_price_top_v3(price_rank_req_v3: PriceRankReqV3):
         try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                tiers = ["S", "A", "B", "C", "D", "E", "F"]
-                tier_size = 100
-                pvp_tier_dict = {
-                    tier: {"min": float("inf"), "max": 0, "list": []} for tier in tiers
-                }
-                pve_tier_dict = {
-                    tier: {"min": float("inf"), "max": 0, "list": []} for tier in tiers
-                }
-
-                pve_top_query = text(PriceUtil.get_pve_price_top())
-                pvp_top_query = text(PriceUtil.get_pvp_price_top())
-
-                pve_top_list = s.execute(
-                    pve_top_query, {"categories": tuple(priceRankReq.categoryList)}
+            with V3Database.SessionLocal() as s:
+                pvp_rows = PriceServiceV3._get_price_top_rows_v3(
+                    s, "pvp", price_rank_req_v3.categoryList
                 )
-                pve_result = [dict(row) for row in pve_top_list.mappings()]
-
-                pvp_top_list = s.execute(
-                    pvp_top_query, {"categories": tuple(priceRankReq.categoryList)}
+                pve_rows = PriceServiceV3._get_price_top_rows_v3(
+                    s, "pve", price_rank_req_v3.categoryList
                 )
-                pvp_result = [dict(row) for row in pvp_top_list.mappings()]
 
-                for i, item in enumerate(pvp_result):
-                    tier_index = i // tier_size
-                    if tier_index < len(tiers):
-                        tier_name = tiers[tier_index]
-                        per_slot = item["per_slot"]
-
-                        # 티어의 최소, 최대 금액 업데이트
-                        if per_slot < pvp_tier_dict[tier_name]["min"]:
-                            pvp_tier_dict[tier_name]["min"] = per_slot
-                        if per_slot > pvp_tier_dict[tier_name]["max"]:
-                            pvp_tier_dict[tier_name]["max"] = per_slot
-
-                        # 티어 리스트에 항목 추가
-                        pvp_tier_dict[tier_name]["list"].append(item)
-
-                for i, item in enumerate(pve_result):
-                    tier_index = i // tier_size
-                    if tier_index < len(tiers):
-                        tier_name = tiers[tier_index]
-                        per_slot = item["per_slot"]
-
-                        # 티어의 최소, 최대 금액 업데이트
-                        if per_slot < pve_tier_dict[tier_name]["min"]:
-                            pve_tier_dict[tier_name]["min"] = per_slot
-                        if per_slot > pve_tier_dict[tier_name]["max"]:
-                            pve_tier_dict[tier_name]["max"] = per_slot
-
-                        # 티어 리스트에 항목 추가
-                        pve_tier_dict[tier_name]["list"].append(item)
-
-                for tier in tiers:
-                    if not pvp_tier_dict[tier]["list"]:
-                        pvp_tier_dict[tier]["min"] = 0
-                        pvp_tier_dict[tier]["max"] = 0
-                    if not pve_tier_dict[tier]["list"]:
-                        pve_tier_dict[tier]["min"] = 0
-                        pve_tier_dict[tier]["max"] = 0
-
-                # 리스트 형태로 변환
-                pvp_tier_list = [
-                    {
-                        "tier": tier,
-                        "min": pvp_tier_dict[tier]["min"],
-                        "max": pvp_tier_dict[tier]["max"],
-                        "list": pvp_tier_dict[tier]["list"],
-                    }
-                    for tier in tiers
-                ]
-
-                pve_tier_list = [
-                    {
-                        "tier": tier,
-                        "min": pve_tier_dict[tier]["min"],
-                        "max": pve_tier_dict[tier]["max"],
-                        "list": pve_tier_dict[tier]["list"],
-                    }
-                    for tier in tiers
-                ]
-
-                return {"pvp_top_list": pvp_tier_list, "pve_top_list": pve_tier_list}
+                return {
+                    "pvp_top_list": PriceServiceV3._build_price_tiers_v3(pvp_rows),
+                    "pve_top_list": PriceServiceV3._build_price_tiers_v3(pve_rows),
+                }
 
         except Exception as e:
             logger.error(
-                f"get_price_top: {priceRankReq.model_dump()}, error: {e}",
+                f"get_price_top_v3: {price_rank_req_v3.model_dump()}, error: {e}",
                 exc_info=True,
             )
             return None

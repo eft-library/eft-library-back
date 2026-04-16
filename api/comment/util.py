@@ -253,3 +253,50 @@ class CommentUtil:
     def my_page_comment():
         return """
         """
+
+
+class CommentUtilV3:
+
+    @staticmethod
+    def _to_v3_sql(sql: str):
+        return (
+            sql.replace("ccr.user_email", "ccr.email")
+            .replace("ub.blocker_email", "ub.request_email")
+            .replace("ub.blocked_email", "ub.target_email")
+        )
+
+    @staticmethod
+    def insert_parent_comment():
+        return CommentUtil.insert_parent_comment()
+
+    @staticmethod
+    def insert_child_comment():
+        return CommentUtil.insert_child_comment()
+
+    @staticmethod
+    def update_comment():
+        return CommentUtil.update_comment()
+
+    @staticmethod
+    def delete_comment_by_user():
+        return CommentUtil.delete_comment_by_user()
+
+    @staticmethod
+    def delete_comment_by_admin():
+        return CommentUtil.delete_comment_by_admin()
+
+    @staticmethod
+    def get_comment():
+        return CommentUtilV3._to_v3_sql(CommentUtil.get_comment())
+
+    @staticmethod
+    def get_comment_total_count():
+        return CommentUtil.get_comment_total_count()
+
+    @staticmethod
+    def get_issue_comment_page():
+        return CommentUtil.get_issue_comment_page()
+
+    @staticmethod
+    def get_issue_comment():
+        return CommentUtil.get_issue_comment()

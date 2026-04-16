@@ -1,12 +1,11 @@
-from database import DataBaseConnector
+from database import V3Database
 from sqlalchemy import Column, TIMESTAMP, TEXT, func, INTEGER
 
 
-class UserLocationRequest(DataBaseConnector.Base):
-
+class UserLocationRequestV3(V3Database.Base):
     __tablename__ = "user_location_request"
 
     id = Column(INTEGER, primary_key=True)
-    user_email = Column(TEXT)
+    email = Column(TEXT)
     location = Column(TEXT)
-    created_time = Column(TIMESTAMP, server_default=func.now())
+    request_time = Column(TIMESTAMP, server_default=func.now())

@@ -1,59 +1,23 @@
 from sqlalchemy import text
-from api.boss.models import Boss
-from api.boss.util import BossUtil
-from api.boss.query import BossQuery
-from database import DataBaseConnector, V3Database
+from api.boss.query import BossQueryV3
+from database import V3Database
 import logging
 
 logger = logging.getLogger("api.boss")
 
 
-class BossService:
-    # TODO: 삭제 예정
+class BossServiceV3:
     @staticmethod
-    def get_boss_by_id(url_mapping: str):
-        """
-        특정 boss id 조회
-        """
-        try:
-            with DataBaseConnector.SessionLocal() as s:
-                query = text(BossUtil.get_boss_query())
-                param = {"url_mapping": url_mapping}
-                result = s.execute(query, param)
-                boss_data = [dict(row) for row in result.mappings()]
-
-                boss_selector = (
-                    s.query(Boss.url_mapping, Boss.name)
-                    .filter(Boss.is_boss.is_(True))
-                    .order_by(Boss.order)
-                    .all()
-                )
-
-                boss_selector_list = [
-                    {"url_mapping": url_mapping, "name": name}
-                    for url_mapping, name in boss_selector
-                ]
-
-                return {"boss": boss_data[0], "boss_selector": boss_selector_list}
-
-        except Exception as e:
-            logger.error(
-                f"get_boss_by_id: {url_mapping}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_boss_by_normalized_name(normalized_name: str):
+    def get_boss_by_normalized_name_v3(normalized_name: str):
         try:
             with V3Database.SessionLocal() as s:
-                boss_id_sql = text(BossQuery.boss_id_sql())
-                boss_info_sql = text(BossQuery.boss_info_sql())
-                boss_map_sql = text(BossQuery.boss_map_sql())
-                boss_item_sql = text(BossQuery.boss_item_sql())
-                boss_follower_sql = text(BossQuery.boss_follower_sql())
-                boss_follower_info_sql = text(BossQuery.boss_follower_info_sql())
-                boss_selector_sql = text(BossQuery.boss_selector_sql())
+                boss_id_sql = text(BossQueryV3.boss_id_sql())
+                boss_info_sql = text(BossQueryV3.boss_info_sql())
+                boss_map_sql = text(BossQueryV3.boss_map_sql())
+                boss_item_sql = text(BossQueryV3.boss_item_sql())
+                boss_follower_sql = text(BossQueryV3.boss_follower_sql())
+                boss_follower_info_sql = text(BossQueryV3.boss_follower_info_sql())
+                boss_selector_sql = text(BossQueryV3.boss_selector_sql())
 
                 param = {"normalized_name": normalized_name}
                 boss_id = s.execute(boss_id_sql, param).scalar()
@@ -84,7 +48,7 @@ class BossService:
                         .all()
                     )
 
-                    boss_follower_item_sql = text(BossQuery.boss_follower_item_sql())
+                    boss_follower_item_sql = text(BossQueryV3.boss_follower_item_sql())
                     boss_follower_items = (
                         s.execute(boss_follower_item_sql, {"boss_ids": boss_follower})
                         .mappings()
@@ -113,7 +77,7 @@ class BossService:
 
         except Exception as e:
             logger.error(
-                f"get_boss_by_normalized_name: {normalized_name}, error: {e}",
+                f"get_boss_by_normalized_name_v3: {normalized_name}, error: {e}",
                 exc_info=True,
             )
             return None

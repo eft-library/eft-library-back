@@ -1,56 +1,41 @@
-from database import DataBaseConnector
+from database import V3Database
 from sqlalchemy import (
     Column,
-    String,
     TEXT,
     TIMESTAMP,
-    JSON,
-    ForeignKey,
     Integer,
     NUMERIC,
+    Boolean,
 )
-from sqlalchemy.orm import relationship
 from pydantic import BaseModel
 from typing import List
 
 
-class PriceModel(DataBaseConnector.Base):
-    """
-    Price
-    """
+class ItemPriceV3(V3Database.Base):
+    __tablename__ = "item_prices"
 
-    __tablename__ = "item_price_i18n"
-
-    id = Column(TEXT, primary_key=True)
-    name = Column(JSON)
-    image = Column(TEXT)
-    trader = Column(JSON)
-    category = Column(TEXT)
-    width = Column(NUMERIC)
-    height = Column(NUMERIC)
+    item_id = Column(TEXT, primary_key=True)
+    game_mode = Column(TEXT, primary_key=True)
+    highest_trader_price = Column(NUMERIC)
+    highest_trader_id = Column(TEXT)
+    flea_market_price = Column(NUMERIC)
+    trader_count = Column(Integer)
+    has_flea = Column(Boolean)
     update_time = Column(TIMESTAMP)
-    history = relationship(
-        "PriceHistoryModel", backref="price", order_by="PriceHistoryModel.price_time"
-    )
 
 
-class PriceHistoryModel(DataBaseConnector.Base):
-    """
-    Price History
-    """
+class ItemPriceHistoryV3(V3Database.Base):
+    __tablename__ = "item_price_history"
 
-    __tablename__ = "item_price_history_i18n"
-
-    id = Column(TEXT, ForeignKey("item_price_i18n.id"))
-    item_price = Column("price", Integer)
-    price_type = Column(String)
+    item_id = Column(TEXT, primary_key=True)
+    game_mode = Column(TEXT, primary_key=True)
     price_time = Column(TIMESTAMP, primary_key=True)
-    execute_time = Column(TIMESTAMP)
+    price = Column(Integer)
 
 
-class PriceRankReq(BaseModel):
+class PriceRankReqV3(BaseModel):
     """
-    아이템 랭크 카테고리 파라미터
+    V3 아이템 랭크 카테고리 파라미터
     """
 
     categoryList: List[str]

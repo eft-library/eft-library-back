@@ -1,13 +1,11 @@
-from sqlalchemy import text
-from api.map.models import Map, MapV3
-from api.map.util import MapUtil
-from database import DataBaseConnector, V3Database
+from api.map.models import MapV3
+from database import V3Database
 import logging
 
 logger = logging.getLogger("api.map")
 
 
-class MapService:
+class MapServiceV3:
     @staticmethod
     def _serialize_top_level_map_v3(map_data: MapV3):
         return {
@@ -29,65 +27,8 @@ class MapService:
             "three_json": map_data.three_json,
         }
 
-    # TODO: 삭제 예정
     @staticmethod
-    def get_map(map_id: str):
-        """
-        ID를 통한 map 조회
-        """
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                query = text(MapUtil.get_map_detail_query())
-                param = {"map_id": map_id}
-                result = s.execute(query, param)
-                map_data = [dict(row) for row in result.mappings()]
-
-                map_selector = (
-                    s.query(Map).filter(Map.depth == 1).order_by(Map.order).all()
-                )
-
-                map_selector_list = [
-                    {"id": m.id, "name": m.name, "link": m.link} for m in map_selector
-                ]
-
-                return {
-                    "map": map_data[0],  # 상세 정보
-                    "map_selector": map_selector_list,  # selector 목록
-                }
-
-        except Exception as e:
-            logger.error(
-                f"get_map: {map_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    # TODO: 삭제 예정
-    @staticmethod
-    def get_sub_map(map_id: str):
-        """
-        ID를 통한 sub map 조회
-        """
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                response_map = (
-                    s.query(Map)
-                    .filter(Map.parent_value == map_id)
-                    .order_by(Map.order)
-                    .all()
-                )
-                return response_map
-        except Exception as e:
-            logger.error(
-                f"get_sub_map: {map_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_map_by_normalized_name(normalized_name: str):
+    def get_map_by_normalized_name_v3(normalized_name: str):
         try:
             with V3Database.SessionLocal() as s:
                 map_data = (
@@ -108,7 +49,7 @@ class MapService:
                     related_parent_id = map_data.parent_map_id
 
                 top_level_maps = [
-                    MapService._serialize_top_level_map_v3(row)
+                    MapServiceV3._serialize_top_level_map_v3(row)
                     for row in s.query(MapV3)
                     .filter(
                         MapV3.map_depth == 1,
@@ -142,14 +83,14 @@ class MapService:
                     ]
 
                 return {
-                    "map": MapService._serialize_map_v3(map_data),
+                    "map": MapServiceV3._serialize_map_v3(map_data),
                     "top_level_map": top_level_maps,
                     "related_maps": related_maps,
                 }
 
         except Exception as e:
             logger.error(
-                f"get_map_by_normalized_name: {normalized_name}, error: {e}",
+                f"get_map_by_normalized_name_v3: {normalized_name}, error: {e}",
                 exc_info=True,
             )
             return None

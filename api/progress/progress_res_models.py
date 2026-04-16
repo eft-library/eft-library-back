@@ -1,21 +1,19 @@
-from database import DataBaseConnector
-from sqlalchemy import Column, TIMESTAMP, ARRAY, TEXT, JSON
+from database import V3Database
+from sqlalchemy import Column, TIMESTAMP, ARRAY, TEXT
 
 
-class UserProgressItem(DataBaseConnector.Base):
+class UserProgressItemV3(V3Database.Base):
     __tablename__ = "user_progress_item"
 
-    user_email = Column(TEXT, primary_key=True)
+    email = Column(TEXT, primary_key=True)
     progress_type = Column(TEXT, primary_key=True)
     item_list = Column(ARRAY(TEXT))
     update_time = Column(TIMESTAMP)
 
 
-class ProgressItem(DataBaseConnector.Base):
-    __tablename__ = "progress_item_i18n"
+class ProgressItemV3(V3Database.Base):
+    __tablename__ = "progress_item"
 
     id = Column(TEXT, primary_key=True)
-    name = Column(JSON)
     progress_type = Column(TEXT, primary_key=True)
-    image = Column(TEXT)
     update_time = Column(TIMESTAMP)

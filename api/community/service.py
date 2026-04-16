@@ -7,18 +7,24 @@ from api.community.community_res_models import (
     CommunityPostsBookmark,
     UserFollows,
     PostReport,
+    CommunityPostsV3,
+    CommunityPostsViewV3,
+    CommunityPostsReactionsV3,
+    CommunityPostsBookmarkV3,
+    UserFollowsV3,
+    PostReportV3,
 )
-from api.community.util import CommunityUtil
+from api.community.util import CommunityUtil, CommunityUtilV3
 from api.community.community_req_models import (
     CreateCommunity,
     ReqPostReport,
     FollowUser,
 )
-from database import DataBaseConnector
+from database import DataBaseConnector, V3Database
 from util.snowflake_id import SnowflakeGenerator
 from slugify import slugify
 import os
-from api.community.community_function import CommunityFunction
+from api.community.community_function import CommunityFunction, CommunityFunctionV3
 from dotenv import load_dotenv
 from datetime import datetime
 from PIL import Image
@@ -650,6 +656,465 @@ class CommunityService:
         except Exception as e:
             logger.error(
                 f"increase_view_count: {post_id_slug}, error: {e}",
+                exc_info=True,
+            )
+            return None
+
+
+class CommunityServiceV3:
+
+    @staticmethod
+    def upload_image_v3(file: UploadFile = File(...)):
+        return CommunityService.upload_image(file)
+
+    @staticmethod
+    def create_posts_v3(post_info: CreateCommunity, user_email: str):
+        new_id = snowflake.generate_id()
+        slug = slugify(post_info.title)
+        thumbnail = CommunityFunctionV3.extract_thumbnail_img(post_info.contents)
+
+        try:
+            now_time = datetime.now()
+            with V3Database.SessionLocal() as s:
+                new_post = CommunityPostsV3(
+                    id=new_id,
+                    slug=slug,
+                    user_email=user_email,
+                    category=post_info.category,
+                    title=post_info.title,
+                    contents=post_info.contents,
+                    thumbnail=thumbnail,
+                    delete_by_user=False,
+                    delete_by_admin=False,
+                    create_time=now_time,
+                    update_time=now_time,
+                )
+                s.add(new_post)
+                s.add(CommunityPostsViewV3(post_id=new_id, view_count=1))
+                s.commit()
+
+                kafka_message = {
+                    "url": f"{new_id}-{slug}",
+                    "title": post_info.title,
+                    "author_email": user_email,
+                    "author_nickname": post_info.nickname,
+                    "noti_type": "create_post",
+                }
+                produce_notification(json.dumps(kafka_message))
+
+                return {"url": f"{new_id}-{slug}"}
+        except Exception as e:
+            logger.error(
+                f"create_posts_v3: {post_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
+    def get_posts_v3(category: str, page_num: int, user_email: Optional[str] = None):
+        try:
+            limit, offset = 20, (page_num - 1) * 20
+
+            with V3Database.SessionLocal() as s:
+                if category == "issue":
+                    get_post_query = text(CommunityUtilV3.get_posts_with_issue())
+                    get_post_count_query = text(CommunityUtilV3.get_post_issue_count())
+                else:
+                    get_post_query = text(CommunityUtilV3.get_posts_with_category())
+                    get_post_count_query = text(
+                        CommunityUtilV3.get_post_category_count()
+                    )
+                params = {
+                    "limit": limit,
+                    "offset": offset,
+                    "category": category,
+                    "user_email": user_email,
+                }
+                posts_result = s.execute(get_post_query, params)
+                posts = [dict(row) for row in posts_result.mappings()]
+                total = s.execute(get_post_count_query, params).scalar() or 0
+
+                return {
+                    "total": total,
+                    "max_page_count": (total + limit - 1) // limit,
+                    "posts": posts,
+                }
+        except Exception as e:
+            logger.error(f"get_posts_v3 error: {e}", exc_info=True)
+            return None
+
+    @staticmethod
+    def get_detail_post_v3(post_id_slug: str, user_email: str, page_category: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                post_id = CommunityFunctionV3.parse_id_and_slug(post_id_slug)
+                return {
+                    "post_detail": CommunityFunctionV3.fetch_post_detail(
+                        s, post_id, user_email
+                    ),
+                    "author_detail": CommunityFunctionV3.fetch_author_meta(
+                        s, post_id, user_email
+                    ),
+                    "posts": CommunityFunctionV3.fetch_posts_with_paging(
+                        s, post_id, page_category, user_email
+                    ),
+                }
+        except Exception as e:
+            logger.error(
+                f"get_detail_post_v3: {post_id_slug}, {page_category}, error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
+    def get_side_info_v3(user_email: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                side_issue_posts = s.execute(
+                    text(CommunityUtilV3.get_posts_with_issue()),
+                    {"limit": 5, "offset": 0, "user_email": user_email},
+                )
+                return {
+                    "issue_posts": [
+                        dict(row) for row in side_issue_posts.mappings()
+                    ],
+                    "notice_posts": CommunityFunctionV3.fetch_notice_posts(s),
+                }
+        except Exception as e:
+            logger.error(f"get_side_info_v3 error: {e}", exc_info=True)
+            return None
+
+    @staticmethod
+    def get_detail_post_meta_data_v3(post_id_slug: str, user_email: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                post_id = CommunityFunctionV3.parse_id_and_slug(post_id_slug)
+                result = s.execute(
+                    text(CommunityUtilV3.get_post_detail_meta_data()),
+                    {"post_id": post_id, "user_email": user_email},
+                )
+                return [dict(row) for row in result.mappings()][0]
+        except Exception as e:
+            logger.error(
+                f"get_detail_post_meta_data_v3: {post_id_slug}, error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
+    def like_post_v3(post_id: str, user_email: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                bigint_post_id = int(post_id)
+                reaction = (
+                    s.query(CommunityPostsReactionsV3)
+                    .filter(
+                        CommunityPostsReactionsV3.post_id == bigint_post_id,
+                        CommunityPostsReactionsV3.user_email == user_email,
+                    )
+                    .first()
+                )
+                if reaction:
+                    if reaction.reaction_type in (0, -1):
+                        reaction.reaction_type = 1
+                    elif reaction.reaction_type == 1:
+                        reaction.reaction_type = -1
+                    reaction.update_time = datetime.now()
+                else:
+                    reaction = CommunityPostsReactionsV3(
+                        post_id=bigint_post_id,
+                        user_email=user_email,
+                        reaction_type=1,
+                        update_time=datetime.now(),
+                    )
+                    s.add(reaction)
+
+                s.commit()
+                return {"result": reaction.reaction_type}
+        except Exception as e:
+            logger.error(f"like_post_v3: {post_id}, error: {e}", exc_info=True)
+            return None
+
+    @staticmethod
+    def dislike_post_v3(post_id: str, user_email: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                bigint_post_id = int(post_id)
+                reaction = (
+                    s.query(CommunityPostsReactionsV3)
+                    .filter(
+                        CommunityPostsReactionsV3.post_id == bigint_post_id,
+                        CommunityPostsReactionsV3.user_email == user_email,
+                    )
+                    .first()
+                )
+                if reaction:
+                    if reaction.reaction_type == 0:
+                        reaction.reaction_type = -1
+                    elif reaction.reaction_type in (1, -1):
+                        reaction.reaction_type = 0
+                    reaction.update_time = datetime.now()
+                else:
+                    reaction = CommunityPostsReactionsV3(
+                        post_id=bigint_post_id,
+                        user_email=user_email,
+                        reaction_type=0,
+                        update_time=datetime.now(),
+                    )
+                    s.add(reaction)
+
+                s.commit()
+                return {"result": reaction.reaction_type}
+        except Exception as e:
+            logger.error(f"dislike_post_v3: {post_id}, error: {e}", exc_info=True)
+            return None
+
+    @staticmethod
+    def bookmark_post_v3(post_id: str, user_email: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                bigint_post_id = int(post_id)
+                bookmark = (
+                    s.query(CommunityPostsBookmarkV3)
+                    .filter(
+                        CommunityPostsBookmarkV3.post_id == bigint_post_id,
+                        CommunityPostsBookmarkV3.email == user_email,
+                    )
+                    .first()
+                )
+                if bookmark:
+                    s.delete(bookmark)
+                else:
+                    s.add(
+                        CommunityPostsBookmarkV3(
+                            post_id=bigint_post_id,
+                            email=user_email,
+                            create_time=datetime.now(),
+                        )
+                    )
+                s.commit()
+                return {"result": 1}
+        except Exception as e:
+            logger.error(f"bookmark_post_v3: {post_id}, error: {e}", exc_info=True)
+            return None
+
+    @staticmethod
+    def toggle_follow_v3(request_info: FollowUser, user_email: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                follower_status = (
+                    s.query(UserFollowsV3)
+                    .filter(
+                        UserFollowsV3.follower_email
+                        == request_info.following_user_email,
+                        UserFollowsV3.following_email == user_email,
+                    )
+                    .first()
+                )
+                if follower_status:
+                    s.delete(follower_status)
+                else:
+                    s.add(
+                        UserFollowsV3(
+                            follower_email=request_info.following_user_email,
+                            following_email=user_email,
+                            create_time=datetime.now(),
+                        )
+                    )
+                    if request_info.following_user_email != user_email:
+                        kafka_message = {
+                            "follower_email": request_info.following_user_email,
+                            "following_email": user_email,
+                            "author_nickname": request_info.nickname,
+                            "noti_type": "follow_user",
+                        }
+                        produce_notification(json.dumps(kafka_message))
+
+                s.commit()
+                return {"result": 1}
+        except Exception as e:
+            logger.error(
+                f"toggle_follow_v3: {request_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
+    def check_user_following_v3(author_email: str, user_email: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                result = s.execute(
+                    text(CommunityUtilV3.check_follow()),
+                    {"author_email": author_email, "user_email": user_email},
+                )
+                return [dict(row) for row in result.mappings()][0]
+        except Exception as e:
+            logger.error(
+                f"check_user_following_v3: {author_email}, error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
+    def update_post_v3(
+        post_id: str,
+        slug: str,
+        page_category: str,
+        title: str,
+        contents: str,
+        user_email: str,
+    ):
+        new_slug = slugify(title)
+        new_thumbnail = CommunityFunctionV3.extract_thumbnail_img(contents)
+        try:
+            with V3Database.SessionLocal() as s:
+                bigint_post_id = int(post_id)
+                post_info = (
+                    s.query(CommunityPostsV3)
+                    .filter(CommunityPostsV3.id == bigint_post_id)
+                    .first()
+                )
+                if post_info:
+                    if post_info.user_email == user_email:
+                        post_info.update_time = datetime.now()
+                        post_info.title = title
+                        post_info.contents = contents
+                        post_info.thumbnail = new_thumbnail
+                        post_info.slug = new_slug
+                        post_info.category = page_category
+                        s.commit()
+                    return {"url": f"{bigint_post_id}-{new_slug}"}
+                return {"url": f"{bigint_post_id}-{slug}"}
+        except Exception as e:
+            logger.error(f"update_post_v3 error: {e}", exc_info=True)
+            return None
+
+    @staticmethod
+    def get_update_post_detail_v3(post_id: str, user_email: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                bigint_post_id = int(post_id)
+                post_info = (
+                    s.query(CommunityPostsV3)
+                    .filter(CommunityPostsV3.id == bigint_post_id)
+                    .first()
+                )
+                if post_info and post_info.user_email == user_email:
+                    post_info.id = str(post_info.id)
+                    return post_info
+                return None
+        except Exception as e:
+            logger.error(
+                f"get_update_post_detail_v3: {post_id}, error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
+    def delete_post_by_admin_v3(post_id: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                post_info = (
+                    s.query(CommunityPostsV3)
+                    .filter(CommunityPostsV3.id == int(post_id))
+                    .first()
+                )
+                if post_info:
+                    post_info.update_time = datetime.now()
+                    post_info.delete_by_admin = True
+                s.commit()
+                return {"result": 1}
+        except Exception as e:
+            logger.error(
+                f"delete_post_by_admin_v3: {post_id}, error: {e}", exc_info=True
+            )
+            return None
+
+    @staticmethod
+    def delete_post_by_user_v3(post_id: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                post_info = (
+                    s.query(CommunityPostsV3)
+                    .filter(CommunityPostsV3.id == int(post_id))
+                    .first()
+                )
+                if post_info:
+                    post_info.update_time = datetime.now()
+                    post_info.delete_by_user = True
+                s.commit()
+                return {"result": 1}
+        except Exception as e:
+            logger.error(
+                f"delete_post_by_user_v3: {post_id}, error: {e}", exc_info=True
+            )
+            return None
+
+    @staticmethod
+    def get_search_v3(
+        search_type: str, word: str, page_num: int, user_email: Optional[str] = None
+    ):
+        limit, offset = 20, (page_num - 1) * 20
+        try:
+            with V3Database.SessionLocal() as s:
+                params = {
+                    "limit": limit,
+                    "offset": offset,
+                    "word": f"%{word}%",
+                    "user_email": user_email,
+                }
+                result = s.execute(
+                    text(CommunityFunctionV3.get_search_sql(search_type)), params
+                )
+                data = [dict(row) for row in result.mappings()]
+                total = s.execute(
+                    text(CommunityFunctionV3.get_search_total_count_sql(search_type)),
+                    params,
+                ).scalar()
+
+                return {
+                    "search_result": data,
+                    "total_count": total,
+                    "max_page_count": (total + limit - 1) // limit,
+                }
+        except Exception as e:
+            logger.error(f"get_search_v3 error: {e}", exc_info=True)
+            return None
+
+    @staticmethod
+    def report_post_v3(request_info: ReqPostReport, user_email: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                s.add(
+                    PostReportV3(
+                        target_post_id=int(request_info.post_id),
+                        request_email=user_email,
+                        target_email=request_info.reported_email,
+                        reason_type=request_info.reason_type,
+                        reason=request_info.reason,
+                        create_time=datetime.now(),
+                    )
+                )
+                s.commit()
+                return {"result": 1}
+        except Exception as e:
+            logger.error(
+                f"report_post_v3: {request_info.model_dump()}, error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
+    def increase_view_count_v3(post_id_slug: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                post_id = CommunityFunctionV3.parse_id_and_slug(post_id_slug)
+                s.execute(text(CommunityUtilV3.increase_view_count()), {"post_id": post_id})
+                s.commit()
+                return {"result": 1}
+        except Exception as e:
+            logger.error(
+                f"increase_view_count_v3: {post_id_slug}, error: {e}",
                 exc_info=True,
             )
             return None

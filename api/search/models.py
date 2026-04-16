@@ -1,35 +1,26 @@
-from sqlalchemy import Column, String, TIMESTAMP, INTEGER
+from sqlalchemy import Column, String, TIMESTAMP, INTEGER, NUMERIC
+from database import V3Database
 
-from database import DataBaseConnector
 
+class AutocompleteItemV3(V3Database.Base):
+    __tablename__ = "autocomplete_items"
 
-class Search(DataBaseConnector.Base):
-    """
-    search info
-    """
-
-    __tablename__ = "search_i18n"
-
-    value = Column(String, primary_key=True)
-    page_value = Column(String, primary_key=True)
-    lang = Column(String, primary_key=True)
-    link = Column(String)
-    type = Column(String)
-    order = Column(INTEGER)
+    url = Column(String, primary_key=True)
+    autocomplete_text_en = Column(String)
+    autocomplete_text_ko = Column(String)
+    autocomplete_text_ja = Column(String)
+    category = Column(String)
+    sort_order = Column(INTEGER)
     update_time = Column(TIMESTAMP)
 
 
-class Sitemap(DataBaseConnector.Base):
-    """
-    sitemap.xml
-    """
-
+class SitemapV3(V3Database.Base):
     __tablename__ = "sitemap"
 
     id = Column(INTEGER, primary_key=True)
-    link = Column(String)
-    priority = Column(INTEGER)
-    value = Column(String)
+    url = Column(String)
+    priority = Column(NUMERIC)
     change_freq = Column(String)
-    create_date = Column(TIMESTAMP)
+    sitemap_value = Column(String)
+    create_time = Column(TIMESTAMP)
     update_time = Column(TIMESTAMP)

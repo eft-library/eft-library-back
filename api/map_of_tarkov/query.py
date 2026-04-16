@@ -1,4 +1,4 @@
-class MapOfTarkovQuery:
+class MapOfTarkovQueryV3:
     @staticmethod
     def boss_info_by_map_sql():
         return """

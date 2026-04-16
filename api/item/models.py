@@ -1,23 +1,5 @@
-from sqlalchemy import BOOLEAN, Column, INTEGER, NUMERIC, TEXT, TIMESTAMP, JSON
-from database import DataBaseConnector, V3Database
-
-
-class Item(DataBaseConnector.Base):
-    """
-    Item
-    """
-
-    __tablename__ = "item_i18n"
-
-    id = Column(TEXT, primary_key=True)
-    name = Column(JSON)
-    image_width = Column(NUMERIC)
-    image_height = Column(NUMERIC)
-    url_mapping = Column(TEXT)
-    category = Column(TEXT)
-    image = Column(TEXT)
-    info = Column(JSON)
-    update_time = Column(TIMESTAMP)
+from sqlalchemy import BOOLEAN, Column, INTEGER, NUMERIC, TEXT, TIMESTAMP
+from database import V3Database
 
 
 class ItemV3(V3Database.Base):

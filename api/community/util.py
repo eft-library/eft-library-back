@@ -300,3 +300,76 @@ class CommunityUtil:
         order by cp.create_time desc
         limit 5        
         """
+
+
+class CommunityUtilV3:
+
+    @staticmethod
+    def _to_v3_sql(sql: str):
+        return (
+            sql.replace("ub.blocker_email", "ub.request_email")
+            .replace("ub.blocked_email", "ub.target_email")
+            .replace("cpb.user_email", "cpb.email")
+        )
+
+    @staticmethod
+    def get_posts_with_post_id():
+        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_posts_with_post_id())
+
+    @staticmethod
+    def get_posts_with_category():
+        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_posts_with_category())
+
+    @staticmethod
+    def get_post_category_count():
+        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_post_category_count())
+
+    @staticmethod
+    def get_post_category_count_with_post_id():
+        return CommunityUtilV3._to_v3_sql(
+            CommunityUtil.get_post_category_count_with_post_id()
+        )
+
+    @staticmethod
+    def get_post_issue_count():
+        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_post_issue_count())
+
+    @staticmethod
+    def get_posts_with_issue():
+        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_posts_with_issue())
+
+    @staticmethod
+    def get_post_detail():
+        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_post_detail())
+
+    @staticmethod
+    def get_post_detail_meta_data():
+        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_post_detail_meta_data())
+
+    @staticmethod
+    def get_detail_author_meta_data():
+        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_detail_author_meta_data())
+
+    @staticmethod
+    def check_follow():
+        return CommunityUtilV3._to_v3_sql(CommunityUtil.check_follow())
+
+    @staticmethod
+    def get_current_post_category_page_num():
+        return CommunityUtilV3._to_v3_sql(
+            CommunityUtil.get_current_post_category_page_num()
+        )
+
+    @staticmethod
+    def get_current_post_issue_page_num():
+        return CommunityUtilV3._to_v3_sql(
+            CommunityUtil.get_current_post_issue_page_num()
+        )
+
+    @staticmethod
+    def increase_view_count():
+        return CommunityUtilV3._to_v3_sql(CommunityUtil.increase_view_count())
+
+    @staticmethod
+    def get_home_post():
+        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_home_post())

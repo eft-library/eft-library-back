@@ -1,66 +1,61 @@
-class DashboardUtil:
+class DashboardQueryV3:
     @staticmethod
-    def get_psql_top_request():
+    def get_psql_top_request_v3():
         return """
             SELECT
-              REQUEST,
-              LINK,
+              request_type,
+              url,
               COUNT(*) AS request_count
-            FROM USER_FOOTPRINT
-            WHERE (EXECUTE_TIME AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
-              AND LINK NOT LIKE '%health%'
-            GROUP BY REQUEST, LINK
+            FROM user_footprint
+            WHERE (execute_time AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
+              AND url NOT LIKE '%health%'
+            GROUP BY request_type, url
             ORDER BY request_count DESC
             LIMIT 10
         """
 
     @staticmethod
-    def get_psql_total_count():
+    def get_psql_total_count_v3():
         return """
-            WITH current_period AS (
-              SELECT COUNT(*) AS request_count
-              FROM USER_FOOTPRINT
-              WHERE FOOTPRINT_TIME AT TIME ZONE 'Asia/Seoul' >= :start_date
-                AND FOOTPRINT_TIME AT TIME ZONE 'Asia/Seoul' < :end_date
-            )
-            SELECT 
-              c.request_count AS current_requests
-            FROM current_period c
+            SELECT COUNT(*) AS current_requests
+            FROM user_footprint
+            WHERE request_time AT TIME ZONE 'Asia/Seoul' >= :start_date
+              AND request_time AT TIME ZONE 'Asia/Seoul' < :end_date
         """
 
     @staticmethod
-    def get_psql_user_total_count():
+    def get_psql_user_total_count_v3():
         return """
             SELECT COUNT(*) AS user_total_count
-            FROM USER_INFO
+            FROM user_info
         """
 
     @staticmethod
-    def get_psql_active_user_count():
+    def get_psql_active_user_count_v3():
         return """
             SELECT COUNT(*) AS active_user
-            FROM USER_INFO
+            FROM user_info
             WHERE (attendance_time AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
         """
 
     @staticmethod
-    def get_psql_time_distribution():
+    def get_psql_time_distribution_v3():
         return """
             SELECT
               TO_CHAR(
-                date_trunc('hour', EXECUTE_TIME AT TIME ZONE 'Asia/Seoul') + 
-                INTERVAL '1 minute' * (FLOOR(EXTRACT(MINUTE FROM EXECUTE_TIME AT TIME ZONE 'Asia/Seoul') / 15) * 15),
+                date_trunc('hour', execute_time AT TIME ZONE 'Asia/Seoul') +
+                INTERVAL '1 minute' * (FLOOR(EXTRACT(MINUTE FROM execute_time AT TIME ZONE 'Asia/Seoul') / 15) * 15),
                 'HH24:MI'
               ) AS time,
               COUNT(*) AS requests
-            FROM USER_FOOTPRINT
-            WHERE (EXECUTE_TIME AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
+            FROM user_footprint
+            WHERE (execute_time AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
             GROUP BY time
             ORDER BY time
         """
 
     @staticmethod
-    def get_psql_health_check():
+    def get_psql_health_check_v3():
         return """
         SELECT
             service_name,
@@ -76,16 +71,13 @@ class DashboardUtil:
         """
 
     @staticmethod
-    def get_response_ms():
+    def get_response_ms_v3():
         return """
         SELECT
             service_name,
             ROUND(AVG(response_ms::DOUBLE PRECISION) * 1000) AS avg_response_ms
-        FROM
-            response_time
-        WHERE
-            (checked_time AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
+        FROM response_time
+        WHERE (checked_time AT TIME ZONE 'Asia/Seoul') BETWEEN :start_date AND :end_date
           AND response_ms IS NOT NULL
-        GROUP BY
-            service_name
+        GROUP BY service_name
         """

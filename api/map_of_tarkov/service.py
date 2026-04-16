@@ -1,21 +1,17 @@
 from sqlalchemy import text
-from api.map.models import Map, MapV3
+from api.map.models import MapV3
 from api.map_of_tarkov.models import (
-    Extraction,
     MapPointV3,
-    Transits,
-    WhereAmI,
     WhereAmIV3,
 )
-from api.map_of_tarkov.query import MapOfTarkovQuery
-from api.map_of_tarkov.util import MapOfTarkovUtil
-from database import DataBaseConnector, V3Database
+from api.map_of_tarkov.query import MapOfTarkovQueryV3
+from database import V3Database
 import logging
 
 logger = logging.getLogger("api.mot")
 
 
-class MapOfTarkovService:
+class MapOfTarkovServiceV3:
     @staticmethod
     def _serialize_map_selector_v3(map_data: MapV3):
         return {
@@ -96,68 +92,12 @@ class MapOfTarkovService:
         }
 
     @staticmethod
-    def get_map_of_tarkov(map_id):
-        """
-        map of tarkov 지도 조회
-        """
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                map_selector = (
-                    s.query(Map).filter(Map.depth == 1).order_by(Map.order).all()
-                )
-                map_selector_list = [{"id": m.id, "name": m.name} for m in map_selector]
-
-                map_query = text(MapOfTarkovUtil.get_map_of_tarkov_detail_query())
-                map_param = {"map_id": map_id}
-                map_result = s.execute(map_query, map_param)
-                map_data = [dict(row) for row in map_result.mappings()]
-
-                boss_query = text(MapOfTarkovUtil.get_map_of_tarkov_boss_query())
-                boss_param = {"map_id": map_id}
-                boss_result = s.execute(boss_query, boss_param)
-                boss_data = [dict(row) for row in boss_result.mappings()]
-
-                extraction_info = (
-                    s.query(Extraction)
-                    .filter(Extraction.map == map_id)
-                    .order_by(Extraction.faction, Extraction.name)
-                    .all()
-                )
-                transits_info = (
-                    s.query(Transits)
-                    .filter(Transits.map == map_id)
-                    .order_by(Transits.faction, Transits.name)
-                    .all()
-                )
-
-                find_info = s.query(WhereAmI).filter(WhereAmI.id == map_id).first()
-
-            map_of_tarkov = {
-                "map_info": map_data[0],
-                "extraction_info": extraction_info,
-                "transits_info": transits_info,
-                "map_id": map_id,
-                "find_info": find_info,
-                "map_selector": map_selector_list,
-                "boss_info": boss_data,
-            }
-
-            return map_of_tarkov
-        except Exception as e:
-            logger.error(
-                f"get_map_of_tarkov: {map_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
     def get_map_of_tarkov_v3(normalized_name: str):
         try:
             with V3Database.SessionLocal() as s:
-                boss_info_query = text(MapOfTarkovQuery.boss_info_by_map_sql())
+                boss_info_query = text(MapOfTarkovQueryV3.boss_info_by_map_sql())
                 boss_followers_query = text(
-                    MapOfTarkovQuery.boss_followers_by_parent_ids_sql()
+                    MapOfTarkovQueryV3.boss_followers_by_parent_ids_sql()
                 )
 
                 map_data = (
@@ -237,27 +177,31 @@ class MapOfTarkovService:
                 extraction_info = []
                 transit_info = []
                 for point in map_points:
-                    serialized_point = MapOfTarkovService._serialize_map_point_v3(point)
+                    serialized_point = MapOfTarkovServiceV3._serialize_map_point_v3(
+                        point
+                    )
                     if point.point_type == "extraction":
                         extraction_info.append(serialized_point)
                     elif point.point_type == "transit":
                         transit_info.append(serialized_point)
 
                 return {
-                    "map_info": MapOfTarkovService._serialize_map_detail_v3(map_data),
+                    "map_info": MapOfTarkovServiceV3._serialize_map_detail_v3(map_data),
                     "map_selector": [
-                        MapOfTarkovService._serialize_map_selector_v3(row)
+                        MapOfTarkovServiceV3._serialize_map_selector_v3(row)
                         for row in map_selector
                     ],
                     "child_maps": [
-                        MapOfTarkovService._serialize_map_selector_v3(row)
+                        MapOfTarkovServiceV3._serialize_map_selector_v3(row)
                         for row in child_maps
                     ],
-                    "find_info": MapOfTarkovService._serialize_where_am_i_v3(find_info),
+                    "find_info": MapOfTarkovServiceV3._serialize_where_am_i_v3(
+                        find_info
+                    ),
                     "extraction_info": extraction_info,
                     "transit_info": transit_info,
                     "boss_info": [
-                        MapOfTarkovService._serialize_boss_info_v3(
+                        MapOfTarkovServiceV3._serialize_boss_info_v3(
                             dict(row), followers_by_parent.get(row["id"], [])
                         )
                         for row in boss_rows

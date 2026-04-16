@@ -1,4 +1,4 @@
-class BossQuery:
+class BossQueryV3:
     @staticmethod
     def boss_selector_sql():
         return """

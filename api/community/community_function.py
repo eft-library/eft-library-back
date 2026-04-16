@@ -2,7 +2,7 @@ import re
 
 from sqlalchemy import text
 from api.community.util import CommunityUtil
-from api.news.models import Information
+from api.news.models import Information, InformationV3
 
 
 class CommunityFunction:
@@ -457,6 +457,114 @@ class CommunityFunction:
 
         return queries[search_type]
 
+
+class CommunityFunctionV3:
+
+    @staticmethod
+    def extract_thumbnail_img(html):
+        return CommunityFunction.extract_thumbnail_img(html)
+
+    @staticmethod
+    def parse_id_and_slug(value: str):
+        return CommunityFunction.parse_id_and_slug(value)
+
+    @staticmethod
+    def fetch_post_detail(session, post_id: int, user_email: str):
+        from api.community.util import CommunityUtilV3
+
+        query = text(CommunityUtilV3.get_post_detail())
+        params = {"post_id": post_id, "user_email": user_email}
+        result = session.execute(query, params)
+        return [dict(row) for row in result.mappings()][0]
+
+    @staticmethod
+    def fetch_author_meta(session, post_id: int, user_email: str):
+        from api.community.util import CommunityUtilV3
+
+        query = text(CommunityUtilV3.get_detail_author_meta_data())
+        params = {"post_id": post_id, "user_email": user_email}
+        result = session.execute(query, params)
+        return [dict(row) for row in result.mappings()][0]
+
+    @staticmethod
+    def fetch_posts_with_paging(
+        session, post_id: int, page_category: str, user_email: str, limit: int = 20
+    ):
+        from api.community.util import CommunityUtilV3
+
+        if page_category == "issue":
+            get_post_query = text(CommunityUtilV3.get_posts_with_issue())
+            get_post_count_query = text(CommunityUtilV3.get_post_issue_count())
+            get_post_current_page_num_query = text(
+                CommunityUtilV3.get_current_post_issue_page_num()
+            )
+        else:
+            get_post_query = text(CommunityUtilV3.get_posts_with_post_id())
+            get_post_count_query = text(
+                CommunityUtilV3.get_post_category_count_with_post_id()
+            )
+            get_post_current_page_num_query = text(
+                CommunityUtilV3.get_current_post_category_page_num()
+            )
+
+        current_page_num_result = session.execute(
+            get_post_current_page_num_query,
+            {"post_id": post_id},
+        )
+        current_page_num_raw = current_page_num_result.scalar()
+        current_page_num = ((current_page_num_raw or 1) - 1) // limit + 1
+        offset = (current_page_num - 1) * limit
+
+        posts_result = session.execute(
+            get_post_query,
+            {
+                "limit": limit,
+                "offset": offset,
+                "post_id": post_id,
+                "user_email": user_email,
+            },
+        )
+        posts = [dict(row) for row in posts_result.mappings()]
+
+        total_result = session.execute(
+            get_post_count_query, {"post_id": post_id, "user_email": user_email}
+        )
+        total = total_result.scalar()
+        max_page_count = (total + limit - 1) // limit
+
+        return {
+            "total": total,
+            "max_page_count": max_page_count,
+            "posts": posts,
+            "current_page_num": current_page_num,
+        }
+
+    @staticmethod
+    def fetch_notice_posts(s):
+        return (
+            s.query(InformationV3)
+            .filter(InformationV3.information_type == "NOTICE")
+            .order_by(InformationV3.update_time.desc())
+            .limit(5)
+            .all()
+        )
+
+    @staticmethod
+    def get_search_sql(search_type: str):
+        return (
+            CommunityFunction.get_search_sql(search_type)
+            .replace("ub.blocker_email", "ub.request_email")
+            .replace("ub.blocked_email", "ub.target_email")
+        )
+
+    @staticmethod
+    def get_search_total_count_sql(search_type: str):
+        return (
+            CommunityFunction.get_search_total_count_sql(search_type)
+            .replace("ub.blocker_email", "ub.request_email")
+            .replace("ub.blocked_email", "ub.target_email")
+        )
+
     @staticmethod
     def get_search_total_count_sql(search_type: str):
         queries = {
@@ -585,3 +693,21 @@ class CommunityFunction:
         }
 
         return queries[search_type]
+
+
+CommunityFunction.get_search_total_count_sql = staticmethod(
+    CommunityFunctionV3.get_search_total_count_sql
+)
+
+
+def _get_search_total_count_sql_v3(search_type: str):
+    return (
+        CommunityFunction.get_search_total_count_sql(search_type)
+        .replace("ub.blocker_email", "ub.request_email")
+        .replace("ub.blocked_email", "ub.target_email")
+    )
+
+
+CommunityFunctionV3.get_search_total_count_sql = staticmethod(
+    _get_search_total_count_sql_v3
+)

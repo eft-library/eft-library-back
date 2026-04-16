@@ -1,11 +1,11 @@
-from api.user.user_res_models import User
+from api.user.user_res_models import User, UserV3, UserQuestV3
 from api.planner.planner_res_models import UserQuest
 from api.user.user_req_models import AddUserReq
 from datetime import datetime, timedelta, date
 import pytz
 from sqlalchemy import text
 import re
-from api.user.util import UserUtil
+from api.user.util import UserUtil, UserUtilV3
 
 
 class UserFunction:
@@ -301,3 +301,195 @@ class UserFunction:
             "jp": "使用可能なニックネームです。",
             "en": "Nickname is available.",
         }
+
+
+class UserFunctionV3:
+    @staticmethod
+    def _get_existing_user_v3(session, email: str) -> UserV3:
+        return session.query(UserV3).filter(UserV3.email == email).first()
+
+    @staticmethod
+    def _check_nickname_duplicate_v3(session, nickname: str):
+        return session.query(UserV3).filter(UserV3.nickname == nickname).first()
+
+    @staticmethod
+    def _handle_existing_user_v3(session, user: UserV3):
+        today = date.today()
+        tz = pytz.timezone("Asia/Seoul")
+        start_of_today, end_of_today = UserFunction._get_start_and_end_of_day(tz, today)
+
+        if user.attendance_time.tzinfo is None:
+            user.attendance_time = tz.localize(user.attendance_time)
+
+        if not (start_of_today <= user.attendance_time <= end_of_today):
+            user.attendance_count += 1
+            user.attendance_time = datetime.now(tz)
+            session.commit()
+
+    @staticmethod
+    def _create_delete_user_v3(session, user: UserV3):
+        session.delete(user)
+
+    @staticmethod
+    def _create_new_user_v3(session, addUserReq: AddUserReq):
+        new_user = UserV3(
+            name=addUserReq.name,
+            email=addUserReq.email,
+            is_admin=False,
+            attendance_count=1,
+            create_time=datetime.now(),
+            attendance_time=datetime.now(),
+        )
+        session.add(new_user)
+        UserFunctionV3._create_user_related_entries_v3(session, addUserReq.email)
+        session.commit()
+
+    @staticmethod
+    def _create_user_related_entries_v3(session, email: str):
+        exists = session.query(UserQuestV3).filter(UserQuestV3.email == email).first()
+        if exists:
+            return
+
+        session.add(
+            UserQuestV3(
+                email=email,
+                quest_list=[],
+                update_time=datetime.now(),
+            )
+        )
+
+    @staticmethod
+    def delete_all_user_data_v3(session, email: str):
+        param = {"email": email}
+        session.execute(text(UserUtilV3.delete_user_quest()), param)
+        session.execute(text(UserUtilV3.delete_user_roadmap()), param)
+        return True
+
+    @staticmethod
+    def _get_user_data_v3(session, user_email: str):
+        result = session.execute(
+            text(UserUtilV3.get_user_info_with_penalty()),
+            {"user_email": user_email},
+        )
+        return [dict(row) for row in result.mappings()][0]
+
+    @staticmethod
+    def get_my_page_default_v3(session, user_email: str):
+        result = session.execute(
+            text(UserUtilV3.get_my_page_default()),
+            {"user_email": user_email},
+        )
+        return [dict(row) for row in result.mappings()][0]
+
+    @staticmethod
+    def get_my_page_posts_v3(session, user_email: str, limit: int, offset: int):
+        return UserFunctionV3._get_paged_user_data_v3(
+            session,
+            UserUtilV3.get_my_page_posts(),
+            UserUtilV3.get_my_page_posts_total(),
+            "posts",
+            user_email,
+            limit,
+            offset,
+        )
+
+    @staticmethod
+    def get_my_page_bookmarks_v3(session, user_email: str, limit: int, offset: int):
+        return UserFunctionV3._get_paged_user_data_v3(
+            session,
+            UserUtilV3.get_my_page_bookmarks(),
+            UserUtilV3.get_my_page_bookmarks_total(),
+            "bookmarks",
+            user_email,
+            limit,
+            offset,
+        )
+
+    @staticmethod
+    def get_my_page_blocks_v3(session, user_email: str, limit: int, offset: int):
+        return UserFunctionV3._get_paged_user_data_v3(
+            session,
+            UserUtilV3.get_my_page_blocks(),
+            UserUtilV3.get_my_page_blocks_total(),
+            "blocks",
+            user_email,
+            limit,
+            offset,
+        )
+
+    @staticmethod
+    def get_my_page_follow_v3(session, user_email: str, limit: int, offset: int):
+        return UserFunctionV3._get_paged_user_data_v3(
+            session,
+            UserUtilV3.get_my_page_follow(),
+            UserUtilV3.get_my_page_follow_total(),
+            "follow",
+            user_email,
+            limit,
+            offset,
+        )
+
+    @staticmethod
+    def get_my_page_comments_v3(session, user_email: str, limit: int, offset: int):
+        return UserFunctionV3._get_paged_user_data_v3(
+            session,
+            UserUtilV3.get_my_page_comments(),
+            UserUtilV3.get_my_page_comments_total(),
+            "comments",
+            user_email,
+            limit,
+            offset,
+        )
+
+    @staticmethod
+    def _get_paged_user_data_v3(
+        session,
+        data_sql: str,
+        count_sql: str,
+        result_key: str,
+        user_email: str,
+        limit: int,
+        offset: int,
+    ):
+        data_result = session.execute(
+            text(data_sql),
+            {"limit": limit, "offset": offset, "user_email": user_email},
+        )
+        total = session.execute(
+            text(count_sql),
+            {"user_email": user_email},
+        ).scalar()
+        return {
+            result_key: [dict(row) for row in data_result.mappings()],
+            "total_count": total,
+            "max_page_count": (total + limit - 1) // limit,
+        }
+
+    @staticmethod
+    def get_my_page_notification_v3(
+        session, user_email: str, limit: int, offset: int
+    ):
+        result = session.execute(
+            text(UserUtilV3.get_my_page_notification()),
+            {"limit": limit, "offset": offset, "user_email": user_email},
+        )
+        notifications = [dict(row) for row in result.mappings()]
+        total = session.execute(
+            text(UserUtilV3.get_my_page_notification_total()),
+            {"user_email": user_email},
+        ).scalar()
+
+        if notifications:
+            ids = [n["id"] for n in notifications if not n.get("is_read", False)]
+            if ids:
+                session.execute(text(UserUtilV3.update_my_page_notification()), {"ids": ids})
+                session.commit()
+
+        return {
+            "notifications": notifications,
+            "total_count": total,
+            "max_page_count": (total + limit - 1) // limit,
+        }
+
+    calculate_end_time_v3 = staticmethod(UserFunction.calculate_end_time)
+    _validate_nickname_rules_v3 = staticmethod(UserFunction._validate_nickname_rules)

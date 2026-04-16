@@ -1,4 +1,4 @@
-class QuestQuery:
+class QuestQueryV3:
     @staticmethod
     def quest_list_sql():
         return """

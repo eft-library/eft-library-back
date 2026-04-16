@@ -1,4 +1,4 @@
-class HomeQuery:
+class HomeQueryV3:
     @staticmethod
     def news_item_sql():
         return """
