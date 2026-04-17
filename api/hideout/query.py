@@ -1,5 +1,48 @@
 class HideoutQueryV3:
     @staticmethod
+    def hideout_master_list_sql():
+        return """
+            select id,
+                   name_en,
+                   name_ko,
+                   name_ja,
+                   normalized_name
+            from hideout_master
+            order by name_en nulls last, id;
+        """
+
+    @staticmethod
+    def user_hideout_sql():
+        return """
+            select email,
+                   complete_list,
+                   item_list,
+                   update_time
+            from user_hideout
+            where email = :email;
+        """
+
+    @staticmethod
+    def upsert_user_hideout_complete_list_sql():
+        return """
+            insert into user_hideout (email, complete_list, item_list, update_time)
+            values (:email, :complete_list, '[]'::jsonb, :update_time)
+            on conflict (email) do update
+            set complete_list = excluded.complete_list,
+                update_time = excluded.update_time;
+        """
+
+    @staticmethod
+    def upsert_user_hideout_item_list_sql():
+        return """
+            insert into user_hideout (email, complete_list, item_list, update_time)
+            values (:email, ARRAY[]::text[], cast(:item_list as jsonb), :update_time)
+            on conflict (email) do update
+            set item_list = cast(excluded.item_list as jsonb),
+                update_time = excluded.update_time;
+        """
+
+    @staticmethod
     def hideout_master_sql():
         return """
             select id,

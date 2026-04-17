@@ -1,40 +1,32 @@
-from typing import Optional
-from fastapi import UploadFile, File, HTTPException
-from api.community.community_res_models import (
-    CommunityPosts,
-    CommunityPostsView,
-    CommunityPostsReactions,
-    CommunityPostsBookmark,
-    UserFollows,
-    PostReport,
-    CommunityPostsV3,
-    CommunityPostsViewV3,
-    CommunityPostsReactionsV3,
-    CommunityPostsBookmarkV3,
-    UserFollowsV3,
-    PostReportV3,
-)
-from api.community.util import CommunityUtil, CommunityUtilV3
-from api.community.community_req_models import (
-    CreateCommunity,
-    ReqPostReport,
-    FollowUser,
-)
-from database import DataBaseConnector, V3Database
-from util.snowflake_id import SnowflakeGenerator
-from slugify import slugify
-import os
-from api.community.community_function import CommunityFunction, CommunityFunctionV3
-from dotenv import load_dotenv
 from datetime import datetime
-from PIL import Image
-from minio import Minio
-from minio.error import S3Error
 import io
-from sqlalchemy import text
-from util.kafka_producer import produce_notification
 import json
 import logging
+import os
+from typing import Optional
+
+from fastapi import File, HTTPException, UploadFile
+from minio import Minio
+from minio.error import S3Error
+from PIL import Image
+from slugify import slugify
+from sqlalchemy import text
+
+from api.community.community_function import CommunityFunctionV3
+from api.community.community_req_models import CreateCommunity, FollowUser, ReqPostReport
+from api.community.community_res_models import (
+    CommunityPostsBookmarkV3,
+    CommunityPostsReactionsV3,
+    CommunityPostsV3,
+    CommunityPostsViewV3,
+    PostReportV3,
+    UserFollowsV3,
+)
+from api.community.util import CommunityUtilV3
+from database import V3Database
+from dotenv import load_dotenv
+from util.kafka_producer import produce_notification
+from util.snowflake_id import SnowflakeGenerator
 
 logger = logging.getLogger("api.community")
 
@@ -51,27 +43,18 @@ minio_client = Minio(
 )
 
 
-class CommunityService:
-
+class CommunityServiceV3:
     @staticmethod
-    def upload_image(file: UploadFile = File(...)):
+    def upload_image_v3(file: UploadFile = File(...)):
         timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
         filename_wo_ext = os.path.splitext(file.filename.replace(" ", "_"))[0]
-        object_name = f"{folder_name}/{timestamp}_{filename_wo_ext}.webp"  # ✅ .webp 확장자로 저장
+        object_name = f"{folder_name}/{timestamp}_{filename_wo_ext}.webp"
         try:
-            # 1. 이미지 열기 (UploadFile -> PIL Image)
             image = Image.open(file.file)
-
-            # 2. 리사이징 (선택적): 너무 큰 이미지 줄이기
-            max_size = (1200, 1200)
-            image.thumbnail(max_size)
-
-            # 3. WebP로 저장
+            image.thumbnail((1200, 1200))
             buffer = io.BytesIO()
-            image.save(buffer, format="WEBP", quality=80, method=6)  # ✅ 압축률 조정
+            image.save(buffer, format="WEBP", quality=80, method=6)
             buffer.seek(0)
-
-            # 4. MinIO에 업로드
             minio_client.put_object(
                 bucket_name,
                 object_name,
@@ -79,630 +62,51 @@ class CommunityService:
                 length=buffer.getbuffer().nbytes,
                 content_type="image/webp",
             )
-
         except S3Error as e:
-            logger.error(
-                f"upload_image error: {e}",
-                exc_info=True,
-            )
             raise HTTPException(status_code=500, detail=f"MinIO 업로드 실패: {e}")
         except Exception as e:
-            logger.error(
-                f"upload_image error: {e}",
-                exc_info=True,
-            )
             raise HTTPException(status_code=500, detail=f"이미지 처리 실패: {e}")
 
-        url = f"https://image.eftlibrary.com/{bucket_name}/{object_name}"
-        result = {"image_url": url}
-
-        return result
-
-    @staticmethod
-    def create_posts(post_info: CreateCommunity, user_email: str):
-        # snowflake 생성
-        new_id = snowflake.generate_id()
-        # slug 생성
-        slug = slugify(post_info.title)
-        # thumbnail 추출
-        thumbnail = CommunityFunction.extract_thumbnail_img(post_info.contents)
-
-        try:
-
-            now_time = datetime.now()
-            with DataBaseConnector.SessionLocal() as s:
-                # 삽입
-                new_post = CommunityPosts(
-                    id=new_id,
-                    slug=slug,
-                    user_email=user_email,
-                    category=post_info.category,
-                    title=post_info.title,
-                    contents=post_info.contents,
-                    thumbnail=thumbnail,
-                    delete_by_user=False,
-                    delete_by_admin=False,
-                    create_time=now_time,
-                    update_time=now_time,
-                )
-                s.add(new_post)
-
-                # view count 1 생성
-                new_view_count = CommunityPostsView(post_id=new_id, view_count=1)
-                s.add(new_view_count)
-                s.commit()
-
-                kafka_message = {
-                    "url": f"{new_id}-{slug}",
-                    "title": post_info.title,
-                    "author_email": user_email,
-                    "author_nickname": post_info.nickname,
-                    "noti_type": "create_post",
-                }
-                json_str = json.dumps(kafka_message)
-                produce_notification(json_str)
-
-                # 리턴은 snowflake-slug
-                return {"url": f"{new_id}-{slug}"}
-        except Exception as e:
-            logger.error(
-                f"create_posts: {post_info.model_dump()}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_posts(category: str, page_num: int, user_email: Optional[str] = None):
-        try:
-            limit, offset = 20, (page_num - 1) * 20
-
-            with DataBaseConnector.SessionLocal() as s:
-                if category == "issue":
-                    get_post_query = text(CommunityUtil.get_posts_with_issue())
-                    get_post_count_query = text(CommunityUtil.get_post_issue_count())
-                else:
-                    get_post_query = text(CommunityUtil.get_posts_with_category())
-                    get_post_count_query = text(CommunityUtil.get_post_category_count())
-                get_post_params = {
-                    "limit": limit,
-                    "offset": offset,
-                    "category": category,
-                    "user_email": user_email,
-                }
-                get_post_data_result = s.execute(get_post_query, get_post_params)
-                get_post_data = [dict(row) for row in get_post_data_result.mappings()]
-                get_post_count_result = s.execute(get_post_count_query, get_post_params)
-                total = get_post_count_result.scalar() or 0
-
-                max_page_count = (total + limit - 1) // limit
-
-                return {
-                    "total": total,
-                    "max_page_count": max_page_count,
-                    "posts": get_post_data,
-                }
-
-        except Exception as e:
-            logger.error(
-                f"get_posts error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_detail_post(post_id_slug: str, user_email: str, page_category: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
-                return {
-                    "post_detail": CommunityFunction.fetch_post_detail(
-                        s, post_id, user_email
-                    ),
-                    "author_detail": CommunityFunction.fetch_author_meta(
-                        s, post_id, user_email
-                    ),
-                    "posts": CommunityFunction.fetch_posts_with_paging(
-                        s, post_id, page_category, user_email
-                    ),
-                }
-        except Exception as e:
-            logger.error(
-                f"get_detail_post: {post_id_slug}, {page_category}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_side_info(user_email: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-
-                side_issue_posts_query = text(CommunityUtil.get_posts_with_issue())
-                get_side_issue_posts = s.execute(
-                    side_issue_posts_query,
-                    {"limit": 5, "offset": 0, "user_email": user_email},
-                )
-                get_side_issue_posts_data = [
-                    dict(row) for row in get_side_issue_posts.mappings()
-                ]
-
-                return {
-                    "issue_posts": get_side_issue_posts_data,
-                    "notice_posts": CommunityFunction.fetch_notice_posts(s),
-                }
-        except Exception as e:
-            logger.error(
-                f"get_side_info error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_detail_post_meta_data(post_id_slug: str, user_email: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
-                post_detail_query = text(CommunityUtil.get_post_detail_meta_data())
-                post_detail_param = {"post_id": post_id, "user_email": user_email}
-                post_detail_result = s.execute(post_detail_query, post_detail_param)
-                post_detail = [dict(row) for row in post_detail_result.mappings()]
-
-                return post_detail[0]
-        except Exception as e:
-            logger.error(
-                f"get_detail_post_meta_data: {post_id_slug}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def like_post(post_id: str, user_email: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                bigint_post_id = int(post_id)
-
-                # 기존 reaction 조회
-                reaction = (
-                    s.query(CommunityPostsReactions)
-                    .filter(
-                        CommunityPostsReactions.post_id == bigint_post_id,
-                        CommunityPostsReactions.user_email == user_email,
-                    )
-                    .first()
-                )
-
-                if reaction:
-                    # 기존 값에 따라 변경
-                    if reaction.reaction_type == 0:
-                        reaction.reaction_type = 1
-                    elif reaction.reaction_type == 1:
-                        reaction.reaction_type = -1
-                    elif reaction.reaction_type == -1:
-                        reaction.reaction_type = 1
-                    # update_time 갱신
-                    reaction.update_time = datetime.now()
-                else:
-                    # 없으면 새로 생성 (1로 시작)
-                    reaction = CommunityPostsReactions(
-                        post_id=bigint_post_id,
-                        user_email=user_email,
-                        reaction_type=1,
-                        update_time=datetime.now(),
-                    )
-                    s.add(reaction)
-
-                s.commit()
-                return {"result": reaction.reaction_type}  # 현재 상태 반환
-
-        except Exception as e:
-            logger.error(
-                f"like_post: {post_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def dislike_post(post_id: str, user_email: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                bigint_post_id = int(post_id)
-
-                # 기존 reaction 조회
-                reaction = (
-                    s.query(CommunityPostsReactions)
-                    .filter(
-                        CommunityPostsReactions.post_id == bigint_post_id,
-                        CommunityPostsReactions.user_email == user_email,
-                    )
-                    .first()
-                )
-
-                if reaction:
-                    # 기존 값에 따라 변경
-                    if reaction.reaction_type == 0:
-                        reaction.reaction_type = -1
-                    elif reaction.reaction_type == 1:
-                        reaction.reaction_type = 0
-                    elif reaction.reaction_type == -1:
-                        reaction.reaction_type = 0
-                    # update_time 갱신
-                    reaction.update_time = datetime.now()
-                else:
-                    # 없으면 새로 생성 (0으로 시작)
-                    reaction = CommunityPostsReactions(
-                        post_id=bigint_post_id,
-                        user_email=user_email,
-                        reaction_type=0,
-                        update_time=datetime.now(),
-                    )
-                    s.add(reaction)
-
-                s.commit()
-                return {"result": reaction.reaction_type}  # 현재 상태 반환
-
-        except Exception as e:
-            logger.error(
-                f"dislike_post: {post_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def bookmark_post(post_id: str, user_email: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                bigint_post_id = int(post_id)
-
-                # 기존 bookmark 조회 (ORM 방식)
-                bookmark = (
-                    s.query(CommunityPostsBookmark)
-                    .filter(
-                        CommunityPostsBookmark.post_id == bigint_post_id,
-                        CommunityPostsBookmark.user_email == user_email,
-                    )
-                    .first()
-                )
-
-                if bookmark:
-                    # 있으면 제거
-                    s.delete(bookmark)
-                else:
-                    # 없으면 새로 생성
-                    new_bookmark = CommunityPostsBookmark(
-                        post_id=bigint_post_id,
-                        user_email=user_email,
-                        create_time=datetime.now(),
-                    )
-                    s.add(new_bookmark)
-
-                s.commit()
-                return {"result": 1}  # 성공
-
-        except Exception as e:
-            logger.error(
-                f"bookmark_post: {post_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def toggle_follow(request_info: FollowUser, user_email: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                # 현재 팔로우 상태 확인
-                follower_status = (
-                    s.query(UserFollows)
-                    .filter(
-                        UserFollows.follower_email == request_info.following_user_email,
-                        UserFollows.following_email == user_email,
-                    )
-                    .first()
-                )
-
-                if follower_status:
-                    # 이미 팔로우 중이면 → 언팔로우
-                    s.delete(follower_status)
-                else:
-                    # 팔로우 중이 아니면 → 팔로우
-                    new_follow = UserFollows(
-                        follower_email=request_info.following_user_email,
-                        following_email=user_email,
-                        create_time=datetime.now(),
-                    )
-                    s.add(new_follow)
-
-                    # 본인이 본인 팔로우 한 거는 무시
-                    if request_info.following_user_email != user_email:
-                        kafka_message = {
-                            "follower_email": request_info.following_user_email,
-                            "following_email": user_email,
-                            "author_nickname": request_info.nickname,
-                            "noti_type": "follow_user",
-                        }
-                        json_str = json.dumps(kafka_message)
-                        produce_notification(json_str)
-
-                s.commit()
-                return {"result": 1}
-
-        except Exception as e:
-            logger.error(
-                f"toggle_follow: {request_info.model_dump()}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def check_user_following(author_email: str, user_email: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                check_follow_query = text(CommunityUtil.check_follow())
-                check_follow_param = {
-                    "author_email": author_email,
-                    "user_email": user_email,
-                }
-                check_follow_result = s.execute(check_follow_query, check_follow_param)
-                check_follow = [dict(row) for row in check_follow_result.mappings()]
-
-                return check_follow[0]
-        except Exception as e:
-            logger.error(
-                f"check_user_following: {author_email}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def update_post(
-        post_id: str,
-        slug: str,
-        page_category: str,
-        title: str,
-        contents: str,
-        user_email: str,
-    ):
-        new_slug = slugify(title)
-        new_thumbnail = CommunityFunction.extract_thumbnail_img(contents)
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                bigint_post_id = int(post_id)
-                post_info = (
-                    s.query(CommunityPosts)
-                    .filter(CommunityPosts.id == bigint_post_id)
-                    .first()
-                )
-
-                if post_info:
-                    if post_info.user_email == user_email:
-                        post_info.update_time = datetime.now()
-                        post_info.title = title
-                        post_info.contents = contents
-                        post_info.thumbnail = new_thumbnail
-                        post_info.slug = new_slug
-                        post_info.category = page_category
-                        s.commit()
-
-                    return {"url": f"{bigint_post_id}-{new_slug}"}
-
-                return {"url": f"{bigint_post_id}-{slug}"}
-        except Exception as e:
-            logger.error(
-                f"update_post error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_update_post_detail(post_id: str, user_email: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                bigint_post_id = int(post_id)
-                post_info = (
-                    s.query(CommunityPosts)
-                    .filter(CommunityPosts.id == bigint_post_id)
-                    .first()
-                )
-
-                if post_info:
-                    if post_info.user_email == user_email:
-                        post_info.id = str(post_info.id)
-                        return post_info
-
-                return None
-        except Exception as e:
-            logger.error(
-                f"get_update_post_detail: {post_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def delete_post_by_admin(post_id: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                bigint_post_id = int(post_id)
-                post_info = (
-                    s.query(CommunityPosts)
-                    .filter(CommunityPosts.id == bigint_post_id)
-                    .first()
-                )
-
-                if post_info:
-                    post_info.update_time = datetime.now()
-                    post_info.delete_by_admin = True
-
-                s.commit()
-                return {"result": 1}
-        except Exception as e:
-            logger.error(
-                f"delete_post_by_admin: {post_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def delete_post_by_user(post_id: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                bigint_post_id = int(post_id)
-                post_info = (
-                    s.query(CommunityPosts)
-                    .filter(CommunityPosts.id == bigint_post_id)
-                    .first()
-                )
-
-                if post_info:
-                    post_info.update_time = datetime.now()
-                    post_info.delete_by_user = True
-
-                s.commit()
-                return {"result": 1}
-        except Exception as e:
-            logger.error(
-                f"delete_post_by_user: {post_id}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def get_search(
-        search_type: str, word: str, page_num: int, user_email: Optional[str] = None
-    ):
-        limit, offset = 20, (page_num - 1) * 20
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                get_search_sql = text(CommunityFunction.get_search_sql(search_type))
-                get_search_total_count_sql = text(
-                    CommunityFunction.get_search_total_count_sql(search_type)
-                )
-                get_search_params = {
-                    "limit": limit,
-                    "offset": offset,
-                    "word": f"%{word}%",
-                    "user_email": user_email,
-                }
-                get_search_result = s.execute(get_search_sql, get_search_params)
-                get_search_result_data = [
-                    dict(row) for row in get_search_result.mappings()
-                ]
-                get_search_total_count_result = s.execute(
-                    get_search_total_count_sql, get_search_params
-                )
-                total = get_search_total_count_result.scalar()
-                max_page_count = (total + limit - 1) // limit
-
-                return {
-                    "search_result": get_search_result_data,
-                    "total_count": total,
-                    "max_page_count": max_page_count,
-                }
-        except Exception as e:
-            logger.error(
-                f"get_search error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def report_post(request_info: ReqPostReport, user_email: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                bigint_post_id = int(request_info.post_id)
-                new_post_report = PostReport(
-                    post_id=bigint_post_id,
-                    reporter_email=user_email,
-                    reported_email=request_info.reported_email,
-                    reason_type=request_info.reason_type,
-                    reason=request_info.reason,
-                    create_time=datetime.now(),
-                )
-                s.add(new_post_report)
-                s.commit()
-
-                return {"result": 1}
-        except Exception as e:
-            logger.error(
-                f"report_post: {request_info.model_dump()}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def increase_view_count(post_id_slug: str):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                increase_sql = text(CommunityUtil.increase_view_count())
-                bigint_post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
-                param = {"post_id": bigint_post_id}
-                s.execute(increase_sql, param)
-                s.commit()
-
-                return {"result": 1}
-        except Exception as e:
-            logger.error(
-                f"increase_view_count: {post_id_slug}, error: {e}",
-                exc_info=True,
-            )
-            return None
-
-
-class CommunityServiceV3:
-
-    @staticmethod
-    def upload_image_v3(file: UploadFile = File(...)):
-        return CommunityService.upload_image(file)
+        return {"image_url": f"https://image.eftlibrary.com/{bucket_name}/{object_name}"}
 
     @staticmethod
     def create_posts_v3(post_info: CreateCommunity, user_email: str):
-        new_id = snowflake.generate_id()
-        slug = slugify(post_info.title)
-        thumbnail = CommunityFunctionV3.extract_thumbnail_img(post_info.contents)
-
         try:
-            now_time = datetime.now()
+            new_id = snowflake.generate_id()
+            slug = slugify(post_info.title)
+            thumbnail = CommunityFunctionV3.extract_thumbnail_img(post_info.contents)
+
             with V3Database.SessionLocal() as s:
-                new_post = CommunityPostsV3(
-                    id=new_id,
-                    slug=slug,
-                    user_email=user_email,
-                    category=post_info.category,
-                    title=post_info.title,
-                    contents=post_info.contents,
-                    thumbnail=thumbnail,
-                    delete_by_user=False,
-                    delete_by_admin=False,
-                    create_time=now_time,
-                    update_time=now_time,
+                s.add(
+                    CommunityPostsV3(
+                        id=new_id,
+                        slug=slug,
+                        user_email=user_email,
+                        category=post_info.category,
+                        title=post_info.title,
+                        contents=post_info.contents,
+                        thumbnail=thumbnail,
+                        delete_by_user=False,
+                        delete_by_admin=False,
+                        create_time=datetime.now(),
+                        update_time=datetime.now(),
+                    )
                 )
-                s.add(new_post)
                 s.add(CommunityPostsViewV3(post_id=new_id, view_count=1))
                 s.commit()
 
-                kafka_message = {
-                    "url": f"{new_id}-{slug}",
-                    "title": post_info.title,
-                    "author_email": user_email,
-                    "author_nickname": post_info.nickname,
-                    "noti_type": "create_post",
-                }
-                produce_notification(json.dumps(kafka_message))
-
-                return {"url": f"{new_id}-{slug}"}
+            produce_notification(
+                json.dumps(
+                    {
+                        "url": f"{new_id}-{slug}",
+                        "title": post_info.title,
+                        "author_email": user_email,
+                        "author_nickname": post_info.nickname,
+                        "noti_type": "create_post",
+                    }
+                )
+            )
+            return {"url": f"{new_id}-{slug}"}
         except Exception as e:
             logger.error(
                 f"create_posts_v3: {post_info.model_dump()}, error: {e}",
@@ -714,26 +118,21 @@ class CommunityServiceV3:
     def get_posts_v3(category: str, page_num: int, user_email: Optional[str] = None):
         try:
             limit, offset = 20, (page_num - 1) * 20
-
             with V3Database.SessionLocal() as s:
                 if category == "issue":
-                    get_post_query = text(CommunityUtilV3.get_posts_with_issue())
-                    get_post_count_query = text(CommunityUtilV3.get_post_issue_count())
+                    posts_sql = text(CommunityUtilV3.get_posts_with_issue())
+                    count_sql = text(CommunityUtilV3.get_post_issue_count())
                 else:
-                    get_post_query = text(CommunityUtilV3.get_posts_with_category())
-                    get_post_count_query = text(
-                        CommunityUtilV3.get_post_category_count()
-                    )
+                    posts_sql = text(CommunityUtilV3.get_posts_with_category())
+                    count_sql = text(CommunityUtilV3.get_post_category_count())
                 params = {
                     "limit": limit,
                     "offset": offset,
                     "category": category,
                     "user_email": user_email,
                 }
-                posts_result = s.execute(get_post_query, params)
-                posts = [dict(row) for row in posts_result.mappings()]
-                total = s.execute(get_post_count_query, params).scalar() or 0
-
+                posts = [dict(row) for row in s.execute(posts_sql, params).mappings()]
+                total = s.execute(count_sql, params).scalar() or 0
                 return {
                     "total": total,
                     "max_page_count": (total + limit - 1) // limit,
@@ -770,14 +169,12 @@ class CommunityServiceV3:
     def get_side_info_v3(user_email: str):
         try:
             with V3Database.SessionLocal() as s:
-                side_issue_posts = s.execute(
+                issue_posts = s.execute(
                     text(CommunityUtilV3.get_posts_with_issue()),
                     {"limit": 5, "offset": 0, "user_email": user_email},
                 )
                 return {
-                    "issue_posts": [
-                        dict(row) for row in side_issue_posts.mappings()
-                    ],
+                    "issue_posts": [dict(row) for row in issue_posts.mappings()],
                     "notice_posts": CommunityFunctionV3.fetch_notice_posts(s),
                 }
         except Exception as e:
@@ -803,70 +200,55 @@ class CommunityServiceV3:
 
     @staticmethod
     def like_post_v3(post_id: str, user_email: str):
-        try:
-            with V3Database.SessionLocal() as s:
-                bigint_post_id = int(post_id)
-                reaction = (
-                    s.query(CommunityPostsReactionsV3)
-                    .filter(
-                        CommunityPostsReactionsV3.post_id == bigint_post_id,
-                        CommunityPostsReactionsV3.user_email == user_email,
-                    )
-                    .first()
-                )
-                if reaction:
-                    if reaction.reaction_type in (0, -1):
-                        reaction.reaction_type = 1
-                    elif reaction.reaction_type == 1:
-                        reaction.reaction_type = -1
-                    reaction.update_time = datetime.now()
-                else:
-                    reaction = CommunityPostsReactionsV3(
-                        post_id=bigint_post_id,
-                        user_email=user_email,
-                        reaction_type=1,
-                        update_time=datetime.now(),
-                    )
-                    s.add(reaction)
-
-                s.commit()
-                return {"result": reaction.reaction_type}
-        except Exception as e:
-            logger.error(f"like_post_v3: {post_id}, error: {e}", exc_info=True)
-            return None
+        return CommunityServiceV3._toggle_post_reaction_v3(int(post_id), user_email, 1)
 
     @staticmethod
     def dislike_post_v3(post_id: str, user_email: str):
+        return CommunityServiceV3._toggle_post_reaction_v3(int(post_id), user_email, 0)
+
+    @staticmethod
+    def _toggle_post_reaction_v3(post_id: int, user_email: str, next_value: int):
         try:
             with V3Database.SessionLocal() as s:
-                bigint_post_id = int(post_id)
                 reaction = (
                     s.query(CommunityPostsReactionsV3)
                     .filter(
-                        CommunityPostsReactionsV3.post_id == bigint_post_id,
+                        CommunityPostsReactionsV3.post_id == post_id,
                         CommunityPostsReactionsV3.user_email == user_email,
                     )
                     .first()
                 )
                 if reaction:
-                    if reaction.reaction_type == 0:
-                        reaction.reaction_type = -1
-                    elif reaction.reaction_type in (1, -1):
-                        reaction.reaction_type = 0
+                    if next_value == 1:
+                        reaction.reaction_type = (
+                            1 if reaction.reaction_type in (0, -1) else -1
+                        )
+                    else:
+                        reaction.reaction_type = (
+                            0 if reaction.reaction_type in (1, -1) else -1
+                        )
                     reaction.update_time = datetime.now()
                 else:
-                    reaction = CommunityPostsReactionsV3(
-                        post_id=bigint_post_id,
-                        user_email=user_email,
-                        reaction_type=0,
-                        update_time=datetime.now(),
+                    s.add(
+                        CommunityPostsReactionsV3(
+                            post_id=post_id,
+                            user_email=user_email,
+                            reaction_type=next_value,
+                            update_time=datetime.now(),
+                        )
                     )
-                    s.add(reaction)
-
+                    reaction = (
+                        s.query(CommunityPostsReactionsV3)
+                        .filter(
+                            CommunityPostsReactionsV3.post_id == post_id,
+                            CommunityPostsReactionsV3.user_email == user_email,
+                        )
+                        .first()
+                    )
                 s.commit()
                 return {"result": reaction.reaction_type}
         except Exception as e:
-            logger.error(f"dislike_post_v3: {post_id}, error: {e}", exc_info=True)
+            logger.error(f"toggle_post_reaction_v3: {post_id}, error: {e}", exc_info=True)
             return None
 
     @staticmethod
@@ -902,17 +284,16 @@ class CommunityServiceV3:
     def toggle_follow_v3(request_info: FollowUser, user_email: str):
         try:
             with V3Database.SessionLocal() as s:
-                follower_status = (
+                follow = (
                     s.query(UserFollowsV3)
                     .filter(
-                        UserFollowsV3.follower_email
-                        == request_info.following_user_email,
+                        UserFollowsV3.follower_email == request_info.following_user_email,
                         UserFollowsV3.following_email == user_email,
                     )
                     .first()
                 )
-                if follower_status:
-                    s.delete(follower_status)
+                if follow:
+                    s.delete(follow)
                 else:
                     s.add(
                         UserFollowsV3(
@@ -922,14 +303,16 @@ class CommunityServiceV3:
                         )
                     )
                     if request_info.following_user_email != user_email:
-                        kafka_message = {
-                            "follower_email": request_info.following_user_email,
-                            "following_email": user_email,
-                            "author_nickname": request_info.nickname,
-                            "noti_type": "follow_user",
-                        }
-                        produce_notification(json.dumps(kafka_message))
-
+                        produce_notification(
+                            json.dumps(
+                                {
+                                    "follower_email": request_info.following_user_email,
+                                    "following_email": user_email,
+                                    "author_nickname": request_info.nickname,
+                                    "noti_type": "follow_user",
+                                }
+                            )
+                        )
                 s.commit()
                 return {"result": 1}
         except Exception as e:
@@ -965,26 +348,20 @@ class CommunityServiceV3:
         user_email: str,
     ):
         new_slug = slugify(title)
-        new_thumbnail = CommunityFunctionV3.extract_thumbnail_img(contents)
+        thumbnail = CommunityFunctionV3.extract_thumbnail_img(contents)
         try:
             with V3Database.SessionLocal() as s:
-                bigint_post_id = int(post_id)
-                post_info = (
-                    s.query(CommunityPostsV3)
-                    .filter(CommunityPostsV3.id == bigint_post_id)
-                    .first()
-                )
-                if post_info:
-                    if post_info.user_email == user_email:
-                        post_info.update_time = datetime.now()
-                        post_info.title = title
-                        post_info.contents = contents
-                        post_info.thumbnail = new_thumbnail
-                        post_info.slug = new_slug
-                        post_info.category = page_category
-                        s.commit()
-                    return {"url": f"{bigint_post_id}-{new_slug}"}
-                return {"url": f"{bigint_post_id}-{slug}"}
+                post = s.query(CommunityPostsV3).filter(CommunityPostsV3.id == int(post_id)).first()
+                if post and post.user_email == user_email:
+                    post.update_time = datetime.now()
+                    post.title = title
+                    post.contents = contents
+                    post.thumbnail = thumbnail
+                    post.slug = new_slug
+                    post.category = page_category
+                    s.commit()
+                    return {"url": f"{post_id}-{new_slug}"}
+                return {"url": f"{post_id}-{slug}"}
         except Exception as e:
             logger.error(f"update_post_v3 error: {e}", exc_info=True)
             return None
@@ -993,15 +370,10 @@ class CommunityServiceV3:
     def get_update_post_detail_v3(post_id: str, user_email: str):
         try:
             with V3Database.SessionLocal() as s:
-                bigint_post_id = int(post_id)
-                post_info = (
-                    s.query(CommunityPostsV3)
-                    .filter(CommunityPostsV3.id == bigint_post_id)
-                    .first()
-                )
-                if post_info and post_info.user_email == user_email:
-                    post_info.id = str(post_info.id)
-                    return post_info
+                post = s.query(CommunityPostsV3).filter(CommunityPostsV3.id == int(post_id)).first()
+                if post and post.user_email == user_email:
+                    post.id = str(post.id)
+                    return post
                 return None
         except Exception as e:
             logger.error(
@@ -1012,68 +384,52 @@ class CommunityServiceV3:
 
     @staticmethod
     def delete_post_by_admin_v3(post_id: str):
-        try:
-            with V3Database.SessionLocal() as s:
-                post_info = (
-                    s.query(CommunityPostsV3)
-                    .filter(CommunityPostsV3.id == int(post_id))
-                    .first()
-                )
-                if post_info:
-                    post_info.update_time = datetime.now()
-                    post_info.delete_by_admin = True
-                s.commit()
-                return {"result": 1}
-        except Exception as e:
-            logger.error(
-                f"delete_post_by_admin_v3: {post_id}, error: {e}", exc_info=True
-            )
-            return None
+        return CommunityServiceV3._delete_post_v3(post_id, "admin")
 
     @staticmethod
     def delete_post_by_user_v3(post_id: str):
+        return CommunityServiceV3._delete_post_v3(post_id, "user")
+
+    @staticmethod
+    def _delete_post_v3(post_id: str, delete_type: str):
         try:
             with V3Database.SessionLocal() as s:
-                post_info = (
-                    s.query(CommunityPostsV3)
-                    .filter(CommunityPostsV3.id == int(post_id))
-                    .first()
-                )
-                if post_info:
-                    post_info.update_time = datetime.now()
-                    post_info.delete_by_user = True
+                post = s.query(CommunityPostsV3).filter(CommunityPostsV3.id == int(post_id)).first()
+                if post:
+                    post.update_time = datetime.now()
+                    if delete_type == "admin":
+                        post.delete_by_admin = True
+                    else:
+                        post.delete_by_user = True
                 s.commit()
                 return {"result": 1}
         except Exception as e:
-            logger.error(
-                f"delete_post_by_user_v3: {post_id}, error: {e}", exc_info=True
-            )
+            logger.error(f"delete_post_by_{delete_type}_v3: {post_id}, error: {e}", exc_info=True)
             return None
 
     @staticmethod
     def get_search_v3(
         search_type: str, word: str, page_num: int, user_email: Optional[str] = None
     ):
-        limit, offset = 20, (page_num - 1) * 20
         try:
+            limit, offset = 20, (page_num - 1) * 20
+            params = {
+                "limit": limit,
+                "offset": offset,
+                "word": f"%{word}%",
+                "user_email": user_email,
+            }
             with V3Database.SessionLocal() as s:
-                params = {
-                    "limit": limit,
-                    "offset": offset,
-                    "word": f"%{word}%",
-                    "user_email": user_email,
-                }
-                result = s.execute(
-                    text(CommunityFunctionV3.get_search_sql(search_type)), params
+                search_result = s.execute(
+                    text(CommunityFunctionV3.get_search_sql(search_type)),
+                    params,
                 )
-                data = [dict(row) for row in result.mappings()]
                 total = s.execute(
                     text(CommunityFunctionV3.get_search_total_count_sql(search_type)),
                     params,
                 ).scalar()
-
                 return {
-                    "search_result": data,
+                    "search_result": [dict(row) for row in search_result.mappings()],
                     "total_count": total,
                     "max_page_count": (total + limit - 1) // limit,
                 }

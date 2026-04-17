@@ -4,7 +4,6 @@ from api.item.models import (
     ConsumableCureV3,
     ConsumableItemV3,
     ConsumableStimEffectV3,
-    Item,
     ItemPenaltyV3,
     ItemV3,
     MeleeItemV3,

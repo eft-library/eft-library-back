@@ -1,70 +1,15 @@
-from typing import List
 from sqlalchemy import text
-from database import DataBaseConnector, V3Database
-from api.hideout.util import HideoutUtil
+
+from api.hideout.hideout_req_models import ItemTypeV3
+from api.hideout.hideout_res_models import UserHideoutV3
 from api.hideout.query import HideoutQueryV3
+from database import V3Database
 from datetime import datetime
-from api.hideout.hideout_res_models import UserHideOut
-from api.hideout.hideout_req_models import ItemType
-import pytz
+from typing import List, Optional
 import logging
+import json
 
 logger = logging.getLogger("api.hideout")
-
-
-class HideoutService:
-    @staticmethod
-    def get_station(user_email: str | None):
-        try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                user_hideout = {}
-
-                # 은신처 기본 정보
-                hideout_query = text(HideoutUtil.get_hideout_query())
-                hideouts = s.execute(hideout_query).mappings().all()
-                user_hideout["hideout_info"] = list(hideouts)
-
-                # 완료 레벨 목록
-                user_info = None
-                if user_email:
-                    user_info = (
-                        s.query(UserHideOut)
-                        .filter(UserHideOut.user_email == user_email)
-                        .first()
-                    )
-
-                user_hideout["complete_list"] = (
-                    user_info.complete_list if user_info else []
-                )
-
-                user_hideout["item_list"] = user_info.item_list if user_info else []
-
-                # 아이템 필요 정보
-                item_require_query = text(HideoutUtil.get_item_require_info())
-                item_require = (
-                    s.execute(item_require_query, {"user_email": user_email})
-                    .mappings()
-                    .all()
-                )
-                user_hideout["item_require_info"] = list(item_require)
-
-                return user_hideout
-
-        except Exception as e:
-            logger.error(
-                f"get_station error: {e}",
-                exc_info=True,
-            )
-            return None
-
-    @staticmethod
-    def _group_rows_by_key(rows, key):
-        grouped = {}
-        for row in rows:
-            row_dict = dict(row)
-            grouped.setdefault(row_dict[key], []).append(row_dict)
-        return grouped
 
 
 class HideoutServiceV3:
@@ -77,14 +22,55 @@ class HideoutServiceV3:
         return grouped
 
     @staticmethod
+    def get_station_v3(user_email: Optional[str]):
+        try:
+            with V3Database.SessionLocal() as s:
+                result = {
+                    "user_hideout": None,
+                    "hideout_list": [],
+                }
+
+                if user_email:
+                    user_hideout = (
+                        s.query(UserHideoutV3)
+                        .filter(UserHideoutV3.email == user_email)
+                        .first()
+                    )
+                    if user_hideout:
+                        result["user_hideout"] = {
+                            "email": user_hideout.email,
+                            "complete_list": user_hideout.complete_list or [],
+                            "item_list": user_hideout.item_list or [],
+                            "update_time": user_hideout.update_time,
+                        }
+                    else:
+                        result["user_hideout"] = {
+                            "email": user_email,
+                            "complete_list": [],
+                            "item_list": [],
+                            "update_time": None,
+                        }
+
+                hideout_master_rows = (
+                    s.execute(text(HideoutQueryV3.hideout_master_list_sql()))
+                    .mappings()
+                    .all()
+                )
+                result["hideout_list"] = [dict(row) for row in hideout_master_rows]
+                return result
+        except Exception as e:
+            logger.error(f"get_station_v3 error: {e}", exc_info=True)
+            return None
+
+    @staticmethod
     def get_station_by_normalized_name_v3(normalized_name: str):
         try:
             with V3Database.SessionLocal() as s:
-                master_sql = text(HideoutQueryV3.hideout_master_sql())
-                levels_sql = text(HideoutQueryV3.hideout_levels_sql())
-
                 master = (
-                    s.execute(master_sql, {"normalized_name": normalized_name})
+                    s.execute(
+                        text(HideoutQueryV3.hideout_master_sql()),
+                        {"normalized_name": normalized_name},
+                    )
                     .mappings()
                     .first()
                 )
@@ -92,7 +78,12 @@ class HideoutServiceV3:
                     return None
 
                 level_rows = (
-                    s.execute(levels_sql, {"master_id": master["id"]}).mappings().all()
+                    s.execute(
+                        text(HideoutQueryV3.hideout_levels_sql()),
+                        {"master_id": master["id"]},
+                    )
+                    .mappings()
+                    .all()
                 )
                 levels = [dict(row) for row in level_rows]
                 if not levels:
@@ -151,7 +142,6 @@ class HideoutServiceV3:
 
                 crafts = [dict(row) for row in craft_rows]
                 craft_ids = [craft["id"] for craft in crafts]
-
                 craft_require_rows = []
                 if craft_ids:
                     craft_require_rows = (
@@ -222,70 +212,61 @@ class HideoutServiceV3:
             return None
 
     @staticmethod
-    def save_station(complete_list: List[str], user_email: str):
+    def save_station_v3(complete_list: List[str], user_email: str):
         try:
-
-            with DataBaseConnector.SessionLocal() as s:
-                user_hideout = (
-                    s.query(UserHideOut).filter_by(user_email=user_email).first()
+            with V3Database.SessionLocal() as s:
+                s.execute(
+                    text(HideoutQueryV3.upsert_user_hideout_complete_list_sql()),
+                    {
+                        "email": user_email,
+                        "complete_list": complete_list,
+                        "update_time": datetime.utcnow(),
+                    },
                 )
-                utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
-                kst = pytz.timezone("Asia/Seoul")
-                kst_now = utc_now.astimezone(kst)
-
-                if user_hideout:
-                    user_hideout.complete_list = complete_list
-                    user_hideout.update_time = kst_now
-                    s.commit()
-                else:
-                    new_user_hideout = UserHideOut(
-                        user_email=user_email,
-                        item_list=[],
-                        complete_list=complete_list,
-                        update_time=kst_now,
-                    )
-                    s.add(new_user_hideout)
-                    s.commit()
-                return HideoutService.get_station(user_email)
+                s.commit()
+                return HideoutServiceV3.get_station_v3(user_email)
         except Exception as e:
             logger.error(
-                f"save_station: {complete_list}, error: {e}",
+                f"save_station_v3: {complete_list}, error: {e}",
                 exc_info=True,
             )
             return None
 
     @staticmethod
-    def save_station_item(item_list: List[ItemType], user_email: str):
+    def save_station_item_v3(item_list: List[ItemTypeV3], user_email: str):
         try:
-
             item_list_json = [item.model_dump() for item in item_list]
 
-            utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
-            kst_now = utc_now.astimezone(pytz.timezone("Asia/Seoul"))
-
-            with DataBaseConnector.SessionLocal() as s:
-                user_hideout = (
-                    s.query(UserHideOut).filter_by(user_email=user_email).first()
+            with V3Database.SessionLocal() as s:
+                existing = (
+                    s.query(UserHideoutV3)
+                    .filter(UserHideoutV3.email == user_email)
+                    .first()
                 )
+                complete_list = existing.complete_list if existing else []
 
-                if user_hideout:
-                    user_hideout.item_list = item_list_json
-                    user_hideout.update_time = kst_now
-                else:
-                    user_hideout = UserHideOut(
-                        user_email=user_email,
-                        item_list=item_list_json,
-                        complete_list=[],
-                        update_time=kst_now,
-                    )
-                    s.add(user_hideout)
-
+                s.execute(
+                    text(
+                        """
+                        insert into user_hideout (email, complete_list, item_list, update_time)
+                        values (:email, :complete_list, cast(:item_list as jsonb), :update_time)
+                        on conflict (email) do update
+                        set item_list = cast(excluded.item_list as jsonb),
+                            update_time = excluded.update_time;
+                        """
+                    ),
+                    {
+                        "email": user_email,
+                        "complete_list": complete_list,
+                        "item_list": json.dumps(item_list_json),
+                        "update_time": datetime.utcnow(),
+                    },
+                )
                 s.commit()
-                return user_hideout
-
+                return HideoutServiceV3.get_station_v3(user_email)
         except Exception as e:
             logger.error(
-                f"save_station_item: {item_list}, error: {e}",
+                f"save_station_item_v3: {item_list}, error: {e}",
                 exc_info=True,
             )
             return None

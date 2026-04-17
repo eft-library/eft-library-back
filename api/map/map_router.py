@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from api.map.service import MapService, MapServiceV3
+from api.map.service import MapServiceV3
 from api.response import CustomResponse
 from util.constants import HTTPCode
 from api.constants import Message

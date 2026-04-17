@@ -46,3 +46,18 @@ class HomeQueryV3:
             from menu_sub_groups
             order by sort_order;
         """
+
+    @staticmethod
+    def home_posts_sql():
+        return """
+            select cp.id::text AS id,
+                   cp.slug,
+                   cp.user_email,
+                   cp.category,
+                   cp.title
+            from community_posts cp
+            where cp.delete_by_user = false
+              and cp.delete_by_admin = false
+            order by cp.create_time desc
+            limit 5;
+        """

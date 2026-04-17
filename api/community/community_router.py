@@ -1,295 +1,36 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
-from api.response import CustomResponse
+from typing import Optional
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.security import OAuth2PasswordBearer
+
+from api.community.community_req_models import (
+    CheckFollow,
+    CreateCommunity,
+    FollowUser,
+    GetPostDetail,
+    GetUpdatePostDetail,
+    PostBookmark,
+    PostDelete,
+    PostReaction,
+    ReqPostReport,
+    UpdateCommunity,
+)
+from api.community.service import CommunityServiceV3
+from api.constants import Message
+from api.response import CustomResponse
 from api.user.util import UserUtil
 from util.constants import HTTPCode
-from api.constants import Message
-from api.community.service import CommunityService, CommunityServiceV3
-from api.community.community_req_models import (
-    CreateCommunity,
-    GetPostDetail,
-    UpdateCommunity,
-    ViewCount,
-    PostReaction,
-    PostBookmark,
-    FollowUser,
-    CheckFollow,
-    PostDelete,
-    GetUpdatePostDetail,
-    ReqPostReport,
-)
-from typing import Optional
 
 router = APIRouter(tags=["Community"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
-@router.post(
-    "/upload-image",
-    include_in_schema=False,
-)
-async def upload_image(file: UploadFile = File(...)):
-    result = CommunityService.upload_image(file)
-    if result is None:
-        raise HTTPException(status_code=500, detail=f"이미지 처리 실패")
-    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.post(
-    "/create-posts",
-    include_in_schema=False,
-)
-def create_posts(post_info: CreateCommunity, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommunityService.create_posts(post_info, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.get("/get/{category}")
-def get_posts(
-    category: str,
-    page_num: int,
-    token: Optional[str] = Depends(oauth2_scheme),
-):
-    user_email: Optional[str] = None
-    if token:
-        user_email = UserUtil.verify_google_token(access_token=token)
-    result = CommunityService.get_posts(category, page_num, user_email)
-
-    if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/search")
-def get_search_posts(
-    page_num: int,
-    word: str,
-    search_type: str,
-    token: Optional[str] = Depends(oauth2_scheme),
-):
-    user_email: Optional[str] = None
-    if token:
-        user_email = UserUtil.verify_google_token(access_token=token)
-    result = CommunityService.get_search(search_type, word, page_num, user_email)
-
-    if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.post("/detail")
-def get_posts_detail(request_info: GetPostDetail):
-    result = CommunityService.get_detail_post(
-        request_info.url, request_info.user_email, request_info.page_category
-    )
-    if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get("/side-post")
-def get_side_post(
-    token: Optional[str] = Depends(oauth2_scheme),
-):
-    user_email: Optional[str] = None
-    if token:
-        user_email = UserUtil.verify_google_token(access_token=token)
-    result = CommunityService.get_side_info(user_email)
-
-    if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.post("/detail-meta-data")
-def get_posts_detail_meta_data(request_info: GetPostDetail):
-    result = CommunityService.get_detail_post_meta_data(
-        request_info.url, request_info.user_email
-    )
-    if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.post(
-    "/like-post",
-    include_in_schema=False,
-)
-def like_post(request_info: PostReaction, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommunityService.like_post(request_info.post_id, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/dislike-post",
-    include_in_schema=False,
-)
-def dislike_post(request_info: PostReaction, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommunityService.dislike_post(request_info.post_id, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/bookmark-post",
-    include_in_schema=False,
-)
-def bookmark_post(request_info: PostBookmark, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommunityService.bookmark_post(request_info.post_id, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/follow-user",
-    include_in_schema=False,
-)
-def follow_user(request_info: FollowUser, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommunityService.toggle_follow(request_info, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/check-follow",
-    include_in_schema=False,
-)
-def check_follow(
-    request_info: CheckFollow,
-):
-    result = CommunityService.check_user_following(
-        request_info.following_user_email, request_info.user_email
-    )
-    if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.post(
-    "/update-post",
-    include_in_schema=False,
-)
-def update_post(post_info: UpdateCommunity, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommunityService.update_post(
-            post_info.id,
-            post_info.slug,
-            post_info.category,
-            post_info.title,
-            post_info.contents,
-            user_email,
-        )
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/get-update-post-detail",
-    include_in_schema=False,
-)
-def get_update_post_detail(
-    post_info: GetUpdatePostDetail, token: str = Depends(oauth2_scheme)
-):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommunityService.get_update_post_detail(post_info.post_id, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/delete-post-by-admin",
-    include_in_schema=False,
-)
-def delete_post_by_admin(request_info: PostDelete, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommunityService.delete_post_by_admin(request_info.post_id)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/delete-post-by-user",
-    include_in_schema=False,
-)
-def delete_post_by_user(request_info: PostDelete, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommunityService.delete_post_by_user(request_info.post_id)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/report-post",
-    include_in_schema=False,
-)
-def report_post(request_info: ReqPostReport, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommunityService.report_post(request_info, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post("/increase-view-count")
-def increase_view_count(request_info: PostReaction):
-    result = CommunityService.increase_view_count(request_info.post_id)
-    if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
 @router.post("/v3/upload-image", include_in_schema=False)
 async def upload_image_v3(file: UploadFile = File(...)):
     result = CommunityServiceV3.upload_image_v3(file)
     if result is None:
-        raise HTTPException(status_code=500, detail=f"이미지 처리 실패")
+        raise HTTPException(status_code=500, detail="이미지 처리 실패")
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 

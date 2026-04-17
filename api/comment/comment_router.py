@@ -1,170 +1,24 @@
 from fastapi import APIRouter, Depends
-from api.response import CustomResponse
 from fastapi.security import OAuth2PasswordBearer
+
+from api.comment.comment_req_models import (
+    CommentReaction,
+    DeleteComment,
+    GetComments,
+    InsertChildComment,
+    InsertParentComment,
+    ReqCommentReport,
+    UpdateComment,
+)
+from api.comment.service import CommentServiceV3
+from api.constants import Message
+from api.response import CustomResponse
 from api.user.util import UserUtil
 from util.constants import HTTPCode
-from api.constants import Message
-from api.comment.service import CommentService, CommentServiceV3
-from api.comment.comment_req_models import (
-    InsertParentComment,
-    InsertChildComment,
-    CommentReaction,
-    GetComments,
-    UpdateComment,
-    DeleteComment,
-    ReqCommentReport,
-)
-
 
 router = APIRouter(tags=["Comment"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
-
-
-@router.post(
-    "/insert-parent-comment",
-    include_in_schema=False,
-)
-def insert_parent_comment(
-    request_info: InsertParentComment, token: str = Depends(oauth2_scheme)
-):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommentService.insert_parent_comment(request_info, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/insert-child-comment",
-    include_in_schema=False,
-)
-def insert_child_comment(
-    request_info: InsertChildComment, token: str = Depends(oauth2_scheme)
-):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommentService.inset_child_comment(
-            request_info,
-            user_email,
-        )
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post("/get-comments")
-def get_comments(request_info: GetComments):
-    result = CommentService.get_comment(
-        request_info.post_id,
-        request_info.page_num,
-        request_info.issue_comment_id,
-        request_info.user_email,
-    )
-    if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.post(
-    "/like-comment",
-    include_in_schema=False,
-)
-def like_comment(request_info: CommentReaction, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommentService.like_comment(request_info.comment_id, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/dislike-comment",
-    include_in_schema=False,
-)
-def dislike_comment(request_info: CommentReaction, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommentService.dislike_comment(request_info.comment_id, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/update-comment",
-    include_in_schema=False,
-)
-def update_comment(request_info: UpdateComment, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommentService.update_comment(
-            request_info.comment_id, request_info.contents
-        )
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/delete-comment-by-admin",
-    include_in_schema=False,
-)
-def delete_comment_by_admin(
-    request_info: DeleteComment, token: str = Depends(oauth2_scheme)
-):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommentService.delete_comment_by_admin(request_info.comment_id)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/delete-comment-by-user",
-    include_in_schema=False,
-)
-def delete_comment_by_user(
-    request_info: DeleteComment, token: str = Depends(oauth2_scheme)
-):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommentService.delete_comment_by_user(request_info.comment_id)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-
-
-@router.post(
-    "/report-comment",
-    include_in_schema=False,
-)
-def report_post(request_info: ReqCommentReport, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = CommentService.report_comment(request_info, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post("/v3/insert-parent-comment", include_in_schema=False)
@@ -272,7 +126,9 @@ def delete_comment_by_user_v3(
 
 
 @router.post("/v3/report-comment", include_in_schema=False)
-def report_post_v3(request_info: ReqCommentReport, token: str = Depends(oauth2_scheme)):
+def report_comment_v3(
+    request_info: ReqCommentReport, token: str = Depends(oauth2_scheme)
+):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
         result = CommentServiceV3.report_comment_v3(request_info, user_email)

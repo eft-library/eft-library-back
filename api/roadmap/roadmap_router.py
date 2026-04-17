@@ -2,12 +2,12 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends
 from api.response import CustomResponse
-from api.roadmap.roadmap_req_models import GetRoadMap, SaveRoadmap
+from api.roadmap.roadmap_req_models import SaveRoadmap
 from fastapi.security import OAuth2PasswordBearer
 from util.constants import HTTPCode
 from api.constants import Message
 from api.user.util import UserUtil
-from api.roadmap.roadmap_service import RoadmapService, RoadmapServiceV3
+from api.roadmap.roadmap_service import RoadmapServiceV3
 
 router = APIRouter(tags=["Roadmap"])
 
@@ -15,31 +15,9 @@ router = APIRouter(tags=["Roadmap"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
-@router.get("/get-roadmap")
-def get_roadmap():
-    result = RoadmapService.get_roadmap()
-    if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
 @router.get("/v3/get-roadmap")
 def get_roadmap_v3():
     result = RoadmapServiceV3.get_roadmap_v3()
-    if result is None:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-    return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.get(
-    "/get-user-roadmap",
-    include_in_schema=False,
-)
-def get_user_roadmap(token: Optional[str] = Depends(oauth2_scheme)):
-    user_email: Optional[str] = None
-    if token:
-        user_email = UserUtil.verify_google_token(access_token=token)
-    result = RoadmapService.get_user_roadmap(user_email)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -57,21 +35,6 @@ def get_user_roadmap_v3(token: Optional[str] = Depends(oauth2_scheme)):
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-
-
-@router.post(
-    "/save-roadmap",
-    include_in_schema=False,
-)
-def save_roadmap(roadmap: SaveRoadmap, token: str = Depends(oauth2_scheme)):
-    user_email = UserUtil.verify_google_token(access_token=token)
-    if user_email:
-        result = RoadmapService.save_roadmap(roadmap.questList, user_email)
-        if result is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
-        return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
-    else:
-        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 
 
 @router.post(

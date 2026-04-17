@@ -60,14 +60,3 @@ class NewsItemV3(V3Database.Base):
     is_active = Column(Boolean)
     sort_order = Column(Integer)
     update_time = Column(TIMESTAMP)
-
-
-class AutocompleteItemV3(V3Database.Base):
-    __tablename__ = "autocomplete_items"
-
-    url = Column(String, primary_key=True)
-    autocomplete_text_en = Column(String)
-    autocomplete_text_ko = Column(String)
-    autocomplete_text_ja = Column(String)
-    sort_order = Column(Integer)
-    update_time = Column(TIMESTAMP)

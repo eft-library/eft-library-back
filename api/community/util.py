@@ -1,5 +1,4 @@
-class CommunityUtil:
-
+class CommunityUtilV3:
     @staticmethod
     def get_posts_with_post_id():
         return """
@@ -15,10 +14,8 @@ class CommunityUtil:
                    cp.delete_by_admin,
                    cp.create_time,
                    cp.update_time,
-                   cpv.view_count                           as view_count,
-                   coalesce((SELECT COUNT(*)
-                             FROM community_comments cc
-                             WHERE cc.post_id = cp.id), 0) AS comment_count,
+                   cpv.view_count as view_count,
+                   coalesce((SELECT COUNT(*) FROM community_comments cc WHERE cc.post_id = cp.id), 0) AS comment_count,
                    coalesce((SELECT SUM(CASE
                                             WHEN cpr.reaction_type = 1 THEN 1
                                             WHEN cpr.reaction_type = 0 THEN -1
@@ -51,10 +48,8 @@ class CommunityUtil:
                    cp.delete_by_admin,
                    cp.create_time,
                    cp.update_time,
-                   cpv.view_count                           as view_count,
-                   coalesce((SELECT COUNT(*)
-                             FROM community_comments cc
-                             WHERE cc.post_id = cp.id), 0) AS comment_count,
+                   cpv.view_count as view_count,
+                   coalesce((SELECT COUNT(*) FROM community_comments cc WHERE cc.post_id = cp.id), 0) AS comment_count,
                    coalesce((SELECT SUM(CASE
                                             WHEN cpr.reaction_type = 1 THEN 1
                                             WHEN cpr.reaction_type = 0 THEN -1
@@ -70,8 +65,8 @@ class CommunityUtil:
               AND NOT EXISTS (
                   SELECT 1
                   FROM user_block ub
-                  WHERE ub.blocker_email = :user_email
-                    AND ub.blocked_email = cp.user_email
+                  WHERE ub.request_email = :user_email
+                    AND ub.target_email = cp.user_email
               )
             order by cp.create_time desc
             limit :limit
@@ -89,8 +84,8 @@ class CommunityUtil:
               AND NOT EXISTS (
                   SELECT 1
                   FROM user_block ub
-                  WHERE ub.blocker_email = :user_email
-                    AND ub.blocked_email = cp.user_email
+                  WHERE ub.request_email = :user_email
+                    AND ub.target_email = cp.user_email
               )
         """
 
@@ -113,9 +108,9 @@ class CommunityUtil:
             where NOT EXISTS (
                   SELECT 1
                   FROM user_block ub
-                  WHERE ub.blocker_email = :user_email
-                    AND ub.blocked_email = cp.user_email
-              )     
+                  WHERE ub.request_email = :user_email
+                    AND ub.target_email = cp.user_email
+              )
         """
 
     @staticmethod
@@ -136,13 +131,11 @@ class CommunityUtil:
                 cp.create_time,
                 cp.update_time,
                 cpv.view_count AS view_count,
-                coalesce((SELECT COUNT(*)
-                          FROM community_comments cc
-                          WHERE cc.post_id = cp.id), 0) AS comment_count,
+                coalesce((SELECT COUNT(*) FROM community_comments cc WHERE cc.post_id = cp.id), 0) AS comment_count,
                 coalesce((SELECT SUM(CASE
                                          WHEN cpr.reaction_type = 1 THEN 1
                                          WHEN cpr.reaction_type = 0 THEN -1
-                                         ELSE 0 END) AS reaction_score
+                                         ELSE 0 END)
                           FROM community_posts_reactions cpr
                           WHERE cpr.post_id = cp.id), 0) AS reaction_score
             FROM community_posts_hot_issue cphi
@@ -153,11 +146,11 @@ class CommunityUtil:
               AND NOT EXISTS (
                   SELECT 1
                   FROM user_block ub
-                  WHERE ub.blocker_email = :user_email
-                    AND ub.blocked_email = cp.user_email
+                  WHERE ub.request_email = :user_email
+                    AND ub.target_email = cp.user_email
               )
             ORDER BY cphi.issue_time DESC
-            LIMIT :limit 
+            LIMIT :limit
             OFFSET :offset
         """
 
@@ -176,17 +169,9 @@ class CommunityUtil:
                 cp.create_time,
                 cp.update_time,
                 cpv.view_count,
-                coalesce((SELECT COUNT(*)
-                          FROM community_comments cc
-                          WHERE cc.post_id = cp.id), 0) AS comment_count,
-                -- 작성자 팔로워 수
-                (SELECT COUNT(*)
-                 FROM user_follows uf
-                 WHERE uf.following_email = cp.user_email) AS follower_count,
-                -- 작성자 게시글 전체 수
-                (SELECT COUNT(*)
-                 FROM community_posts cp2
-                 WHERE cp2.user_email = cp.user_email) AS total_post_count
+                coalesce((SELECT COUNT(*) FROM community_comments cc WHERE cc.post_id = cp.id), 0) AS comment_count,
+                (SELECT COUNT(*) FROM user_follows uf WHERE uf.following_email = cp.user_email) AS follower_count,
+                (SELECT COUNT(*) FROM community_posts cp2 WHERE cp2.user_email = cp.user_email) AS total_post_count
             FROM community_posts cp
             LEFT JOIN user_info ui ON cp.user_email = ui.email
             LEFT JOIN community_posts_views cpv on cp.id = cpv.post_id
@@ -199,20 +184,16 @@ class CommunityUtil:
             SELECT
                 cp.id::text AS id,
                 COALESCE(cpr.reaction_type, -1) AS is_like,
-                CASE
-                    WHEN cpb.post_id IS NOT NULL THEN 1
-                    ELSE 0
-                END AS is_bookmarked,
+                CASE WHEN cpb.post_id IS NOT NULL THEN 1 ELSE 0 END AS is_bookmarked,
                 (
-                    SELECT 
-                        COALESCE(SUM(CASE WHEN cpr2.reaction_type = 1 THEN 1 ELSE 0 END), 0)
-                        - COALESCE(SUM(CASE WHEN cpr2.reaction_type = 0 THEN 1 ELSE 0 END), 0)
+                    SELECT COALESCE(SUM(CASE WHEN cpr2.reaction_type = 1 THEN 1 ELSE 0 END), 0)
+                         - COALESCE(SUM(CASE WHEN cpr2.reaction_type = 0 THEN 1 ELSE 0 END), 0)
                     FROM community_posts_reactions cpr2
                     WHERE cpr2.post_id = cp.id
                 ) AS like_count
             FROM community_posts cp
             LEFT JOIN community_posts_bookmark cpb
-                   ON cp.id = cpb.post_id AND cpb.user_email = :user_email
+                   ON cp.id = cpb.post_id AND cpb.email = :user_email
             LEFT JOIN community_posts_reactions cpr
                    ON cp.id = cpr.post_id AND cpr.user_email = :user_email
             WHERE cp.id = :post_id
@@ -221,31 +202,31 @@ class CommunityUtil:
     @staticmethod
     def get_detail_author_meta_data():
         return """
-        select cp.user_email,
-               ui.nickname,
-               count(distinct cp2.id) as posts_count,
-               count(cpr.post_id) filter (where cpr.reaction_type = 1) as like_count,
-               case when uf.follower_email is not null then 1 else 0 end as is_follow
-        from community_posts cp
-                 join user_info ui on cp.user_email = ui.email
-                 left join community_posts cp2 on cp2.user_email = cp.user_email
-                 left join community_posts_reactions cpr on cp2.id = cpr.post_id
-                 left join user_follows uf
-                           on uf.following_email = :user_email
-                               and uf.follower_email = cp.user_email
-        where cp.id = :post_id
-        and cp.delete_by_user = false and cp.delete_by_admin = false
-        group by cp.user_email, ui.nickname, uf.follower_email
+            select cp.user_email,
+                   ui.nickname,
+                   count(distinct cp2.id) as posts_count,
+                   count(cpr.post_id) filter (where cpr.reaction_type = 1) as like_count,
+                   case when uf.follower_email is not null then 1 else 0 end as is_follow
+            from community_posts cp
+                     join user_info ui on cp.user_email = ui.email
+                     left join community_posts cp2 on cp2.user_email = cp.user_email
+                     left join community_posts_reactions cpr on cp2.id = cpr.post_id
+                     left join user_follows uf
+                               on uf.following_email = :user_email
+                                  and uf.follower_email = cp.user_email
+            where cp.id = :post_id
+              and cp.delete_by_user = false
+              and cp.delete_by_admin = false
+            group by cp.user_email, ui.nickname, uf.follower_email
         """
 
     @staticmethod
     def check_follow():
         return """
-        SELECT
-            CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS is_follow
-        FROM user_follows
-        WHERE following_email = :user_email
-          AND follower_email = :author_email;
+            SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS is_follow
+            FROM user_follows
+            WHERE following_email = :user_email
+              AND follower_email = :author_email
         """
 
     @staticmethod
@@ -266,7 +247,7 @@ class CommunityUtil:
             )
             SELECT rn
             FROM ordered_posts
-            WHERE id = :post_id  
+            WHERE id = :post_id
         """
 
     @staticmethod
@@ -279,97 +260,13 @@ class CommunityUtil:
             )
             SELECT rn
             FROM ordered_posts
-            WHERE id = :post_id     
+            WHERE id = :post_id
         """
 
     @staticmethod
     def increase_view_count():
         return """
-        UPDATE community_posts_views
-        SET view_count = view_count + 1
-        WHERE post_id = :post_id   
+            UPDATE community_posts_views
+            SET view_count = view_count + 1
+            WHERE post_id = :post_id
         """
-
-    @staticmethod
-    def get_home_post():
-        return """
-        select cp.id::text AS id, cp.slug, cp.user_email, cp.category, cp.title
-        from community_posts cp
-        where cp.delete_by_user = false
-        and cp.delete_by_admin = false
-        order by cp.create_time desc
-        limit 5        
-        """
-
-
-class CommunityUtilV3:
-
-    @staticmethod
-    def _to_v3_sql(sql: str):
-        return (
-            sql.replace("ub.blocker_email", "ub.request_email")
-            .replace("ub.blocked_email", "ub.target_email")
-            .replace("cpb.user_email", "cpb.email")
-        )
-
-    @staticmethod
-    def get_posts_with_post_id():
-        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_posts_with_post_id())
-
-    @staticmethod
-    def get_posts_with_category():
-        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_posts_with_category())
-
-    @staticmethod
-    def get_post_category_count():
-        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_post_category_count())
-
-    @staticmethod
-    def get_post_category_count_with_post_id():
-        return CommunityUtilV3._to_v3_sql(
-            CommunityUtil.get_post_category_count_with_post_id()
-        )
-
-    @staticmethod
-    def get_post_issue_count():
-        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_post_issue_count())
-
-    @staticmethod
-    def get_posts_with_issue():
-        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_posts_with_issue())
-
-    @staticmethod
-    def get_post_detail():
-        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_post_detail())
-
-    @staticmethod
-    def get_post_detail_meta_data():
-        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_post_detail_meta_data())
-
-    @staticmethod
-    def get_detail_author_meta_data():
-        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_detail_author_meta_data())
-
-    @staticmethod
-    def check_follow():
-        return CommunityUtilV3._to_v3_sql(CommunityUtil.check_follow())
-
-    @staticmethod
-    def get_current_post_category_page_num():
-        return CommunityUtilV3._to_v3_sql(
-            CommunityUtil.get_current_post_category_page_num()
-        )
-
-    @staticmethod
-    def get_current_post_issue_page_num():
-        return CommunityUtilV3._to_v3_sql(
-            CommunityUtil.get_current_post_issue_page_num()
-        )
-
-    @staticmethod
-    def increase_view_count():
-        return CommunityUtilV3._to_v3_sql(CommunityUtil.increase_view_count())
-
-    @staticmethod
-    def get_home_post():
-        return CommunityUtilV3._to_v3_sql(CommunityUtil.get_home_post())

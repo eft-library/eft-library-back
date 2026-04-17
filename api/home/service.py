@@ -1,12 +1,12 @@
 from sqlalchemy.orm import subqueryload
 
-from api.community.util import CommunityUtil
 from api.home.models import (
-    AutocompleteItemV3,
     MainInfoV3,
     MenuGroupV3,
     NewsItemV3,
 )
+from api.home.query import HomeQueryV3
+from api.search.models import AutocompleteItemV3
 from database import V3Database
 from sqlalchemy import text
 import logging
@@ -116,7 +116,7 @@ class HomeServiceV3:
                     .all()
                 )
 
-                side_home_posts_query = text(CommunityUtil.get_home_post())
+                side_home_posts_query = text(HomeQueryV3.home_posts_sql())
                 get_side_home_posts = s.execute(side_home_posts_query)
                 get_side_home_posts_data = [
                     dict(row) for row in get_side_home_posts.mappings()

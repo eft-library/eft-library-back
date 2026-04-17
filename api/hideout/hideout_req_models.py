@@ -1,36 +1,17 @@
-from pydantic import BaseModel
 from typing import List
 
+from pydantic import BaseModel
 
-class CompleteHideoutStation(BaseModel):
-    """
-    사용자 hideout station 건설
-    """
 
+class CompleteHideoutStationV3(BaseModel):
     complete_list: List[str]
 
 
-class BrokenHideoutStation(BaseModel):
-    """
-    사용자 hideout station 파괴
-    """
-
-    broken_id: str
-
-
-class GetHideoutStation(BaseModel):
-    """
-    사용자 hideout station 조회
-    """
-
-    user_email: str
-
-
-class ItemType(BaseModel):
+class ItemTypeV3(BaseModel):
     id: str
     count: int
     found_in_raid: bool
 
 
-class UpdateStationItemRequest(BaseModel):
-    user_item_list: List[ItemType]
+class UpdateStationItemRequestV3(BaseModel):
+    user_item_list: List[ItemTypeV3]
