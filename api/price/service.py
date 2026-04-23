@@ -1,4 +1,4 @@
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, or_
 from api.item.models import ItemV3
 from api.price.models import (
     ItemPriceHistoryV3,
