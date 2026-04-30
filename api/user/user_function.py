@@ -5,7 +5,7 @@ import pytz
 from sqlalchemy import text
 
 from api.user.user_req_models import AddUserReq
-from api.user.user_res_models import UserQuestV3, UserV3
+from api.user.user_res_models import UserV3
 from api.user.util import UserUtilV3
 
 
@@ -50,14 +50,7 @@ class UserFunctionV3:
                 attendance_time=datetime.now(),
             )
         )
-        UserFunctionV3._create_user_related_entries_v3(session, addUserReq.email)
         session.commit()
-
-    @staticmethod
-    def _create_user_related_entries_v3(session, email: str):
-        exists = session.query(UserQuestV3).filter(UserQuestV3.email == email).first()
-        if not exists:
-            session.add(UserQuestV3(email=email, quest_list=[], update_time=datetime.now()))
 
     @staticmethod
     def _create_delete_user_v3(session, user: UserV3):
@@ -66,7 +59,6 @@ class UserFunctionV3:
     @staticmethod
     def delete_all_user_data_v3(session, email: str):
         param = {"email": email}
-        session.execute(text(UserUtilV3.delete_user_quest()), param)
         session.execute(text(UserUtilV3.delete_user_roadmap()), param)
         return True
 

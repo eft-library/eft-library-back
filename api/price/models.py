@@ -24,6 +24,16 @@ class ItemPriceV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
+class ItemTraderPriceV3(V3Database.Base):
+    __tablename__ = "item_trader_prices"
+
+    id = Column(TEXT, primary_key=True)
+    item_id = Column(TEXT)
+    game_mode = Column(TEXT)
+    trader_id = Column(TEXT)
+    price = Column(NUMERIC)
+
+
 class ItemPriceHistoryV3(V3Database.Base):
     __tablename__ = "item_price_history"
 

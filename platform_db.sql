@@ -440,13 +440,6 @@ create table if not exists user_info
   create_time timestamptz default now()
 );
 
-create table if not exists user_quest
-(
-  email text primary key,
-  quest_list text[],
-  update_time timestamptz default now()
-);
-
 create table if not exists information
 (
     id text primary key,

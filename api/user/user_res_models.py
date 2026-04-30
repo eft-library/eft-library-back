@@ -1,4 +1,4 @@
-from sqlalchemy import ARRAY, BOOLEAN, INTEGER, TEXT, TIMESTAMP, Column
+from sqlalchemy import BOOLEAN, INTEGER, TEXT, TIMESTAMP, Column
 
 from database import V3Database
 
@@ -14,14 +14,6 @@ class UserV3(V3Database.Base):
     last_update_nickname = Column(TIMESTAMP)
     create_time = Column(TIMESTAMP)
     attendance_time = Column(TIMESTAMP)
-
-
-class UserQuestV3(V3Database.Base):
-    __tablename__ = "user_quest"
-
-    email = Column(TEXT, primary_key=True)
-    quest_list = Column(ARRAY(TEXT))
-    update_time = Column(TIMESTAMP)
 
 
 class UserReportV3(V3Database.Base):

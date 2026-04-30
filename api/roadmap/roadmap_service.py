@@ -50,13 +50,13 @@ class RoadmapServiceV3:
         try:
             with V3Database.SessionLocal() as s:
                 if user_email is not None:
-                    user_quest_list = (
+                    user_roadmap = (
                         s.query(UserRoadmapV3)
                         .filter(UserRoadmapV3.email == user_email)
                         .first()
                     )
-                    if user_quest_list is not None:
-                        return user_quest_list.quest_list
+                    if user_roadmap is not None:
+                        return user_roadmap.quest_list
                     return []
                 return []
         except Exception as e:

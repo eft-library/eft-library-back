@@ -1,4 +1,4 @@
-from sqlalchemy import func, and_, or_
+from sqlalchemy import func, and_, or_, text, bindparam
 from api.item.models import ItemV3
 from api.price.models import (
     ItemPriceHistoryV3,
@@ -18,7 +18,12 @@ class PriceServiceV3:
         return float(value) if value is not None else None
 
     @staticmethod
-    def _serialize_item_price_v3(item: ItemV3, prices_by_mode, histories_by_mode):
+    def _serialize_item_price_v3(
+        item: ItemV3,
+        prices_by_mode,
+        histories_by_mode,
+        trader_prices_by_mode,
+    ):
         return {
             "id": item.id,
             "normalized_name": item.normalized_name,
@@ -32,6 +37,7 @@ class PriceServiceV3:
             "height": item.height,
             "prices": prices_by_mode,
             "history_by_type": histories_by_mode,
+            "trader_prices": trader_prices_by_mode,
         }
 
     @staticmethod
@@ -54,6 +60,27 @@ class PriceServiceV3:
             "game_mode": history.game_mode,
             "price": history.price,
             "price_time": history.price_time,
+        }
+
+    @staticmethod
+    def _serialize_trader_price_row_v3(row):
+        return {
+            "id": row["id"],
+            "game_mode": row["game_mode"],
+            "trader_id": row["trader_id"],
+            "price": PriceServiceV3._to_float_v3(row["price"]),
+            "trader": (
+                {
+                    "id": row["trader_id"],
+                    "normalized_name": row["trader_normalized_name"],
+                    "name_en": row["trader_name_en"],
+                    "name_ko": row["trader_name_ko"],
+                    "name_ja": row["trader_name_ja"],
+                    "image": row["trader_image"],
+                }
+                if row["trader_normalized_name"] is not None
+                else None
+            ),
         }
 
     @staticmethod
@@ -92,6 +119,7 @@ class PriceServiceV3:
 
                 prices_by_item = defaultdict(dict)
                 histories_by_item = defaultdict(lambda: {"pvp": [], "pve": []})
+                trader_prices_by_item = defaultdict(lambda: {"pvp": [], "pve": []})
 
                 if item_ids:
                     prices = (
@@ -119,6 +147,38 @@ class PriceServiceV3:
                             history.game_mode, []
                         ).append(PriceServiceV3._serialize_history_row_v3(history))
 
+                    trader_prices = (
+                        s.execute(
+                            text(
+                                """
+                                select itp.id,
+                                       itp.item_id,
+                                       itp.game_mode,
+                                       itp.trader_id,
+                                       itp.price,
+                                       t.normalized_name as trader_normalized_name,
+                                       t.name_en as trader_name_en,
+                                       t.name_ko as trader_name_ko,
+                                       t.name_ja as trader_name_ja,
+                                       t.image as trader_image
+                                from item_trader_prices itp
+                                         left join traders t on itp.trader_id = t.id
+                                where itp.item_id in :item_ids
+                                order by itp.item_id, itp.game_mode, itp.price desc;
+                                """
+                            ).bindparams(bindparam("item_ids", expanding=True)),
+                            {"item_ids": item_ids},
+                        )
+                        .mappings()
+                        .all()
+                    )
+                    for trader_price in trader_prices:
+                        trader_prices_by_item[trader_price["item_id"]].setdefault(
+                            trader_price["game_mode"], []
+                        ).append(
+                            PriceServiceV3._serialize_trader_price_row_v3(trader_price)
+                        )
+
                 return {
                     "data": [
                         PriceServiceV3._serialize_item_price_v3(
@@ -128,6 +188,7 @@ class PriceServiceV3:
                                 "pve": prices_by_item[item.id].get("pve"),
                             },
                             histories_by_item[item.id],
+                            trader_prices_by_item[item.id],
                         )
                         for item in item_list
                     ],

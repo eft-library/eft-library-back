@@ -271,10 +271,3 @@ class UserUtilV3:
             DELETE FROM user_roadmap
             WHERE email = :email
         """
-
-    @staticmethod
-    def delete_user_quest():
-        return """
-            DELETE FROM user_quest
-            WHERE email = :email
-        """
