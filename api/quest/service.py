@@ -343,6 +343,17 @@ class QuestServiceV3:
                         {"trader_normalized_name": trader_normalized_name},
                     ).mappings()
                 ]
+                quest_detail_list = []
+                for quest in quest_list:
+                    quest_detail = QuestServiceV3.get_quest_by_normalized_name_v3(
+                        quest["normalized_name"]
+                    )
+                    if quest_detail is not None:
+                        quest_detail["quest"].pop("guide_en", None)
+                        quest_detail["quest"].pop("guide_ko", None)
+                        quest_detail["quest"].pop("guide_ja", None)
+                        quest_detail_list.append(quest_detail)
+
                 trader_list = [
                     dict(row)
                     for row in s.execute(
@@ -351,7 +362,7 @@ class QuestServiceV3:
                 ]
 
                 return {
-                    "quest_list": quest_list,
+                    "quest_list": quest_detail_list,
                     "trader_list": trader_list,
                 }
         except Exception as e:
