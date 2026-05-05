@@ -203,12 +203,12 @@ class CommunityUtilV3:
     def get_detail_author_meta_data():
         return """
             select cp.user_email,
-                   ui.nickname,
+                   coalesce(ui.nickname, cp.user_email) as nickname,
                    count(distinct cp2.id) as posts_count,
                    count(cpr.post_id) filter (where cpr.reaction_type = 1) as like_count,
                    case when uf.follower_email is not null then 1 else 0 end as is_follow
             from community_posts cp
-                     join user_info ui on cp.user_email = ui.email
+                     left join user_info ui on cp.user_email = ui.email
                      left join community_posts cp2 on cp2.user_email = cp.user_email
                      left join community_posts_reactions cpr on cp2.id = cpr.post_id
                      left join user_follows uf
@@ -217,7 +217,7 @@ class CommunityUtilV3:
             where cp.id = :post_id
               and cp.delete_by_user = false
               and cp.delete_by_admin = false
-            group by cp.user_email, ui.nickname, uf.follower_email
+            group by cp.user_email, coalesce(ui.nickname, cp.user_email), uf.follower_email
         """
 
     @staticmethod

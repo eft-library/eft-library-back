@@ -28,7 +28,16 @@ class CommunityFunctionV3:
             text(CommunityUtilV3.get_detail_author_meta_data()),
             {"post_id": post_id, "user_email": user_email},
         )
-        return [dict(row) for row in result.mappings()][0]
+        row = result.mappings().first()
+        if row is None:
+            return {
+                "user_email": None,
+                "nickname": None,
+                "posts_count": 0,
+                "like_count": 0,
+                "is_follow": 0,
+            }
+        return dict(row)
 
     @staticmethod
     def fetch_posts_with_paging(
