@@ -1190,34 +1190,34 @@ def migrate_story_roadmap() -> int:
 
 
 def main() -> None:
-    map_points_count = migrate_map_points()
-    main_contents_count = migrate_main_contents()
-    menu_groups_count = migrate_menu_groups()
+    # map_points_count = migrate_map_points()
+    # main_contents_count = migrate_main_contents()
+    # menu_groups_count = migrate_menu_groups()
     menu_sub_groups_count = migrate_menu_sub_groups()
-    roadmap_node_count = migrate_roadmap_node()
-    roadmap_edge_count = migrate_roadmap_edge()
-    progress_item_count = migrate_progress_item()
-    information_count = migrate_information()
-    wipe_count = migrate_wipe()
-    quest_guide_count = migrate_quest_guide()
-    quest_objectives_i18n_count = migrate_quest_objectives_i18n()
-    story_count = migrate_story()
-    roadmap_count = migrate_story_roadmap()
+    # roadmap_node_count = migrate_roadmap_node()
+    # roadmap_edge_count = migrate_roadmap_edge()
+    # progress_item_count = migrate_progress_item()
+    # information_count = migrate_information()
+    # wipe_count = migrate_wipe()
+    # quest_guide_count = migrate_quest_guide()
+    # quest_objectives_i18n_count = migrate_quest_objectives_i18n()
+    # story_count = migrate_story()
+    # roadmap_count = migrate_story_roadmap()
     logger.info(
         "migration finished: map_points=%s, main_contents=%s, menu_groups=%s, menu_sub_groups=%s, roadmap_node=%s, roadmap_edge=%s, progress_item=%s, information=%s, wipe=%s, quest_guide=%s, quest_objectives_i18n=%s, story=%s, story_roadmap=%s",
-        map_points_count,
-        main_contents_count,
-        menu_groups_count,
+        0,
+        0,
+        0,
         menu_sub_groups_count,
-        roadmap_node_count,
-        roadmap_edge_count,
-        progress_item_count,
-        information_count,
-        wipe_count,
-        quest_guide_count,
-        quest_objectives_i18n_count,
-        story_count,
-        roadmap_count,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
     )
 
 

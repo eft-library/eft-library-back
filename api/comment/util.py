@@ -115,15 +115,15 @@ class CommentUtilV3:
                     t.sort_path,
                     COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0) AS like_count,
                     COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0) AS dislike_count,
-                    ui.nickname AS nickname,
-                    pui.nickname AS parent_nickname,
+                    COALESCE(ui.nickname, t.user_email) AS nickname,
+                    COALESCE(pui.nickname, pc.user_email) AS parent_nickname,
                     COALESCE(ccr.reaction_type, -1) AS is_like
                 FROM tree t
                 LEFT JOIN community_comments_reactions r
                        ON r.comment_id = t.id
                 LEFT JOIN community_comments_reactions ccr
                        ON t.id = ccr.comment_id AND ccr.email = :user_email
-                JOIN user_info ui
+                LEFT JOIN user_info ui
                        ON t.user_email = ui.email
                 LEFT JOIN community_comments pc
                        ON t.parent_id = pc.id
@@ -135,7 +135,8 @@ class CommentUtilV3:
                 GROUP BY
                     t.id, t.parent_id, t.post_id, t.user_email, t.contents,
                     t.delete_by_admin, t.delete_by_user, t.create_time, t.update_time,
-                    t.depth, t.sort_path, ui.nickname, pui.nickname, ccr.reaction_type, ub.id
+                    t.depth, t.sort_path, COALESCE(ui.nickname, t.user_email),
+                    COALESCE(pui.nickname, pc.user_email), ccr.reaction_type, ub.id
             ),
             ranked AS (
                 SELECT a.*,
@@ -199,8 +200,8 @@ class CommentUtilV3:
                 c.post_id::text AS post_id,
                 c.path,
                 c.user_email,
-                ui.nickname AS nickname,
-                pui.nickname AS parent_nickname,
+                COALESCE(ui.nickname, c.user_email) AS nickname,
+                COALESCE(pui.nickname, pc.user_email) AS parent_nickname,
                 c.contents,
                 c.delete_by_user,
                 c.delete_by_admin,
@@ -214,7 +215,7 @@ class CommentUtilV3:
             FROM community_comments c
             LEFT JOIN community_comments_reactions r
                    ON r.comment_id = c.id
-            JOIN user_info ui
+            LEFT JOIN user_info ui
                  ON c.user_email = ui.email
             LEFT JOIN community_comments pc
                    ON c.parent_id = pc.id
@@ -222,8 +223,9 @@ class CommentUtilV3:
                    ON pc.user_email = pui.email
             WHERE c.post_id = :post_id
             GROUP BY
-                c.id, c.parent_id, c.post_id, c.path, c.user_email, ui.nickname,
-                pui.nickname, c.contents, c.delete_by_user, c.delete_by_admin, c.create_time, c.update_time
+                c.id, c.parent_id, c.post_id, c.path, c.user_email,
+                COALESCE(ui.nickname, c.user_email), COALESCE(pui.nickname, pc.user_email),
+                c.contents, c.delete_by_user, c.delete_by_admin, c.create_time, c.update_time
             HAVING
                 (COALESCE(SUM(CASE WHEN r.reaction_type = 1 THEN 1 ELSE 0 END), 0)
                  + COALESCE(SUM(CASE WHEN r.reaction_type = 0 THEN 1 ELSE 0 END), 0)) >= 5
