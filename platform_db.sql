@@ -1037,3 +1037,86 @@ create table if not exists user_notifications (
     is_read boolean DEFAULT FALSE,
     create_time timestamptz default now()
 );
+
+create table if not exists live_map_floors
+(
+    id text primary key,
+    map_id text,
+    floor_no integer,
+    name_en text,
+    name_ko text,
+    name_ja text,
+    image text,
+    min_z numeric,
+    max_z numeric,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index idx_live_map_floors_map_id on live_map_floors(map_id);
+create unique index idx_live_map_floors_map_floor on live_map_floors(map_id, floor_no);
+
+create table if not exists live_map_points
+(
+    id text primary key,
+    quest_id text,
+    objective_id text,
+    map_id text,
+    floor_id text,
+    floor_no integer,
+    name_en text,
+    name_ko text,
+    name_ja text,
+    x numeric,
+    z numeric,
+    y numeric,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create unique index idx_live_map_points_objective_unique
+    on live_map_points(objective_id)
+    where objective_id is not null;
+create index idx_live_map_points_map_id on live_map_points(map_id);
+create index idx_live_map_points_quest_id on live_map_points(quest_id);
+create index idx_live_map_points_floor_id on live_map_points(floor_id);
+create index idx_live_map_points_map_floor on live_map_points(map_id, floor_no);
+
+create table if not exists live_map_point_details
+(
+    id text primary key,
+    point_id text,
+    title_en text,
+    title_ko text,
+    title_ja text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    image text,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index idx_live_map_point_details_point_id on live_map_point_details(point_id);
+
+create table if not exists live_map_static_points
+(
+    id text primary key,
+    map_id text,
+    floor_id text,
+    floor_no integer,
+    category text,
+    name_en text,
+    name_ko text,
+    name_ja text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    x numeric,
+    z numeric,
+    y numeric,
+    metadata jsonb,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index idx_live_map_static_points_map_id on live_map_static_points(map_id);
+create index idx_live_map_static_points_category on live_map_static_points(category);
+create index idx_live_map_static_points_map_category on live_map_static_points(map_id, category);
+create index idx_live_map_static_points_floor_id on live_map_static_points(floor_id);
