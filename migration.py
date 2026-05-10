@@ -224,6 +224,123 @@ SELECT_STORY_ROADMAP_SQL = text(
     """
 )
 
+SELECT_USER_INFO_SQL = text(
+    """
+    select
+        email,
+        name,
+        nickname,
+        is_admin,
+        attendance_count,
+        attendance_time,
+        last_update_nickname,
+        create_time
+    from user_info
+    order by email;
+    """
+)
+
+
+SELECT_USER_HIDEOUT_SQL = text(
+    """
+    select
+        user_email,
+        complete_list,
+        item_list,
+        update_time
+    from user_hideout
+    order by user_email;
+    """
+)
+
+
+SELECT_USER_ROADMAP_SQL = text(
+    """
+    select
+        user_email,
+        quest_list,
+        update_time
+    from user_roadmap
+    order by user_email;
+    """
+)
+
+
+SELECT_USER_PROGRESS_ITEM_SQL = text(
+    """
+    select
+        user_email,
+        progress_type,
+        item_list,
+        update_time
+    from user_progress_item
+    order by user_email, progress_type;
+    """
+)
+
+
+SELECT_COMMUNITY_POSTS_SQL = text(
+    """
+    select
+        id,
+        slug,
+        user_email,
+        category,
+        title,
+        contents,
+        thumbnail,
+        delete_by_user,
+        delete_by_admin,
+        create_time,
+        update_time
+    from community_posts
+    order by create_time, id;
+    """
+)
+
+
+SELECT_COMMUNITY_COMMENTS_SQL = text(
+    """
+    select
+        id,
+        parent_id,
+        post_id,
+        path,
+        user_email,
+        contents,
+        delete_by_user,
+        delete_by_admin,
+        create_time,
+        update_time
+    from community_comments
+    order by create_time, id;
+    """
+)
+
+
+SELECT_COMMUNITY_COMMENTS_REACTIONS_SQL = text(
+    """
+    select
+        comment_id,
+        user_email,
+        reaction_type,
+        update_time
+    from community_comments_reactions
+    order by update_time, comment_id, user_email;
+    """
+)
+
+
+SELECT_COMMUNITY_POSTS_VIEWS_SQL = text(
+    """
+    select
+        post_id,
+        view_count
+    from community_posts_views
+    order by post_id;
+    """
+)
+
 
 UPSERT_STORY_SQL = text(
     """
@@ -690,6 +807,213 @@ UPSERT_STORY_ROADMAP_SQL = text(
     """
 )
 
+UPSERT_USER_INFO_SQL = text(
+    """
+    insert into user_info (
+        email,
+        name,
+        nickname,
+        is_admin,
+        attendance_count,
+        attendance_time,
+        last_update_nickname,
+        create_time
+    ) values (
+        :email,
+        :name,
+        :nickname,
+        :is_admin,
+        :attendance_count,
+        :attendance_time,
+        :last_update_nickname,
+        :create_time
+    )
+    on conflict (email) do update set
+        name = excluded.name,
+        nickname = excluded.nickname,
+        is_admin = excluded.is_admin,
+        attendance_count = excluded.attendance_count,
+        attendance_time = excluded.attendance_time,
+        last_update_nickname = excluded.last_update_nickname,
+        create_time = excluded.create_time;
+    """
+)
+
+
+UPSERT_USER_HIDEOUT_SQL = text(
+    """
+    insert into user_hideout (
+        email,
+        complete_list,
+        item_list,
+        update_time
+    ) values (
+        :email,
+        :complete_list,
+        :item_list,
+        :update_time
+    )
+    on conflict (email) do update set
+        complete_list = excluded.complete_list,
+        item_list = excluded.item_list,
+        update_time = excluded.update_time;
+    """
+)
+
+
+UPSERT_USER_ROADMAP_SQL = text(
+    """
+    insert into user_roadmap (
+        email,
+        quest_list,
+        update_time
+    ) values (
+        :email,
+        :quest_list,
+        :update_time
+    )
+    on conflict (email) do update set
+        quest_list = excluded.quest_list,
+        update_time = excluded.update_time;
+    """
+)
+
+
+UPSERT_USER_PROGRESS_ITEM_SQL = text(
+    """
+    insert into user_progress_item (
+        email,
+        progress_type,
+        item_list,
+        update_time
+    ) values (
+        :email,
+        :progress_type,
+        :item_list,
+        :update_time
+    )
+    on conflict (email, progress_type) do update set
+        item_list = excluded.item_list,
+        update_time = excluded.update_time;
+    """
+)
+
+
+UPSERT_COMMUNITY_POSTS_SQL = text(
+    """
+    insert into community_posts (
+        id,
+        slug,
+        user_email,
+        category,
+        title,
+        contents,
+        thumbnail,
+        delete_by_user,
+        delete_by_admin,
+        create_time,
+        update_time
+    ) values (
+        :id,
+        :slug,
+        :user_email,
+        :category,
+        :title,
+        :contents,
+        :thumbnail,
+        :delete_by_user,
+        :delete_by_admin,
+        :create_time,
+        :update_time
+    )
+    on conflict (id) do update set
+        slug = excluded.slug,
+        user_email = excluded.user_email,
+        category = excluded.category,
+        title = excluded.title,
+        contents = excluded.contents,
+        thumbnail = excluded.thumbnail,
+        delete_by_user = excluded.delete_by_user,
+        delete_by_admin = excluded.delete_by_admin,
+        create_time = excluded.create_time,
+        update_time = excluded.update_time;
+    """
+)
+
+
+UPSERT_COMMUNITY_COMMENTS_SQL = text(
+    """
+    insert into community_comments (
+        id,
+        parent_id,
+        post_id,
+        path,
+        user_email,
+        contents,
+        delete_by_user,
+        delete_by_admin,
+        create_time,
+        update_time
+    ) values (
+        :id,
+        :parent_id,
+        :post_id,
+        cast(:path as ltree),
+        :user_email,
+        :contents,
+        :delete_by_user,
+        :delete_by_admin,
+        :create_time,
+        :update_time
+    )
+    on conflict (id) do update set
+        parent_id = excluded.parent_id,
+        post_id = excluded.post_id,
+        path = excluded.path,
+        user_email = excluded.user_email,
+        contents = excluded.contents,
+        delete_by_user = excluded.delete_by_user,
+        delete_by_admin = excluded.delete_by_admin,
+        create_time = excluded.create_time,
+        update_time = excluded.update_time;
+    """
+)
+
+
+UPSERT_COMMUNITY_COMMENTS_REACTIONS_SQL = text(
+    """
+    insert into community_comments_reactions (
+        comment_id,
+        email,
+        reaction_type,
+        reaction_time
+    ) values (
+        :comment_id,
+        :email,
+        :reaction_type,
+        :reaction_time
+    )
+    on conflict (comment_id, email) do update set
+        reaction_type = excluded.reaction_type,
+        reaction_time = excluded.reaction_time;
+    """
+)
+
+
+UPSERT_COMMUNITY_POSTS_VIEWS_SQL = text(
+    """
+    insert into community_posts_views (
+        post_id,
+        view_count
+    ) values (
+        :post_id,
+        :view_count
+    )
+    on conflict (post_id) do update set
+        view_count = excluded.view_count;
+    """
+)
+
 
 def get_lang_value(value: Any, lang: str) -> str | None:
     if value is None:
@@ -931,6 +1255,115 @@ def build_story_roadmap_payload(row: dict[str, Any]) -> dict[str, Any]:
         "edge": Json(row["edge"]) if row["edge"] is not None else None,
         "update_time": row["update_time"],
     }
+
+
+def build_user_info_payload(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "email": row["email"],
+        "name": row["name"],
+        "nickname": row["nickname"],
+        "is_admin": row["is_admin"],
+        "attendance_count": row["attendance_count"],
+        "attendance_time": row["attendance_time"],
+        "last_update_nickname": row["last_update_nickname"],
+        "create_time": row["create_time"],
+    }
+
+
+def build_user_hideout_payload(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "email": row["user_email"],
+        "complete_list": row["complete_list"],
+        "item_list": Json(row["item_list"]) if row["item_list"] is not None else None,
+        "update_time": row["update_time"],
+    }
+
+
+def build_user_roadmap_payload(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "email": row["user_email"],
+        "quest_list": row["quest_list"],
+        "update_time": row["update_time"],
+    }
+
+
+def build_user_progress_item_payload(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "email": row["user_email"],
+        "progress_type": row["progress_type"],
+        "item_list": row["item_list"],
+        "update_time": row["update_time"],
+    }
+
+
+def build_community_posts_payload(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": row["id"],
+        "slug": row["slug"],
+        "user_email": row["user_email"],
+        "category": row["category"],
+        "title": row["title"],
+        "contents": row["contents"],
+        "thumbnail": row["thumbnail"],
+        "delete_by_user": row["delete_by_user"],
+        "delete_by_admin": row["delete_by_admin"],
+        "create_time": row["create_time"],
+        "update_time": row["update_time"],
+    }
+
+
+def build_community_comments_payload(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": row["id"],
+        "parent_id": row["parent_id"],
+        "post_id": row["post_id"],
+        "path": str(row["path"]) if row["path"] is not None else None,
+        "user_email": row["user_email"],
+        "contents": row["contents"],
+        "delete_by_user": row["delete_by_user"],
+        "delete_by_admin": row["delete_by_admin"],
+        "create_time": row["create_time"],
+        "update_time": row["update_time"],
+    }
+
+
+def build_community_comments_reactions_payload(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "comment_id": row["comment_id"],
+        "email": row["user_email"],
+        "reaction_type": row["reaction_type"],
+        "reaction_time": row["update_time"],
+    }
+
+
+def build_community_posts_views_payload(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "post_id": row["post_id"],
+        "view_count": row["view_count"],
+    }
+
+
+def migrate_simple_table(
+    migration_name: str,
+    select_sql,
+    upsert_sql,
+    build_payload,
+) -> int:
+    with DataBaseConnector.SessionLocal() as source_session:
+        source_rows = source_session.execute(select_sql).mappings().all()
+
+    payloads = [build_payload(dict(row)) for row in source_rows]
+
+    if not payloads:
+        logger.info("%s migration skipped: no source rows", migration_name)
+        return 0
+
+    with V3Database.SessionLocal() as target_session:
+        target_session.execute(upsert_sql, payloads)
+        target_session.commit()
+
+    logger.info("%s migration completed: %s rows", migration_name, len(payloads))
+    return len(payloads)
 
 
 def migrate_map_points() -> int:
@@ -1189,35 +1622,113 @@ def migrate_story_roadmap() -> int:
     return len(payloads)
 
 
+def migrate_user_info() -> int:
+    return migrate_simple_table(
+        "user_info",
+        SELECT_USER_INFO_SQL,
+        UPSERT_USER_INFO_SQL,
+        build_user_info_payload,
+    )
+
+
+def migrate_user_hideout() -> int:
+    return migrate_simple_table(
+        "user_hideout",
+        SELECT_USER_HIDEOUT_SQL,
+        UPSERT_USER_HIDEOUT_SQL,
+        build_user_hideout_payload,
+    )
+
+
+def migrate_user_roadmap() -> int:
+    return migrate_simple_table(
+        "user_roadmap",
+        SELECT_USER_ROADMAP_SQL,
+        UPSERT_USER_ROADMAP_SQL,
+        build_user_roadmap_payload,
+    )
+
+
+def migrate_user_progress_item() -> int:
+    return migrate_simple_table(
+        "user_progress_item",
+        SELECT_USER_PROGRESS_ITEM_SQL,
+        UPSERT_USER_PROGRESS_ITEM_SQL,
+        build_user_progress_item_payload,
+    )
+
+
+def migrate_community_posts() -> int:
+    return migrate_simple_table(
+        "community_posts",
+        SELECT_COMMUNITY_POSTS_SQL,
+        UPSERT_COMMUNITY_POSTS_SQL,
+        build_community_posts_payload,
+    )
+
+
+def migrate_community_comments() -> int:
+    return migrate_simple_table(
+        "community_comments",
+        SELECT_COMMUNITY_COMMENTS_SQL,
+        UPSERT_COMMUNITY_COMMENTS_SQL,
+        build_community_comments_payload,
+    )
+
+
+def migrate_community_comments_reactions() -> int:
+    return migrate_simple_table(
+        "community_comments_reactions",
+        SELECT_COMMUNITY_COMMENTS_REACTIONS_SQL,
+        UPSERT_COMMUNITY_COMMENTS_REACTIONS_SQL,
+        build_community_comments_reactions_payload,
+    )
+
+
+def migrate_community_posts_views() -> int:
+    return migrate_simple_table(
+        "community_posts_views",
+        SELECT_COMMUNITY_POSTS_VIEWS_SQL,
+        UPSERT_COMMUNITY_POSTS_VIEWS_SQL,
+        build_community_posts_views_payload,
+    )
+
+
 def main() -> None:
     # map_points_count = migrate_map_points()
     # main_contents_count = migrate_main_contents()
     # menu_groups_count = migrate_menu_groups()
-    menu_sub_groups_count = migrate_menu_sub_groups()
+    # menu_sub_groups_count = migrate_menu_sub_groups()
     # roadmap_node_count = migrate_roadmap_node()
     # roadmap_edge_count = migrate_roadmap_edge()
     # progress_item_count = migrate_progress_item()
-    # information_count = migrate_information()
     # wipe_count = migrate_wipe()
     # quest_guide_count = migrate_quest_guide()
     # quest_objectives_i18n_count = migrate_quest_objectives_i18n()
     # story_count = migrate_story()
     # roadmap_count = migrate_story_roadmap()
+
+    information_count = migrate_information()
+    user_info_count = migrate_user_info()
+    user_hideout_count = migrate_user_hideout()
+    user_roadmap_count = migrate_user_roadmap()
+    user_progress_item_count = migrate_user_progress_item()
+    community_posts_count = migrate_community_posts()
+    community_posts_views_count = migrate_community_posts_views()
+    community_comments_count = migrate_community_comments()
+    community_comments_reactions_count = migrate_community_comments_reactions()
+
     logger.info(
-        "migration finished: map_points=%s, main_contents=%s, menu_groups=%s, menu_sub_groups=%s, roadmap_node=%s, roadmap_edge=%s, progress_item=%s, information=%s, wipe=%s, quest_guide=%s, quest_objectives_i18n=%s, story=%s, story_roadmap=%s",
-        0,
-        0,
-        0,
-        menu_sub_groups_count,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
+        "migration finished: information=%s, user_info=%s, user_hideout=%s, user_roadmap=%s, user_progress_item=%s, community_posts=%s, community_posts_views=%s, community_comments=%s, community_comments_reactions=%s",
+        information_count,
+        user_info_count,
+        user_hideout_count,
+        user_roadmap_count,
+        user_progress_item_count,
+        community_posts_count,
+        community_posts_views_count,
+        community_comments_count,
+        community_comments_reactions_count,
     )
 
 
