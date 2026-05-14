@@ -1,4 +1,5 @@
 import httpx
+import json
 import logging
 import os
 from api.chat.chat_req_models import ChatRequest
@@ -36,9 +37,43 @@ async def request_chat_stream(req: ChatRequest):
     if req.history_limit is not None:
         payload["history_limit"] = req.history_limit
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        async with client.stream("POST", MCP_CHAT_STREAM_URL, json=payload) as resp:
-            resp.raise_for_status()
-            async for line in resp.aiter_lines():
-                if line:
-                    yield f"{line}\n\n"
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            async with client.stream("POST", MCP_CHAT_STREAM_URL, json=payload) as resp:
+                if resp.status_code >= 400:
+                    body = await resp.aread()
+                    message = body.decode("utf-8", errors="replace")
+                    log.error(
+                        "MCP chat stream error status=%s body=%s",
+                        resp.status_code,
+                        message[:1000],
+                    )
+                    yield _sse_error(
+                        f"Agent server returned HTTP {resp.status_code}",
+                        message,
+                    )
+                    yield _sse_done()
+                    return
+
+                async for line in resp.aiter_lines():
+                    if line:
+                        yield f"{line}\n\n"
+    except httpx.HTTPError as e:
+        log.error("MCP chat stream connection error: %s", e, exc_info=True)
+        yield _sse_error("Agent stream connection failed", str(e))
+        yield _sse_done()
+    except Exception as e:
+        log.error("chat stream proxy error: %s", e, exc_info=True)
+        yield _sse_error("Chat stream proxy failed", str(e))
+        yield _sse_done()
+
+
+def _sse_error(message: str, detail: str | None = None) -> str:
+    payload = {"type": "error", "message": message}
+    if detail:
+        payload["detail"] = detail
+    return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+
+
+def _sse_done() -> str:
+    return f"data: {json.dumps({'type': 'done'}, ensure_ascii=False)}\n\n"
