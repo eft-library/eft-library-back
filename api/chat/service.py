@@ -26,15 +26,19 @@ def get_chat_search():
 
 
 async def request_chat_stream(req: ChatRequest):
+    domain = req.domain
+    if domain in ("", "string"):
+        domain = None
+
     payload = {
         "session_id": req.session_id,
         "query": req.query,
         "lang": req.lang,
-        "domain": req.domain,
+        "domain": domain,
     }
-    if req.rag_limit is not None:
+    if req.rag_limit is not None and req.rag_limit > 0:
         payload["rag_limit"] = req.rag_limit
-    if req.history_limit is not None:
+    if req.history_limit is not None and req.history_limit > 0:
         payload["history_limit"] = req.history_limit
 
     try:
