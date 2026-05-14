@@ -1700,7 +1700,7 @@ def main() -> None:
     # menu_groups_count = migrate_menu_groups()
     # menu_sub_groups_count = migrate_menu_sub_groups()
     # roadmap_node_count = migrate_roadmap_node()
-    # roadmap_edge_count = migrate_roadmap_edge()
+    roadmap_edge_count = migrate_roadmap_edge()
     # progress_item_count = migrate_progress_item()
     # wipe_count = migrate_wipe()
     # quest_guide_count = migrate_quest_guide()
@@ -1708,27 +1708,19 @@ def main() -> None:
     # story_count = migrate_story()
     # roadmap_count = migrate_story_roadmap()
 
-    information_count = migrate_information()
-    user_info_count = migrate_user_info()
-    user_hideout_count = migrate_user_hideout()
-    user_roadmap_count = migrate_user_roadmap()
-    user_progress_item_count = migrate_user_progress_item()
-    community_posts_count = migrate_community_posts()
-    community_posts_views_count = migrate_community_posts_views()
-    community_comments_count = migrate_community_comments()
-    community_comments_reactions_count = migrate_community_comments_reactions()
+    # information_count = migrate_information()
+    # user_info_count = migrate_user_info()
+    # user_hideout_count = migrate_user_hideout()
+    # user_roadmap_count = migrate_user_roadmap()
+    # user_progress_item_count = migrate_user_progress_item()
+    # community_posts_count = migrate_community_posts()
+    # community_posts_views_count = migrate_community_posts_views()
+    # community_comments_count = migrate_community_comments()
+    # community_comments_reactions_count = migrate_community_comments_reactions()
 
     logger.info(
-        "migration finished: information=%s, user_info=%s, user_hideout=%s, user_roadmap=%s, user_progress_item=%s, community_posts=%s, community_posts_views=%s, community_comments=%s, community_comments_reactions=%s",
-        information_count,
-        user_info_count,
-        user_hideout_count,
-        user_roadmap_count,
-        user_progress_item_count,
-        community_posts_count,
-        community_posts_views_count,
-        community_comments_count,
-        community_comments_reactions_count,
+        "migration finished: information=%s",
+        roadmap_edge_count,
     )
 
 

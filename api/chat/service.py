@@ -8,8 +8,7 @@ from database import DataBaseConnector
 log = logging.getLogger(__name__)
 
 MCP_SERVER_URL = os.getenv("MCP_SERVER_URL")
-MCP_CHAT_URL = f"{MCP_SERVER_URL}/api/rag/chat"
-MCP_CHAT_STREAM_URL = f"{MCP_SERVER_URL}/api/rag/chat/stream"
+MCP_CHAT_STREAM_URL = f"{MCP_SERVER_URL}/api/rag/v3/chat/stream"
 
 
 def get_chat_search():
@@ -30,8 +29,12 @@ async def request_chat_stream(req: ChatRequest):
         "session_id": req.session_id,
         "query": req.query,
         "lang": req.lang,
-        "source_table": None,
+        "domain": req.domain,
     }
+    if req.rag_limit is not None:
+        payload["rag_limit"] = req.rag_limit
+    if req.history_limit is not None:
+        payload["history_limit"] = req.history_limit
 
     async with httpx.AsyncClient(timeout=120.0) as client:
         async with client.stream("POST", MCP_CHAT_STREAM_URL, json=payload) as resp:
