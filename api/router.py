@@ -19,6 +19,7 @@ from api.progress import progress_router
 from api.minigame import minigame_router
 from api.story import story_router
 from api.chat import chat_router
+from api.live_map import live_map_router
 
 api_router = APIRouter()
 
@@ -42,3 +43,4 @@ api_router.include_router(progress_router.router, prefix="/progress")
 api_router.include_router(minigame_router.router, prefix="/minigame")
 api_router.include_router(story_router.router, prefix="/story")
 api_router.include_router(chat_router.router, prefix="/chat")
+api_router.include_router(live_map_router.router, prefix="/live-map")
