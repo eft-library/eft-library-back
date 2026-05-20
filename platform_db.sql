@@ -822,6 +822,61 @@ create table if not exists story (
     update_time timestamptz default now()
 );
 
+create table if not exists story_objectives
+(
+    objective_id text primary key,
+    story_id text,
+    parent_objective_id text,
+    objective_type text, -- talk/handover/extract/visit/locate/kill/access/note/etc
+    description_en text,
+    description_ko text,
+    description_ja text,
+    count integer,
+    is_optional boolean default false,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_story_objectives_story_id on story_objectives(story_id);
+create index if not exists idx_story_objectives_parent_id on story_objectives(parent_objective_id);
+create index if not exists idx_story_objectives_type on story_objectives(objective_type);
+
+create table if not exists story_requirements
+(
+    id text primary key,
+    story_id text,
+    requirement_type text, -- auto_added/level/quest/item/access/note/etc
+    description_en text,
+    description_ko text,
+    description_ja text,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_story_requirements_story_id on story_requirements(story_id);
+create index if not exists idx_story_requirements_type on story_requirements(requirement_type);
+
+create table if not exists story_objective_items
+(
+    objective_id text,
+    item_id text,
+    quantity integer,
+    found_in_raid boolean,
+    item_role text, -- required/handover/optional/reward/etc
+    sort_order integer,
+    primary key (objective_id, item_id, item_role)
+);
+create index if not exists idx_story_objective_items_objective_id on story_objective_items(objective_id);
+create index if not exists idx_story_objective_items_item_id on story_objective_items(item_id);
+
+create table if not exists story_objective_maps
+(
+    objective_id text,
+    map_id text,
+    sort_order integer,
+    primary key (objective_id, map_id)
+);
+create index if not exists idx_story_objective_maps_objective_id on story_objective_maps(objective_id);
+create index if not exists idx_story_objective_maps_map_id on story_objective_maps(map_id);
+
 create table if not exists story_roadmap (
     id text primary key,
     node_type text,
@@ -841,43 +896,6 @@ create table if not exists story_roadmap (
     edge jsonb,
     update_time timestamptz default now()
 );
-
-create table if not exists item_details
-(
-    ID text primary key,
-    normalized_name text,
-    HIDEOUT_ITEMS jsonb,
-    USED_IN_CRAFTS jsonb,
-    REWARDED_BY_NPCS jsonb,
-    REWARDED_BY_QUESTS jsonb,
-    REQUIRED_BY_QUEST_ITEM jsonb,
-    REQUIRED_BY_QUEST_ITEM_ARRAY jsonb,
-    REWARDED_BY_QUESTS_CRAFT_UNLOCK jsonb,
-    REWARDED_BY_QUESTS_OFFER_UNLOCK jsonb,
-    update_time timestamptz default now()
-);
-COMMENT ON COLUMN ITEM_DETAIL_I18N.ID IS '아이템 상세 아이디';
-COMMENT ON COLUMN ITEM_DETAIL_I18N.normalized_name IS '아이템 상세 주소';
-COMMENT ON COLUMN ITEM_DETAIL_I18N.HIDEOUT_ITEMS IS '아이템 상세 건설 필요';
-COMMENT ON COLUMN ITEM_DETAIL_I18N.USED_IN_CRAFTS IS '아이템 상세 제작 필요';
-COMMENT ON COLUMN ITEM_DETAIL_I18N.REWARDED_BY_NPCS IS '아이템 상세 상인 교환';
-COMMENT ON COLUMN ITEM_DETAIL_I18N.REWARDED_BY_QUESTS IS '아이템 상세 퀘스트 보상';
-COMMENT ON COLUMN ITEM_DETAIL_I18N.REQUIRED_BY_QUEST_ITEM IS '아이템 상세 퀘스트 아이템';
-COMMENT ON COLUMN ITEM_DETAIL_I18N.REQUIRED_BY_QUEST_ITEM_ARRAY IS '아이템 상세 퀘스트 아이템 배열';
-COMMENT ON COLUMN ITEM_DETAIL_I18N.REWARDED_BY_QUESTS_CRAFT_UNLOCK IS '아이템 상세 제작 잠금 해제';
-COMMENT ON COLUMN ITEM_DETAIL_I18N.REWARDED_BY_QUESTS_OFFER_UNLOCK IS '아이템 상세 구매 잠금 해제';
-COMMENT ON COLUMN ITEM_DETAIL_I18N.UPDATE_TIME IS '아이템 상세 업데이트 날짜';
-
-create table if not exists RAG_SEARCH_I18N
-(
-  VALUE text,
-  LANG text,
-  update_time timestamptz default now(),
-  primary key (VALUE, LANG)
-);
-COMMENT ON COLUMN RAG_SEARCH_I18N.VALUE IS '검색 드롭다운 값';
-COMMENT ON COLUMN RAG_SEARCH_I18N.LANG IS '언어';
-COMMENT ON COLUMN RAG_SEARCH_I18N.UPDATE_TIME IS '검색 업데이트 시간';
 
 create table if not exists COMMUNITY_POSTS (
     id bigint PRIMARY KEY,
@@ -1114,3 +1132,36 @@ create index idx_live_map_static_points_map_id on live_map_static_points(map_id)
 create index idx_live_map_static_points_category on live_map_static_points(category);
 create index idx_live_map_static_points_map_category on live_map_static_points(map_id, category);
 create index idx_live_map_static_points_floor_id on live_map_static_points(floor_id);
+
+create table if not exists live_map_story_points
+(
+    id text primary key,
+    story_id text,
+    objective_id text,
+    map_id text,
+    floor_id text,
+    floor_no integer,
+    x numeric,
+    z numeric,
+    y numeric,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_story_points_map_id on live_map_story_points(map_id);
+create index if not exists idx_live_map_story_points_story_id on live_map_story_points(story_id);
+create index if not exists idx_live_map_story_points_objective_id on live_map_story_points(objective_id);
+create index if not exists idx_live_map_story_points_floor_id on live_map_story_points(floor_id);
+create index if not exists idx_live_map_story_points_map_floor on live_map_story_points(map_id, floor_no);
+
+create table if not exists live_map_story_point_details
+(
+    id text primary key,
+    point_id text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    image text,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_story_point_details_point_id on live_map_story_point_details(point_id);
