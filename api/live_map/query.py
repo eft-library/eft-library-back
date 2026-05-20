@@ -182,3 +182,88 @@ class LiveMapQueryV3:
             where so.story_id = any(:story_ids)
             order by som.objective_id, som.sort_order, m.name_en;
         """
+
+    @staticmethod
+    def event_points_by_map_sql():
+        return """
+            select lmep.id,
+                   lmep.event_id,
+                   lmep.objective_id,
+                   lmep.map_id,
+                   lmep.floor_id,
+                   lmep.floor_no,
+                   lmep.x,
+                   lmep.z,
+                   lmep.y,
+                   e.title_en,
+                   e.title_ko,
+                   e.title_ja,
+                   e.is_active,
+                   t.id as trader_id,
+                   t.normalized_name as trader_normalized_name,
+                   t.name_en as trader_name_en,
+                   t.name_ko as trader_name_ko,
+                   t.name_ja as trader_name_ja,
+                   t.image as trader_image
+            from live_map_event_points lmep
+                     join live_map_events e on lmep.event_id = e.id
+                     left join traders t on e.trader_id = t.id
+            where lmep.map_id = :map_id
+              and e.is_active is true
+            order by lmep.floor_no, lmep.sort_order, lmep.id;
+        """
+
+    @staticmethod
+    def event_point_details_by_map_sql():
+        return """
+            select lmepd.id,
+                   lmepd.point_id,
+                   lmepd.description_en,
+                   lmepd.description_ko,
+                   lmepd.description_ja,
+                   lmepd.image
+            from live_map_event_point_details lmepd
+                     join live_map_event_points lmep on lmepd.point_id = lmep.id
+            where lmep.map_id = :map_id
+            order by lmepd.point_id, lmepd.sort_order, lmepd.id;
+        """
+
+    @staticmethod
+    def event_objectives_by_event_ids_sql():
+        return """
+            select objective_id,
+                   event_id,
+                   parent_objective_id,
+                   objective_type,
+                   description_en,
+                   description_ko,
+                   description_ja,
+                   count,
+                   is_optional,
+                   sort_order
+            from live_map_event_objectives
+            where event_id = any(:event_ids)
+            order by event_id, sort_order, objective_id;
+        """
+
+    @staticmethod
+    def event_objective_items_by_event_ids_sql():
+        return """
+            select lmeoi.objective_id,
+                   lmeoi.item_id,
+                   lmeoi.quantity,
+                   lmeoi.found_in_raid,
+                   lmeoi.item_role,
+                   lmeoi.sort_order,
+                   i.normalized_name,
+                   i.name_en,
+                   i.name_ko,
+                   i.name_ja,
+                   i.image
+            from live_map_event_objective_items lmeoi
+                     join live_map_event_objectives lmeo
+                          on lmeoi.objective_id = lmeo.objective_id
+                     left join items i on lmeoi.item_id = i.id
+            where lmeo.event_id = any(:event_ids)
+            order by lmeoi.objective_id, lmeoi.sort_order, i.name_en;
+        """

@@ -97,3 +97,32 @@ class LiveMapStoryPointDetailV3(V3Database.Base):
     image = Column(TEXT)
     sort_order = Column(Integer)
     update_time = Column(TIMESTAMP)
+
+
+class LiveMapEventPointV3(V3Database.Base):
+    __tablename__ = "live_map_event_points"
+
+    id = Column(String, primary_key=True)
+    event_id = Column(String)
+    objective_id = Column(String)
+    map_id = Column(String)
+    floor_id = Column(String)
+    floor_no = Column(Integer)
+    x = Column(NUMERIC)
+    z = Column(NUMERIC)
+    y = Column(NUMERIC)
+    sort_order = Column(Integer)
+    update_time = Column(TIMESTAMP)
+
+
+class LiveMapEventPointDetailV3(V3Database.Base):
+    __tablename__ = "live_map_event_point_details"
+
+    id = Column(String, primary_key=True)
+    point_id = Column(String)
+    description_en = Column(TEXT)
+    description_ko = Column(TEXT)
+    description_ja = Column(TEXT)
+    image = Column(TEXT)
+    sort_order = Column(Integer)
+    update_time = Column(TIMESTAMP)

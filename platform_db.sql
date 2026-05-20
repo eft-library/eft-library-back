@@ -1165,3 +1165,81 @@ create table if not exists live_map_story_point_details
     update_time timestamptz default now()
 );
 create index if not exists idx_live_map_story_point_details_point_id on live_map_story_point_details(point_id);
+
+create table if not exists live_map_events
+(
+    id text primary key,
+    trader_id text,
+    title_en text,
+    title_ko text,
+    title_ja text,
+    is_active boolean default true,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_events_trader_id on live_map_events(trader_id);
+create index if not exists idx_live_map_events_active on live_map_events(is_active);
+
+create table if not exists live_map_event_objectives
+(
+    objective_id text primary key,
+    event_id text,
+    parent_objective_id text,
+    objective_type text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    count integer,
+    is_optional boolean default false,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_event_objectives_event_id on live_map_event_objectives(event_id);
+create index if not exists idx_live_map_event_objectives_parent_id on live_map_event_objectives(parent_objective_id);
+create index if not exists idx_live_map_event_objectives_type on live_map_event_objectives(objective_type);
+
+create table if not exists live_map_event_objective_items
+(
+    objective_id text,
+    item_id text,
+    quantity integer,
+    found_in_raid boolean,
+    item_role text,
+    sort_order integer,
+    primary key (objective_id, item_id, item_role)
+);
+create index if not exists idx_live_map_event_objective_items_objective_id on live_map_event_objective_items(objective_id);
+create index if not exists idx_live_map_event_objective_items_item_id on live_map_event_objective_items(item_id);
+
+create table if not exists live_map_event_points
+(
+    id text primary key,
+    event_id text,
+    objective_id text,
+    map_id text,
+    floor_id text,
+    floor_no integer,
+    x numeric,
+    z numeric,
+    y numeric,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_event_points_event_id on live_map_event_points(event_id);
+create index if not exists idx_live_map_event_points_objective_id on live_map_event_points(objective_id);
+create index if not exists idx_live_map_event_points_map_id on live_map_event_points(map_id);
+create index if not exists idx_live_map_event_points_floor_id on live_map_event_points(floor_id);
+create index if not exists idx_live_map_event_points_map_floor on live_map_event_points(map_id, floor_no);
+
+create table if not exists live_map_event_point_details
+(
+    id text primary key,
+    point_id text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    image text,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_event_point_details_point_id on live_map_event_point_details(point_id);

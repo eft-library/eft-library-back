@@ -207,6 +207,123 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
+    def _build_event_info_by_id_v3(
+        event_point_rows: list[dict],
+        event_details_by_point_id: dict[str, list[dict]],
+        objectives: list[dict],
+        objective_items: list[dict],
+    ):
+        event_info_by_id = {}
+        for row in event_point_rows:
+            event_id = row["event_id"]
+            if event_id is None or event_id in event_info_by_id:
+                continue
+            event_info_by_id[event_id] = {
+                "event": {
+                    "id": event_id,
+                    "title_en": row["title_en"],
+                    "title_ko": row["title_ko"],
+                    "title_ja": row["title_ja"],
+                    "is_active": row["is_active"],
+                },
+                "trader": (
+                    {
+                        "id": row["trader_id"],
+                        "normalized_name": row["trader_normalized_name"],
+                        "name_en": row["trader_name_en"],
+                        "name_ko": row["trader_name_ko"],
+                        "name_ja": row["trader_name_ja"],
+                        "image": row["trader_image"],
+                    }
+                    if row["trader_id"] is not None
+                    else None
+                ),
+                "objectives": [],
+            }
+
+        objective_by_id = {}
+        children_by_parent_id = {}
+        for objective in objectives:
+            objective_info = {
+                "objective_id": objective["objective_id"],
+                "parent_objective_id": objective["parent_objective_id"],
+                "objective_type": objective["objective_type"],
+                "description_en": objective["description_en"],
+                "description_ko": objective["description_ko"],
+                "description_ja": objective["description_ja"],
+                "count": objective["count"],
+                "is_optional": objective["is_optional"],
+                "items": [],
+                "live_map_points": [],
+                "children": [],
+            }
+            objective_by_id[objective["objective_id"]] = objective_info
+            children_by_parent_id.setdefault(objective["parent_objective_id"], []).append(
+                objective_info
+            )
+
+        for item in objective_items:
+            objective = objective_by_id.get(item["objective_id"])
+            if objective is None:
+                continue
+            objective["items"].append(
+                {
+                    "quantity": item["quantity"],
+                    "found_in_raid": item["found_in_raid"],
+                    "item_role": item["item_role"],
+                    "item": (
+                        {
+                            "id": item["item_id"],
+                            "normalized_name": item["normalized_name"],
+                            "name_en": item["name_en"],
+                            "name_ko": item["name_ko"],
+                            "name_ja": item["name_ja"],
+                            "image": item["image"],
+                        }
+                        if item["item_id"] is not None
+                        else None
+                    ),
+                }
+            )
+
+        for row in event_point_rows:
+            objective = objective_by_id.get(row["objective_id"])
+            if objective is None:
+                continue
+            objective["live_map_points"].append(
+                LiveMapServiceV3._serialize_live_map_point_v3(
+                    row, event_details_by_point_id.get(row["id"], [])
+                )
+            )
+
+        for objective_id, objective in objective_by_id.items():
+            objective["children"] = children_by_parent_id.get(objective_id, [])
+
+        for objective in objectives:
+            if objective["parent_objective_id"] is not None:
+                continue
+            event_info = event_info_by_id.get(objective["event_id"])
+            if event_info is not None:
+                event_info["objectives"].append(objective_by_id[objective["objective_id"]])
+
+        return event_info_by_id
+
+    @staticmethod
+    def _serialize_event_point_v3(row: dict, event_info: dict | None):
+        return {
+            "id": row["id"],
+            "event_id": row["event_id"],
+            "objective_id": row["objective_id"],
+            "map_id": row["map_id"],
+            "floor_id": row["floor_id"],
+            "floor_no": row["floor_no"],
+            "x": row["x"],
+            "z": row["z"],
+            "y": row["y"],
+            "event_info": event_info,
+        }
+
+    @staticmethod
     def _strip_quest_html_text_v3(quest_detail: dict | None):
         if quest_detail is None:
             return None
@@ -272,6 +389,11 @@ class LiveMapServiceV3:
     def _can_query_story_points_v3(s):
         inspector = inspect(s.bind)
         return inspector.has_table("live_map_story_points")
+
+    @staticmethod
+    def _can_query_event_points_v3(s):
+        inspector = inspect(s.bind)
+        return inspector.has_table("live_map_event_points")
 
     @staticmethod
     def get_live_map_v3(normalized_name: str):
@@ -460,6 +582,76 @@ class LiveMapServiceV3:
                         for row in story_point_rows
                     ]
 
+                event_points = []
+                if LiveMapServiceV3._can_query_event_points_v3(s):
+                    event_point_rows = [
+                        dict(row)
+                        for row in s.execute(
+                            text(LiveMapQueryV3.event_points_by_map_sql()),
+                            {"map_id": map_data.id},
+                        ).mappings()
+                    ]
+                else:
+                    event_point_rows = []
+
+                if event_point_rows:
+                    event_detail_rows = [
+                        dict(row)
+                        for row in s.execute(
+                            text(LiveMapQueryV3.event_point_details_by_map_sql()),
+                            {"map_id": map_data.id},
+                        ).mappings()
+                    ]
+                    event_details_by_point_id = {}
+                    for detail in event_detail_rows:
+                        event_details_by_point_id.setdefault(
+                            detail["point_id"], []
+                        ).append(
+                            {
+                                "id": detail["id"],
+                                "description_en": detail["description_en"],
+                                "description_ko": detail["description_ko"],
+                                "description_ja": detail["description_ja"],
+                                "image": detail["image"],
+                            }
+                        )
+
+                    event_ids = sorted(
+                        {row["event_id"] for row in event_point_rows if row["event_id"]}
+                    )
+                    event_objectives = []
+                    event_objective_items = []
+                    if event_ids:
+                        event_objectives = [
+                            dict(row)
+                            for row in s.execute(
+                                text(LiveMapQueryV3.event_objectives_by_event_ids_sql()),
+                                {"event_ids": event_ids},
+                            ).mappings()
+                        ]
+                        event_objective_items = [
+                            dict(row)
+                            for row in s.execute(
+                                text(
+                                    LiveMapQueryV3.event_objective_items_by_event_ids_sql()
+                                ),
+                                {"event_ids": event_ids},
+                            ).mappings()
+                        ]
+
+                    event_info_by_id = LiveMapServiceV3._build_event_info_by_id_v3(
+                        event_point_rows,
+                        event_details_by_point_id,
+                        event_objectives,
+                        event_objective_items,
+                    )
+                    event_points = [
+                        LiveMapServiceV3._serialize_event_point_v3(
+                            row, event_info_by_id.get(row["event_id"])
+                        )
+                        for row in event_point_rows
+                    ]
+
                 return {
                     "map_selector": LiveMapServiceV3._get_map_selector_v3(s),
                     "floors": [
@@ -467,6 +659,7 @@ class LiveMapServiceV3:
                     ],
                     "quest_points": quest_points,
                     "story_points": story_points,
+                    "event_points": event_points,
                     "static_points": [
                         LiveMapServiceV3._serialize_static_point_v3(row)
                         for row in static_points
