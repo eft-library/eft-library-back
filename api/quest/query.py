@@ -1,5 +1,27 @@
 class QuestQueryV3:
     @staticmethod
+    def completion_graph_sql():
+        return """
+            select q.id,
+                   coalesce(require_rel.task_requirements, array[]::text[]) as task_requirements,
+                   coalesce(next_rel.task_next, array[]::text[]) as task_next
+            from quests q
+                     left join lateral (
+                         select array_agg(qr.related_quest_id order by qr.sort_order, qr.related_quest_id) as task_requirements
+                         from quest_relations qr
+                         where qr.quest_id = q.id
+                           and qr.relation_type = 'require'
+                     ) require_rel on true
+                     left join lateral (
+                         select array_agg(qr.related_quest_id order by qr.sort_order, qr.related_quest_id) as task_next
+                         from quest_relations qr
+                         where qr.quest_id = q.id
+                           and qr.relation_type = 'next'
+                     ) next_rel on true
+            order by q.sort_order, q.id;
+        """
+
+    @staticmethod
     def quest_list_sql():
         return """
             select q.id,

@@ -8,6 +8,26 @@ logger = logging.getLogger("api.quest")
 
 class QuestServiceV3:
     @staticmethod
+    def get_completion_graph_v3():
+        try:
+            with V3Database.SessionLocal() as s:
+                rows = s.execute(text(QuestQueryV3.completion_graph_sql())).mappings()
+                return [
+                    {
+                        "id": row["id"],
+                        "task_requirements": list(row["task_requirements"] or []),
+                        "task_next": list(row["task_next"] or []),
+                    }
+                    for row in rows
+                ]
+        except Exception as e:
+            logger.error(
+                f"get_completion_graph_v3 error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
     def _serialize_objective_related_item(row, id_key: str):
         return {
             "id": row[id_key],

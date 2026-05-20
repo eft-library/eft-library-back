@@ -7,6 +7,14 @@ from api.quest.service import QuestServiceV3
 router = APIRouter(tags=["Quest"])
 
 
+@router.get("/v3/completion-graph")
+def get_completion_graph_v3():
+    completion_graph = QuestServiceV3.get_completion_graph_v3()
+    if completion_graph is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+    return CustomResponse.response(completion_graph, HTTPCode.OK, Message.SUCCESS)
+
+
 @router.get("/v3/all")
 def get_all_quest_v3():
     quest_list = QuestServiceV3.get_all_quest_v3()
