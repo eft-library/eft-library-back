@@ -1,8 +1,11 @@
+from copy import deepcopy
+
 from sqlalchemy import nullslast, text
 
 from api.live_map.models import LiveMapFloorV3, LiveMapStaticPointV3
 from api.live_map.query import LiveMapQueryV3
 from api.map.models import MapV3
+from api.quest.service import QuestServiceV3
 from database import V3Database
 import logging
 
@@ -55,56 +58,58 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _serialize_quest_point_v3(row: dict, details: list[dict]):
+    def _strip_quest_html_text_v3(quest_detail: dict | None):
+        if quest_detail is None:
+            return None
+
+        quest = quest_detail.get("quest")
+        if quest is not None:
+            quest.pop("guide_en", None)
+            quest.pop("guide_ko", None)
+            quest.pop("guide_ja", None)
+        return quest_detail
+
+    @staticmethod
+    def _attach_live_map_point_to_objective_v3(
+        row: dict, details: list[dict], quest_detail: dict | None
+    ):
+        if quest_detail is None:
+            return None
+
+        quest_info = deepcopy(quest_detail)
+        objective_id = row["objective_id"]
+        if objective_id is None:
+            return quest_info
+
+        live_map_point = {
+            "id": row["id"],
+            "map_id": row["map_id"],
+            "floor_id": row["floor_id"],
+            "floor_no": row["floor_no"],
+            "x": row["x"],
+            "z": row["z"],
+            "y": row["y"],
+            "details": details,
+        }
+
+        for objective in quest_info.get("objectives", []):
+            if objective.get("objective_id") == objective_id:
+                objective["live_map_point"] = live_map_point
+                break
+
+        return quest_info
+
+    @staticmethod
+    def _serialize_quest_point_v3(row: dict, quest_info: dict | None):
         return {
             "id": row["id"],
             "map_id": row["map_id"],
             "floor_id": row["floor_id"],
             "floor_no": row["floor_no"],
-            "name_en": row["name_en"],
-            "name_ko": row["name_ko"],
-            "name_ja": row["name_ja"],
             "x": row["x"],
             "z": row["z"],
             "y": row["y"],
-            "quest": (
-                {
-                    "id": row["quest_id"],
-                    "normalized_name": row["quest_normalized_name"],
-                    "name_en": row["quest_name_en"],
-                    "name_ko": row["quest_name_ko"],
-                    "name_ja": row["quest_name_ja"],
-                    "min_player_level": row["min_player_level"],
-                }
-                if row["quest_id"] is not None
-                else None
-            ),
-            "trader": (
-                {
-                    "id": row["trader_id"],
-                    "normalized_name": row["trader_normalized_name"],
-                    "name_en": row["trader_name_en"],
-                    "name_ko": row["trader_name_ko"],
-                    "name_ja": row["trader_name_ja"],
-                    "image": row["trader_image"],
-                }
-                if row["trader_id"] is not None
-                else None
-            ),
-            "objective": (
-                {
-                    "objective_id": row["objective_id"],
-                    "type": row["objective_type"],
-                    "description_en": row["objective_description_en"],
-                    "description_ko": row["objective_description_ko"],
-                    "description_ja": row["objective_description_ja"],
-                    "count": row["objective_count"],
-                    "found_in_raid": row["found_in_raid"],
-                }
-                if row["objective_id"] is not None
-                else None
-            ),
-            "details": details,
+            "quest_info": quest_info,
         }
 
     @staticmethod
@@ -163,9 +168,6 @@ class LiveMapServiceV3:
                     details_by_point_id.setdefault(detail["point_id"], []).append(
                         {
                             "id": detail["id"],
-                            "title_en": detail["title_en"],
-                            "title_ko": detail["title_ko"],
-                            "title_ja": detail["title_ja"],
                             "description_en": detail["description_en"],
                             "description_ko": detail["description_ko"],
                             "description_ja": detail["description_ja"],
@@ -173,14 +175,41 @@ class LiveMapServiceV3:
                         }
                     )
 
-                quest_points = [
-                    LiveMapServiceV3._serialize_quest_point_v3(
-                        dict(row), details_by_point_id.get(row["id"], [])
-                    )
+                quest_point_rows = [
+                    dict(row)
                     for row in s.execute(
                         text(LiveMapQueryV3.quest_points_by_map_sql()),
                         {"map_id": map_data.id},
                     ).mappings()
+                ]
+
+                quest_detail_by_normalized_name = {}
+                for row in quest_point_rows:
+                    quest_normalized_name = row["quest_normalized_name"]
+                    if (
+                        quest_normalized_name is not None
+                        and quest_normalized_name not in quest_detail_by_normalized_name
+                    ):
+                        quest_detail_by_normalized_name[quest_normalized_name] = (
+                            LiveMapServiceV3._strip_quest_html_text_v3(
+                                QuestServiceV3.get_quest_by_normalized_name_v3(
+                                    quest_normalized_name
+                                )
+                            )
+                        )
+
+                quest_points = [
+                    LiveMapServiceV3._serialize_quest_point_v3(
+                        row,
+                        LiveMapServiceV3._attach_live_map_point_to_objective_v3(
+                            row,
+                            details_by_point_id.get(row["id"], []),
+                            quest_detail_by_normalized_name.get(
+                                row["quest_normalized_name"]
+                            ),
+                        ),
+                    )
+                    for row in quest_point_rows
                 ]
 
                 return {

@@ -31,9 +31,6 @@ class LiveMapQueryV3:
                    lmp.map_id,
                    lmp.floor_id,
                    lmp.floor_no,
-                   lmp.name_en,
-                   lmp.name_ko,
-                   lmp.name_ja,
                    lmp.x,
                    lmp.z,
                    lmp.y,
@@ -61,7 +58,7 @@ class LiveMapQueryV3:
                               and (lmp.quest_id is null or lmp.quest_id = qo.quest_id)
                      left join traders t on q.trader_id = t.id
             where lmp.map_id = :map_id
-            order by lmp.floor_no, lmp.sort_order, lmp.name_en;
+            order by lmp.floor_no, lmp.sort_order, lmp.id;
         """
 
     @staticmethod
@@ -69,9 +66,6 @@ class LiveMapQueryV3:
         return """
             select lmpd.id,
                    lmpd.point_id,
-                   lmpd.title_en,
-                   lmpd.title_ko,
-                   lmpd.title_ja,
                    lmpd.description_en,
                    lmpd.description_ko,
                    lmpd.description_ja,
@@ -79,5 +73,5 @@ class LiveMapQueryV3:
             from live_map_point_details lmpd
                      join live_map_points lmp on lmpd.point_id = lmp.id
             where lmp.map_id = :map_id
-            order by lmpd.point_id, lmpd.sort_order, lmpd.title_en;
+            order by lmpd.point_id, lmpd.sort_order, lmpd.id;
         """
