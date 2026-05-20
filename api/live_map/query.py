@@ -75,3 +75,110 @@ class LiveMapQueryV3:
             where lmp.map_id = :map_id
             order by lmpd.point_id, lmpd.sort_order, lmpd.id;
         """
+
+    @staticmethod
+    def story_points_by_map_sql():
+        return """
+            select lmsp.id,
+                   lmsp.story_id,
+                   lmsp.objective_id,
+                   lmsp.map_id,
+                   lmsp.floor_id,
+                   lmsp.floor_no,
+                   lmsp.x,
+                   lmsp.z,
+                   lmsp.y,
+                   s.title_en,
+                   s.title_ko,
+                   s.title_ja
+            from live_map_story_points lmsp
+                     left join story s on lmsp.story_id = s.id
+            where lmsp.map_id = :map_id
+            order by lmsp.floor_no, lmsp.sort_order, lmsp.id;
+        """
+
+    @staticmethod
+    def story_point_details_by_map_sql():
+        return """
+            select lmspd.id,
+                   lmspd.point_id,
+                   lmspd.description_en,
+                   lmspd.description_ko,
+                   lmspd.description_ja,
+                   lmspd.image
+            from live_map_story_point_details lmspd
+                     join live_map_story_points lmsp on lmspd.point_id = lmsp.id
+            where lmsp.map_id = :map_id
+            order by lmspd.point_id, lmspd.sort_order, lmspd.id;
+        """
+
+    @staticmethod
+    def story_requirements_by_story_ids_sql():
+        return """
+            select id,
+                   story_id,
+                   requirement_type,
+                   description_en,
+                   description_ko,
+                   description_ja,
+                   sort_order
+            from story_requirements
+            where story_id = any(:story_ids)
+            order by story_id, sort_order, id;
+        """
+
+    @staticmethod
+    def story_objectives_by_story_ids_sql():
+        return """
+            select objective_id,
+                   story_id,
+                   parent_objective_id,
+                   objective_type,
+                   description_en,
+                   description_ko,
+                   description_ja,
+                   count,
+                   is_optional,
+                   sort_order
+            from story_objectives
+            where story_id = any(:story_ids)
+            order by story_id, sort_order, objective_id;
+        """
+
+    @staticmethod
+    def story_objective_items_by_story_ids_sql():
+        return """
+            select soi.objective_id,
+                   soi.item_id,
+                   soi.quantity,
+                   soi.found_in_raid,
+                   soi.item_role,
+                   soi.sort_order,
+                   i.normalized_name,
+                   i.name_en,
+                   i.name_ko,
+                   i.name_ja,
+                   i.image
+            from story_objective_items soi
+                     join story_objectives so on soi.objective_id = so.objective_id
+                     left join items i on soi.item_id = i.id
+            where so.story_id = any(:story_ids)
+            order by soi.objective_id, soi.sort_order, i.name_en;
+        """
+
+    @staticmethod
+    def story_objective_maps_by_story_ids_sql():
+        return """
+            select som.objective_id,
+                   som.map_id,
+                   som.sort_order,
+                   m.normalized_name,
+                   m.name_en,
+                   m.name_ko,
+                   m.name_ja
+            from story_objective_maps som
+                     join story_objectives so on som.objective_id = so.objective_id
+                     left join maps m on som.map_id = m.id
+            where so.story_id = any(:story_ids)
+            order by som.objective_id, som.sort_order, m.name_en;
+        """

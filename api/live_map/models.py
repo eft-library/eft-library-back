@@ -68,3 +68,32 @@ class LiveMapStaticPointV3(V3Database.Base):
     metadata_ = Column("metadata", JSON)
     sort_order = Column(Integer)
     update_time = Column(TIMESTAMP)
+
+
+class LiveMapStoryPointV3(V3Database.Base):
+    __tablename__ = "live_map_story_points"
+
+    id = Column(String, primary_key=True)
+    story_id = Column(String)
+    objective_id = Column(String)
+    map_id = Column(String)
+    floor_id = Column(String)
+    floor_no = Column(Integer)
+    x = Column(NUMERIC)
+    z = Column(NUMERIC)
+    y = Column(NUMERIC)
+    sort_order = Column(Integer)
+    update_time = Column(TIMESTAMP)
+
+
+class LiveMapStoryPointDetailV3(V3Database.Base):
+    __tablename__ = "live_map_story_point_details"
+
+    id = Column(String, primary_key=True)
+    point_id = Column(String)
+    description_en = Column(TEXT)
+    description_ko = Column(TEXT)
+    description_ja = Column(TEXT)
+    image = Column(TEXT)
+    sort_order = Column(Integer)
+    update_time = Column(TIMESTAMP)
