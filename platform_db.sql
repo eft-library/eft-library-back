@@ -1167,6 +1167,7 @@ create table if not exists live_map_static_points
     description_en text,
     description_ko text,
     description_ja text,
+    image text,
     x numeric,
     z numeric,
     y numeric,

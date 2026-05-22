@@ -51,6 +51,7 @@ class LiveMapServiceV3:
             "description_en": point.description_en,
             "description_ko": point.description_ko,
             "description_ja": point.description_ja,
+            "image": point.image,
             "x": point.x,
             "z": point.z,
             "y": point.y,

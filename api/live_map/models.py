@@ -62,6 +62,7 @@ class LiveMapStaticPointV3(V3Database.Base):
     description_en = Column(TEXT)
     description_ko = Column(TEXT)
     description_ja = Column(TEXT)
+    image = Column(TEXT)
     x = Column(NUMERIC)
     z = Column(NUMERIC)
     y = Column(NUMERIC)
