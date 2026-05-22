@@ -877,6 +877,52 @@ create table if not exists story_objective_maps
 create index if not exists idx_story_objective_maps_objective_id on story_objective_maps(objective_id);
 create index if not exists idx_story_objective_maps_map_id on story_objective_maps(map_id);
 
+create table if not exists story_objective_reward_items
+(
+    objective_id text,
+    item_id text,
+    quantity integer,
+    sort_order integer,
+    primary key (objective_id, item_id)
+);
+create index if not exists idx_story_objective_reward_items_objective_id on story_objective_reward_items(objective_id);
+create index if not exists idx_story_objective_reward_items_item_id on story_objective_reward_items(item_id);
+
+create table if not exists story_objective_reward_texts
+(
+    id text primary key,
+    objective_id text,
+    reward_type text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_story_objective_reward_texts_objective_id on story_objective_reward_texts(objective_id);
+create index if not exists idx_story_objective_reward_texts_type on story_objective_reward_texts(reward_type);
+
+create table if not exists story_reward_trader_standing
+(
+    story_id text,
+    trader_id text,
+    standing numeric,
+    sort_order integer,
+    primary key (story_id, trader_id)
+);
+create index if not exists idx_story_reward_trader_standing_story_id on story_reward_trader_standing(story_id);
+
+create table if not exists story_reward_items
+(
+    story_id text,
+    item_id text,
+    quantity integer,
+    sort_order integer,
+    primary key (story_id, item_id)
+);
+create index if not exists idx_story_reward_items_story_id on story_reward_items(story_id);
+create index if not exists idx_story_reward_items_item_id on story_reward_items(item_id);
+
 create table if not exists story_roadmap (
     id text primary key,
     node_type text,
@@ -1210,6 +1256,27 @@ create table if not exists live_map_event_objective_items
 );
 create index if not exists idx_live_map_event_objective_items_objective_id on live_map_event_objective_items(objective_id);
 create index if not exists idx_live_map_event_objective_items_item_id on live_map_event_objective_items(item_id);
+
+create table if not exists live_map_event_reward_trader_standing
+(
+    event_id text,
+    trader_id text,
+    standing numeric,
+    sort_order integer,
+    primary key (event_id, trader_id)
+);
+create index if not exists idx_live_map_event_reward_trader_standing_event_id on live_map_event_reward_trader_standing(event_id);
+
+create table if not exists live_map_event_reward_items
+(
+    event_id text,
+    item_id text,
+    quantity integer,
+    sort_order integer,
+    primary key (event_id, item_id)
+);
+create index if not exists idx_live_map_event_reward_items_event_id on live_map_event_reward_items(event_id);
+create index if not exists idx_live_map_event_reward_items_item_id on live_map_event_reward_items(item_id);
 
 create table if not exists live_map_event_points
 (

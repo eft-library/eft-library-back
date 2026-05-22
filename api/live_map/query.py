@@ -184,6 +184,77 @@ class LiveMapQueryV3:
         """
 
     @staticmethod
+    def story_objective_reward_items_by_story_ids_sql():
+        return """
+            select sori.objective_id,
+                   sori.item_id,
+                   sori.quantity,
+                   sori.sort_order,
+                   i.normalized_name,
+                   i.name_en,
+                   i.name_ko,
+                   i.name_ja,
+                   i.image
+            from story_objective_reward_items sori
+                     join story_objectives so on sori.objective_id = so.objective_id
+                     left join items i on sori.item_id = i.id
+            where so.story_id = any(:story_ids)
+            order by sori.objective_id, sori.sort_order, i.name_en;
+        """
+
+    @staticmethod
+    def story_objective_reward_texts_by_story_ids_sql():
+        return """
+            select sort.id,
+                   sort.objective_id,
+                   sort.reward_type,
+                   sort.description_en,
+                   sort.description_ko,
+                   sort.description_ja,
+                   sort.sort_order
+            from story_objective_reward_texts sort
+                     join story_objectives so on sort.objective_id = so.objective_id
+            where so.story_id = any(:story_ids)
+            order by sort.objective_id, sort.sort_order, sort.id;
+        """
+
+    @staticmethod
+    def story_reward_trader_standing_by_story_ids_sql():
+        return """
+            select srts.story_id,
+                   srts.trader_id,
+                   srts.standing,
+                   srts.sort_order,
+                   t.normalized_name,
+                   t.name_en,
+                   t.name_ko,
+                   t.name_ja,
+                   t.image
+            from story_reward_trader_standing srts
+                     left join traders t on srts.trader_id = t.id
+            where srts.story_id = any(:story_ids)
+            order by srts.story_id, srts.sort_order, t.name_en;
+        """
+
+    @staticmethod
+    def story_reward_items_by_story_ids_sql():
+        return """
+            select sri.story_id,
+                   sri.item_id,
+                   sri.quantity,
+                   sri.sort_order,
+                   i.normalized_name,
+                   i.name_en,
+                   i.name_ko,
+                   i.name_ja,
+                   i.image
+            from story_reward_items sri
+                     left join items i on sri.item_id = i.id
+            where sri.story_id = any(:story_ids)
+            order by sri.story_id, sri.sort_order, i.name_en;
+        """
+
+    @staticmethod
     def event_points_by_map_sql():
         return """
             select lmep.id,
@@ -266,4 +337,40 @@ class LiveMapQueryV3:
                      left join items i on lmeoi.item_id = i.id
             where lmeo.event_id = any(:event_ids)
             order by lmeoi.objective_id, lmeoi.sort_order, i.name_en;
+        """
+
+    @staticmethod
+    def event_reward_trader_standing_by_event_ids_sql():
+        return """
+            select lmerts.event_id,
+                   lmerts.trader_id,
+                   lmerts.standing,
+                   lmerts.sort_order,
+                   t.normalized_name,
+                   t.name_en,
+                   t.name_ko,
+                   t.name_ja,
+                   t.image
+            from live_map_event_reward_trader_standing lmerts
+                     left join traders t on lmerts.trader_id = t.id
+            where lmerts.event_id = any(:event_ids)
+            order by lmerts.event_id, lmerts.sort_order, t.name_en;
+        """
+
+    @staticmethod
+    def event_reward_items_by_event_ids_sql():
+        return """
+            select lmeri.event_id,
+                   lmeri.item_id,
+                   lmeri.quantity,
+                   lmeri.sort_order,
+                   i.normalized_name,
+                   i.name_en,
+                   i.name_ko,
+                   i.name_ja,
+                   i.image
+            from live_map_event_reward_items lmeri
+                     left join items i on lmeri.item_id = i.id
+            where lmeri.event_id = any(:event_ids)
+            order by lmeri.event_id, lmeri.sort_order, i.name_en;
         """

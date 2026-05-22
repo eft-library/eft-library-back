@@ -78,6 +78,10 @@ class LiveMapServiceV3:
         objectives: list[dict],
         objective_items: list[dict],
         objective_maps: list[dict],
+        objective_reward_items: list[dict],
+        objective_reward_texts: list[dict],
+        reward_trader_standing: list[dict],
+        reward_items: list[dict],
     ):
         story_info_by_id = {}
         for row in story_point_rows:
@@ -93,6 +97,10 @@ class LiveMapServiceV3:
                 },
                 "requirements": [],
                 "objectives": [],
+                "finish_rewards": {
+                    "trader_standing": [],
+                    "items": [],
+                },
             }
 
         for requirement in requirements:
@@ -124,6 +132,10 @@ class LiveMapServiceV3:
                 "items": [],
                 "maps": [],
                 "live_map_points": [],
+                "rewards": {
+                    "items": [],
+                    "texts": [],
+                },
                 "children": [],
             }
             objective_by_id[objective["objective_id"]] = objective_info
@@ -169,6 +181,42 @@ class LiveMapServiceV3:
                 }
             )
 
+        for row in objective_reward_items:
+            objective = objective_by_id.get(row["objective_id"])
+            if objective is None:
+                continue
+            objective["rewards"]["items"].append(
+                {
+                    "quantity": row["quantity"],
+                    "item": (
+                        {
+                            "id": row["item_id"],
+                            "normalized_name": row["normalized_name"],
+                            "name_en": row["name_en"],
+                            "name_ko": row["name_ko"],
+                            "name_ja": row["name_ja"],
+                            "image": row["image"],
+                        }
+                        if row["item_id"] is not None
+                        else None
+                    ),
+                }
+            )
+
+        for row in objective_reward_texts:
+            objective = objective_by_id.get(row["objective_id"])
+            if objective is None:
+                continue
+            objective["rewards"]["texts"].append(
+                {
+                    "id": row["id"],
+                    "reward_type": row["reward_type"],
+                    "description_en": row["description_en"],
+                    "description_ko": row["description_ko"],
+                    "description_ja": row["description_ja"],
+                }
+            )
+
         for row in story_point_rows:
             objective = objective_by_id.get(row["objective_id"])
             if objective is None:
@@ -188,6 +236,50 @@ class LiveMapServiceV3:
             story_info = story_info_by_id.get(objective["story_id"])
             if story_info is not None:
                 story_info["objectives"].append(objective_by_id[objective["objective_id"]])
+
+        for row in reward_trader_standing:
+            story_info = story_info_by_id.get(row["story_id"])
+            if story_info is None:
+                continue
+            story_info["finish_rewards"]["trader_standing"].append(
+                {
+                    "standing": row["standing"],
+                    "trader": (
+                        {
+                            "id": row["trader_id"],
+                            "normalized_name": row["normalized_name"],
+                            "name_en": row["name_en"],
+                            "name_ko": row["name_ko"],
+                            "name_ja": row["name_ja"],
+                            "image": row["image"],
+                        }
+                        if row["trader_id"] is not None
+                        else None
+                    ),
+                }
+            )
+
+        for row in reward_items:
+            story_info = story_info_by_id.get(row["story_id"])
+            if story_info is None:
+                continue
+            story_info["finish_rewards"]["items"].append(
+                {
+                    "quantity": row["quantity"],
+                    "item": (
+                        {
+                            "id": row["item_id"],
+                            "normalized_name": row["normalized_name"],
+                            "name_en": row["name_en"],
+                            "name_ko": row["name_ko"],
+                            "name_ja": row["name_ja"],
+                            "image": row["image"],
+                        }
+                        if row["item_id"] is not None
+                        else None
+                    ),
+                }
+            )
 
         return story_info_by_id
 
@@ -212,6 +304,8 @@ class LiveMapServiceV3:
         event_details_by_point_id: dict[str, list[dict]],
         objectives: list[dict],
         objective_items: list[dict],
+        reward_trader_standing: list[dict],
+        reward_items: list[dict],
     ):
         event_info_by_id = {}
         for row in event_point_rows:
@@ -239,6 +333,10 @@ class LiveMapServiceV3:
                     else None
                 ),
                 "objectives": [],
+                "finish_rewards": {
+                    "trader_standing": [],
+                    "items": [],
+                },
             }
 
         objective_by_id = {}
@@ -305,6 +403,50 @@ class LiveMapServiceV3:
             event_info = event_info_by_id.get(objective["event_id"])
             if event_info is not None:
                 event_info["objectives"].append(objective_by_id[objective["objective_id"]])
+
+        for row in reward_trader_standing:
+            event_info = event_info_by_id.get(row["event_id"])
+            if event_info is None:
+                continue
+            event_info["finish_rewards"]["trader_standing"].append(
+                {
+                    "standing": row["standing"],
+                    "trader": (
+                        {
+                            "id": row["trader_id"],
+                            "normalized_name": row["normalized_name"],
+                            "name_en": row["name_en"],
+                            "name_ko": row["name_ko"],
+                            "name_ja": row["name_ja"],
+                            "image": row["image"],
+                        }
+                        if row["trader_id"] is not None
+                        else None
+                    ),
+                }
+            )
+
+        for row in reward_items:
+            event_info = event_info_by_id.get(row["event_id"])
+            if event_info is None:
+                continue
+            event_info["finish_rewards"]["items"].append(
+                {
+                    "quantity": row["quantity"],
+                    "item": (
+                        {
+                            "id": row["item_id"],
+                            "normalized_name": row["normalized_name"],
+                            "name_en": row["name_en"],
+                            "name_ko": row["name_ko"],
+                            "name_ja": row["name_ja"],
+                            "image": row["image"],
+                        }
+                        if row["item_id"] is not None
+                        else None
+                    ),
+                }
+            )
 
         return event_info_by_id
 
@@ -394,6 +536,11 @@ class LiveMapServiceV3:
     def _can_query_event_points_v3(s):
         inspector = inspect(s.bind)
         return inspector.has_table("live_map_event_points")
+
+    @staticmethod
+    def _has_table_v3(s, table_name: str):
+        inspector = inspect(s.bind)
+        return inspector.has_table(table_name)
 
     @staticmethod
     def get_live_map_v3(normalized_name: str):
@@ -529,6 +676,10 @@ class LiveMapServiceV3:
                     objectives = []
                     objective_items = []
                     objective_maps = []
+                    objective_reward_items = []
+                    objective_reward_texts = []
+                    reward_trader_standing = []
+                    reward_items = []
                     if story_ids:
                         requirements = [
                             dict(row)
@@ -566,6 +717,52 @@ class LiveMapServiceV3:
                                 {"story_ids": story_ids},
                             ).mappings()
                         ]
+                        if LiveMapServiceV3._has_table_v3(
+                            s, "story_objective_reward_items"
+                        ):
+                            objective_reward_items = [
+                                dict(row)
+                                for row in s.execute(
+                                    text(
+                                        LiveMapQueryV3.story_objective_reward_items_by_story_ids_sql()
+                                    ),
+                                    {"story_ids": story_ids},
+                                ).mappings()
+                            ]
+                        if LiveMapServiceV3._has_table_v3(
+                            s, "story_objective_reward_texts"
+                        ):
+                            objective_reward_texts = [
+                                dict(row)
+                                for row in s.execute(
+                                    text(
+                                        LiveMapQueryV3.story_objective_reward_texts_by_story_ids_sql()
+                                    ),
+                                    {"story_ids": story_ids},
+                                ).mappings()
+                            ]
+                        if LiveMapServiceV3._has_table_v3(
+                            s, "story_reward_trader_standing"
+                        ):
+                            reward_trader_standing = [
+                                dict(row)
+                                for row in s.execute(
+                                    text(
+                                        LiveMapQueryV3.story_reward_trader_standing_by_story_ids_sql()
+                                    ),
+                                    {"story_ids": story_ids},
+                                ).mappings()
+                            ]
+                        if LiveMapServiceV3._has_table_v3(s, "story_reward_items"):
+                            reward_items = [
+                                dict(row)
+                                for row in s.execute(
+                                    text(
+                                        LiveMapQueryV3.story_reward_items_by_story_ids_sql()
+                                    ),
+                                    {"story_ids": story_ids},
+                                ).mappings()
+                            ]
 
                     story_info_by_id = LiveMapServiceV3._build_story_info_by_id_v3(
                         story_point_rows,
@@ -574,6 +771,10 @@ class LiveMapServiceV3:
                         objectives,
                         objective_items,
                         objective_maps,
+                        objective_reward_items,
+                        objective_reward_texts,
+                        reward_trader_standing,
+                        reward_items,
                     )
                     story_points = [
                         LiveMapServiceV3._serialize_story_point_v3(
@@ -621,6 +822,8 @@ class LiveMapServiceV3:
                     )
                     event_objectives = []
                     event_objective_items = []
+                    event_reward_trader_standing = []
+                    event_reward_items = []
                     if event_ids:
                         event_objectives = [
                             dict(row)
@@ -638,12 +841,38 @@ class LiveMapServiceV3:
                                 {"event_ids": event_ids},
                             ).mappings()
                         ]
+                        if LiveMapServiceV3._has_table_v3(
+                            s, "live_map_event_reward_trader_standing"
+                        ):
+                            event_reward_trader_standing = [
+                                dict(row)
+                                for row in s.execute(
+                                    text(
+                                        LiveMapQueryV3.event_reward_trader_standing_by_event_ids_sql()
+                                    ),
+                                    {"event_ids": event_ids},
+                                ).mappings()
+                            ]
+                        if LiveMapServiceV3._has_table_v3(
+                            s, "live_map_event_reward_items"
+                        ):
+                            event_reward_items = [
+                                dict(row)
+                                for row in s.execute(
+                                    text(
+                                        LiveMapQueryV3.event_reward_items_by_event_ids_sql()
+                                    ),
+                                    {"event_ids": event_ids},
+                                ).mappings()
+                            ]
 
                     event_info_by_id = LiveMapServiceV3._build_event_info_by_id_v3(
                         event_point_rows,
                         event_details_by_point_id,
                         event_objectives,
                         event_objective_items,
+                        event_reward_trader_standing,
+                        event_reward_items,
                     )
                     event_points = [
                         LiveMapServiceV3._serialize_event_point_v3(
