@@ -1133,7 +1133,7 @@ create table if not exists live_map_points
     sort_order integer,
     update_time timestamptz default now()
 );
-create unique index idx_live_map_points_objective_unique
+create index idx_live_map_points_objective_id
     on live_map_points(objective_id)
     where objective_id is not null;
 create index idx_live_map_points_map_id on live_map_points(map_id);
