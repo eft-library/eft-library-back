@@ -480,7 +480,10 @@ class LiveMapServiceV3:
 
     @staticmethod
     def _attach_live_map_point_to_objective_v3(
-        row: dict, details: list[dict], quest_detail: dict | None
+        row: dict,
+        details: list[dict],
+        quest_detail: dict | None,
+        quest_live_map_points_by_objective_id: dict[str, list[dict]] | None = None,
     ):
         if quest_detail is None:
             return None
@@ -502,11 +505,46 @@ class LiveMapServiceV3:
         }
 
         for objective in quest_info.get("objectives", []):
-            if objective.get("objective_id") == objective_id:
+            current_objective_id = objective.get("objective_id")
+            if quest_live_map_points_by_objective_id is not None:
+                live_map_points = quest_live_map_points_by_objective_id.get(
+                    current_objective_id
+                )
+                if live_map_points:
+                    objective["live_map_points"] = deepcopy(live_map_points)
+
+            if current_objective_id == objective_id:
                 objective["live_map_point"] = live_map_point
-                break
 
         return quest_info
+
+    @staticmethod
+    def _build_quest_live_map_points_by_quest_id_v3(
+        quest_point_rows: list[dict],
+        details_by_point_id: dict[str, list[dict]],
+    ):
+        quest_live_map_points_by_quest_id = {}
+        for row in quest_point_rows:
+            quest_id = row["quest_id"]
+            objective_id = row["objective_id"]
+            if quest_id is None or objective_id is None:
+                continue
+
+            live_map_point = {
+                "id": row["id"],
+                "map_id": row["map_id"],
+                "floor_id": row["floor_id"],
+                "floor_no": row["floor_no"],
+                "x": row["x"],
+                "z": row["z"],
+                "y": row["y"],
+                "details": details_by_point_id.get(row["id"], []),
+            }
+            quest_live_map_points_by_quest_id.setdefault(quest_id, {}).setdefault(
+                objective_id, []
+            ).append(live_map_point)
+
+        return quest_live_map_points_by_quest_id
 
     @staticmethod
     def _serialize_quest_point_v3(row: dict, quest_info: dict | None):
@@ -622,6 +660,13 @@ class LiveMapServiceV3:
                             )
                         )
 
+                quest_live_map_points_by_quest_id = (
+                    LiveMapServiceV3._build_quest_live_map_points_by_quest_id_v3(
+                        quest_point_rows,
+                        details_by_point_id,
+                    )
+                )
+
                 quest_points = [
                     LiveMapServiceV3._serialize_quest_point_v3(
                         row,
@@ -631,6 +676,7 @@ class LiveMapServiceV3:
                             quest_detail_by_normalized_name.get(
                                 row["quest_normalized_name"]
                             ),
+                            quest_live_map_points_by_quest_id.get(row["quest_id"]),
                         ),
                     )
                     for row in quest_point_rows
