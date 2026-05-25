@@ -77,6 +77,44 @@ class LiveMapQueryV3:
         """
 
     @staticmethod
+    def quest_points_by_quest_ids_sql():
+        return """
+            select lmp.id,
+                   lmp.quest_id,
+                   lmp.objective_id,
+                   lmp.map_id,
+                   lmp.floor_id,
+                   lmp.floor_no,
+                   lmp.x,
+                   lmp.z,
+                   lmp.y,
+                   lmp.sort_order,
+                   m.normalized_name as map_normalized_name,
+                   m.name_en as map_name_en,
+                   m.name_ko as map_name_ko,
+                   m.name_ja as map_name_ja
+            from live_map_points lmp
+                     left join maps m on lmp.map_id = m.id
+            where lmp.quest_id = any(:quest_ids)
+            order by lmp.quest_id, lmp.floor_no, lmp.sort_order, lmp.id;
+        """
+
+    @staticmethod
+    def point_details_by_quest_ids_sql():
+        return """
+            select lmpd.id,
+                   lmpd.point_id,
+                   lmpd.description_en,
+                   lmpd.description_ko,
+                   lmpd.description_ja,
+                   lmpd.image
+            from live_map_point_details lmpd
+                     join live_map_points lmp on lmpd.point_id = lmp.id
+            where lmp.quest_id = any(:quest_ids)
+            order by lmpd.point_id, lmpd.sort_order, lmpd.id;
+        """
+
+    @staticmethod
     def story_points_by_map_sql():
         return """
             select lmsp.id,

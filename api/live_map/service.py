@@ -540,6 +540,14 @@ class LiveMapServiceV3:
                 "y": row["y"],
                 "details": details_by_point_id.get(row["id"], []),
             }
+            if row.get("map_normalized_name") is not None:
+                live_map_point["map"] = {
+                    "id": row["map_id"],
+                    "normalized_name": row["map_normalized_name"],
+                    "name_en": row["map_name_en"],
+                    "name_ko": row["map_name_ko"],
+                    "name_ja": row["map_name_ja"],
+                }
             quest_live_map_points_by_quest_id.setdefault(quest_id, {}).setdefault(
                 objective_id, []
             ).append(live_map_point)
@@ -660,10 +668,43 @@ class LiveMapServiceV3:
                             )
                         )
 
+                quest_ids = sorted(
+                    {row["quest_id"] for row in quest_point_rows if row["quest_id"]}
+                )
+                all_quest_point_rows = []
+                all_detail_rows = []
+                if quest_ids:
+                    all_quest_point_rows = [
+                        dict(row)
+                        for row in s.execute(
+                            text(LiveMapQueryV3.quest_points_by_quest_ids_sql()),
+                            {"quest_ids": quest_ids},
+                        ).mappings()
+                    ]
+                    all_detail_rows = [
+                        dict(row)
+                        for row in s.execute(
+                            text(LiveMapQueryV3.point_details_by_quest_ids_sql()),
+                            {"quest_ids": quest_ids},
+                        ).mappings()
+                    ]
+
+                all_details_by_point_id = {}
+                for detail in all_detail_rows:
+                    all_details_by_point_id.setdefault(detail["point_id"], []).append(
+                        {
+                            "id": detail["id"],
+                            "description_en": detail["description_en"],
+                            "description_ko": detail["description_ko"],
+                            "description_ja": detail["description_ja"],
+                            "image": detail["image"],
+                        }
+                    )
+
                 quest_live_map_points_by_quest_id = (
                     LiveMapServiceV3._build_quest_live_map_points_by_quest_id_v3(
-                        quest_point_rows,
-                        details_by_point_id,
+                        all_quest_point_rows,
+                        all_details_by_point_id,
                     )
                 )
 
