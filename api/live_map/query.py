@@ -11,8 +11,6 @@ class LiveMapQueryV3:
             from live_map_floors lmf
                      join maps m on lmf.map_id = m.id
                      join maps selector on selector.id = coalesce(m.parent_map_id, m.id)
-            where m.is_use is true
-              and selector.is_use is true
             group by selector.id,
                      selector.normalized_name,
                      selector.name_en,
@@ -58,7 +56,12 @@ class LiveMapQueryV3:
                               and (lmp.quest_id is null or lmp.quest_id = qo.quest_id)
                      left join traders t on q.trader_id = t.id
             where lmp.map_id = :map_id
-            order by lmp.floor_no, lmp.sort_order, lmp.id;
+            order by q.sort_order nulls last,
+                     q.name_en nulls last,
+                     qo.sort_order nulls last,
+                     lmp.floor_no,
+                     lmp.sort_order nulls last,
+                     lmp.id;
         """
 
     @staticmethod
@@ -94,9 +97,18 @@ class LiveMapQueryV3:
                    m.name_ko as map_name_ko,
                    m.name_ja as map_name_ja
             from live_map_points lmp
+                     left join quests q on lmp.quest_id = q.id
+                     left join quest_objectives qo
+                               on lmp.objective_id = qo.objective_id
+                              and lmp.quest_id = qo.quest_id
                      left join maps m on lmp.map_id = m.id
             where lmp.quest_id = any(:quest_ids)
-            order by lmp.quest_id, lmp.floor_no, lmp.sort_order, lmp.id;
+            order by q.sort_order nulls last,
+                     q.name_en nulls last,
+                     qo.sort_order nulls last,
+                     lmp.floor_no,
+                     lmp.sort_order nulls last,
+                     lmp.id;
         """
 
     @staticmethod

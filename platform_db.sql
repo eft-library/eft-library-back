@@ -727,16 +727,6 @@ create table if not exists usage_items
     max_uses integer
 );
 
-create table if not exists where_am_i
-(
-    id text primary key,
-    image text,
-    map_bounds jsonb,
-    image_bounds jsonb,
-    default_zoom_level numeric,
-    update_time timestamptz default now()
-);
-
 create table if not exists user_footprint
 (
   id serial primary key,
