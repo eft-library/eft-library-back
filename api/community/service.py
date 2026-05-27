@@ -122,6 +122,9 @@ class CommunityServiceV3:
                 if category == "issue":
                     posts_sql = text(CommunityUtilV3.get_posts_with_issue())
                     count_sql = text(CommunityUtilV3.get_post_issue_count())
+                elif category == "all":
+                    posts_sql = text(CommunityUtilV3.get_posts_with_all())
+                    count_sql = text(CommunityUtilV3.get_post_all_count())
                 else:
                     posts_sql = text(CommunityUtilV3.get_posts_with_category())
                     count_sql = text(CommunityUtilV3.get_post_category_count())

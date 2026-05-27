@@ -47,6 +47,10 @@ class CommunityFunctionV3:
             get_post_query = text(CommunityUtilV3.get_posts_with_issue())
             get_post_count_query = text(CommunityUtilV3.get_post_issue_count())
             current_page_query = text(CommunityUtilV3.get_current_post_issue_page_num())
+        elif page_category == "all":
+            get_post_query = text(CommunityUtilV3.get_posts_with_all())
+            get_post_count_query = text(CommunityUtilV3.get_post_all_count())
+            current_page_query = text(CommunityUtilV3.get_current_post_all_page_num())
         else:
             get_post_query = text(CommunityUtilV3.get_posts_with_post_id())
             get_post_count_query = text(

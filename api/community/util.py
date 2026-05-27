@@ -74,6 +74,45 @@ class CommunityUtilV3:
         """
 
     @staticmethod
+    def get_posts_with_all():
+        return """
+            select cp.id::text AS id,
+                   cp.slug,
+                   cp.user_email,
+                   ui.nickname,
+                   cp.category,
+                   cp.title,
+                   cp.contents,
+                   cp.thumbnail,
+                   cp.delete_by_user,
+                   cp.delete_by_admin,
+                   cp.create_time,
+                   cp.update_time,
+                   cpv.view_count as view_count,
+                   coalesce((SELECT COUNT(*) FROM community_comments cc WHERE cc.post_id = cp.id), 0) AS comment_count,
+                   coalesce((SELECT SUM(CASE
+                                            WHEN cpr.reaction_type = 1 THEN 1
+                                            WHEN cpr.reaction_type = 0 THEN -1
+                                            ELSE 0 END)
+                             FROM community_posts_reactions cpr
+                             WHERE cpr.post_id = cp.id), 0) as reaction_score
+            from community_posts cp
+                     LEFT JOIN user_info ui on cp.user_email = ui.email
+                     LEFT JOIN community_posts_views cpv on cp.id = cpv.post_id
+            where cp.delete_by_user = false
+              and cp.delete_by_admin = false
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM user_block ub
+                  WHERE ub.request_email = :user_email
+                    AND ub.target_email = cp.user_email
+              )
+            order by cp.create_time desc
+            limit :limit
+            offset :offset
+        """
+
+    @staticmethod
     def get_post_category_count():
         return """
             select count(*)
@@ -90,12 +129,36 @@ class CommunityUtilV3:
         """
 
     @staticmethod
+    def get_post_all_count():
+        return """
+            select count(*)
+            from community_posts cp
+            where delete_by_user = false
+              and delete_by_admin = false
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM user_block ub
+                  WHERE ub.request_email = :user_email
+                    AND ub.target_email = cp.user_email
+              )
+        """
+
+    @staticmethod
     def get_post_category_count_with_post_id():
         return """
             select count(*)
             from community_posts cp
             where category = (select category from community_posts where id = :post_id)
               and delete_by_user = false
+              and delete_by_admin = false
+        """
+
+    @staticmethod
+    def get_post_all_count_with_post_id():
+        return """
+            select count(*)
+            from community_posts cp
+            where delete_by_user = false
               and delete_by_admin = false
         """
 
@@ -243,6 +306,21 @@ class CommunityUtilV3:
                 FROM community_posts cp
                 WHERE cp.category = (SELECT category FROM post_category)
                   AND delete_by_user = false
+                  AND delete_by_admin = false
+            )
+            SELECT rn
+            FROM ordered_posts
+            WHERE id = :post_id
+        """
+
+    @staticmethod
+    def get_current_post_all_page_num():
+        return """
+            WITH ordered_posts AS (
+                SELECT id,
+                       ROW_NUMBER() OVER (ORDER BY create_time DESC) AS rn
+                FROM community_posts cp
+                WHERE delete_by_user = false
                   AND delete_by_admin = false
             )
             SELECT rn
