@@ -169,6 +169,7 @@ create table if not exists quest_objectives (
 );
 create index idx_quest_objectives_quest_id on quest_objectives (quest_id);
 create index idx_quest_objectives_type on quest_objectives (type);
+create index if not exists idx_quest_objectives_quest_sort on quest_objectives(quest_id, sort_order, objective_id);
 
 -- 목표에 필요한 아이템
 create table if not exists quest_objective_items (
@@ -754,6 +755,7 @@ create table if not exists health_check (
     status text,
     checked_time timestamptz default now()
 );
+create index if not exists idx_health_check_checked_time on health_check(checked_time desc);
 
 create table if not exists response_time (
     id serial primary key,
@@ -761,6 +763,7 @@ create table if not exists response_time (
     response_ms numeric,
     checked_time timestamptz default now()
 );
+create index if not exists idx_response_time_checked_time on response_time(checked_time desc);
 
 create table if not exists user_location_request (
     id serial primary key,
@@ -829,6 +832,7 @@ create table if not exists story_objectives
 create index if not exists idx_story_objectives_story_id on story_objectives(story_id);
 create index if not exists idx_story_objectives_parent_id on story_objectives(parent_objective_id);
 create index if not exists idx_story_objectives_type on story_objectives(objective_type);
+create index if not exists idx_story_objectives_story_sort on story_objectives(story_id, sort_order, objective_id);
 
 create table if not exists story_requirements
 (
@@ -957,6 +961,15 @@ COMMENT ON COLUMN COMMUNITY_POSTS.DELETE_BY_USER IS '게시글 유저 삭제 여
 COMMENT ON COLUMN COMMUNITY_POSTS.DELETE_BY_ADMIN IS '게시글 관리자 삭제 여부';
 COMMENT ON COLUMN COMMUNITY_POSTS.CREATE_TIME IS '게시글 생성 시간';
 COMMENT ON COLUMN COMMUNITY_POSTS.UPDATE_TIME IS '게시글 업데이트 시간';
+create index if not exists idx_community_posts_active_created
+    on community_posts(create_time desc)
+    where delete_by_user = false and delete_by_admin = false;
+create index if not exists idx_community_posts_active_category_created
+    on community_posts(category, create_time desc)
+    where delete_by_user = false and delete_by_admin = false;
+create index if not exists idx_community_posts_user_created
+    on community_posts(user_email, create_time desc)
+    where delete_by_user = false and delete_by_admin = false;
 
 create table if not exists community_posts_views (
     post_id bigint PRIMARY KEY,
@@ -986,6 +999,8 @@ create table if not exists COMMUNITY_POSTS_HOT_ISSUE (
 );
 COMMENT ON COLUMN COMMUNITY_POSTS_HOT_ISSUE.post_id IS '게시글 snoflake 아이디';
 COMMENT ON COLUMN COMMUNITY_POSTS_HOT_ISSUE.post_id IS '게시글 핫이슈 시간';
+create index if not exists idx_community_posts_hot_issue_time
+    on community_posts_hot_issue(issue_time desc);
 
 create table if not exists USER_FOLLOWS (
     follower_email text,
@@ -1045,6 +1060,7 @@ create table if not exists user_block (
     reason text,
     create_time timestamptz default now()
 );
+create index if not exists idx_user_block_request_target on user_block(request_email, target_email);
 
 create table if not exists user_penalty (
     id serial primary key,
@@ -1130,6 +1146,8 @@ create index idx_live_map_points_map_id on live_map_points(map_id);
 create index idx_live_map_points_quest_id on live_map_points(quest_id);
 create index idx_live_map_points_floor_id on live_map_points(floor_id);
 create index idx_live_map_points_map_floor on live_map_points(map_id, floor_no);
+create index if not exists idx_live_map_points_map_floor_sort on live_map_points(map_id, floor_no, sort_order, id);
+create index if not exists idx_live_map_points_quest_floor_sort on live_map_points(quest_id, floor_no, sort_order, id);
 
 create table if not exists live_map_point_details
 (
@@ -1169,6 +1187,7 @@ create index idx_live_map_static_points_map_id on live_map_static_points(map_id)
 create index idx_live_map_static_points_category on live_map_static_points(category);
 create index idx_live_map_static_points_map_category on live_map_static_points(map_id, category);
 create index idx_live_map_static_points_floor_id on live_map_static_points(floor_id);
+create index if not exists idx_live_map_static_points_map_sort on live_map_static_points(map_id, floor_no, category, sort_order, name_en);
 
 create table if not exists live_map_story_points
 (
@@ -1189,6 +1208,7 @@ create index if not exists idx_live_map_story_points_story_id on live_map_story_
 create index if not exists idx_live_map_story_points_objective_id on live_map_story_points(objective_id);
 create index if not exists idx_live_map_story_points_floor_id on live_map_story_points(floor_id);
 create index if not exists idx_live_map_story_points_map_floor on live_map_story_points(map_id, floor_no);
+create index if not exists idx_live_map_story_points_map_sort on live_map_story_points(map_id, floor_no, sort_order, id);
 
 create table if not exists live_map_story_point_details
 (
@@ -1234,6 +1254,7 @@ create table if not exists live_map_event_objectives
 create index if not exists idx_live_map_event_objectives_event_id on live_map_event_objectives(event_id);
 create index if not exists idx_live_map_event_objectives_parent_id on live_map_event_objectives(parent_objective_id);
 create index if not exists idx_live_map_event_objectives_type on live_map_event_objectives(objective_type);
+create index if not exists idx_live_map_event_objectives_event_sort on live_map_event_objectives(event_id, sort_order, objective_id);
 
 create table if not exists live_map_event_objective_items
 (
@@ -1288,6 +1309,7 @@ create index if not exists idx_live_map_event_points_objective_id on live_map_ev
 create index if not exists idx_live_map_event_points_map_id on live_map_event_points(map_id);
 create index if not exists idx_live_map_event_points_floor_id on live_map_event_points(floor_id);
 create index if not exists idx_live_map_event_points_map_floor on live_map_event_points(map_id, floor_no);
+create index if not exists idx_live_map_event_points_map_sort on live_map_event_points(map_id, floor_no, sort_order, id);
 
 create table if not exists live_map_event_point_details
 (
