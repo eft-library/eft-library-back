@@ -1117,6 +1117,8 @@ create table if not exists live_map_floors
     name_ko text,
     name_ja text,
     image text,
+    map_bounds jsonb,
+    default_zoom_level numeric,
     min_z numeric,
     max_z numeric,
     sort_order integer,

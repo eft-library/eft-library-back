@@ -33,6 +33,8 @@ class LiveMapServiceV3:
             "name_ko": floor.name_ko,
             "name_ja": floor.name_ja,
             "image": floor.image,
+            "map_bounds": floor.map_bounds,
+            "default_zoom_level": floor.default_zoom_level,
             "min_z": floor.min_z,
             "max_z": floor.max_z,
         }

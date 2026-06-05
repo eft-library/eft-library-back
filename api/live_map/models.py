@@ -13,6 +13,8 @@ class LiveMapFloorV3(V3Database.Base):
     name_ko = Column(String)
     name_ja = Column(String)
     image = Column(TEXT)
+    map_bounds = Column(JSON)
+    default_zoom_level = Column(NUMERIC)
     min_z = Column(NUMERIC)
     max_z = Column(NUMERIC)
     sort_order = Column(Integer)
