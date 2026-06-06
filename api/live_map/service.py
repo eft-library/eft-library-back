@@ -81,7 +81,7 @@ class LiveMapServiceV3:
 
     @staticmethod
     def _serialize_live_map_point_v3(row: dict, details: list[dict]):
-        return {
+        live_map_point = {
             "id": row["id"],
             "map_id": row["map_id"],
             "floor_id": row["floor_id"],
@@ -91,10 +91,20 @@ class LiveMapServiceV3:
             "y": row["y"],
             "details": details,
         }
+        if row.get("map_normalized_name") is not None:
+            live_map_point["map"] = {
+                "id": row["map_id"],
+                "normalized_name": row["map_normalized_name"],
+                "name_en": row["map_name_en"],
+                "name_ko": row["map_name_ko"],
+                "name_ja": row["map_name_ja"],
+            }
+        return live_map_point
 
     @staticmethod
     def _build_story_info_by_id_v3(
         story_point_rows: list[dict],
+        story_live_map_point_rows: list[dict],
         story_details_by_point_id: dict[str, list[dict]],
         requirements: list[dict],
         objectives: list[dict],
@@ -239,7 +249,7 @@ class LiveMapServiceV3:
                 }
             )
 
-        for row in story_point_rows:
+        for row in story_live_map_point_rows:
             objective = objective_by_id.get(row["objective_id"])
             if objective is None:
                 continue
@@ -323,6 +333,7 @@ class LiveMapServiceV3:
     @staticmethod
     def _build_event_info_by_id_v3(
         event_point_rows: list[dict],
+        event_live_map_point_rows: list[dict],
         event_details_by_point_id: dict[str, list[dict]],
         objectives: list[dict],
         objective_items: list[dict],
@@ -406,7 +417,7 @@ class LiveMapServiceV3:
                 }
             )
 
-        for row in event_point_rows:
+        for row in event_live_map_point_rows:
             objective = objective_by_id.get(row["objective_id"])
             if objective is None:
                 continue
@@ -802,6 +813,7 @@ class LiveMapServiceV3:
                     story_ids = sorted(
                         {row["story_id"] for row in story_point_rows if row["story_id"]}
                     )
+                    story_live_map_point_rows = story_point_rows
                     requirements = []
                     objectives = []
                     objective_items = []
@@ -811,6 +823,35 @@ class LiveMapServiceV3:
                     reward_trader_standing = []
                     reward_items = []
                     if story_ids:
+                        story_live_map_point_rows = [
+                            dict(row)
+                            for row in s.execute(
+                                text(LiveMapQueryV3.story_points_by_story_ids_sql()),
+                                {"story_ids": story_ids},
+                            ).mappings()
+                        ]
+                        story_detail_rows = [
+                            dict(row)
+                            for row in s.execute(
+                                text(
+                                    LiveMapQueryV3.story_point_details_by_story_ids_sql()
+                                ),
+                                {"story_ids": story_ids},
+                            ).mappings()
+                        ]
+                        story_details_by_point_id = {}
+                        for detail in story_detail_rows:
+                            story_details_by_point_id.setdefault(
+                                detail["point_id"], []
+                            ).append(
+                                {
+                                    "id": detail["id"],
+                                    "description_en": detail["description_en"],
+                                    "description_ko": detail["description_ko"],
+                                    "description_ja": detail["description_ja"],
+                                    "image": detail["image"],
+                                }
+                            )
                         requirements = [
                             dict(row)
                             for row in s.execute(
@@ -896,6 +937,7 @@ class LiveMapServiceV3:
 
                     story_info_by_id = LiveMapServiceV3._build_story_info_by_id_v3(
                         story_point_rows,
+                        story_live_map_point_rows,
                         story_details_by_point_id,
                         requirements,
                         objectives,
@@ -950,11 +992,41 @@ class LiveMapServiceV3:
                     event_ids = sorted(
                         {row["event_id"] for row in event_point_rows if row["event_id"]}
                     )
+                    event_live_map_point_rows = event_point_rows
                     event_objectives = []
                     event_objective_items = []
                     event_reward_trader_standing = []
                     event_reward_items = []
                     if event_ids:
+                        event_live_map_point_rows = [
+                            dict(row)
+                            for row in s.execute(
+                                text(LiveMapQueryV3.event_points_by_event_ids_sql()),
+                                {"event_ids": event_ids},
+                            ).mappings()
+                        ]
+                        event_detail_rows = [
+                            dict(row)
+                            for row in s.execute(
+                                text(
+                                    LiveMapQueryV3.event_point_details_by_event_ids_sql()
+                                ),
+                                {"event_ids": event_ids},
+                            ).mappings()
+                        ]
+                        event_details_by_point_id = {}
+                        for detail in event_detail_rows:
+                            event_details_by_point_id.setdefault(
+                                detail["point_id"], []
+                            ).append(
+                                {
+                                    "id": detail["id"],
+                                    "description_en": detail["description_en"],
+                                    "description_ko": detail["description_ko"],
+                                    "description_ja": detail["description_ja"],
+                                    "image": detail["image"],
+                                }
+                            )
                         event_objectives = [
                             dict(row)
                             for row in s.execute(
@@ -998,6 +1070,7 @@ class LiveMapServiceV3:
 
                     event_info_by_id = LiveMapServiceV3._build_event_info_by_id_v3(
                         event_point_rows,
+                        event_live_map_point_rows,
                         event_details_by_point_id,
                         event_objectives,
                         event_objective_items,

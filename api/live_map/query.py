@@ -163,6 +163,44 @@ class LiveMapQueryV3:
         """
 
     @staticmethod
+    def story_points_by_story_ids_sql():
+        return """
+            select lmsp.id,
+                   lmsp.story_id,
+                   lmsp.objective_id,
+                   lmsp.map_id,
+                   lmsp.floor_id,
+                   lmsp.floor_no,
+                   lmsp.x,
+                   lmsp.z,
+                   lmsp.y,
+                   lmsp.sort_order,
+                   m.normalized_name as map_normalized_name,
+                   m.name_en as map_name_en,
+                   m.name_ko as map_name_ko,
+                   m.name_ja as map_name_ja
+            from live_map_story_points lmsp
+                     left join maps m on lmsp.map_id = m.id
+            where lmsp.story_id = any(:story_ids)
+            order by lmsp.story_id, lmsp.floor_no, lmsp.sort_order, lmsp.id;
+        """
+
+    @staticmethod
+    def story_point_details_by_story_ids_sql():
+        return """
+            select lmspd.id,
+                   lmspd.point_id,
+                   lmspd.description_en,
+                   lmspd.description_ko,
+                   lmspd.description_ja,
+                   lmspd.image
+            from live_map_story_point_details lmspd
+                     join live_map_story_points lmsp on lmspd.point_id = lmsp.id
+            where lmsp.story_id = any(:story_ids)
+            order by lmspd.point_id, lmspd.sort_order, lmspd.id;
+        """
+
+    @staticmethod
     def story_requirements_by_story_ids_sql():
         return """
             select id,
@@ -346,6 +384,48 @@ class LiveMapQueryV3:
             from live_map_event_point_details lmepd
                      join live_map_event_points lmep on lmepd.point_id = lmep.id
             where lmep.map_id = :map_id
+            order by lmepd.point_id, lmepd.sort_order, lmepd.id;
+        """
+
+    @staticmethod
+    def event_points_by_event_ids_sql():
+        return """
+            select lmep.id,
+                   lmep.event_id,
+                   lmep.objective_id,
+                   lmep.map_id,
+                   lmep.floor_id,
+                   lmep.floor_no,
+                   lmep.x,
+                   lmep.z,
+                   lmep.y,
+                   lmep.sort_order,
+                   m.normalized_name as map_normalized_name,
+                   m.name_en as map_name_en,
+                   m.name_ko as map_name_ko,
+                   m.name_ja as map_name_ja
+            from live_map_event_points lmep
+                     join live_map_events e on lmep.event_id = e.id
+                     left join maps m on lmep.map_id = m.id
+            where lmep.event_id = any(:event_ids)
+              and e.is_active is true
+            order by lmep.event_id, lmep.floor_no, lmep.sort_order, lmep.id;
+        """
+
+    @staticmethod
+    def event_point_details_by_event_ids_sql():
+        return """
+            select lmepd.id,
+                   lmepd.point_id,
+                   lmepd.description_en,
+                   lmepd.description_ko,
+                   lmepd.description_ja,
+                   lmepd.image
+            from live_map_event_point_details lmepd
+                     join live_map_event_points lmep on lmepd.point_id = lmep.id
+                     join live_map_events e on lmep.event_id = e.id
+            where lmep.event_id = any(:event_ids)
+              and e.is_active is true
             order by lmepd.point_id, lmepd.sort_order, lmepd.id;
         """
 
