@@ -597,9 +597,14 @@ class LiveMapServiceV3:
             with V3Database.SessionLocal() as s:
                 map_data = (
                     s.query(MapV3)
+                    .join(LiveMapFloorV3, LiveMapFloorV3.map_id == MapV3.id)
                     .filter(
                         MapV3.normalized_name == normalized_name,
-                        MapV3.is_use.is_(True),
+                    )
+                    .order_by(
+                        nullslast(MapV3.is_use.desc()),
+                        nullslast(MapV3.sort_order),
+                        MapV3.name_en,
                     )
                     .first()
                 )
