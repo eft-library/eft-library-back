@@ -21,6 +21,22 @@ class LiveMapFloorV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
+class LiveMapFloorZoneV3(V3Database.Base):
+    __tablename__ = "live_map_floor_zones"
+
+    id = Column(String, primary_key=True)
+    floor_id = Column(String)
+    map_id = Column(String)
+    area_x_min = Column(NUMERIC)
+    area_x_max = Column(NUMERIC)
+    area_z_min = Column(NUMERIC)
+    area_z_max = Column(NUMERIC)
+    override_min_z = Column(NUMERIC)
+    override_max_z = Column(NUMERIC)
+    sort_order = Column(Integer)
+    update_time = Column(TIMESTAMP)
+
+
 class LiveMapPointV3(V3Database.Base):
     __tablename__ = "live_map_points"
 

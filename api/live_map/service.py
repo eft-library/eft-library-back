@@ -2,7 +2,11 @@ from copy import deepcopy
 
 from sqlalchemy import inspect, nullslast, text
 
-from api.live_map.models import LiveMapFloorV3, LiveMapStaticPointV3
+from api.live_map.models import (
+    LiveMapFloorV3,
+    LiveMapFloorZoneV3,
+    LiveMapStaticPointV3,
+)
 from api.live_map.query import LiveMapQueryV3
 from api.map.models import MapV3
 from api.quest.service import QuestServiceV3
@@ -24,7 +28,21 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _serialize_floor_v3(floor: LiveMapFloorV3):
+    def _serialize_floor_zone_v3(zone: LiveMapFloorZoneV3):
+        return {
+            "id": zone.id,
+            "floor_id": zone.floor_id,
+            "map_id": zone.map_id,
+            "area_x_min": zone.area_x_min,
+            "area_x_max": zone.area_x_max,
+            "area_z_min": zone.area_z_min,
+            "area_z_max": zone.area_z_max,
+            "override_min_z": zone.override_min_z,
+            "override_max_z": zone.override_max_z,
+        }
+
+    @staticmethod
+    def _serialize_floor_v3(floor: LiveMapFloorV3, zones: list[dict] | None = None):
         return {
             "id": floor.id,
             "map_id": floor.map_id,
@@ -37,6 +55,7 @@ class LiveMapServiceV3:
             "default_zoom_level": floor.default_zoom_level,
             "min_z": floor.min_z,
             "max_z": floor.max_z,
+            "zones": zones or [],
         }
 
     @staticmethod
@@ -620,6 +639,22 @@ class LiveMapServiceV3:
                     )
                     .all()
                 )
+                zones_by_floor_id = {}
+                if LiveMapServiceV3._has_table_v3(s, "live_map_floor_zones"):
+                    floor_zones = (
+                        s.query(LiveMapFloorZoneV3)
+                        .filter(LiveMapFloorZoneV3.map_id == map_data.id)
+                        .order_by(
+                            LiveMapFloorZoneV3.floor_id,
+                            nullslast(LiveMapFloorZoneV3.sort_order),
+                            LiveMapFloorZoneV3.id,
+                        )
+                        .all()
+                    )
+                    for zone in floor_zones:
+                        zones_by_floor_id.setdefault(zone.floor_id, []).append(
+                            LiveMapServiceV3._serialize_floor_zone_v3(zone)
+                        )
 
                 static_points = (
                     s.query(LiveMapStaticPointV3)
@@ -979,7 +1014,10 @@ class LiveMapServiceV3:
                 return {
                     "map_selector": LiveMapServiceV3._get_map_selector_v3(s),
                     "floors": [
-                        LiveMapServiceV3._serialize_floor_v3(row) for row in floors
+                        LiveMapServiceV3._serialize_floor_v3(
+                            row, zones_by_floor_id.get(row.id, [])
+                        )
+                        for row in floors
                     ],
                     "quest_points": quest_points,
                     "story_points": story_points,

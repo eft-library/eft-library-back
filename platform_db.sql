@@ -1127,6 +1127,24 @@ create table if not exists live_map_floors
 create index idx_live_map_floors_map_id on live_map_floors(map_id);
 create unique index idx_live_map_floors_map_floor on live_map_floors(map_id, floor_no);
 
+create table if not exists live_map_floor_zones
+(
+    id text primary key,
+    floor_id text,
+    map_id text,
+    area_x_min numeric,
+    area_x_max numeric,
+    area_z_min numeric,
+    area_z_max numeric,
+    override_min_z numeric,
+    override_max_z numeric,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_floor_zones_floor_id on live_map_floor_zones(floor_id);
+create index if not exists idx_live_map_floor_zones_map_id on live_map_floor_zones(map_id);
+create index if not exists idx_live_map_floor_zones_floor_sort on live_map_floor_zones(floor_id, sort_order, id);
+
 create table if not exists live_map_points
 (
     id text primary key,
