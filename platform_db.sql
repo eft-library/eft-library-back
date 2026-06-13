@@ -1156,7 +1156,6 @@ create table if not exists live_map_points
     x numeric,
     z numeric,
     y numeric,
-    sort_order integer,
     update_time timestamptz default now()
 );
 create index idx_live_map_points_objective_id
@@ -1166,8 +1165,8 @@ create index idx_live_map_points_map_id on live_map_points(map_id);
 create index idx_live_map_points_quest_id on live_map_points(quest_id);
 create index idx_live_map_points_floor_id on live_map_points(floor_id);
 create index idx_live_map_points_map_floor on live_map_points(map_id, floor_no);
-create index if not exists idx_live_map_points_map_floor_sort on live_map_points(map_id, floor_no, sort_order, id);
-create index if not exists idx_live_map_points_quest_floor_sort on live_map_points(quest_id, floor_no, sort_order, id);
+create index if not exists idx_live_map_points_map_floor_id on live_map_points(map_id, floor_no, id);
+create index if not exists idx_live_map_points_quest_floor_id on live_map_points(quest_id, floor_no, id);
 
 create table if not exists live_map_point_details
 (

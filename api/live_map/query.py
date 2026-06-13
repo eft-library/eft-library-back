@@ -60,7 +60,6 @@ class LiveMapQueryV3:
                      q.name_en nulls last,
                      qo.sort_order nulls last,
                      lmp.floor_no,
-                     lmp.sort_order nulls last,
                      lmp.id;
         """
 
@@ -91,7 +90,6 @@ class LiveMapQueryV3:
                    lmp.x,
                    lmp.z,
                    lmp.y,
-                   lmp.sort_order,
                    m.normalized_name as map_normalized_name,
                    m.name_en as map_name_en,
                    m.name_ko as map_name_ko,
@@ -107,7 +105,6 @@ class LiveMapQueryV3:
                      q.name_en nulls last,
                      qo.sort_order nulls last,
                      lmp.floor_no,
-                     lmp.sort_order nulls last,
                      lmp.id;
         """
 

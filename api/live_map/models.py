@@ -49,7 +49,6 @@ class LiveMapPointV3(V3Database.Base):
     x = Column(NUMERIC)
     z = Column(NUMERIC)
     y = Column(NUMERIC)
-    sort_order = Column(Integer)
     update_time = Column(TIMESTAMP)
 
 
