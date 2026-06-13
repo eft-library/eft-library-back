@@ -172,11 +172,15 @@ class LiveMapQueryV3:
                    lmsp.z,
                    lmsp.y,
                    lmsp.sort_order,
+                   s.title_en,
+                   s.title_ko,
+                   s.title_ja,
                    m.normalized_name as map_normalized_name,
                    m.name_en as map_name_en,
                    m.name_ko as map_name_ko,
                    m.name_ja as map_name_ja
             from live_map_story_points lmsp
+                     left join story s on lmsp.story_id = s.id
                      left join maps m on lmsp.map_id = m.id
             where lmsp.story_id = any(:story_ids)
             order by lmsp.story_id, lmsp.floor_no, lmsp.sort_order, lmsp.id;
@@ -397,12 +401,23 @@ class LiveMapQueryV3:
                    lmep.z,
                    lmep.y,
                    lmep.sort_order,
+                   e.title_en,
+                   e.title_ko,
+                   e.title_ja,
+                   e.is_active,
+                   t.id as trader_id,
+                   t.normalized_name as trader_normalized_name,
+                   t.name_en as trader_name_en,
+                   t.name_ko as trader_name_ko,
+                   t.name_ja as trader_name_ja,
+                   t.image as trader_image,
                    m.normalized_name as map_normalized_name,
                    m.name_en as map_name_en,
                    m.name_ko as map_name_ko,
                    m.name_ja as map_name_ja
             from live_map_event_points lmep
                      join live_map_events e on lmep.event_id = e.id
+                     left join traders t on e.trader_id = t.id
                      left join maps m on lmep.map_id = m.id
             where lmep.event_id = any(:event_ids)
               and e.is_active is true

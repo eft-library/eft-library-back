@@ -22,6 +22,30 @@ def get_live_map_v3(normalized_name: str):
     return CustomResponse.response(live_map, HTTPCode.OK, Message.SUCCESS)
 
 
+@router.get("/v3/quest/{quest_id_or_normalized_name}")
+def get_live_map_quest_detail_v3(quest_id_or_normalized_name: str):
+    quest = LiveMapServiceV3.get_quest_detail_v3(quest_id_or_normalized_name)
+    if quest is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+    return CustomResponse.response(quest, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/v3/story/{story_id}")
+def get_live_map_story_detail_v3(story_id: str):
+    story = LiveMapServiceV3.get_story_detail_v3(story_id)
+    if story is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+    return CustomResponse.response(story, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get("/v3/event/{event_id}")
+def get_live_map_event_detail_v3(event_id: str):
+    event = LiveMapServiceV3.get_event_detail_v3(event_id)
+    if event is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+    return CustomResponse.response(event, HTTPCode.OK, Message.SUCCESS)
+
+
 @router.get(
     "/v3/user-roadmap",
     include_in_schema=False,
