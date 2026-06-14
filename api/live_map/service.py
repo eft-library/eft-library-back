@@ -675,7 +675,17 @@ class LiveMapServiceV3:
                     }
                     if row["story_id"] is not None
                     else None
-                )
+                ),
+                "objective": (
+                    {
+                        "objective_id": row["objective_id"],
+                        "description_en": row["objective_description_en"],
+                        "description_ko": row["objective_description_ko"],
+                        "description_ja": row["objective_description_ja"],
+                    }
+                    if row["objective_id"] is not None
+                    else None
+                ),
             },
         }
 
@@ -702,7 +712,29 @@ class LiveMapServiceV3:
                     }
                     if row["event_id"] is not None
                     else None
-                )
+                ),
+                "trader": (
+                    {
+                        "id": row["trader_id"],
+                        "normalized_name": row["trader_normalized_name"],
+                        "name_en": row["trader_name_en"],
+                        "name_ko": row["trader_name_ko"],
+                        "name_ja": row["trader_name_ja"],
+                        "image": row["trader_image"],
+                    }
+                    if row["trader_id"] is not None
+                    else None
+                ),
+                "objective": (
+                    {
+                        "objective_id": row["objective_id"],
+                        "description_en": row["objective_description_en"],
+                        "description_ko": row["objective_description_ko"],
+                        "description_ja": row["objective_description_ja"],
+                    }
+                    if row["objective_id"] is not None
+                    else None
+                ),
             },
         }
 

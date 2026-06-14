@@ -137,9 +137,13 @@ class LiveMapQueryV3:
                    lmsp.y,
                    s.title_en,
                    s.title_ko,
-                   s.title_ja
+                   s.title_ja,
+                   so.description_en as objective_description_en,
+                   so.description_ko as objective_description_ko,
+                   so.description_ja as objective_description_ja
             from live_map_story_points lmsp
                      left join story s on lmsp.story_id = s.id
+                     left join story_objectives so on lmsp.objective_id = so.objective_id
             where lmsp.map_id = :map_id
             order by lmsp.floor_no, lmsp.sort_order, lmsp.id;
         """
@@ -364,9 +368,14 @@ class LiveMapQueryV3:
                    t.name_en as trader_name_en,
                    t.name_ko as trader_name_ko,
                    t.name_ja as trader_name_ja,
-                   t.image as trader_image
+                   t.image as trader_image,
+                   lmeo.description_en as objective_description_en,
+                   lmeo.description_ko as objective_description_ko,
+                   lmeo.description_ja as objective_description_ja
             from live_map_event_points lmep
                      join live_map_events e on lmep.event_id = e.id
+                     left join live_map_event_objectives lmeo
+                               on lmep.objective_id = lmeo.objective_id
                      left join traders t on e.trader_id = t.id
             where lmep.map_id = :map_id
               and e.is_active is true
