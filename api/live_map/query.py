@@ -206,6 +206,18 @@ class LiveMapQueryV3:
         """
 
     @staticmethod
+    def stories_by_story_ids_sql():
+        return """
+            select id,
+                   title_en,
+                   title_ko,
+                   title_ja
+            from story
+            where id = any(:story_ids)
+            order by sort_order, title_en, id;
+        """
+
+    @staticmethod
     def story_requirements_by_story_ids_sql():
         return """
             select id,
@@ -218,6 +230,102 @@ class LiveMapQueryV3:
             from story_requirements
             where story_id = any(:story_ids)
             order by story_id, sort_order, id;
+        """
+
+    @staticmethod
+    def story_requirement_details_by_story_ids_sql():
+        return """
+            select srd.id,
+                   srd.requirement_id,
+                   srd.description_en,
+                   srd.description_ko,
+                   srd.description_ja,
+                   srd.image,
+                   srd.sort_order
+            from story_requirement_details srd
+                     join story_requirements sr on srd.requirement_id = sr.id
+            where sr.story_id = any(:story_ids)
+            order by srd.requirement_id, srd.sort_order, srd.id;
+        """
+
+    @staticmethod
+    def story_requirement_items_by_story_ids_sql():
+        return """
+            select sri.requirement_id,
+                   sri.item_id,
+                   sri.quantity,
+                   sri.found_in_raid,
+                   sri.item_role,
+                   sri.sort_order,
+                   i.normalized_name,
+                   i.name_en,
+                   i.name_ko,
+                   i.name_ja,
+                   i.image
+            from story_requirement_items sri
+                     join story_requirements sr on sri.requirement_id = sr.id
+                     left join items i on sri.item_id = i.id
+            where sr.story_id = any(:story_ids)
+            order by sri.requirement_id, sri.sort_order, i.name_en;
+        """
+
+    @staticmethod
+    def story_requirement_maps_by_story_ids_sql():
+        return """
+            select srm.requirement_id,
+                   srm.map_id,
+                   srm.sort_order,
+                   m.normalized_name,
+                   m.name_en,
+                   m.name_ko,
+                   m.name_ja
+            from story_requirement_maps srm
+                     join story_requirements sr on srm.requirement_id = sr.id
+                     left join maps m on srm.map_id = m.id
+            where sr.story_id = any(:story_ids)
+            order by srm.requirement_id, srm.sort_order, m.name_en;
+        """
+
+    @staticmethod
+    def story_requirement_points_by_story_ids_sql():
+        return """
+            select lmsrp.id,
+                   lmsrp.story_id,
+                   lmsrp.requirement_id,
+                   lmsrp.map_id,
+                   lmsrp.floor_id,
+                   lmsrp.floor_no,
+                   lmsrp.x,
+                   lmsrp.z,
+                   lmsrp.y,
+                   lmsrp.sort_order,
+                   m.normalized_name as map_normalized_name,
+                   m.name_en as map_name_en,
+                   m.name_ko as map_name_ko,
+                   m.name_ja as map_name_ja
+            from live_map_story_requirement_points lmsrp
+                     left join maps m on lmsrp.map_id = m.id
+            where lmsrp.story_id = any(:story_ids)
+            order by lmsrp.requirement_id,
+                     lmsrp.floor_no,
+                     lmsrp.sort_order,
+                     lmsrp.id;
+        """
+
+    @staticmethod
+    def story_requirement_point_details_by_story_ids_sql():
+        return """
+            select lmsrpd.id,
+                   lmsrpd.point_id,
+                   lmsrpd.description_en,
+                   lmsrpd.description_ko,
+                   lmsrpd.description_ja,
+                   lmsrpd.image
+            from live_map_story_requirement_point_details lmsrpd
+                     join live_map_story_requirement_points lmsrp
+                          on lmsrpd.point_id = lmsrp.id
+            where lmsrp.story_id = any(:story_ids)
+            order by lmsrpd.point_id, lmsrpd.sort_order, lmsrpd.id;
         """
 
     @staticmethod

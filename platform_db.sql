@@ -847,6 +847,46 @@ create table if not exists story_requirements
 );
 create index if not exists idx_story_requirements_story_id on story_requirements(story_id);
 create index if not exists idx_story_requirements_type on story_requirements(requirement_type);
+create index if not exists idx_story_requirements_story_sort on story_requirements(story_id, sort_order, id);
+
+create table if not exists story_requirement_details
+(
+    id text primary key,
+    requirement_id text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    image text,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_story_requirement_details_requirement_id on story_requirement_details(requirement_id);
+create index if not exists idx_story_requirement_details_requirement_sort on story_requirement_details(requirement_id, sort_order, id);
+
+create table if not exists story_requirement_items
+(
+    requirement_id text,
+    item_id text,
+    quantity integer,
+    found_in_raid boolean,
+    item_role text,
+    sort_order integer,
+    primary key (requirement_id, item_id, item_role)
+);
+create index if not exists idx_story_requirement_items_requirement_id on story_requirement_items(requirement_id);
+create index if not exists idx_story_requirement_items_item_id on story_requirement_items(item_id);
+create index if not exists idx_story_requirement_items_requirement_sort on story_requirement_items(requirement_id, sort_order, item_id);
+
+create table if not exists story_requirement_maps
+(
+    requirement_id text,
+    map_id text,
+    sort_order integer,
+    primary key (requirement_id, map_id)
+);
+create index if not exists idx_story_requirement_maps_requirement_id on story_requirement_maps(requirement_id);
+create index if not exists idx_story_requirement_maps_map_id on story_requirement_maps(map_id);
+create index if not exists idx_story_requirement_maps_requirement_sort on story_requirement_maps(requirement_id, sort_order, map_id);
 
 create table if not exists story_objective_items
 (
@@ -1241,6 +1281,41 @@ create table if not exists live_map_story_point_details
     update_time timestamptz default now()
 );
 create index if not exists idx_live_map_story_point_details_point_id on live_map_story_point_details(point_id);
+
+create table if not exists live_map_story_requirement_points
+(
+    id text primary key,
+    story_id text,
+    requirement_id text,
+    map_id text,
+    floor_id text,
+    floor_no integer,
+    x numeric,
+    z numeric,
+    y numeric,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_story_requirement_points_story_id on live_map_story_requirement_points(story_id);
+create index if not exists idx_live_map_story_requirement_points_requirement_id on live_map_story_requirement_points(requirement_id);
+create index if not exists idx_live_map_story_requirement_points_map_id on live_map_story_requirement_points(map_id);
+create index if not exists idx_live_map_story_requirement_points_floor_id on live_map_story_requirement_points(floor_id);
+create index if not exists idx_live_map_story_requirement_points_map_floor on live_map_story_requirement_points(map_id, floor_no);
+create index if not exists idx_live_map_story_requirement_points_map_sort on live_map_story_requirement_points(map_id, floor_no, sort_order, id);
+
+create table if not exists live_map_story_requirement_point_details
+(
+    id text primary key,
+    point_id text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    image text,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_story_requirement_point_details_point_id on live_map_story_requirement_point_details(point_id);
+create index if not exists idx_live_map_story_requirement_point_details_point_sort on live_map_story_requirement_point_details(point_id, sort_order, id);
 
 create table if not exists live_map_events
 (

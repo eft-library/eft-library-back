@@ -117,6 +117,35 @@ class LiveMapStoryPointDetailV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
+class LiveMapStoryRequirementPointV3(V3Database.Base):
+    __tablename__ = "live_map_story_requirement_points"
+
+    id = Column(String, primary_key=True)
+    story_id = Column(String)
+    requirement_id = Column(String)
+    map_id = Column(String)
+    floor_id = Column(String)
+    floor_no = Column(Integer)
+    x = Column(NUMERIC)
+    z = Column(NUMERIC)
+    y = Column(NUMERIC)
+    sort_order = Column(Integer)
+    update_time = Column(TIMESTAMP)
+
+
+class LiveMapStoryRequirementPointDetailV3(V3Database.Base):
+    __tablename__ = "live_map_story_requirement_point_details"
+
+    id = Column(String, primary_key=True)
+    point_id = Column(String)
+    description_en = Column(TEXT)
+    description_ko = Column(TEXT)
+    description_ja = Column(TEXT)
+    image = Column(TEXT)
+    sort_order = Column(Integer)
+    update_time = Column(TIMESTAMP)
+
+
 class LiveMapEventPointV3(V3Database.Base):
     __tablename__ = "live_map_event_points"
 

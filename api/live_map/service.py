@@ -103,10 +103,15 @@ class LiveMapServiceV3:
 
     @staticmethod
     def _build_story_info_by_id_v3(
-        story_point_rows: list[dict],
+        story_rows: list[dict],
         story_live_map_point_rows: list[dict],
         story_details_by_point_id: dict[str, list[dict]],
         requirements: list[dict],
+        requirement_details: list[dict],
+        requirement_items: list[dict],
+        requirement_maps: list[dict],
+        requirement_live_map_point_rows: list[dict],
+        requirement_details_by_point_id: dict[str, list[dict]],
         objectives: list[dict],
         objective_items: list[dict],
         objective_maps: list[dict],
@@ -116,9 +121,9 @@ class LiveMapServiceV3:
         reward_items: list[dict],
     ):
         story_info_by_id = {}
-        for row in story_point_rows:
-            story_id = row["story_id"]
-            if story_id is None or story_id in story_info_by_id:
+        for row in story_rows:
+            story_id = row["id"]
+            if story_id is None:
                 continue
             story_info_by_id[story_id] = {
                 "story": {
@@ -135,17 +140,97 @@ class LiveMapServiceV3:
                 },
             }
 
+        requirement_by_id = {}
         for requirement in requirements:
             story_info = story_info_by_id.get(requirement["story_id"])
             if story_info is None:
                 continue
-            story_info["requirements"].append(
+            requirement_info = {
+                "id": requirement["id"],
+                "requirement_type": requirement["requirement_type"],
+                "description_en": requirement["description_en"],
+                "description_ko": requirement["description_ko"],
+                "description_ja": requirement["description_ja"],
+                "details": [],
+                "items": [],
+                "maps": [],
+                "live_map_points": [],
+            }
+            requirement_by_id[requirement["id"]] = requirement_info
+            story_info["requirements"].append(requirement_info)
+
+        for detail in requirement_details:
+            requirement = requirement_by_id.get(detail["requirement_id"])
+            if requirement is None:
+                continue
+            requirement["details"].append(
+                {
+                    "id": detail["id"],
+                    "description_en": detail["description_en"],
+                    "description_ko": detail["description_ko"],
+                    "description_ja": detail["description_ja"],
+                    "image": detail["image"],
+                }
+            )
+
+        for item in requirement_items:
+            requirement = requirement_by_id.get(item["requirement_id"])
+            if requirement is None:
+                continue
+            requirement["items"].append(
+                {
+                    "quantity": item["quantity"],
+                    "found_in_raid": item["found_in_raid"],
+                    "item_role": item["item_role"],
+                    "item": (
+                        {
+                            "id": item["item_id"],
+                            "normalized_name": item["normalized_name"],
+                            "name_en": item["name_en"],
+                            "name_ko": item["name_ko"],
+                            "name_ja": item["name_ja"],
+                            "image": item["image"],
+                        }
+                        if item["item_id"] is not None
+                        else None
+                    ),
+                }
+            )
+
+        for map_row in requirement_maps:
+            requirement = requirement_by_id.get(map_row["requirement_id"])
+            if requirement is None:
+                continue
+            requirement["maps"].append(
+                {
+                    "id": map_row["map_id"],
+                    "normalized_name": map_row["normalized_name"],
+                    "name_en": map_row["name_en"],
+                    "name_ko": map_row["name_ko"],
+                    "name_ja": map_row["name_ja"],
+                }
+            )
+
+        for row in requirement_live_map_point_rows:
+            requirement = requirement_by_id.get(row["requirement_id"])
+            if requirement is None:
+                continue
+            requirement["live_map_points"].append(
+                LiveMapServiceV3._serialize_live_map_point_v3(
+                    row, requirement_details_by_point_id.get(row["id"], [])
+                )
+            )
+
+        for requirement in requirement_by_id.values():
+            if requirement["details"]:
+                continue
+            requirement["details"].append(
                 {
                     "id": requirement["id"],
-                    "requirement_type": requirement["requirement_type"],
                     "description_en": requirement["description_en"],
                     "description_ko": requirement["description_ko"],
                     "description_ja": requirement["description_ja"],
+                    "image": None,
                 }
             )
 
@@ -845,6 +930,16 @@ class LiveMapServiceV3:
         try:
             with V3Database.SessionLocal() as s:
                 story_ids = [story_id]
+                story_rows = [
+                    dict(row)
+                    for row in s.execute(
+                        text(LiveMapQueryV3.stories_by_story_ids_sql()),
+                        {"story_ids": story_ids},
+                    ).mappings()
+                ]
+                if not story_rows:
+                    return None
+
                 story_point_rows = [
                     dict(row)
                     for row in s.execute(
@@ -852,8 +947,6 @@ class LiveMapServiceV3:
                         {"story_ids": story_ids},
                     ).mappings()
                 ]
-                if not story_point_rows:
-                    return None
 
                 detail_rows = [
                     dict(row)
@@ -872,6 +965,70 @@ class LiveMapServiceV3:
                         {"story_ids": story_ids},
                     ).mappings()
                 ]
+                requirement_details = []
+                requirement_items = []
+                requirement_maps = []
+                requirement_point_rows = []
+                requirement_point_detail_rows = []
+                if LiveMapServiceV3._has_table_v3(s, "story_requirement_details"):
+                    requirement_details = [
+                        dict(row)
+                        for row in s.execute(
+                            text(
+                                LiveMapQueryV3.story_requirement_details_by_story_ids_sql()
+                            ),
+                            {"story_ids": story_ids},
+                        ).mappings()
+                    ]
+                if LiveMapServiceV3._has_table_v3(s, "story_requirement_items"):
+                    requirement_items = [
+                        dict(row)
+                        for row in s.execute(
+                            text(
+                                LiveMapQueryV3.story_requirement_items_by_story_ids_sql()
+                            ),
+                            {"story_ids": story_ids},
+                        ).mappings()
+                    ]
+                if LiveMapServiceV3._has_table_v3(s, "story_requirement_maps"):
+                    requirement_maps = [
+                        dict(row)
+                        for row in s.execute(
+                            text(
+                                LiveMapQueryV3.story_requirement_maps_by_story_ids_sql()
+                            ),
+                            {"story_ids": story_ids},
+                        ).mappings()
+                    ]
+                if LiveMapServiceV3._has_table_v3(
+                    s, "live_map_story_requirement_points"
+                ):
+                    requirement_point_rows = [
+                        dict(row)
+                        for row in s.execute(
+                            text(
+                                LiveMapQueryV3.story_requirement_points_by_story_ids_sql()
+                            ),
+                            {"story_ids": story_ids},
+                        ).mappings()
+                    ]
+                if LiveMapServiceV3._has_table_v3(
+                    s, "live_map_story_requirement_point_details"
+                ):
+                    requirement_point_detail_rows = [
+                        dict(row)
+                        for row in s.execute(
+                            text(
+                                LiveMapQueryV3.story_requirement_point_details_by_story_ids_sql()
+                            ),
+                            {"story_ids": story_ids},
+                        ).mappings()
+                    ]
+                requirement_details_by_point_id = (
+                    LiveMapServiceV3._build_details_by_point_id_v3(
+                        requirement_point_detail_rows
+                    )
+                )
                 objectives = [
                     dict(row)
                     for row in s.execute(
@@ -937,10 +1094,15 @@ class LiveMapServiceV3:
                     ]
 
                 story_info_by_id = LiveMapServiceV3._build_story_info_by_id_v3(
-                    story_point_rows,
+                    story_rows,
                     story_point_rows,
                     details_by_point_id,
                     requirements,
+                    requirement_details,
+                    requirement_items,
+                    requirement_maps,
+                    requirement_point_rows,
+                    requirement_details_by_point_id,
                     objectives,
                     objective_items,
                     objective_maps,
