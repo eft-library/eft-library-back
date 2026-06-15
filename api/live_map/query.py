@@ -129,23 +129,60 @@ class LiveMapQueryV3:
             select lmsp.id,
                    lmsp.story_id,
                    lmsp.objective_id,
+                   null as requirement_id,
                    lmsp.map_id,
                    lmsp.floor_id,
                    lmsp.floor_no,
                    lmsp.x,
                    lmsp.z,
                    lmsp.y,
+                   lmsp.sort_order,
                    s.title_en,
                    s.title_ko,
                    s.title_ja,
                    so.description_en as objective_description_en,
                    so.description_ko as objective_description_ko,
-                   so.description_ja as objective_description_ja
+                   so.description_ja as objective_description_ja,
+                   null as requirement_type,
+                   null as requirement_description_en,
+                   null as requirement_description_ko,
+                   null as requirement_description_ja
             from live_map_story_points lmsp
                      left join story s on lmsp.story_id = s.id
                      left join story_objectives so on lmsp.objective_id = so.objective_id
             where lmsp.map_id = :map_id
             order by lmsp.floor_no, lmsp.sort_order, lmsp.id;
+        """
+
+    @staticmethod
+    def story_requirement_points_by_map_sql():
+        return """
+            select lmsrp.id,
+                   lmsrp.story_id,
+                   null as objective_id,
+                   lmsrp.requirement_id,
+                   lmsrp.map_id,
+                   lmsrp.floor_id,
+                   lmsrp.floor_no,
+                   lmsrp.x,
+                   lmsrp.z,
+                   lmsrp.y,
+                   lmsrp.sort_order,
+                   s.title_en,
+                   s.title_ko,
+                   s.title_ja,
+                   null as objective_description_en,
+                   null as objective_description_ko,
+                   null as objective_description_ja,
+                   sr.requirement_type,
+                   sr.description_en as requirement_description_en,
+                   sr.description_ko as requirement_description_ko,
+                   sr.description_ja as requirement_description_ja
+            from live_map_story_requirement_points lmsrp
+                     left join story s on lmsrp.story_id = s.id
+                     left join story_requirements sr on lmsrp.requirement_id = sr.id
+            where lmsrp.map_id = :map_id
+            order by lmsrp.floor_no, lmsrp.sort_order, lmsrp.id;
         """
 
     @staticmethod
@@ -232,23 +269,6 @@ class LiveMapQueryV3:
             order by story_id, sort_order, id;
         """
 
-    @staticmethod
-    def story_requirement_details_by_story_ids_sql():
-        return """
-            select srd.id,
-                   srd.requirement_id,
-                   srd.description_en,
-                   srd.description_ko,
-                   srd.description_ja,
-                   srd.image,
-                   srd.sort_order
-            from story_requirement_details srd
-                     join story_requirements sr on srd.requirement_id = sr.id
-            where sr.story_id = any(:story_ids)
-            order by srd.requirement_id, srd.sort_order, srd.id;
-        """
-
-    @staticmethod
     def story_requirement_items_by_story_ids_sql():
         return """
             select sri.requirement_id,
