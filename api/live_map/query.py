@@ -653,3 +653,18 @@ class LiveMapQueryV3:
             where lmeri.event_id = any(:event_ids)
             order by lmeri.event_id, lmeri.sort_order, i.name_en;
         """
+
+    @staticmethod
+    def event_reward_texts_by_event_ids_sql():
+        return """
+            select lmert.id,
+                   lmert.event_id,
+                   lmert.reward_type,
+                   lmert.description_en,
+                   lmert.description_ko,
+                   lmert.description_ja,
+                   lmert.sort_order
+            from live_map_event_reward_texts lmert
+            where lmert.event_id = any(:event_ids)
+            order by lmert.event_id, lmert.sort_order, lmert.id;
+        """

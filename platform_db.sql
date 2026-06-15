@@ -1370,6 +1370,21 @@ create table if not exists live_map_event_reward_items
 create index if not exists idx_live_map_event_reward_items_event_id on live_map_event_reward_items(event_id);
 create index if not exists idx_live_map_event_reward_items_item_id on live_map_event_reward_items(item_id);
 
+create table if not exists live_map_event_reward_texts
+(
+    id text primary key,
+    event_id text,
+    reward_type text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_event_reward_texts_event_id on live_map_event_reward_texts(event_id);
+create index if not exists idx_live_map_event_reward_texts_type on live_map_event_reward_texts(reward_type);
+create index if not exists idx_live_map_event_reward_texts_event_sort on live_map_event_reward_texts(event_id, sort_order, id);
+
 create table if not exists live_map_event_points
 (
     id text primary key,

@@ -396,6 +396,7 @@ class LiveMapServiceV3:
         objective_items: list[dict],
         reward_trader_standing: list[dict],
         reward_items: list[dict],
+        reward_texts: list[dict],
     ):
         event_info_by_id = {}
         for row in event_point_rows:
@@ -426,6 +427,7 @@ class LiveMapServiceV3:
                 "finish_rewards": {
                     "trader_standing": [],
                     "items": [],
+                    "texts": [],
                 },
             }
 
@@ -535,6 +537,20 @@ class LiveMapServiceV3:
                         if row["item_id"] is not None
                         else None
                     ),
+                }
+            )
+
+        for row in reward_texts:
+            event_info = event_info_by_id.get(row["event_id"])
+            if event_info is None:
+                continue
+            event_info["finish_rewards"]["texts"].append(
+                {
+                    "id": row["id"],
+                    "reward_type": row["reward_type"],
+                    "description_en": row["description_en"],
+                    "description_ko": row["description_ko"],
+                    "description_ja": row["description_ja"],
                 }
             )
 
@@ -1131,6 +1147,7 @@ class LiveMapServiceV3:
                 ]
                 event_reward_trader_standing = []
                 event_reward_items = []
+                event_reward_texts = []
                 if LiveMapServiceV3._has_table_v3(
                     s, "live_map_event_reward_trader_standing"
                 ):
@@ -1151,6 +1168,14 @@ class LiveMapServiceV3:
                             {"event_ids": event_ids},
                         ).mappings()
                     ]
+                if LiveMapServiceV3._has_table_v3(s, "live_map_event_reward_texts"):
+                    event_reward_texts = [
+                        dict(row)
+                        for row in s.execute(
+                            text(LiveMapQueryV3.event_reward_texts_by_event_ids_sql()),
+                            {"event_ids": event_ids},
+                        ).mappings()
+                    ]
 
                 event_info_by_id = LiveMapServiceV3._build_event_info_by_id_v3(
                     event_point_rows,
@@ -1160,6 +1185,7 @@ class LiveMapServiceV3:
                     event_objective_items,
                     event_reward_trader_standing,
                     event_reward_items,
+                    event_reward_texts,
                 )
                 return event_info_by_id.get(event_id)
         except Exception as e:
