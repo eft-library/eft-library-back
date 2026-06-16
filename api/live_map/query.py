@@ -129,7 +129,7 @@ class LiveMapQueryV3:
             select lmsp.id,
                    lmsp.story_id,
                    lmsp.objective_id,
-                   null as requirement_id,
+                   sr.id as requirement_id,
                    lmsp.map_id,
                    lmsp.floor_id,
                    lmsp.floor_no,
@@ -143,13 +143,25 @@ class LiveMapQueryV3:
                    so.description_en as objective_description_en,
                    so.description_ko as objective_description_ko,
                    so.description_ja as objective_description_ja,
-                   null as requirement_type,
-                   null as requirement_description_en,
-                   null as requirement_description_ko,
-                   null as requirement_description_ja
+                   sr.requirement_type,
+                   sr.description_en as requirement_description_en,
+                   sr.description_ko as requirement_description_ko,
+                   sr.description_ja as requirement_description_ja
             from live_map_story_points lmsp
                      left join story s on lmsp.story_id = s.id
                      left join story_objectives so on lmsp.objective_id = so.objective_id
+                     left join lateral (
+                         select id,
+                                requirement_type,
+                                description_en,
+                                description_ko,
+                                description_ja
+                         from story_requirements
+                         where story_id = lmsp.story_id
+                           and lmsp.objective_id is null
+                         order by sort_order, id
+                         limit 1
+                     ) sr on true
             where lmsp.map_id = :map_id
             order by lmsp.floor_no, lmsp.sort_order, lmsp.id;
         """
@@ -160,7 +172,7 @@ class LiveMapQueryV3:
             select lmsrp.id,
                    lmsrp.story_id,
                    null as objective_id,
-                   lmsrp.requirement_id,
+                   coalesce(lmsrp.requirement_id, sr_fallback.id) as requirement_id,
                    lmsrp.map_id,
                    lmsrp.floor_id,
                    lmsrp.floor_no,
@@ -174,13 +186,24 @@ class LiveMapQueryV3:
                    null as objective_description_en,
                    null as objective_description_ko,
                    null as objective_description_ja,
-                   sr.requirement_type,
-                   sr.description_en as requirement_description_en,
-                   sr.description_ko as requirement_description_ko,
-                   sr.description_ja as requirement_description_ja
+                   coalesce(sr.requirement_type, sr_fallback.requirement_type) as requirement_type,
+                   coalesce(sr.description_en, sr_fallback.description_en) as requirement_description_en,
+                   coalesce(sr.description_ko, sr_fallback.description_ko) as requirement_description_ko,
+                   coalesce(sr.description_ja, sr_fallback.description_ja) as requirement_description_ja
             from live_map_story_requirement_points lmsrp
                      left join story s on lmsrp.story_id = s.id
                      left join story_requirements sr on lmsrp.requirement_id = sr.id
+                     left join lateral (
+                         select id,
+                                requirement_type,
+                                description_en,
+                                description_ko,
+                                description_ja
+                         from story_requirements
+                         where story_id = lmsrp.story_id
+                         order by sort_order, id
+                         limit 1
+                     ) sr_fallback on lmsrp.requirement_id is null
             where lmsrp.map_id = :map_id
             order by lmsrp.floor_no, lmsrp.sort_order, lmsrp.id;
         """
