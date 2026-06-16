@@ -743,6 +743,7 @@ class LiveMapServiceV3:
             "id": row["id"],
             "story_id": row["story_id"],
             "objective_id": row["objective_id"],
+            "requirement_id": row.get("requirement_id"),
             "map_id": row["map_id"],
             "floor_id": row["floor_id"],
             "floor_no": row["floor_no"],
@@ -768,6 +769,17 @@ class LiveMapServiceV3:
                         "description_ja": row["objective_description_ja"],
                     }
                     if row["objective_id"] is not None
+                    else None
+                ),
+                "requirement": (
+                    {
+                        "id": row["requirement_id"],
+                        "requirement_type": row["requirement_type"],
+                        "description_en": row["requirement_description_en"],
+                        "description_ko": row["requirement_description_ko"],
+                        "description_ja": row["requirement_description_ja"],
+                    }
+                    if row.get("requirement_id") is not None
                     else None
                 ),
             },
