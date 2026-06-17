@@ -108,12 +108,10 @@ class LiveMapServiceV3:
         story_details_by_point_id: dict[str, list[dict]],
         requirements: list[dict],
         requirement_items: list[dict],
-        requirement_maps: list[dict],
         requirement_live_map_point_rows: list[dict],
         requirement_point_details_by_point_id: dict[str, list[dict]],
         objectives: list[dict],
         objective_items: list[dict],
-        objective_maps: list[dict],
         objective_reward_items: list[dict],
         objective_reward_texts: list[dict],
         reward_trader_standing: list[dict],
@@ -151,7 +149,6 @@ class LiveMapServiceV3:
                 "description_ko": requirement["description_ko"],
                 "description_ja": requirement["description_ja"],
                 "items": [],
-                "maps": [],
                 "live_map_points": [],
             }
             requirement_by_id[requirement["id"]] = requirement_info
@@ -181,20 +178,6 @@ class LiveMapServiceV3:
                 }
             )
 
-        for map_row in requirement_maps:
-            requirement = requirement_by_id.get(map_row["requirement_id"])
-            if requirement is None:
-                continue
-            requirement["maps"].append(
-                {
-                    "id": map_row["map_id"],
-                    "normalized_name": map_row["normalized_name"],
-                    "name_en": map_row["name_en"],
-                    "name_ko": map_row["name_ko"],
-                    "name_ja": map_row["name_ja"],
-                }
-            )
-
         for row in requirement_live_map_point_rows:
             requirement = requirement_by_id.get(row["requirement_id"])
             if requirement is None:
@@ -218,7 +201,6 @@ class LiveMapServiceV3:
                 "count": objective["count"],
                 "is_optional": objective["is_optional"],
                 "items": [],
-                "maps": [],
                 "live_map_points": [],
                 "rewards": {
                     "items": [],
@@ -252,20 +234,6 @@ class LiveMapServiceV3:
                         if item["item_id"] is not None
                         else None
                     ),
-                }
-            )
-
-        for map_row in objective_maps:
-            objective = objective_by_id.get(map_row["objective_id"])
-            if objective is None:
-                continue
-            objective["maps"].append(
-                {
-                    "id": map_row["map_id"],
-                    "normalized_name": map_row["normalized_name"],
-                    "name_en": map_row["name_en"],
-                    "name_ko": map_row["name_ko"],
-                    "name_ja": map_row["name_ja"],
                 }
             )
 
@@ -977,7 +945,6 @@ class LiveMapServiceV3:
                     ).mappings()
                 ]
                 requirement_items = []
-                requirement_maps = []
                 requirement_point_rows = []
                 requirement_point_detail_rows = []
                 if LiveMapServiceV3._has_table_v3(s, "story_requirement_items"):
@@ -986,16 +953,6 @@ class LiveMapServiceV3:
                         for row in s.execute(
                             text(
                                 LiveMapQueryV3.story_requirement_items_by_story_ids_sql()
-                            ),
-                            {"story_ids": story_ids},
-                        ).mappings()
-                    ]
-                if LiveMapServiceV3._has_table_v3(s, "story_requirement_maps"):
-                    requirement_maps = [
-                        dict(row)
-                        for row in s.execute(
-                            text(
-                                LiveMapQueryV3.story_requirement_maps_by_story_ids_sql()
                             ),
                             {"story_ids": story_ids},
                         ).mappings()
@@ -1040,13 +997,6 @@ class LiveMapServiceV3:
                     dict(row)
                     for row in s.execute(
                         text(LiveMapQueryV3.story_objective_items_by_story_ids_sql()),
-                        {"story_ids": story_ids},
-                    ).mappings()
-                ]
-                objective_maps = [
-                    dict(row)
-                    for row in s.execute(
-                        text(LiveMapQueryV3.story_objective_maps_by_story_ids_sql()),
                         {"story_ids": story_ids},
                     ).mappings()
                 ]
@@ -1099,12 +1049,10 @@ class LiveMapServiceV3:
                     details_by_point_id,
                     requirements,
                     requirement_items,
-                    requirement_maps,
                     requirement_point_rows,
                     requirement_point_details_by_point_id,
                     objectives,
                     objective_items,
-                    objective_maps,
                     objective_reward_items,
                     objective_reward_texts,
                     reward_trader_standing,
@@ -1327,10 +1275,10 @@ class LiveMapServiceV3:
                     )
                     story_point_rows.sort(
                         key=lambda row: (
-                            row["floor_no"] is None,
-                            row["floor_no"] or 0,
                             row["sort_order"] is None,
                             row["sort_order"] or 0,
+                            row["floor_no"] is None,
+                            row["floor_no"] or 0,
                             row["id"] or "",
                         )
                     )

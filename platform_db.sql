@@ -863,17 +863,6 @@ create index if not exists idx_story_requirement_items_requirement_id on story_r
 create index if not exists idx_story_requirement_items_item_id on story_requirement_items(item_id);
 create index if not exists idx_story_requirement_items_requirement_sort on story_requirement_items(requirement_id, sort_order, item_id);
 
-create table if not exists story_requirement_maps
-(
-    requirement_id text,
-    map_id text,
-    sort_order integer,
-    primary key (requirement_id, map_id)
-);
-create index if not exists idx_story_requirement_maps_requirement_id on story_requirement_maps(requirement_id);
-create index if not exists idx_story_requirement_maps_map_id on story_requirement_maps(map_id);
-create index if not exists idx_story_requirement_maps_requirement_sort on story_requirement_maps(requirement_id, sort_order, map_id);
-
 create table if not exists story_objective_items
 (
     objective_id text,
@@ -886,16 +875,6 @@ create table if not exists story_objective_items
 );
 create index if not exists idx_story_objective_items_objective_id on story_objective_items(objective_id);
 create index if not exists idx_story_objective_items_item_id on story_objective_items(item_id);
-
-create table if not exists story_objective_maps
-(
-    objective_id text,
-    map_id text,
-    sort_order integer,
-    primary key (objective_id, map_id)
-);
-create index if not exists idx_story_objective_maps_objective_id on story_objective_maps(objective_id);
-create index if not exists idx_story_objective_maps_map_id on story_objective_maps(map_id);
 
 create table if not exists story_objective_reward_items
 (

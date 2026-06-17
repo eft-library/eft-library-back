@@ -161,9 +161,11 @@ class LiveMapQueryV3:
                            and lmsp.objective_id is null
                          order by sort_order, id
                          limit 1
-                     ) sr on true
+            ) sr on true
             where lmsp.map_id = :map_id
-            order by lmsp.floor_no, lmsp.sort_order, lmsp.id;
+            order by lmsp.sort_order nulls last,
+                     lmsp.floor_no nulls last,
+                     lmsp.id;
         """
 
     @staticmethod
@@ -203,9 +205,11 @@ class LiveMapQueryV3:
                          where story_id = lmsrp.story_id
                          order by sort_order, id
                          limit 1
-                     ) sr_fallback on lmsrp.requirement_id is null
+            ) sr_fallback on lmsrp.requirement_id is null
             where lmsrp.map_id = :map_id
-            order by lmsrp.floor_no, lmsrp.sort_order, lmsrp.id;
+            order by lmsrp.sort_order nulls last,
+                     lmsrp.floor_no nulls last,
+                     lmsrp.id;
         """
 
     @staticmethod
@@ -247,7 +251,11 @@ class LiveMapQueryV3:
                      left join story s on lmsp.story_id = s.id
                      left join maps m on lmsp.map_id = m.id
             where lmsp.story_id = any(:story_ids)
-            order by lmsp.story_id, lmsp.floor_no, lmsp.sort_order, lmsp.id;
+            order by lmsp.story_id,
+                     lmsp.objective_id nulls last,
+                     lmsp.sort_order nulls last,
+                     lmsp.floor_no nulls last,
+                     lmsp.id;
         """
 
     @staticmethod
@@ -312,24 +320,6 @@ class LiveMapQueryV3:
             order by sri.requirement_id, sri.sort_order, i.name_en;
         """
 
-    @staticmethod
-    def story_requirement_maps_by_story_ids_sql():
-        return """
-            select srm.requirement_id,
-                   srm.map_id,
-                   srm.sort_order,
-                   m.normalized_name,
-                   m.name_en,
-                   m.name_ko,
-                   m.name_ja
-            from story_requirement_maps srm
-                     join story_requirements sr on srm.requirement_id = sr.id
-                     left join maps m on srm.map_id = m.id
-            where sr.story_id = any(:story_ids)
-            order by srm.requirement_id, srm.sort_order, m.name_en;
-        """
-
-    @staticmethod
     def story_requirement_points_by_story_ids_sql():
         return """
             select lmsrp.id,
@@ -350,8 +340,8 @@ class LiveMapQueryV3:
                      left join maps m on lmsrp.map_id = m.id
             where lmsrp.story_id = any(:story_ids)
             order by lmsrp.requirement_id,
-                     lmsrp.floor_no,
-                     lmsrp.sort_order,
+                     lmsrp.sort_order nulls last,
+                     lmsrp.floor_no nulls last,
                      lmsrp.id;
         """
 
@@ -410,24 +400,6 @@ class LiveMapQueryV3:
             order by soi.objective_id, soi.sort_order, i.name_en;
         """
 
-    @staticmethod
-    def story_objective_maps_by_story_ids_sql():
-        return """
-            select som.objective_id,
-                   som.map_id,
-                   som.sort_order,
-                   m.normalized_name,
-                   m.name_en,
-                   m.name_ko,
-                   m.name_ja
-            from story_objective_maps som
-                     join story_objectives so on som.objective_id = so.objective_id
-                     left join maps m on som.map_id = m.id
-            where so.story_id = any(:story_ids)
-            order by som.objective_id, som.sort_order, m.name_en;
-        """
-
-    @staticmethod
     def story_objective_reward_items_by_story_ids_sql():
         return """
             select sori.objective_id,
@@ -530,7 +502,9 @@ class LiveMapQueryV3:
                      left join traders t on e.trader_id = t.id
             where lmep.map_id = :map_id
               and e.is_active is true
-            order by lmep.floor_no, lmep.sort_order, lmep.id;
+            order by lmep.sort_order nulls last,
+                     lmep.floor_no nulls last,
+                     lmep.id;
         """
 
     @staticmethod
@@ -581,7 +555,10 @@ class LiveMapQueryV3:
                      left join maps m on lmep.map_id = m.id
             where lmep.event_id = any(:event_ids)
               and e.is_active is true
-            order by lmep.event_id, lmep.floor_no, lmep.sort_order, lmep.id;
+            order by lmep.event_id,
+                     lmep.sort_order nulls last,
+                     lmep.floor_no nulls last,
+                     lmep.id;
         """
 
     @staticmethod
