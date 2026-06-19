@@ -15,8 +15,8 @@ class LiveMapFloorV3(V3Database.Base):
     image = Column(TEXT)
     map_bounds = Column(JSON)
     default_zoom_level = Column(NUMERIC)
-    min_z = Column(NUMERIC)
-    max_z = Column(NUMERIC)
+    min_y = Column(NUMERIC)
+    max_y = Column(NUMERIC)
     sort_order = Column(Integer)
     update_time = Column(TIMESTAMP)
 
@@ -31,8 +31,8 @@ class LiveMapFloorZoneV3(V3Database.Base):
     area_x_max = Column(NUMERIC)
     area_z_min = Column(NUMERIC)
     area_z_max = Column(NUMERIC)
-    override_min_z = Column(NUMERIC)
-    override_max_z = Column(NUMERIC)
+    override_min_y = Column(NUMERIC)
+    override_max_y = Column(NUMERIC)
     sort_order = Column(Integer)
     update_time = Column(TIMESTAMP)
 

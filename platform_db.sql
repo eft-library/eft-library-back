@@ -1124,8 +1124,8 @@ create table if not exists live_map_floors
     image text,
     map_bounds jsonb,
     default_zoom_level numeric,
-    min_z numeric,
-    max_z numeric,
+    min_y numeric,
+    max_y numeric,
     sort_order integer,
     update_time timestamptz default now()
 );
@@ -1141,8 +1141,8 @@ create table if not exists live_map_floor_zones
     area_x_max numeric,
     area_z_min numeric,
     area_z_max numeric,
-    override_min_z numeric,
-    override_max_z numeric,
+    override_min_y numeric,
+    override_max_y numeric,
     sort_order integer,
     update_time timestamptz default now()
 );

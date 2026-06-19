@@ -37,8 +37,8 @@ class LiveMapServiceV3:
             "area_x_max": zone.area_x_max,
             "area_z_min": zone.area_z_min,
             "area_z_max": zone.area_z_max,
-            "override_min_z": zone.override_min_z,
-            "override_max_z": zone.override_max_z,
+            "override_min_y": zone.override_min_y,
+            "override_max_y": zone.override_max_y,
         }
 
     @staticmethod
@@ -53,8 +53,8 @@ class LiveMapServiceV3:
             "image": floor.image,
             "map_bounds": floor.map_bounds,
             "default_zoom_level": floor.default_zoom_level,
-            "min_z": floor.min_z,
-            "max_z": floor.max_z,
+            "min_y": floor.min_y,
+            "max_y": floor.max_y,
             "zones": zones or [],
         }
 
