@@ -64,7 +64,6 @@ class LiveMapServiceV3:
             "id": point.id,
             "map_id": point.map_id,
             "floor_id": point.floor_id,
-            "floor_no": point.floor_no,
             "category": point.category,
             "name_en": point.name_en,
             "name_ko": point.name_ko,
@@ -75,7 +74,6 @@ class LiveMapServiceV3:
             "image": point.image,
             "x": point.x,
             "z": point.z,
-            "y": point.y,
             "metadata": point.metadata_,
         }
 
@@ -85,10 +83,8 @@ class LiveMapServiceV3:
             "id": row["id"],
             "map_id": row["map_id"],
             "floor_id": row["floor_id"],
-            "floor_no": row["floor_no"],
             "x": row["x"],
             "z": row["z"],
-            "y": row["y"],
             "details": details,
         }
         if row.get("map_normalized_name") is not None:
@@ -348,10 +344,8 @@ class LiveMapServiceV3:
             "requirement_id": row.get("requirement_id"),
             "map_id": row["map_id"],
             "floor_id": row["floor_id"],
-            "floor_no": row["floor_no"],
             "x": row["x"],
             "z": row["z"],
-            "y": row["y"],
             "story_info": story_info,
         }
 
@@ -532,10 +526,8 @@ class LiveMapServiceV3:
             "objective_id": row["objective_id"],
             "map_id": row["map_id"],
             "floor_id": row["floor_id"],
-            "floor_no": row["floor_no"],
             "x": row["x"],
             "z": row["z"],
-            "y": row["y"],
             "event_info": event_info,
         }
 
@@ -570,10 +562,8 @@ class LiveMapServiceV3:
             "id": row["id"],
             "map_id": row["map_id"],
             "floor_id": row["floor_id"],
-            "floor_no": row["floor_no"],
             "x": row["x"],
             "z": row["z"],
-            "y": row["y"],
             "details": details,
         }
 
@@ -607,10 +597,8 @@ class LiveMapServiceV3:
                 "id": row["id"],
                 "map_id": row["map_id"],
                 "floor_id": row["floor_id"],
-                "floor_no": row["floor_no"],
                 "x": row["x"],
                 "z": row["z"],
-                "y": row["y"],
                 "details": details_by_point_id.get(row["id"], []),
             }
             if row.get("map_normalized_name") is not None:
@@ -633,10 +621,8 @@ class LiveMapServiceV3:
             "id": row["id"],
             "map_id": row["map_id"],
             "floor_id": row["floor_id"],
-            "floor_no": row["floor_no"],
             "x": row["x"],
             "z": row["z"],
-            "y": row["y"],
             "quest_info": quest_info,
         }
 
@@ -648,10 +634,8 @@ class LiveMapServiceV3:
             "objective_id": row["objective_id"],
             "map_id": row["map_id"],
             "floor_id": row["floor_id"],
-            "floor_no": row["floor_no"],
             "x": row["x"],
             "z": row["z"],
-            "y": row["y"],
             "details": details,
             "quest_info": {
                 "quest": (
@@ -714,10 +698,8 @@ class LiveMapServiceV3:
             "requirement_id": row.get("requirement_id"),
             "map_id": row["map_id"],
             "floor_id": row["floor_id"],
-            "floor_no": row["floor_no"],
             "x": row["x"],
             "z": row["z"],
-            "y": row["y"],
             "story_info": {
                 "story": (
                     {
@@ -761,10 +743,8 @@ class LiveMapServiceV3:
             "objective_id": row["objective_id"],
             "map_id": row["map_id"],
             "floor_id": row["floor_id"],
-            "floor_no": row["floor_no"],
             "x": row["x"],
             "z": row["z"],
-            "y": row["y"],
             "event_info": {
                 "event": (
                     {
@@ -1205,7 +1185,7 @@ class LiveMapServiceV3:
                     s.query(LiveMapStaticPointV3)
                     .filter(LiveMapStaticPointV3.map_id == map_data.id)
                     .order_by(
-                        LiveMapStaticPointV3.floor_no,
+                        LiveMapStaticPointV3.floor_id,
                         LiveMapStaticPointV3.category,
                         LiveMapStaticPointV3.sort_order,
                         LiveMapStaticPointV3.name_en,
@@ -1277,8 +1257,8 @@ class LiveMapServiceV3:
                         key=lambda row: (
                             row["sort_order"] is None,
                             row["sort_order"] or 0,
-                            row["floor_no"] is None,
-                            row["floor_no"] or 0,
+                            row["floor_id"] is None,
+                            row["floor_id"] or "",
                             row["id"] or "",
                         )
                     )

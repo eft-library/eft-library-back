@@ -28,10 +28,8 @@ class LiveMapQueryV3:
                    lmp.objective_id,
                    lmp.map_id,
                    lmp.floor_id,
-                   lmp.floor_no,
                    lmp.x,
                    lmp.z,
-                   lmp.y,
                    q.normalized_name as quest_normalized_name,
                    q.name_en as quest_name_en,
                    q.name_ko as quest_name_ko,
@@ -59,7 +57,7 @@ class LiveMapQueryV3:
             order by q.sort_order nulls last,
                      q.name_en nulls last,
                      qo.sort_order nulls last,
-                     lmp.floor_no,
+                     lmp.floor_id nulls last,
                      lmp.id;
         """
 
@@ -86,10 +84,8 @@ class LiveMapQueryV3:
                    lmp.objective_id,
                    lmp.map_id,
                    lmp.floor_id,
-                   lmp.floor_no,
                    lmp.x,
                    lmp.z,
-                   lmp.y,
                    m.normalized_name as map_normalized_name,
                    m.name_en as map_name_en,
                    m.name_ko as map_name_ko,
@@ -104,7 +100,7 @@ class LiveMapQueryV3:
             order by q.sort_order nulls last,
                      q.name_en nulls last,
                      qo.sort_order nulls last,
-                     lmp.floor_no,
+                     lmp.floor_id nulls last,
                      lmp.id;
         """
 
@@ -132,10 +128,8 @@ class LiveMapQueryV3:
                    sr.id as requirement_id,
                    lmsp.map_id,
                    lmsp.floor_id,
-                   lmsp.floor_no,
                    lmsp.x,
                    lmsp.z,
-                   lmsp.y,
                    lmsp.sort_order,
                    s.title_en,
                    s.title_ko,
@@ -164,7 +158,7 @@ class LiveMapQueryV3:
             ) sr on true
             where lmsp.map_id = :map_id
             order by lmsp.sort_order nulls last,
-                     lmsp.floor_no nulls last,
+                     lmsp.floor_id nulls last,
                      lmsp.id;
         """
 
@@ -177,10 +171,8 @@ class LiveMapQueryV3:
                    coalesce(lmsrp.requirement_id, sr_fallback.id) as requirement_id,
                    lmsrp.map_id,
                    lmsrp.floor_id,
-                   lmsrp.floor_no,
                    lmsrp.x,
                    lmsrp.z,
-                   lmsrp.y,
                    lmsrp.sort_order,
                    s.title_en,
                    s.title_ko,
@@ -208,7 +200,7 @@ class LiveMapQueryV3:
             ) sr_fallback on lmsrp.requirement_id is null
             where lmsrp.map_id = :map_id
             order by lmsrp.sort_order nulls last,
-                     lmsrp.floor_no nulls last,
+                     lmsrp.floor_id nulls last,
                      lmsrp.id;
         """
 
@@ -235,10 +227,8 @@ class LiveMapQueryV3:
                    lmsp.objective_id,
                    lmsp.map_id,
                    lmsp.floor_id,
-                   lmsp.floor_no,
                    lmsp.x,
                    lmsp.z,
-                   lmsp.y,
                    lmsp.sort_order,
                    s.title_en,
                    s.title_ko,
@@ -254,7 +244,7 @@ class LiveMapQueryV3:
             order by lmsp.story_id,
                      lmsp.objective_id nulls last,
                      lmsp.sort_order nulls last,
-                     lmsp.floor_no nulls last,
+                     lmsp.floor_id nulls last,
                      lmsp.id;
         """
 
@@ -327,10 +317,8 @@ class LiveMapQueryV3:
                    lmsrp.requirement_id,
                    lmsrp.map_id,
                    lmsrp.floor_id,
-                   lmsrp.floor_no,
                    lmsrp.x,
                    lmsrp.z,
-                   lmsrp.y,
                    lmsrp.sort_order,
                    m.normalized_name as map_normalized_name,
                    m.name_en as map_name_en,
@@ -341,7 +329,7 @@ class LiveMapQueryV3:
             where lmsrp.story_id = any(:story_ids)
             order by lmsrp.requirement_id,
                      lmsrp.sort_order nulls last,
-                     lmsrp.floor_no nulls last,
+                     lmsrp.floor_id nulls last,
                      lmsrp.id;
         """
 
@@ -478,10 +466,8 @@ class LiveMapQueryV3:
                    lmep.objective_id,
                    lmep.map_id,
                    lmep.floor_id,
-                   lmep.floor_no,
                    lmep.x,
                    lmep.z,
-                   lmep.y,
                    e.title_en,
                    e.title_ko,
                    e.title_ja,
@@ -503,7 +489,7 @@ class LiveMapQueryV3:
             where lmep.map_id = :map_id
               and e.is_active is true
             order by lmep.sort_order nulls last,
-                     lmep.floor_no nulls last,
+                     lmep.floor_id nulls last,
                      lmep.id;
         """
 
@@ -530,10 +516,8 @@ class LiveMapQueryV3:
                    lmep.objective_id,
                    lmep.map_id,
                    lmep.floor_id,
-                   lmep.floor_no,
                    lmep.x,
                    lmep.z,
-                   lmep.y,
                    lmep.sort_order,
                    e.title_en,
                    e.title_ko,
@@ -557,7 +541,7 @@ class LiveMapQueryV3:
               and e.is_active is true
             order by lmep.event_id,
                      lmep.sort_order nulls last,
-                     lmep.floor_no nulls last,
+                     lmep.floor_id nulls last,
                      lmep.id;
         """
 

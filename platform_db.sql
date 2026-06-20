@@ -1157,10 +1157,8 @@ create table if not exists live_map_points
     objective_id text,
     map_id text,
     floor_id text,
-    floor_no integer,
     x numeric,
     z numeric,
-    y numeric,
     update_time timestamptz default now()
 );
 create index idx_live_map_points_objective_id
@@ -1169,9 +1167,9 @@ create index idx_live_map_points_objective_id
 create index idx_live_map_points_map_id on live_map_points(map_id);
 create index idx_live_map_points_quest_id on live_map_points(quest_id);
 create index idx_live_map_points_floor_id on live_map_points(floor_id);
-create index idx_live_map_points_map_floor on live_map_points(map_id, floor_no);
-create index if not exists idx_live_map_points_map_floor_id on live_map_points(map_id, floor_no, id);
-create index if not exists idx_live_map_points_quest_floor_id on live_map_points(quest_id, floor_no, id);
+create index idx_live_map_points_map_floor on live_map_points(map_id, floor_id);
+create index if not exists idx_live_map_points_map_floor_id on live_map_points(map_id, floor_id, id);
+create index if not exists idx_live_map_points_quest_floor_id on live_map_points(quest_id, floor_id, id);
 
 create table if not exists live_map_point_details
 (
@@ -1191,7 +1189,6 @@ create table if not exists live_map_static_points
     id text primary key,
     map_id text,
     floor_id text,
-    floor_no integer,
     category text,
     name_en text,
     name_ko text,
@@ -1202,7 +1199,6 @@ create table if not exists live_map_static_points
     image text,
     x numeric,
     z numeric,
-    y numeric,
     metadata jsonb,
     sort_order integer,
     update_time timestamptz default now()
@@ -1211,7 +1207,7 @@ create index idx_live_map_static_points_map_id on live_map_static_points(map_id)
 create index idx_live_map_static_points_category on live_map_static_points(category);
 create index idx_live_map_static_points_map_category on live_map_static_points(map_id, category);
 create index idx_live_map_static_points_floor_id on live_map_static_points(floor_id);
-create index if not exists idx_live_map_static_points_map_sort on live_map_static_points(map_id, floor_no, category, sort_order, name_en);
+create index if not exists idx_live_map_static_points_map_sort on live_map_static_points(map_id, floor_id, category, sort_order, name_en);
 
 create table if not exists live_map_story_points
 (
@@ -1220,10 +1216,8 @@ create table if not exists live_map_story_points
     objective_id text,
     map_id text,
     floor_id text,
-    floor_no integer,
     x numeric,
     z numeric,
-    y numeric,
     sort_order integer,
     update_time timestamptz default now()
 );
@@ -1231,8 +1225,8 @@ create index if not exists idx_live_map_story_points_map_id on live_map_story_po
 create index if not exists idx_live_map_story_points_story_id on live_map_story_points(story_id);
 create index if not exists idx_live_map_story_points_objective_id on live_map_story_points(objective_id);
 create index if not exists idx_live_map_story_points_floor_id on live_map_story_points(floor_id);
-create index if not exists idx_live_map_story_points_map_floor on live_map_story_points(map_id, floor_no);
-create index if not exists idx_live_map_story_points_map_sort on live_map_story_points(map_id, floor_no, sort_order, id);
+create index if not exists idx_live_map_story_points_map_floor on live_map_story_points(map_id, floor_id);
+create index if not exists idx_live_map_story_points_map_sort on live_map_story_points(map_id, sort_order, floor_id, id);
 
 create table if not exists live_map_story_point_details
 (
@@ -1254,10 +1248,8 @@ create table if not exists live_map_story_requirement_points
     requirement_id text,
     map_id text,
     floor_id text,
-    floor_no integer,
     x numeric,
     z numeric,
-    y numeric,
     sort_order integer,
     update_time timestamptz default now()
 );
@@ -1265,8 +1257,8 @@ create index if not exists idx_live_map_story_requirement_points_story_id on liv
 create index if not exists idx_live_map_story_requirement_points_requirement_id on live_map_story_requirement_points(requirement_id);
 create index if not exists idx_live_map_story_requirement_points_map_id on live_map_story_requirement_points(map_id);
 create index if not exists idx_live_map_story_requirement_points_floor_id on live_map_story_requirement_points(floor_id);
-create index if not exists idx_live_map_story_requirement_points_map_floor on live_map_story_requirement_points(map_id, floor_no);
-create index if not exists idx_live_map_story_requirement_points_map_sort on live_map_story_requirement_points(map_id, floor_no, sort_order, id);
+create index if not exists idx_live_map_story_requirement_points_map_floor on live_map_story_requirement_points(map_id, floor_id);
+create index if not exists idx_live_map_story_requirement_points_map_sort on live_map_story_requirement_points(map_id, sort_order, floor_id, id);
 
 create table if not exists live_map_story_requirement_point_details
 (
@@ -1371,10 +1363,8 @@ create table if not exists live_map_event_points
     objective_id text,
     map_id text,
     floor_id text,
-    floor_no integer,
     x numeric,
     z numeric,
-    y numeric,
     sort_order integer,
     update_time timestamptz default now()
 );
@@ -1382,8 +1372,8 @@ create index if not exists idx_live_map_event_points_event_id on live_map_event_
 create index if not exists idx_live_map_event_points_objective_id on live_map_event_points(objective_id);
 create index if not exists idx_live_map_event_points_map_id on live_map_event_points(map_id);
 create index if not exists idx_live_map_event_points_floor_id on live_map_event_points(floor_id);
-create index if not exists idx_live_map_event_points_map_floor on live_map_event_points(map_id, floor_no);
-create index if not exists idx_live_map_event_points_map_sort on live_map_event_points(map_id, floor_no, sort_order, id);
+create index if not exists idx_live_map_event_points_map_floor on live_map_event_points(map_id, floor_id);
+create index if not exists idx_live_map_event_points_map_sort on live_map_event_points(map_id, sort_order, floor_id, id);
 
 create table if not exists live_map_event_point_details
 (
