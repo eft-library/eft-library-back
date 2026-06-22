@@ -141,6 +141,20 @@ class HomeServiceV3:
             return None
 
     @staticmethod
+    def get_home_posts_v3():
+        try:
+            with V3Database.SessionLocal() as s:
+                home_posts_query = text(HomeQueryV3.home_posts_sql())
+                home_posts = s.execute(home_posts_query)
+                return [dict(row) for row in home_posts.mappings()]
+        except Exception as e:
+            logger.error(
+                f"get_home_posts_v3 error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
     def get_menu_with_autocomplete_v3():
         try:
             with V3Database.SessionLocal() as s:
