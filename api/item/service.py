@@ -110,6 +110,52 @@ class ItemServiceV3:
         }
 
     @staticmethod
+    def _serialize_ammo_info_v3(
+        ammo_info: AmmoItemV3 | None,
+        ammo_efficiency: AmmoEfficiencyV3 | None = None,
+    ):
+        if ammo_info is None:
+            return None
+
+        result = {
+            "damage": ammo_info.damage,
+            "armor_damage": ammo_info.armor_damage,
+            "penetration_power": ammo_info.penetration_power,
+            "recoil_modifier": (
+                float(ammo_info.recoil_modifier)
+                if ammo_info.recoil_modifier is not None
+                else None
+            ),
+            "accuracy_modifier": (
+                float(ammo_info.accuracy_modifier)
+                if ammo_info.accuracy_modifier is not None
+                else None
+            ),
+            "heavy_bleed_modifier": (
+                float(ammo_info.heavy_bleed_modifier)
+                if ammo_info.heavy_bleed_modifier is not None
+                else None
+            ),
+            "light_bleed_modifier": (
+                float(ammo_info.light_bleed_modifier)
+                if ammo_info.light_bleed_modifier is not None
+                else None
+            ),
+        }
+
+        if ammo_efficiency is not None:
+            result["efficiency"] = {
+                "value_1": ammo_efficiency.value_1,
+                "value_2": ammo_efficiency.value_2,
+                "value_3": ammo_efficiency.value_3,
+                "value_4": ammo_efficiency.value_4,
+                "value_5": ammo_efficiency.value_5,
+                "value_6": ammo_efficiency.value_6,
+            }
+
+        return result
+
+    @staticmethod
     def _serialize_related_item_v3(item: ItemV3 | None):
         if item is None:
             return None
@@ -842,40 +888,10 @@ class ItemServiceV3:
                         .first()
                     )
 
-                    result["ammo_info"] = {
-                        "damage": ammo_info.damage,
-                        "armor_damage": ammo_info.armor_damage,
-                        "penetration_power": ammo_info.penetration_power,
-                        "recoil_modifier": (
-                            float(ammo_info.recoil_modifier)
-                            if ammo_info.recoil_modifier is not None
-                            else None
-                        ),
-                        "accuracy_modifier": (
-                            float(ammo_info.accuracy_modifier)
-                            if ammo_info.accuracy_modifier is not None
-                            else None
-                        ),
-                        "heavy_bleed_modifier": (
-                            float(ammo_info.heavy_bleed_modifier)
-                            if ammo_info.heavy_bleed_modifier is not None
-                            else None
-                        ),
-                        "light_bleed_modifier": (
-                            float(ammo_info.light_bleed_modifier)
-                            if ammo_info.light_bleed_modifier is not None
-                            else None
-                        ),
-                    }
-                    if ammo_efficiency is not None:
-                        result["ammo_info"]["efficiency"] = {
-                            "value_1": ammo_efficiency.value_1,
-                            "value_2": ammo_efficiency.value_2,
-                            "value_3": ammo_efficiency.value_3,
-                            "value_4": ammo_efficiency.value_4,
-                            "value_5": ammo_efficiency.value_5,
-                            "value_6": ammo_efficiency.value_6,
-                        }
+                    result["ammo_info"] = ItemServiceV3._serialize_ammo_info_v3(
+                        ammo_info,
+                        ammo_efficiency,
+                    )
 
                 melee_info = (
                     s.query(MeleeItemV3).filter(MeleeItemV3.item_id == item.id).first()
@@ -1112,8 +1128,48 @@ class ItemServiceV3:
 
                 items = query.all()
 
-                return [
-                    {
+                if item_type != "ammo":
+                    return [
+                        {
+                            "id": item.id,
+                            "normalized_name": item.normalized_name,
+                            "name_en": item.name_en,
+                            "name_ko": item.name_ko,
+                            "name_ja": item.name_ja,
+                            "image": item.image,
+                            "width": item.width,
+                            "height": item.height,
+                        }
+                        for item in items
+                    ]
+
+                item_ids = [item.id for item in items]
+                ammo_info_by_item_id = {}
+                ammo_efficiency_by_item_id = {}
+
+                if item_ids:
+                    ammo_infos = (
+                        s.query(AmmoItemV3)
+                        .filter(AmmoItemV3.item_id.in_(item_ids))
+                        .all()
+                    )
+                    ammo_info_by_item_id = {
+                        ammo_info.item_id: ammo_info for ammo_info in ammo_infos
+                    }
+
+                    ammo_efficiencies = (
+                        s.query(AmmoEfficiencyV3)
+                        .filter(AmmoEfficiencyV3.ammo_item_id.in_(item_ids))
+                        .all()
+                    )
+                    ammo_efficiency_by_item_id = {
+                        ammo_efficiency.ammo_item_id: ammo_efficiency
+                        for ammo_efficiency in ammo_efficiencies
+                    }
+
+                result = []
+                for item in items:
+                    item_data = {
                         "id": item.id,
                         "normalized_name": item.normalized_name,
                         "name_en": item.name_en,
@@ -1123,8 +1179,13 @@ class ItemServiceV3:
                         "width": item.width,
                         "height": item.height,
                     }
-                    for item in items
-                ]
+                    item_data["ammo_info"] = ItemServiceV3._serialize_ammo_info_v3(
+                        ammo_info_by_item_id.get(item.id),
+                        ammo_efficiency_by_item_id.get(item.id),
+                    )
+                    result.append(item_data)
+
+                return result
         except Exception as e:
             logger.error(
                 f"get_item_list_v3: {item_type}, error: {e}",
