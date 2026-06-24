@@ -2,8 +2,9 @@ import asyncio
 import json
 import os
 from typing import Dict, Set
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketDisconnect
 from redis.asyncio import Redis
+from starlette.websockets import WebSocketState
 import logging
 
 logger = logging.getLogger("ws")
@@ -18,6 +19,20 @@ redis = Redis.from_url(
 connected_websockets: Dict[str, WebSocket] = {}  # user_email -> websocket
 user_listeners: Dict[str, asyncio.Task] = {}  # user_email -> redis listener task
 sent_notifications: Dict[str, Set[str]] = {}  # user_email -> dedup key set
+
+
+async def safe_send_text(websocket: WebSocket, data: str):
+    if websocket.client_state != WebSocketState.CONNECTED:
+        return False
+
+    try:
+        await websocket.send_text(data)
+        return True
+    except WebSocketDisconnect:
+        return False
+    except RuntimeError as e:
+        logger.info(f"[SEND_SKIP] WebSocket already closed: {e}")
+        return False
 
 
 # WebSocket Handler
@@ -39,14 +54,19 @@ async def websocket_handler(websocket: WebSocket, user_email: str):
 
     existing_notifications.reverse()
 
-    await websocket.send_text(
+    sent = await safe_send_text(
+        websocket,
         json.dumps(
             {
                 "type": "init",
                 "notifications": existing_notifications,
             }
-        )
+        ),
     )
+    if not sent:
+        logger.info(f"[CLOSE] WebSocket init 전송 실패: {user_email}")
+        await cleanup_user(user_email)
+        return
 
     # 2. Redis listener 시작 (없으면)
     if user_email not in user_listeners:
@@ -56,8 +76,10 @@ async def websocket_handler(websocket: WebSocket, user_email: str):
         # ping / keep-alive 용
         while True:
             await websocket.receive_text()
-    except Exception:
+    except WebSocketDisconnect:
         pass
+    except RuntimeError as e:
+        logger.info(f"[CLOSE] WebSocket receive 종료: {user_email}, {e}")
     finally:
         logger.info(f"[CLOSE] WebSocket 연결 종료: {user_email}")
         await cleanup_user(user_email)
@@ -87,7 +109,9 @@ async def redis_listener(user_email: str):
 
             # WPF 위치 메시지
             if data.get("type") == "wpf_location":
-                await ws.send_text(json.dumps(data))
+                sent = await safe_send_text(ws, json.dumps(data))
+                if not sent:
+                    await cleanup_user(user_email)
                 continue
 
             # 일반 알림 (중복 방지)
@@ -104,14 +128,17 @@ async def redis_listener(user_email: str):
 
             sent_notifications[user_email].add(notification_key)
 
-            await ws.send_text(
+            sent = await safe_send_text(
+                ws,
                 json.dumps(
                     {
                         "type": "message",
                         "data": data,
                     }
-                )
+                ),
             )
+            if not sent:
+                await cleanup_user(user_email)
 
     except asyncio.CancelledError:
         pass
