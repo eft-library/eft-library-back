@@ -213,6 +213,7 @@ class CommunityServiceV3:
     def _toggle_post_reaction_v3(post_id: int, user_email: str, next_value: int):
         try:
             with V3Database.SessionLocal() as s:
+                result = next_value
                 reaction = (
                     s.query(CommunityPostsReactionsV3)
                     .filter(
@@ -231,25 +232,17 @@ class CommunityServiceV3:
                             0 if reaction.reaction_type in (1, -1) else -1
                         )
                     reaction.update_time = datetime.now()
+                    result = reaction.reaction_type
                 else:
-                    s.add(
-                        CommunityPostsReactionsV3(
-                            post_id=post_id,
-                            user_email=user_email,
-                            reaction_type=next_value,
-                            update_time=datetime.now(),
-                        )
+                    reaction = CommunityPostsReactionsV3(
+                        post_id=post_id,
+                        user_email=user_email,
+                        reaction_type=next_value,
+                        update_time=datetime.now(),
                     )
-                    reaction = (
-                        s.query(CommunityPostsReactionsV3)
-                        .filter(
-                            CommunityPostsReactionsV3.post_id == post_id,
-                            CommunityPostsReactionsV3.user_email == user_email,
-                        )
-                        .first()
-                    )
+                    s.add(reaction)
                 s.commit()
-                return {"result": reaction.reaction_type}
+                return {"result": result}
         except Exception as e:
             logger.error(f"toggle_post_reaction_v3: {post_id}, error: {e}", exc_info=True)
             return None
