@@ -8,6 +8,7 @@ from database import V3Database
 from datetime import datetime
 import pytz
 import logging
+from sqlalchemy.dialects.postgresql import insert
 
 logger = logging.getLogger("api.progress")
 
@@ -99,30 +100,24 @@ class ProgressServiceV3:
         try:
             with V3Database.SessionLocal() as s:
 
-                def now_kst():
-                    return datetime.now(pytz.timezone("Asia/Seoul"))
-
                 def upsert_progress(progress_type: str, item_list):
-                    item = (
-                        s.query(UserProgressItemV3)
-                        .filter(
-                            UserProgressItemV3.email == user_email,
-                            UserProgressItemV3.progress_type == progress_type,
-                        )
-                        .first()
+                    stmt = insert(UserProgressItemV3).values(
+                        email=user_email,
+                        progress_type=progress_type,
+                        item_list=item_list,
+                        update_time=datetime.now(pytz.timezone("Asia/Seoul")),
                     )
-
-                    if item is None:
-                        item = UserProgressItemV3(
-                            email=user_email,
-                            progress_type=progress_type,
-                            item_list=item_list,
-                            update_time=now_kst(),
-                        )
-                        s.add(item)
-                    else:
-                        item.item_list = item_list
-                        item.update_time = now_kst()
+                    stmt = stmt.on_conflict_do_update(
+                        index_elements=[
+                            UserProgressItemV3.email,
+                            UserProgressItemV3.progress_type,
+                        ],
+                        set_={
+                            "item_list": stmt.excluded.item_list,
+                            "update_time": stmt.excluded.update_time,
+                        },
+                    )
+                    s.execute(stmt)
 
                 upsert_progress("Rebirth", progress_item_list.userRebirth)
                 upsert_progress("Kappa", progress_item_list.userKappa)

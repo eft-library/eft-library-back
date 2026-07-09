@@ -213,36 +213,42 @@ class CommunityServiceV3:
     def _toggle_post_reaction_v3(post_id: int, user_email: str, next_value: int):
         try:
             with V3Database.SessionLocal() as s:
-                result = next_value
-                reaction = (
-                    s.query(CommunityPostsReactionsV3)
-                    .filter(
-                        CommunityPostsReactionsV3.post_id == post_id,
-                        CommunityPostsReactionsV3.user_email == user_email,
-                    )
-                    .first()
+                result = s.execute(
+                    text(
+                        """
+                        INSERT INTO community_posts_reactions
+                            (post_id, user_email, reaction_type, update_time)
+                        VALUES
+                            (:post_id, :user_email, :next_value, :update_time)
+                        ON CONFLICT (post_id, user_email) DO UPDATE
+                        SET reaction_type = CASE
+                                WHEN :next_value = 1 THEN
+                                    CASE
+                                        WHEN COALESCE(community_posts_reactions.reaction_type, -1) IN (0, -1)
+                                        THEN 1
+                                        ELSE -1
+                                    END
+                                ELSE
+                                    CASE
+                                        WHEN COALESCE(community_posts_reactions.reaction_type, -1) IN (1, -1)
+                                        THEN 0
+                                        ELSE -1
+                                    END
+                            END,
+                            update_time = excluded.update_time
+                        RETURNING reaction_type;
+                        """
+                    ),
+                    {
+                        "post_id": post_id,
+                        "user_email": user_email,
+                        "next_value": next_value,
+                        "update_time": datetime.now(),
+                    },
                 )
-                if reaction:
-                    if next_value == 1:
-                        reaction.reaction_type = (
-                            1 if reaction.reaction_type in (0, -1) else -1
-                        )
-                    else:
-                        reaction.reaction_type = (
-                            0 if reaction.reaction_type in (1, -1) else -1
-                        )
-                    reaction.update_time = datetime.now()
-                    result = reaction.reaction_type
-                else:
-                    reaction = CommunityPostsReactionsV3(
-                        post_id=post_id,
-                        user_email=user_email,
-                        reaction_type=next_value,
-                        update_time=datetime.now(),
-                    )
-                    s.add(reaction)
+                reaction_type = result.scalar_one()
                 s.commit()
-                return {"result": result}
+                return {"result": reaction_type}
         except Exception as e:
             logger.error(f"toggle_post_reaction_v3: {post_id}, error: {e}", exc_info=True)
             return None
@@ -252,23 +258,32 @@ class CommunityServiceV3:
         try:
             with V3Database.SessionLocal() as s:
                 bigint_post_id = int(post_id)
-                bookmark = (
-                    s.query(CommunityPostsBookmarkV3)
-                    .filter(
-                        CommunityPostsBookmarkV3.post_id == bigint_post_id,
-                        CommunityPostsBookmarkV3.email == user_email,
-                    )
-                    .first()
+                deleted = s.execute(
+                    text(
+                        """
+                        DELETE FROM community_posts_bookmark
+                        WHERE email = :email AND post_id = :post_id
+                        RETURNING 1;
+                        """
+                    ),
+                    {"email": user_email, "post_id": bigint_post_id},
                 )
-                if bookmark:
-                    s.delete(bookmark)
-                else:
-                    s.add(
-                        CommunityPostsBookmarkV3(
-                            post_id=bigint_post_id,
-                            email=user_email,
-                            create_time=datetime.now(),
-                        )
+                if deleted.scalar() is None:
+                    s.execute(
+                        text(
+                            """
+                            INSERT INTO community_posts_bookmark
+                                (email, post_id, create_time)
+                            VALUES
+                                (:email, :post_id, :create_time)
+                            ON CONFLICT (email, post_id) DO NOTHING;
+                            """
+                        ),
+                        {
+                            "email": user_email,
+                            "post_id": bigint_post_id,
+                            "create_time": datetime.now(),
+                        },
                     )
                 s.commit()
                 return {"result": 1}
@@ -280,25 +295,42 @@ class CommunityServiceV3:
     def toggle_follow_v3(request_info: FollowUser, user_email: str):
         try:
             with V3Database.SessionLocal() as s:
-                follow = (
-                    s.query(UserFollowsV3)
-                    .filter(
-                        UserFollowsV3.follower_email == request_info.following_user_email,
-                        UserFollowsV3.following_email == user_email,
-                    )
-                    .first()
+                deleted = s.execute(
+                    text(
+                        """
+                        DELETE FROM user_follows
+                        WHERE follower_email = :follower_email
+                          AND following_email = :following_email
+                        RETURNING 1;
+                        """
+                    ),
+                    {
+                        "follower_email": request_info.following_user_email,
+                        "following_email": user_email,
+                    },
                 )
-                if follow:
-                    s.delete(follow)
-                else:
-                    s.add(
-                        UserFollowsV3(
-                            follower_email=request_info.following_user_email,
-                            following_email=user_email,
-                            create_time=datetime.now(),
-                        )
+                if deleted.scalar() is None:
+                    inserted = s.execute(
+                        text(
+                            """
+                            INSERT INTO user_follows
+                                (follower_email, following_email, create_time)
+                            VALUES
+                                (:follower_email, :following_email, :create_time)
+                            ON CONFLICT (follower_email, following_email) DO NOTHING
+                            RETURNING 1;
+                            """
+                        ),
+                        {
+                            "follower_email": request_info.following_user_email,
+                            "following_email": user_email,
+                            "create_time": datetime.now(),
+                        },
                     )
-                    if request_info.following_user_email != user_email:
+                    if (
+                        inserted.scalar() is not None
+                        and request_info.following_user_email != user_email
+                    ):
                         produce_notification(
                             json.dumps(
                                 {

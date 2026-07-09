@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta, timezone
 
 import pytz
 from sqlalchemy import text
+from sqlalchemy.dialects.postgresql import insert
 
 from api.user.user_req_models import AddUserReq
 from api.user.user_res_models import UserV3
@@ -53,6 +54,60 @@ class UserFunctionV3:
         session.commit()
 
     @staticmethod
+    def _upsert_user_info_v3(session, addUserReq: AddUserReq):
+        tz = pytz.timezone("Asia/Seoul")
+        now = datetime.now(tz)
+        start_of_today, end_of_today = UserFunctionV3._get_start_and_end_of_day(
+            tz, now.date()
+        )
+
+        stmt = insert(UserV3).values(
+            email=addUserReq.email,
+            name=addUserReq.name,
+            is_admin=False,
+            attendance_count=1,
+            attendance_time=now,
+            create_time=now,
+        )
+        stmt = stmt.on_conflict_do_update(
+            index_elements=[UserV3.email],
+            set_={
+                "name": stmt.excluded.name,
+                "attendance_count": text(
+                    """
+                    CASE
+                        WHEN user_info.attendance_time IS NULL
+                          OR user_info.attendance_time < :start_of_today
+                          OR user_info.attendance_time > :end_of_today
+                        THEN COALESCE(user_info.attendance_count, 0) + 1
+                        ELSE user_info.attendance_count
+                    END
+                    """
+                ),
+                "attendance_time": text(
+                    """
+                    CASE
+                        WHEN user_info.attendance_time IS NULL
+                          OR user_info.attendance_time < :start_of_today
+                          OR user_info.attendance_time > :end_of_today
+                        THEN :now
+                        ELSE user_info.attendance_time
+                    END
+                    """
+                ),
+            },
+        )
+        session.execute(
+            stmt,
+            {
+                "start_of_today": start_of_today,
+                "end_of_today": end_of_today,
+                "now": now,
+            },
+        )
+        session.commit()
+
+    @staticmethod
     def _create_delete_user_v3(session, user: UserV3):
         session.delete(user)
 
@@ -68,7 +123,8 @@ class UserFunctionV3:
             text(UserUtilV3.get_user_info_with_penalty()),
             {"user_email": user_email},
         )
-        return [dict(row) for row in result.mappings()][0]
+        row = result.mappings().first()
+        return dict(row) if row is not None else None
 
     @staticmethod
     def get_my_page_default_v3(session, user_email: str):

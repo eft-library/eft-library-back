@@ -217,35 +217,42 @@ class CommentServiceV3:
     def _toggle_reaction_v3(comment_id: str, user_email: str, next_value: int):
         try:
             with V3Database.SessionLocal() as s:
-                reaction = (
-                    s.query(CommentReactionV3)
-                    .filter(
-                        CommentReactionV3.comment_id == comment_id,
-                        CommentReactionV3.email == user_email,
-                    )
-                    .first()
+                result = s.execute(
+                    text(
+                        """
+                        INSERT INTO community_comments_reactions
+                            (comment_id, email, reaction_type, reaction_time)
+                        VALUES
+                            (:comment_id, :email, :next_value, :reaction_time)
+                        ON CONFLICT (comment_id, email) DO UPDATE
+                        SET reaction_type = CASE
+                                WHEN :next_value = 1 THEN
+                                    CASE
+                                        WHEN COALESCE(community_comments_reactions.reaction_type, -1) IN (0, -1)
+                                        THEN 1
+                                        ELSE -1
+                                    END
+                                ELSE
+                                    CASE
+                                        WHEN COALESCE(community_comments_reactions.reaction_type, -1) IN (1, -1)
+                                        THEN 0
+                                        ELSE -1
+                                    END
+                            END,
+                            reaction_time = excluded.reaction_time
+                        RETURNING reaction_type;
+                        """
+                    ),
+                    {
+                        "comment_id": comment_id,
+                        "email": user_email,
+                        "next_value": next_value,
+                        "reaction_time": datetime.now(),
+                    },
                 )
-                if reaction:
-                    if next_value == 1:
-                        reaction.reaction_type = (
-                            1 if reaction.reaction_type in (0, -1) else -1
-                        )
-                    else:
-                        reaction.reaction_type = (
-                            0 if reaction.reaction_type in (1, -1) else -1
-                        )
-                    reaction.reaction_time = datetime.now()
-                else:
-                    reaction = CommentReactionV3(
-                        comment_id=comment_id,
-                        email=user_email,
-                        reaction_type=next_value,
-                        reaction_time=datetime.now(),
-                    )
-                    s.add(reaction)
-
+                reaction_type = result.scalar_one()
                 s.commit()
-                return {"result": reaction.reaction_type}
+                return {"result": reaction_type}
         except Exception as e:
             logger.error(
                 f"toggle_reaction_v3: {comment_id}, error: {e}",

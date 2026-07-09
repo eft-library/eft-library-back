@@ -43,6 +43,17 @@ class HideoutQueryV3:
         """
 
     @staticmethod
+    def upsert_user_hideout_item_list_preserve_complete_sql():
+        return """
+            insert into user_hideout (email, complete_list, item_list, update_time)
+            values (:email, ARRAY[]::text[], cast(:item_list as jsonb), :update_time)
+            on conflict (email) do update
+            set complete_list = coalesce(user_hideout.complete_list, excluded.complete_list),
+                item_list = cast(excluded.item_list as jsonb),
+                update_time = excluded.update_time;
+        """
+
+    @staticmethod
     def hideout_master_sql():
         return """
             select id,

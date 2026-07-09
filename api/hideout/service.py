@@ -238,26 +238,12 @@ class HideoutServiceV3:
             item_list_json = [item.model_dump() for item in item_list]
 
             with V3Database.SessionLocal() as s:
-                existing = (
-                    s.query(UserHideoutV3)
-                    .filter(UserHideoutV3.email == user_email)
-                    .first()
-                )
-                complete_list = existing.complete_list if existing else []
-
                 s.execute(
                     text(
-                        """
-                        insert into user_hideout (email, complete_list, item_list, update_time)
-                        values (:email, :complete_list, cast(:item_list as jsonb), :update_time)
-                        on conflict (email) do update
-                        set item_list = cast(excluded.item_list as jsonb),
-                            update_time = excluded.update_time;
-                        """
+                        HideoutQueryV3.upsert_user_hideout_item_list_preserve_complete_sql()
                     ),
                     {
                         "email": user_email,
-                        "complete_list": complete_list,
                         "item_list": json.dumps(item_list_json),
                         "update_time": datetime.utcnow(),
                     },

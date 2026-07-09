@@ -17,11 +17,7 @@ class UserServiceV3:
     def add_new_user_v3(addUserReq: AddUserReq):
         try:
             with V3Database.SessionLocal() as s:
-                check_user = UserFunctionV3._get_existing_user_v3(s, addUserReq.email)
-                if check_user:
-                    UserFunctionV3._handle_existing_user_v3(s, check_user)
-                else:
-                    UserFunctionV3._create_new_user_v3(s, addUserReq)
+                UserFunctionV3._upsert_user_info_v3(s, addUserReq)
                 return True
         except Exception as e:
             logger.error(
