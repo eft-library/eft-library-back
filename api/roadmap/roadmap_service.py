@@ -7,6 +7,7 @@ from api.roadmap.roadmap_res_models import (
 from database import V3Database
 from api.roadmap.query import RoadmapQueryV3
 from sqlalchemy import text
+from sqlalchemy.dialects.postgresql import insert
 import pytz
 import logging
 
@@ -70,23 +71,24 @@ class RoadmapServiceV3:
     def save_roadmap_v3(quest_list: List[str], user_email: str):
         try:
             with V3Database.SessionLocal() as s:
-                user_roadmap = (
-                    s.query(UserRoadmapV3).filter_by(email=user_email).first()
-                )
                 utc_now = datetime.utcnow().replace(tzinfo=pytz.utc)
                 kst = pytz.timezone("Asia/Seoul")
                 kst_now = utc_now.astimezone(kst)
 
-                if user_roadmap:
-                    user_roadmap.quest_list = quest_list
-                    user_roadmap.update_time = kst_now
-                    s.commit()
-                else:
-                    new_user_roadmap = UserRoadmapV3(
-                        email=user_email, quest_list=quest_list, update_time=kst_now
-                    )
-                    s.add(new_user_roadmap)
-                    s.commit()
+                stmt = insert(UserRoadmapV3).values(
+                    email=user_email,
+                    quest_list=quest_list,
+                    update_time=kst_now,
+                )
+                stmt = stmt.on_conflict_do_update(
+                    index_elements=[UserRoadmapV3.email],
+                    set_={
+                        "quest_list": stmt.excluded.quest_list,
+                        "update_time": stmt.excluded.update_time,
+                    },
+                )
+                s.execute(stmt)
+                s.commit()
                 return quest_list
         except Exception as e:
             logger.error(
