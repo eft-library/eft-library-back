@@ -2,7 +2,7 @@ import re
 from datetime import date, datetime, timedelta, timezone
 
 import pytz
-from sqlalchemy import text
+from sqlalchemy import case, func, or_, text
 from sqlalchemy.dialects.postgresql import insert
 
 from api.user.user_req_models import AddUserReq
@@ -69,42 +69,29 @@ class UserFunctionV3:
             attendance_time=now,
             create_time=now,
         )
+        should_update_attendance = or_(
+            UserV3.attendance_time.is_(None),
+            UserV3.attendance_time < start_of_today,
+            UserV3.attendance_time > end_of_today,
+        )
         stmt = stmt.on_conflict_do_update(
             index_elements=[UserV3.email],
             set_={
                 "name": stmt.excluded.name,
-                "attendance_count": text(
-                    """
-                    CASE
-                        WHEN user_info.attendance_time IS NULL
-                          OR user_info.attendance_time < :start_of_today
-                          OR user_info.attendance_time > :end_of_today
-                        THEN COALESCE(user_info.attendance_count, 0) + 1
-                        ELSE user_info.attendance_count
-                    END
-                    """
+                "attendance_count": case(
+                    (
+                        should_update_attendance,
+                        func.coalesce(UserV3.attendance_count, 0) + 1,
+                    ),
+                    else_=UserV3.attendance_count,
                 ),
-                "attendance_time": text(
-                    """
-                    CASE
-                        WHEN user_info.attendance_time IS NULL
-                          OR user_info.attendance_time < :start_of_today
-                          OR user_info.attendance_time > :end_of_today
-                        THEN :now
-                        ELSE user_info.attendance_time
-                    END
-                    """
+                "attendance_time": case(
+                    (should_update_attendance, now),
+                    else_=UserV3.attendance_time,
                 ),
             },
         )
-        session.execute(
-            stmt,
-            {
-                "start_of_today": start_of_today,
-                "end_of_today": end_of_today,
-                "now": now,
-            },
-        )
+        session.execute(stmt)
         session.commit()
 
     @staticmethod
