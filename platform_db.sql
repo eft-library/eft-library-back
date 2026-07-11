@@ -788,6 +788,61 @@ create table if not exists progress_item (
 );
 CREATE INDEX idx_progress_item_type ON progress_item (progress_type);
 
+create table if not exists kord_breach_modifier (
+    id text primary key,
+    modifier_category text not null,
+    name_en text not null,
+    name_ko text,
+    name_ja text,
+    effect_en text,
+    effect_ko text,
+    effect_ja text,
+    score integer not null default 0,
+    icon_url text,
+    sort_order integer,
+    is_active boolean default true,
+    update_time timestamptz default now()
+);
+create index if not exists idx_kord_breach_modifier_category_sort
+    on kord_breach_modifier(modifier_category, sort_order, id);
+create index if not exists idx_kord_breach_modifier_active
+    on kord_breach_modifier(is_active);
+
+create table if not exists kord_breach_modifier_conflict (
+    modifier_id text not null,
+    conflict_modifier_id text not null,
+    reason text,
+    update_time timestamptz default now(),
+    primary key (modifier_id, conflict_modifier_id)
+);
+create index if not exists idx_kord_breach_modifier_conflict_reverse
+    on kord_breach_modifier_conflict(conflict_modifier_id, modifier_id);
+
+create table if not exists user_kord_breach_preset (
+    email text not null,
+    slot_no integer not null check (slot_no between 1 and 3),
+    name text,
+    total_score integer not null default 0,
+    create_time timestamptz default now(),
+    update_time timestamptz default now(),
+    primary key (email, slot_no)
+);
+create index if not exists idx_user_kord_breach_preset_email_update
+    on user_kord_breach_preset(email, update_time desc);
+
+create table if not exists user_kord_breach_preset_modifier (
+    email text not null,
+    slot_no integer not null check (slot_no between 1 and 3),
+    modifier_id text not null,
+    sort_order integer,
+    create_time timestamptz default now(),
+    primary key (email, slot_no, modifier_id)
+);
+create index if not exists idx_user_kord_breach_preset_modifier_slot
+    on user_kord_breach_preset_modifier(email, slot_no, sort_order, modifier_id);
+create index if not exists idx_user_kord_breach_preset_modifier_modifier
+    on user_kord_breach_preset_modifier(modifier_id);
+
 create table if not exists user_minigame_score (
   id serial primary key,
   nickname text,

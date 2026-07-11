@@ -20,6 +20,7 @@ from api.minigame import minigame_router
 from api.story import story_router
 from api.chat import chat_router
 from api.live_map import live_map_router
+from api.kord_breach import router as kord_breach_router
 
 api_router = APIRouter()
 
@@ -44,3 +45,4 @@ api_router.include_router(minigame_router.router, prefix="/minigame")
 api_router.include_router(story_router.router, prefix="/story")
 api_router.include_router(chat_router.router, prefix="/chat")
 api_router.include_router(live_map_router.router, prefix="/live-map")
+api_router.include_router(kord_breach_router.router, prefix="/kord-breach")
