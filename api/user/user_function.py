@@ -2,7 +2,7 @@ import re
 from datetime import date, datetime, timedelta, timezone
 
 import pytz
-from sqlalchemy import case, func, or_, text
+from sqlalchemy import case, func, or_, text, update
 from sqlalchemy.dialects.postgresql import insert
 
 from api.user.user_req_models import AddUserReq
@@ -90,6 +90,30 @@ class UserFunctionV3:
                     else_=UserV3.attendance_time,
                 ),
             },
+        )
+        session.execute(stmt)
+        session.commit()
+
+    @staticmethod
+    def _update_attendance_if_needed_v3(session, user_email: str):
+        tz = pytz.timezone("Asia/Seoul")
+        now = datetime.now(tz)
+        start_of_today, end_of_today = UserFunctionV3._get_start_and_end_of_day(
+            tz, now.date()
+        )
+        should_update_attendance = or_(
+            UserV3.attendance_time.is_(None),
+            UserV3.attendance_time < start_of_today,
+            UserV3.attendance_time > end_of_today,
+        )
+
+        stmt = (
+            update(UserV3)
+            .where(UserV3.email == user_email, should_update_attendance)
+            .values(
+                attendance_count=func.coalesce(UserV3.attendance_count, 0) + 1,
+                attendance_time=now,
+            )
         )
         session.execute(stmt)
         session.commit()

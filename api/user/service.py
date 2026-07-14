@@ -30,6 +30,7 @@ class UserServiceV3:
     def get_user_v3(user_email: str):
         try:
             with V3Database.SessionLocal() as s:
+                UserFunctionV3._update_attendance_if_needed_v3(s, user_email)
                 return UserFunctionV3._get_user_data_v3(s, user_email)
         except Exception as e:
             logger.error(f"get_user_v3 error: {e}", exc_info=True)
