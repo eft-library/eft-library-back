@@ -525,6 +525,17 @@ class LiveMapServiceV3:
             "event_id": row["event_id"],
             "objective_id": row["objective_id"],
             "map_id": row["map_id"],
+            "map": (
+                {
+                    "id": row["map_id"],
+                    "normalized_name": row["map_normalized_name"],
+                    "name_en": row["map_name_en"],
+                    "name_ko": row["map_name_ko"],
+                    "name_ja": row["map_name_ja"],
+                }
+                if row.get("map_normalized_name") is not None
+                else None
+            ),
             "floor_id": row["floor_id"],
             "x": row["x"],
             "z": row["z"],
@@ -742,6 +753,17 @@ class LiveMapServiceV3:
             "event_id": row["event_id"],
             "objective_id": row["objective_id"],
             "map_id": row["map_id"],
+            "map": (
+                {
+                    "id": row["map_id"],
+                    "normalized_name": row["map_normalized_name"],
+                    "name_en": row["map_name_en"],
+                    "name_ko": row["map_name_ko"],
+                    "name_ja": row["map_name_ja"],
+                }
+                if row.get("map_normalized_name") is not None
+                else None
+            ),
             "floor_id": row["floor_id"],
             "x": row["x"],
             "z": row["z"],
@@ -1273,8 +1295,7 @@ class LiveMapServiceV3:
                     event_point_rows = [
                         dict(row)
                         for row in s.execute(
-                            text(LiveMapQueryV3.event_points_by_map_sql()),
-                            {"map_id": map_data.id},
+                            text(LiveMapQueryV3.event_points_all_active_sql()),
                         ).mappings()
                     ]
                 else:

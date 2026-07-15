@@ -494,6 +494,48 @@ class LiveMapQueryV3:
         """
 
     @staticmethod
+    def event_points_all_active_sql():
+        return """
+            select lmep.id,
+                   lmep.event_id,
+                   lmep.objective_id,
+                   lmep.map_id,
+                   lmep.floor_id,
+                   lmep.x,
+                   lmep.z,
+                   m.normalized_name as map_normalized_name,
+                   m.name_en as map_name_en,
+                   m.name_ko as map_name_ko,
+                   m.name_ja as map_name_ja,
+                   e.title_en,
+                   e.title_ko,
+                   e.title_ja,
+                   e.is_active,
+                   t.id as trader_id,
+                   t.normalized_name as trader_normalized_name,
+                   t.name_en as trader_name_en,
+                   t.name_ko as trader_name_ko,
+                   t.name_ja as trader_name_ja,
+                   t.image as trader_image,
+                   lmeo.description_en as objective_description_en,
+                   lmeo.description_ko as objective_description_ko,
+                   lmeo.description_ja as objective_description_ja
+            from live_map_event_points lmep
+                     join live_map_events e on lmep.event_id = e.id
+                     left join live_map_event_objectives lmeo
+                               on lmep.objective_id = lmeo.objective_id
+                     left join maps m on lmep.map_id = m.id
+                     left join traders t on e.trader_id = t.id
+            where e.is_active is true
+            order by e.sort_order nulls last,
+                     e.title_en nulls last,
+                     m.sort_order nulls last,
+                     lmep.sort_order nulls last,
+                     lmep.floor_id nulls last,
+                     lmep.id;
+        """
+
+    @staticmethod
     def event_point_details_by_map_sql():
         return """
             select lmepd.id,
