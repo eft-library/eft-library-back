@@ -207,7 +207,7 @@ create table if not exists quest_finish_reward_skills (
     name_en text,
     name_ko text,
     name_ja text,
-    skill_level integer,
+    skill_level numeric,
     sort_order integer,
     primary key (quest_id, name_en, name_ko, name_ja)
 );
@@ -231,7 +231,7 @@ create table if not exists quest_finish_reward_offer_unlock (
     item_id text,
     level integer,
     sort_order integer,
-    primary key (quest_id, offer_id)
+    primary key (quest_id, offer_id, item_id)
 );
 create index idx_quest_finish_reward_offer_unlock_quest_id on quest_finish_reward_offer_unlock (quest_id);
 
@@ -395,7 +395,7 @@ create table if not exists hideout_craft_require_items
     id text primary key,
     craft_id text,
     item_id text,
-    quantity integer
+    quantity numeric
 );
 create index idx_craft_require_items_craft on hideout_craft_require_items(craft_id);
 create index idx_craft_require_items_item on hideout_craft_require_items(item_id);
