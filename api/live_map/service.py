@@ -18,21 +18,25 @@ logger = logging.getLogger("api.live_map")
 
 class LiveMapServiceV3:
     @staticmethod
-    def _has_hangul_v3(value: str | None):
+    def _starts_with_hangul_v3(value: str | None):
         if not value:
             return False
-        return any(
-            "\uac00" <= char <= "\ud7a3" or "\u3131" <= char <= "\u318e"
-            for char in value
+        stripped_value = value.strip()
+        if not stripped_value:
+            return False
+        first_char = stripped_value[0]
+        return (
+            "\uac00" <= first_char <= "\ud7a3"
+            or "\u3131" <= first_char <= "\u318e"
         )
 
     @staticmethod
     def _quest_name_sort_key_v3(row: dict):
         name_ko = row.get("quest_name_ko") or ""
-        has_hangul = LiveMapServiceV3._has_hangul_v3(name_ko)
+        starts_with_hangul = LiveMapServiceV3._starts_with_hangul_v3(name_ko)
         name = name_ko or row.get("quest_name_en") or ""
         return (
-            not has_hangul,
+            not starts_with_hangul,
             name == "",
             name.casefold(),
             row.get("quest_name_en") or "",
