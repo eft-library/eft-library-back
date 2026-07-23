@@ -765,6 +765,22 @@ create table if not exists response_time (
 );
 create index if not exists idx_response_time_checked_time on response_time(checked_time desc);
 
+create table if not exists deployment_notice (
+    id text primary key,
+    is_active boolean not null default false,
+    message_ko text,
+    message_en text,
+    message_ja text,
+    start_time timestamptz,
+    end_time timestamptz,
+    updated_by text,
+    update_time timestamptz default now()
+);
+create index if not exists idx_deployment_notice_active
+    on deployment_notice(is_active);
+create index if not exists idx_deployment_notice_time
+    on deployment_notice(start_time, end_time);
+
 create table if not exists user_location_request (
     id serial primary key,
     email text,

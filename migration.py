@@ -1700,11 +1700,11 @@ def main() -> None:
     # menu_groups_count = migrate_menu_groups()
     # menu_sub_groups_count = migrate_menu_sub_groups()
     # roadmap_node_count = migrate_roadmap_node()
-    roadmap_edge_count = migrate_roadmap_edge()
+    # roadmap_edge_count = migrate_roadmap_edge()
     # progress_item_count = migrate_progress_item()
     # wipe_count = migrate_wipe()
     # quest_guide_count = migrate_quest_guide()
-    # quest_objectives_i18n_count = migrate_quest_objectives_i18n()
+    quest_objectives_i18n_count = migrate_quest_objectives_i18n()
     # story_count = migrate_story()
     # roadmap_count = migrate_story_roadmap()
 
@@ -1720,7 +1720,7 @@ def main() -> None:
 
     logger.info(
         "migration finished: information=%s",
-        roadmap_edge_count,
+        quest_objectives_i18n_count,
     )
 
 
