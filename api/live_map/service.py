@@ -18,6 +18,19 @@ logger = logging.getLogger("api.live_map")
 
 class LiveMapServiceV3:
     @staticmethod
+    def _quest_name_sort_key_v3(row: dict):
+        name = row.get("quest_name_ko") or row.get("quest_name_en") or ""
+        return (
+            name == "",
+            name.casefold(),
+            row.get("quest_name_en") or "",
+            row.get("objective_sort_order") is None,
+            row.get("objective_sort_order") or 0,
+            row.get("floor_id") or "",
+            row.get("id") or "",
+        )
+
+    @staticmethod
     def _serialize_map_selector_v3(row: dict):
         return {
             "id": row["id"],
@@ -1241,6 +1254,7 @@ class LiveMapServiceV3:
                         {"map_id": map_data.id},
                     ).mappings()
                 ]
+                quest_point_rows.sort(key=LiveMapServiceV3._quest_name_sort_key_v3)
 
                 quest_points = [
                     LiveMapServiceV3._serialize_quest_point_summary_v3(

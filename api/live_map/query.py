@@ -41,6 +41,7 @@ class LiveMapQueryV3:
                    qo.description_ja as objective_description_ja,
                    qo.count as objective_count,
                    qo.found_in_raid,
+                   qo.sort_order as objective_sort_order,
                    t.id as trader_id,
                    t.normalized_name as trader_normalized_name,
                    t.name_en as trader_name_en,
