@@ -20,6 +20,9 @@ SUSPICIOUS_PARAMS = {"file", "path", "include", "template", "doc"}
 # 화이트리스트 경로 (필요시 추가)
 SAFE_PATHS = {"/download", "/api/files"}
 
+# 잦은 폴링으로 access log/footprint 적재에서 제외할 경로
+NO_FOOTPRINT_PATHS = {"/api/deployment-notice/v3/status"}
+
 logger = logging.getLogger("api.access")
 load_dotenv()
 
@@ -75,18 +78,26 @@ class KafkaProducerMiddleware(BaseHTTPMiddleware):
 
         # Rate limiting
         now = datetime.now()
-        self.request_counts[real_ip] = [
-            t for t in self.request_counts[real_ip] if now - t < timedelta(minutes=1)
-        ]
+        should_track_footprint = path not in NO_FOOTPRINT_PATHS
 
-        if len(self.request_counts[real_ip]) > 100:
-            logger.warning(f"Rate limit exceeded: {real_ip}")
-            return Response(status_code=429)
+        if should_track_footprint:
+            self.request_counts[real_ip] = [
+                t
+                for t in self.request_counts[real_ip]
+                if now - t < timedelta(minutes=1)
+            ]
 
-        self.request_counts[real_ip].append(now)
+            if len(self.request_counts[real_ip]) > 100:
+                logger.warning(f"Rate limit exceeded: {real_ip}")
+                return Response(status_code=429)
+
+            self.request_counts[real_ip].append(now)
 
         response = await call_next(request)
         process_time = time.time() - start_time
+
+        if not should_track_footprint:
+            return response
 
         # if real_ip != os.getenv("IP"):
         logger.info(
