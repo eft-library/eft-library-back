@@ -105,6 +105,7 @@ class LiveMapServiceV3:
             "x": point.x,
             "z": point.z,
             "metadata": point.metadata_,
+            "is_use": point.is_use,
         }
 
     @staticmethod
@@ -1235,7 +1236,10 @@ class LiveMapServiceV3:
 
                 static_points = (
                     s.query(LiveMapStaticPointV3)
-                    .filter(LiveMapStaticPointV3.map_id == map_data.id)
+                    .filter(
+                        LiveMapStaticPointV3.map_id == map_data.id,
+                        LiveMapStaticPointV3.is_use.is_(True),
+                    )
                     .order_by(
                         LiveMapStaticPointV3.floor_id,
                         LiveMapStaticPointV3.category,

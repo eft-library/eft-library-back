@@ -81,6 +81,7 @@ class LiveMapStaticPointV3(V3Database.Base):
     x = Column(NUMERIC)
     z = Column(NUMERIC)
     metadata_ = Column("metadata", JSON)
+    is_use = Column(BOOLEAN)
     sort_order = Column(Integer)
     update_time = Column(TIMESTAMP)
 

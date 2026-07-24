@@ -1272,6 +1272,7 @@ create table if not exists live_map_static_points
     x numeric,
     z numeric,
     metadata jsonb,
+    is_use boolean default true,
     sort_order integer,
     update_time timestamptz default now()
 );
@@ -1279,6 +1280,7 @@ create index idx_live_map_static_points_map_id on live_map_static_points(map_id)
 create index idx_live_map_static_points_category on live_map_static_points(category);
 create index idx_live_map_static_points_map_category on live_map_static_points(map_id, category);
 create index idx_live_map_static_points_floor_id on live_map_static_points(floor_id);
+create index if not exists idx_live_map_static_points_is_use on live_map_static_points(is_use);
 create index if not exists idx_live_map_static_points_map_sort on live_map_static_points(map_id, floor_id, category, sort_order, name_en);
 
 create table if not exists live_map_story_points
