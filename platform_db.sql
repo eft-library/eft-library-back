@@ -1195,6 +1195,7 @@ create table if not exists live_map_floors
     image text,
     map_bounds jsonb,
     default_zoom_level numeric,
+    is_main boolean default false,
     min_y numeric,
     max_y numeric,
     sort_order integer,

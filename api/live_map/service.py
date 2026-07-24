@@ -82,6 +82,7 @@ class LiveMapServiceV3:
             "image": floor.image,
             "map_bounds": floor.map_bounds,
             "default_zoom_level": floor.default_zoom_level,
+            "is_main": floor.is_main,
             "min_y": floor.min_y,
             "max_y": floor.max_y,
             "zones": zones or [],

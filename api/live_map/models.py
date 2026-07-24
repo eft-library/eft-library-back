@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, JSON, NUMERIC, String, TEXT, TIMESTAMP
+from sqlalchemy import BOOLEAN, Column, Integer, JSON, NUMERIC, String, TEXT, TIMESTAMP
 
 from database import V3Database
 
@@ -15,6 +15,7 @@ class LiveMapFloorV3(V3Database.Base):
     image = Column(TEXT)
     map_bounds = Column(JSON)
     default_zoom_level = Column(NUMERIC)
+    is_main = Column(BOOLEAN)
     min_y = Column(NUMERIC)
     max_y = Column(NUMERIC)
     sort_order = Column(Integer)
