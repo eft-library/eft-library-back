@@ -65,7 +65,6 @@ EFT Library Backend는 FastAPI를 사용하여 구축하였고, PostgreSQL의 �
   - **community** : 커뮤니티 관련 API
   - **comment** : 댓글 관련 API
   - **chat** : MCP AI Agent 관련 API
-  - **minigame** : 웹게임 API
 - **util**
   - **constants** : HTTP Code 정의
   - **kafka_producer** : Kafka 메시지 처리

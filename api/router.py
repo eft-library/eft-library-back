@@ -16,7 +16,6 @@ from api.community import community_router
 from api.comment import comment_router
 from api.where_am_i import where_am_i_router
 from api.progress import progress_router
-from api.minigame import minigame_router
 from api.story import story_router
 from api.chat import chat_router
 from api.live_map import live_map_router
@@ -42,7 +41,6 @@ api_router.include_router(community_router.router, prefix="/community")
 api_router.include_router(comment_router.router, prefix="/comment")
 api_router.include_router(where_am_i_router.router, prefix="/where-am-i")
 api_router.include_router(progress_router.router, prefix="/progress")
-api_router.include_router(minigame_router.router, prefix="/minigame")
 api_router.include_router(story_router.router, prefix="/story")
 api_router.include_router(chat_router.router, prefix="/chat")
 api_router.include_router(live_map_router.router, prefix="/live-map")

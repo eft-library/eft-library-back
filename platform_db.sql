@@ -859,15 +859,6 @@ create index if not exists idx_user_kord_breach_preset_modifier_slot
 create index if not exists idx_user_kord_breach_preset_modifier_modifier
     on user_kord_breach_preset_modifier(modifier_id);
 
-create table if not exists user_minigame_score (
-  id serial primary key,
-  nickname text,
-  game_type text,
-  score bigint,
-  create_time timestamptz default now()
-);
-CREATE INDEX idx_minigame_score_rank ON user_minigame_score (game_type, score DESC, create_time ASC);
-
 create table if not exists story (
     id text primary key,
     title_en text,
@@ -1272,7 +1263,7 @@ create table if not exists live_map_static_points
     x numeric,
     z numeric,
     metadata jsonb,
-    is_use boolean default true,
+    is_use boolean default false,
     sort_order integer,
     update_time timestamptz default now()
 );
