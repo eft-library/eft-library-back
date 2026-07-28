@@ -1,9 +1,6 @@
 from sqlalchemy import text
 from api.map.models import MapV3
-from api.map_of_tarkov.models import (
-    MapPointV3,
-    WhereAmIV3,
-)
+from api.map_of_tarkov.models import MapPointV3
 from api.map_of_tarkov.query import MapOfTarkovQueryV3
 from database import V3Database
 import logging
@@ -32,19 +29,6 @@ class MapOfTarkovServiceV3:
             "mot_image_en": map_data.mot_image_en,
             "mot_image_ko": map_data.mot_image_ko,
             "mot_image_ja": map_data.mot_image_ja,
-        }
-
-    @staticmethod
-    def _serialize_where_am_i_v3(find_info: WhereAmIV3 | None):
-        if find_info is None:
-            return None
-
-        return {
-            "id": find_info.id,
-            "image": find_info.image,
-            "map_bounds": find_info.map_bounds,
-            "image_bounds": find_info.image_bounds,
-            "default_zoom_level": find_info.default_zoom_level,
         }
 
     @staticmethod
@@ -121,10 +105,6 @@ class MapOfTarkovServiceV3:
                     .all()
                 )
 
-                find_info = (
-                    s.query(WhereAmIV3).filter(WhereAmIV3.id == map_data.id).first()
-                )
-
                 related_parent_id = None
                 if map_data.map_depth == 1:
                     related_parent_id = map_data.id
@@ -195,9 +175,6 @@ class MapOfTarkovServiceV3:
                         MapOfTarkovServiceV3._serialize_map_selector_v3(row)
                         for row in child_maps
                     ],
-                    "find_info": MapOfTarkovServiceV3._serialize_where_am_i_v3(
-                        find_info
-                    ),
                     "extraction_info": extraction_info,
                     "transit_info": transit_info,
                     "boss_info": [

@@ -2,25 +2,12 @@ from sqlalchemy import (
     Boolean,
     Column,
     String,
-    JSON,
     Integer,
     TIMESTAMP,
     TEXT,
-    NUMERIC,
 )
 
 from database import V3Database
-
-
-class WhereAmIV3(V3Database.Base):
-    __tablename__ = "where_am_i"
-
-    id = Column(String, primary_key=True)
-    image = Column(TEXT)
-    map_bounds = Column(JSON)
-    image_bounds = Column(JSON)
-    default_zoom_level = Column(NUMERIC)
-    update_time = Column(TIMESTAMP)
 
 
 class MapPointV3(V3Database.Base):
