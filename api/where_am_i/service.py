@@ -41,10 +41,7 @@ class WhereAmIServiceV3:
                     await send_wpf_location(user_email=req.email, location=req.location)
                     return True
             else:
-                logger.error(
-                    f"존재하지 않는 사용자: {req.email}",
-                    exc_info=True,
-                )
+                logger.warning(f"존재하지 않는 사용자: {req.email}")
                 return None
         except Exception as e:
             logger.error(
