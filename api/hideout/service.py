@@ -22,6 +22,61 @@ class HideoutServiceV3:
         return grouped
 
     @staticmethod
+    def get_all_item_requirements_v3():
+        try:
+            with V3Database.SessionLocal() as s:
+                rows = (
+                    s.execute(text(HideoutQueryV3.all_item_requirements_sql()))
+                    .mappings()
+                    .all()
+                )
+
+                items = {}
+                for row in rows:
+                    item_key = (row["item_id"], bool(row["in_raid"]))
+                    item = items.get(item_key)
+                    if item is None:
+                        item = {
+                            "item_id": row["item_id"],
+                            "normalized_name": row["normalized_name"],
+                            "name_en": row["name_en"],
+                            "name_ko": row["name_ko"],
+                            "name_ja": row["name_ja"],
+                            "image": row["image"],
+                            "width": row["width"],
+                            "height": row["height"],
+                            "in_raid": bool(row["in_raid"]),
+                            "total_quantity": 0,
+                            "requirements": [],
+                        }
+                        items[item_key] = item
+
+                    item["total_quantity"] += row["quantity"]
+                    item["requirements"].append(
+                        {
+                            "requirement_id": row["requirement_id"],
+                            "hideout_level_id": row["hideout_level_id"],
+                            "station_id": row["station_id"],
+                            "station_normalized_name": row[
+                                "station_normalized_name"
+                            ],
+                            "station_level": row["station_level"],
+                            "station_name_en": row["station_name_en"],
+                            "station_name_ko": row["station_name_ko"],
+                            "station_name_ja": row["station_name_ja"],
+                            "quantity": row["quantity"],
+                        }
+                    )
+
+                return {"items": list(items.values())}
+        except Exception as e:
+            logger.error(
+                f"get_all_item_requirements_v3 error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
     def get_station_v3(user_email: Optional[str]):
         try:
             with V3Database.SessionLocal() as s:

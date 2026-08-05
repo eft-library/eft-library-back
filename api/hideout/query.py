@@ -1,5 +1,38 @@
 class HideoutQueryV3:
     @staticmethod
+    def all_item_requirements_sql():
+        return """
+            select hir.id as requirement_id,
+                   hir.hideout_level_id,
+                   hir.item_id,
+                   hir.quantity,
+                   hir.in_raid,
+                   i.normalized_name,
+                   i.name_en,
+                   i.name_ko,
+                   i.name_ja,
+                   i.image,
+                   i.width,
+                   i.height,
+                   hm.id as station_id,
+                   hm.normalized_name as station_normalized_name,
+                   hm.name_en as station_name_en,
+                   hm.name_ko as station_name_ko,
+                   hm.name_ja as station_name_ja,
+                   hl.hideout_level as station_level
+            from hideout_item_require hir
+                     join hideout_levels hl on hir.hideout_level_id = hl.id
+                     join hideout_master hm on hl.master_id = hm.id
+                     left join items i on hir.item_id = i.id
+            order by i.name_en nulls last,
+                     hir.item_id,
+                     hir.in_raid,
+                     hm.name_en nulls last,
+                     hl.hideout_level,
+                     hir.id;
+        """
+
+    @staticmethod
     def hideout_master_list_sql():
         return """
             select id,
