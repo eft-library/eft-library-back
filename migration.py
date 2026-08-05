@@ -741,9 +741,14 @@ UPSERT_QUEST_OBJECTIVES_SQL = text(
         :sort_order
     )
     on conflict (objective_id, quest_id) do update set
+        type = excluded.type,
         description_en = excluded.description_en,
         description_ko = excluded.description_ko,
-        description_ja = excluded.description_ja;
+        description_ja = excluded.description_ja,
+        count = excluded.count,
+        found_in_raid = excluded.found_in_raid,
+        sort_order = excluded.sort_order,
+        update_time = now();
     """
 )
 

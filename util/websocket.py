@@ -108,7 +108,11 @@ async def redis_listener(user_email: str):
                 continue
 
             # WPF 위치 메시지
-            if data.get("type") == "wpf_location":
+            if data.get("type") in {
+                "wpf_location",
+                "wpf_log_location",
+                "wpf_raid_state",
+            }:
                 sent = await safe_send_text(ws, json.dumps(data))
                 if not sent:
                     await cleanup_user(user_email)
@@ -172,6 +176,32 @@ async def send_wpf_location(user_email: str, location: str):
         json.dumps(
             {
                 "type": "wpf_location",
+                "payload": location,
+            }
+        ),
+    )
+
+
+async def send_wpf_raid_state(user_email: str, state: dict):
+    """Publish the desktop app's current raid state to the signed-in web client."""
+    await redis.publish(
+        f"notifications_channel:{user_email}",
+        json.dumps(
+            {
+                "type": "wpf_raid_state",
+                "payload": state,
+            }
+        ),
+    )
+
+
+async def send_wpf_log_location(user_email: str, location: dict):
+    """Publish a sparse location observed in an EFT application log."""
+    await redis.publish(
+        f"notifications_channel:{user_email}",
+        json.dumps(
+            {
+                "type": "wpf_log_location",
                 "payload": location,
             }
         ),

@@ -55,6 +55,7 @@ class LiveMapQueryV3:
                               and (lmp.quest_id is null or lmp.quest_id = qo.quest_id)
                      left join traders t on q.trader_id = t.id
             where lmp.map_id = :map_id
+              and (lmp.objective_id is null or qo.is_use is true)
             order by lower(coalesce(q.name_ko, q.name_en)) nulls last,
                      q.name_ko nulls last,
                      q.name_en nulls last,
@@ -99,6 +100,7 @@ class LiveMapQueryV3:
                               and lmp.quest_id = qo.quest_id
                      left join maps m on lmp.map_id = m.id
             where lmp.quest_id = any(:quest_ids)
+              and (lmp.objective_id is null or qo.is_use is true)
             order by q.sort_order nulls last,
                      q.name_en nulls last,
                      qo.sort_order nulls last,

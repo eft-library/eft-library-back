@@ -269,7 +269,9 @@ class ItemServiceV3:
                            t.name_ja as trader_name_ja,
                            t.image as trader_image
                     from quest_objective_items qoi
-                             join quest_objectives qo on qoi.objective_id = qo.objective_id
+                             join quest_objectives qo
+                                  on qoi.objective_id = qo.objective_id
+                                 and qo.is_use is true
                              join quests q on qo.quest_id = q.id
                              left join traders t on q.trader_id = t.id
                     where qoi.item_id = :item_id
@@ -295,7 +297,9 @@ class ItemServiceV3:
                            t.name_ja as trader_name_ja,
                            t.image as trader_image
                     from quest_objective_required_keys qork
-                             join quest_objectives qo on qork.objective_id = qo.objective_id
+                             join quest_objectives qo
+                                  on qork.objective_id = qo.objective_id
+                                 and qo.is_use is true
                              join quests q on qo.quest_id = q.id
                              left join traders t on q.trader_id = t.id
                     where qork.key_id = :item_id

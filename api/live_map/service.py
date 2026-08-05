@@ -1,5 +1,7 @@
 from copy import deepcopy
+from datetime import datetime, timedelta, timezone
 
+import requests
 from sqlalchemy import inspect, nullslast, text
 
 from api.live_map.models import (
@@ -17,6 +19,34 @@ logger = logging.getLogger("api.live_map")
 
 
 class LiveMapServiceV3:
+    _raid_durations_v3: dict[str, int] = {}
+    _raid_durations_fetched_at_v3: datetime | None = None
+
+    @staticmethod
+    def get_raid_duration_v3(normalized_name: str):
+        now = datetime.now(timezone.utc)
+        fetched_at = LiveMapServiceV3._raid_durations_fetched_at_v3
+        if fetched_at is None or now - fetched_at > timedelta(minutes=15):
+            try:
+                response = requests.post(
+                    "https://api.tarkov.dev/graphql",
+                    json={"query": "{ maps { normalizedName raidDuration } }"},
+                    timeout=8,
+                )
+                response.raise_for_status()
+                maps = response.json().get("data", {}).get("maps", [])
+                LiveMapServiceV3._raid_durations_v3 = {
+                    row["normalizedName"]: row["raidDuration"]
+                    for row in maps
+                    if row.get("normalizedName") and row.get("raidDuration")
+                }
+                LiveMapServiceV3._raid_durations_fetched_at_v3 = now
+            except (requests.RequestException, ValueError, TypeError) as e:
+                logger.warning(f"get_raid_duration_v3 refresh failed: {e}")
+
+        duration = LiveMapServiceV3._raid_durations_v3.get(normalized_name)
+        return {"normalized_name": normalized_name, "minutes": duration} if duration else None
+
     @staticmethod
     def _starts_with_hangul_v3(value: str | None):
         if not value:

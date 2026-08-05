@@ -160,6 +160,7 @@ class QuestQueryV3:
                    sort_order
             from quest_objectives
             where quest_id = :quest_id
+              and is_use is true
             order by sort_order, objective_id;
         """
 
@@ -181,6 +182,7 @@ class QuestQueryV3:
                 select objective_id
                 from quest_objectives
                 where quest_id = :quest_id
+                  and is_use is true
             )
             order by qoi.objective_id, qoi.sort_order, i.name_en;
         """
@@ -201,6 +203,7 @@ class QuestQueryV3:
                 select objective_id
                 from quest_objectives
                 where quest_id = :quest_id
+                  and is_use is true
             )
             order by qork.objective_id, i.name_en;
         """
@@ -221,6 +224,7 @@ class QuestQueryV3:
                 select objective_id
                 from quest_objectives
                 where quest_id = :quest_id
+                  and is_use is true
             )
             order by qom.objective_id, qom.sort_order, m.name_en;
         """

@@ -165,6 +165,8 @@ create table if not exists quest_objectives (
     count integer,
     found_in_raid boolean,
     sort_order integer,
+    is_use boolean not null default true,
+    update_time timestamptz default now(),
     primary key (objective_id, quest_id)
 );
 create index idx_quest_objectives_quest_id on quest_objectives (quest_id);
