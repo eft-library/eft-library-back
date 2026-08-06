@@ -9,15 +9,22 @@ class QuestQueryV3:
                      left join lateral (
                          select array_agg(qr.related_quest_id order by qr.sort_order, qr.related_quest_id) as task_requirements
                          from quest_relations qr
+                                  join quests related_q
+                                       on related_q.id = qr.related_quest_id
+                                      and related_q.is_use is true
                          where qr.quest_id = q.id
                            and qr.relation_type = 'require'
                      ) require_rel on true
                      left join lateral (
                          select array_agg(qr.related_quest_id order by qr.sort_order, qr.related_quest_id) as task_next
                          from quest_relations qr
+                                  join quests related_q
+                                       on related_q.id = qr.related_quest_id
+                                      and related_q.is_use is true
                          where qr.quest_id = q.id
                            and qr.relation_type = 'next'
                      ) next_rel on true
+            where q.is_use is true
             order by q.sort_order, q.id;
         """
 
@@ -38,6 +45,7 @@ class QuestQueryV3:
                    t.image as trader_image
             from quests q
                      left join traders t on q.trader_id = t.id
+            where q.is_use is true
             order by q.sort_order, q.name_en;
         """
 
@@ -54,6 +62,7 @@ class QuestQueryV3:
                    q.guide_ja,
                    q.update_time
             from quests q
+            where q.is_use is true
             order by q.sort_order, q.name_en;
         """
 
@@ -82,7 +91,8 @@ class QuestQueryV3:
                    t.image as trader_image
             from quests q
                      left join traders t on q.trader_id = t.id
-            where q.normalized_name = :normalized_name;
+            where q.normalized_name = :normalized_name
+              and q.is_use is true;
         """
 
     @staticmethod
@@ -112,6 +122,7 @@ class QuestQueryV3:
             from quests q
                      join traders t on q.trader_id = t.id
             where t.normalized_name = :trader_normalized_name
+              and q.is_use is true
             order by q.sort_order, q.name_en;
         """
 
@@ -127,6 +138,7 @@ class QuestQueryV3:
                    q.min_player_level
             from quests q
             where q.trader_id = :trader_id
+              and q.is_use is true
             order by q.sort_order, q.name_en;
         """
 
@@ -143,6 +155,7 @@ class QuestQueryV3:
             from quest_relations qr
                      join quests rq on qr.related_quest_id = rq.id
             where qr.quest_id = :quest_id
+              and rq.is_use is true
             order by qr.relation_type, qr.sort_order, rq.name_en;
         """
 

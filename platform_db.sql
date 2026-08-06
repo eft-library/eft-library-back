@@ -138,9 +138,12 @@ create table if not exists quests (
     guide_en text,
     guide_ko text,
     guide_ja text,
+    is_use boolean not null default true,
     sort_order integer,
     update_time timestamptz default now()
 );
+alter table quests add column if not exists is_use boolean not null default true;
+create index if not exists idx_quests_is_use on quests(is_use);
 
 
 -- 퀘스트 관계(Relations)

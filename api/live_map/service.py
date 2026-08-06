@@ -1040,8 +1040,9 @@ class LiveMapServiceV3:
                         """
                         select id, normalized_name
                         from quests
-                        where id = :identifier
-                           or normalized_name = :identifier
+                        where (id = :identifier
+                            or normalized_name = :identifier)
+                          and is_use is true
                         limit 1;
                         """
                     ),

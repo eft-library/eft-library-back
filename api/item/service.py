@@ -272,7 +272,9 @@ class ItemServiceV3:
                              join quest_objectives qo
                                   on qoi.objective_id = qo.objective_id
                                  and qo.is_use is true
-                             join quests q on qo.quest_id = q.id
+                             join quests q
+                                  on qo.quest_id = q.id
+                                 and q.is_use is true
                              left join traders t on q.trader_id = t.id
                     where qoi.item_id = :item_id
                     union all
@@ -300,7 +302,9 @@ class ItemServiceV3:
                              join quest_objectives qo
                                   on qork.objective_id = qo.objective_id
                                  and qo.is_use is true
-                             join quests q on qo.quest_id = q.id
+                             join quests q
+                                  on qo.quest_id = q.id
+                                 and q.is_use is true
                              left join traders t on q.trader_id = t.id
                     where qork.key_id = :item_id
                     order by quest_name_en nulls last, objective_id, sort_order nulls last;
@@ -333,7 +337,9 @@ class ItemServiceV3:
                            t.name_ja as trader_name_ja,
                            t.image as trader_image
                     from quest_finish_reward_items qfri
-                             join quests q on qfri.quest_id = q.id
+                             join quests q
+                                  on qfri.quest_id = q.id
+                                 and q.is_use is true
                              left join traders t on q.trader_id = t.id
                     where qfri.item_id = :item_id
                     union all
@@ -354,7 +360,9 @@ class ItemServiceV3:
                            t.name_ja as trader_name_ja,
                            t.image as trader_image
                     from quest_finish_reward_offer_unlock qfrou
-                             join quests q on qfrou.quest_id = q.id
+                             join quests q
+                                  on qfrou.quest_id = q.id
+                                 and q.is_use is true
                              left join traders t on qfrou.trader_id = t.id
                     where qfrou.item_id = :item_id
                     order by quest_name_en nulls last, reward_type, sort_order nulls last;
@@ -538,7 +546,9 @@ class ItemServiceV3:
                            hm.name_ko as hideout_name_ko,
                            hm.name_ja as hideout_name_ja
                     from quest_finish_reward_craft_unlocks qfrcu
-                             join quests q on qfrcu.quest_id = q.id
+                             join quests q
+                                  on qfrcu.quest_id = q.id
+                                 and q.is_use is true
                              join hideout_crafts hc on qfrcu.craft_id = hc.id
                              left join hideout_levels hl on hc.hideout_level_id = hl.id
                              left join hideout_master hm on hl.master_id = hm.id
