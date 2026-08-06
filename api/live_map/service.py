@@ -10,6 +10,13 @@ from api.live_map.models import (
     LiveMapStaticPointV3,
 )
 from api.live_map.query import LiveMapQueryV3
+from api.live_map.res_models import (
+    BtrRouteMapV3,
+    BtrRoutePointV3,
+    BtrRouteStopV3,
+    BtrRouteV3,
+    BtrRoutesResponseV3,
+)
 from api.map.models import MapV3
 from api.quest.service import QuestServiceV3
 from database import V3Database
@@ -19,6 +26,11 @@ logger = logging.getLogger("api.live_map")
 
 
 class LiveMapServiceV3:
+    _BTR_TABLES_V3 = (
+        "live_map_btr_routes",
+        "live_map_btr_route_points",
+        "live_map_btr_route_stops",
+    )
     _raid_durations_v3: dict[str, int] = {}
     _raid_durations_fetched_at_v3: datetime | None = None
 
@@ -888,6 +900,123 @@ class LiveMapServiceV3:
         return inspector.has_table(table_name)
 
     @staticmethod
+    def _can_query_btr_routes_v3(s):
+        inspector = inspect(s.bind)
+        return all(
+            inspector.has_table(table_name)
+            for table_name in LiveMapServiceV3._BTR_TABLES_V3
+        )
+
+    @staticmethod
+    def _get_btr_routes_by_map_id_v3(s, map_id: str):
+        if not LiveMapServiceV3._can_query_btr_routes_v3(s):
+            return []
+
+        route_rows = list(
+            s.execute(
+                text(LiveMapQueryV3.btr_routes_by_map_sql()),
+                {"map_id": map_id},
+            ).mappings()
+        )
+        if not route_rows:
+            return []
+
+        route_ids = [row["id"] for row in route_rows]
+        point_rows = list(
+            s.execute(
+                text(LiveMapQueryV3.btr_route_points_by_route_ids_sql()),
+                {"route_ids": route_ids},
+            ).mappings()
+        )
+        stop_rows = list(
+            s.execute(
+                text(LiveMapQueryV3.btr_route_stops_by_route_ids_sql()),
+                {"route_ids": route_ids},
+            ).mappings()
+        )
+
+        points_by_route_id: dict[str, list[BtrRoutePointV3]] = {}
+        for row in point_rows:
+            points_by_route_id.setdefault(row["route_id"], []).append(
+                BtrRoutePointV3(
+                    id=row["id"],
+                    x=float(row["x"]),
+                    z=float(row["z"]),
+                    sort_order=row["sort_order"],
+                )
+            )
+
+        stops_by_route_id: dict[str, list[BtrRouteStopV3]] = {}
+        for row in stop_rows:
+            stops_by_route_id.setdefault(row["route_id"], []).append(
+                BtrRouteStopV3(
+                    id=row["id"],
+                    static_point_id=row["static_point_id"],
+                    route_point_id=row["route_point_id"],
+                    name_en=row["name_en"] or "",
+                    name_ko=row["name_ko"] or "",
+                    name_ja=row["name_ja"] or "",
+                    x=float(row["x"]),
+                    z=float(row["z"]),
+                    arrival_remaining_seconds=row["arrival_remaining_seconds"],
+                    departure_remaining_seconds=row[
+                        "departure_remaining_seconds"
+                    ],
+                    visit_order=row["visit_order"],
+                    route_point_order=row["route_point_order"],
+                )
+            )
+
+        return [
+            BtrRouteV3(
+                id=row["id"],
+                name=row["name"],
+                spawn_type=row["spawn_type"],
+                raid_duration_seconds=row["raid_duration_seconds"],
+                spawn_remaining_seconds=row["spawn_remaining_seconds"],
+                stop_duration_seconds=row["stop_duration_seconds"],
+                timing_variance_seconds=row["timing_variance_seconds"],
+                points=points_by_route_id.get(row["id"], []),
+                stops=stops_by_route_id.get(row["id"], []),
+            )
+            for row in route_rows
+        ]
+
+    @staticmethod
+    def get_btr_routes_v3(normalized_name: str):
+        try:
+            with V3Database.SessionLocal() as s:
+                map_data = (
+                    s.query(MapV3)
+                    .filter(MapV3.normalized_name == normalized_name)
+                    .order_by(
+                        nullslast(MapV3.is_use.desc()),
+                        nullslast(MapV3.sort_order),
+                        MapV3.name_en,
+                    )
+                    .first()
+                )
+                if map_data is None:
+                    return None
+
+                response = BtrRoutesResponseV3(
+                    map=BtrRouteMapV3(
+                        id=map_data.id,
+                        normalized_name=map_data.normalized_name,
+                    ),
+                    routes=LiveMapServiceV3._get_btr_routes_by_map_id_v3(
+                        s, map_data.id
+                    ),
+                )
+                return response.model_dump()
+        except Exception as e:
+            logger.error(
+                f"get_btr_routes_v3: {normalized_name}, error: {e}",
+                exc_info=True,
+            )
+            return None
+
+    @staticmethod
     def _build_details_by_point_id_v3(detail_rows: list[dict]):
         details_by_point_id = {}
         for detail in detail_rows:
@@ -1278,6 +1407,9 @@ class LiveMapServiceV3:
                     )
                     .all()
                 )
+                btr_routes = LiveMapServiceV3._get_btr_routes_by_map_id_v3(
+                    s, map_data.id
+                )
 
                 detail_rows = [
                     dict(row)
@@ -1386,6 +1518,7 @@ class LiveMapServiceV3:
                         LiveMapServiceV3._serialize_static_point_v3(row)
                         for row in static_points
                     ],
+                    "btr_routes": [route.model_dump() for route in btr_routes],
                 }
         except Exception as e:
             logger.error(

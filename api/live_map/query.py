@@ -21,6 +21,70 @@ class LiveMapQueryV3:
         """
 
     @staticmethod
+    def btr_routes_by_map_sql():
+        return """
+            select id,
+                   map_id,
+                   name,
+                   spawn_type,
+                   raid_duration_seconds,
+                   spawn_remaining_seconds,
+                   coalesce(stop_duration_seconds, 120) as stop_duration_seconds,
+                   coalesce(timing_variance_seconds, 120) as timing_variance_seconds,
+                   sort_order
+            from live_map_btr_routes
+            where map_id = :map_id
+              and is_use is true
+            order by sort_order nulls last, name, id;
+        """
+
+    @staticmethod
+    def btr_route_points_by_route_ids_sql():
+        return """
+            select id,
+                   route_id,
+                   x,
+                   z,
+                   sort_order
+            from live_map_btr_route_points
+            where route_id = any(:route_ids)
+            order by route_id, sort_order, id;
+        """
+
+    @staticmethod
+    def btr_route_stops_by_route_ids_sql():
+        return """
+            select brs.id,
+                   brs.route_id,
+                   brs.static_point_id,
+                   brs.route_point_id,
+                   sp.name_en,
+                   sp.name_ko,
+                   sp.name_ja,
+                   sp.x,
+                   sp.z,
+                   brs.arrival_remaining_seconds,
+                   brs.departure_remaining_seconds,
+                   brs.visit_order,
+                   brp.sort_order as route_point_order
+            from live_map_btr_route_stops brs
+                     join live_map_btr_routes br
+                          on brs.route_id = br.id
+                     join live_map_static_points sp
+                          on brs.static_point_id = sp.id
+                         and sp.map_id = br.map_id
+                         and sp.category = 'btr_stop'
+                         and sp.is_use is true
+                         and sp.x is not null
+                         and sp.z is not null
+                     left join live_map_btr_route_points brp
+                          on brs.route_point_id = brp.id
+                         and brs.route_id = brp.route_id
+            where brs.route_id = any(:route_ids)
+            order by brs.route_id, brs.visit_order, brs.id;
+        """
+
+    @staticmethod
     def quest_points_by_map_sql():
         return """
             select lmp.id,

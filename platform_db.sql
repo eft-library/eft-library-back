@@ -1276,6 +1276,50 @@ create index idx_live_map_static_points_floor_id on live_map_static_points(floor
 create index if not exists idx_live_map_static_points_is_use on live_map_static_points(is_use);
 create index if not exists idx_live_map_static_points_map_sort on live_map_static_points(map_id, floor_id, category, sort_order, name_en);
 
+create table if not exists live_map_btr_routes
+(
+    id text primary key,
+    map_id text not null,
+    name text not null,
+    spawn_type text,
+    raid_duration_seconds integer not null,
+    spawn_remaining_seconds integer,
+    stop_duration_seconds integer default 120,
+    timing_variance_seconds integer default 120,
+    is_use boolean default true,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_btr_routes_map_id on live_map_btr_routes(map_id);
+create index if not exists idx_live_map_btr_routes_map_use_sort on live_map_btr_routes(map_id, is_use, sort_order);
+
+create table if not exists live_map_btr_route_points
+(
+    id text primary key,
+    route_id text not null,
+    x numeric not null,
+    z numeric not null,
+    sort_order integer not null,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_btr_route_points_route_id on live_map_btr_route_points(route_id);
+create unique index if not exists idx_live_map_btr_route_points_route_sort on live_map_btr_route_points(route_id, sort_order);
+
+create table if not exists live_map_btr_route_stops
+(
+    id text primary key,
+    route_id text not null,
+    static_point_id text not null,
+    route_point_id text,
+    arrival_remaining_seconds integer not null,
+    departure_remaining_seconds integer,
+    visit_order integer not null,
+    update_time timestamptz default now()
+);
+create index if not exists idx_live_map_btr_route_stops_route_id on live_map_btr_route_stops(route_id);
+create index if not exists idx_live_map_btr_route_stops_static_point on live_map_btr_route_stops(static_point_id);
+create unique index if not exists idx_live_map_btr_route_stops_route_visit on live_map_btr_route_stops(route_id, visit_order);
+
 create table if not exists live_map_story_points
 (
     id text primary key,

@@ -86,6 +86,46 @@ class LiveMapStaticPointV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
+class LiveMapBtrRouteV3(V3Database.Base):
+    __tablename__ = "live_map_btr_routes"
+
+    id = Column(String, primary_key=True)
+    map_id = Column(String)
+    name = Column(String)
+    spawn_type = Column(String)
+    raid_duration_seconds = Column(Integer)
+    spawn_remaining_seconds = Column(Integer)
+    stop_duration_seconds = Column(Integer)
+    timing_variance_seconds = Column(Integer)
+    is_use = Column(BOOLEAN)
+    sort_order = Column(Integer)
+    update_time = Column(TIMESTAMP)
+
+
+class LiveMapBtrRoutePointV3(V3Database.Base):
+    __tablename__ = "live_map_btr_route_points"
+
+    id = Column(String, primary_key=True)
+    route_id = Column(String)
+    x = Column(NUMERIC)
+    z = Column(NUMERIC)
+    sort_order = Column(Integer)
+    update_time = Column(TIMESTAMP)
+
+
+class LiveMapBtrRouteStopV3(V3Database.Base):
+    __tablename__ = "live_map_btr_route_stops"
+
+    id = Column(String, primary_key=True)
+    route_id = Column(String)
+    static_point_id = Column(String)
+    route_point_id = Column(String)
+    arrival_remaining_seconds = Column(Integer)
+    departure_remaining_seconds = Column(Integer)
+    visit_order = Column(Integer)
+    update_time = Column(TIMESTAMP)
+
+
 class LiveMapStoryPointV3(V3Database.Base):
     __tablename__ = "live_map_story_points"
 

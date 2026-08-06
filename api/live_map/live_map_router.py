@@ -30,6 +30,14 @@ def get_live_map_raid_duration_v3(normalized_name: str):
     return CustomResponse.response(duration, HTTPCode.OK, Message.SUCCESS)
 
 
+@router.get("/v3/btr-routes/{normalized_name}")
+def get_live_map_btr_routes_v3(normalized_name: str):
+    routes = LiveMapServiceV3.get_btr_routes_v3(normalized_name)
+    if routes is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+    return CustomResponse.response(routes, HTTPCode.OK, Message.SUCCESS)
+
+
 @router.get("/v3/quest/{quest_id_or_normalized_name}")
 def get_live_map_quest_detail_v3(quest_id_or_normalized_name: str):
     quest = LiveMapServiceV3.get_quest_detail_v3(quest_id_or_normalized_name)
