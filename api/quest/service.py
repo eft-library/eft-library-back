@@ -159,6 +159,7 @@ class QuestServiceV3:
                         "name_en": relation["name_en"],
                         "name_ko": relation["name_ko"],
                         "name_ja": relation["name_ja"],
+                        "affinity_type": relation["affinity_type"],
                     }
                     if relation["relation_type"] == "require":
                         require_quests.append(relation_info)
@@ -239,6 +240,7 @@ class QuestServiceV3:
                         "delay_min": quest["delay_min"],
                         "kappa_required": quest["kappa_required"],
                         "min_player_level": quest["min_player_level"],
+                        "affinity_type": quest["affinity_type"],
                         "wiki_url": quest["wiki_url"],
                         "guide_en": quest["guide_en"],
                         "guide_ko": quest["guide_ko"],

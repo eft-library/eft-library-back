@@ -39,6 +39,7 @@ class QuestQueryV3:
                    q.trader_id,
                    q.kappa_required,
                    q.min_player_level,
+                   q.affinity_type,
                    t.name_en as trader_name_en,
                    t.name_ko as trader_name_ko,
                    t.name_ja as trader_name_ja,
@@ -60,6 +61,7 @@ class QuestQueryV3:
                    q.guide_en,
                    q.guide_ko,
                    q.guide_ja,
+                   q.affinity_type,
                    q.update_time
             from quests q
             where q.is_use is true
@@ -80,6 +82,7 @@ class QuestQueryV3:
                    q.delay_min,
                    q.kappa_required,
                    q.min_player_level,
+                   q.affinity_type,
                    q.wiki_url,
                    q.guide_en,
                    q.guide_ko,
@@ -118,7 +121,8 @@ class QuestQueryV3:
                    q.name_ko,
                    q.name_ja,
                    q.kappa_required,
-                   q.min_player_level
+                   q.min_player_level,
+                   q.affinity_type
             from quests q
                      join traders t on q.trader_id = t.id
             where t.normalized_name = :trader_normalized_name
@@ -135,7 +139,8 @@ class QuestQueryV3:
                    q.name_ko,
                    q.name_ja,
                    q.kappa_required,
-                   q.min_player_level
+                   q.min_player_level,
+                   q.affinity_type
             from quests q
             where q.trader_id = :trader_id
               and q.is_use is true
@@ -151,7 +156,8 @@ class QuestQueryV3:
                    rq.normalized_name,
                    rq.name_en,
                    rq.name_ko,
-                   rq.name_ja
+                   rq.name_ja,
+                   rq.affinity_type
             from quest_relations qr
                      join quests rq on qr.related_quest_id = rq.id
             where qr.quest_id = :quest_id
