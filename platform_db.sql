@@ -138,10 +138,16 @@ create table if not exists quests (
     guide_en text,
     guide_ko text,
     guide_ja text,
+    affinity_type text constraint quests_affinity_type_check
+        check (affinity_type in ('level_1', 'level_2', 'level_3', 'level_4', 'main_quest')),
     is_use boolean not null default true,
     sort_order integer,
     update_time timestamptz default now()
 );
+-- 퀘스트 분류: 우호도 레벨 1~4 또는 주요 임무
+alter table quests add column if not exists affinity_type text
+    constraint quests_affinity_type_check
+        check (affinity_type in ('level_1', 'level_2', 'level_3', 'level_4', 'main_quest'));
 alter table quests add column if not exists is_use boolean not null default true;
 create index if not exists idx_quests_is_use on quests(is_use);
 
