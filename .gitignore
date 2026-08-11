@@ -178,4 +178,6 @@ pyrightconfig.json
 
 uploads/
 
+document_coordinate/
+
 # End of https://www.toptal.com/developers/gitignore/api/python
