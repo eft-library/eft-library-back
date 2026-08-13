@@ -41,7 +41,10 @@ class WhereAmIServiceV3:
                     await send_wpf_location(user_email=req.email, location=req.location)
                     return True
             else:
-                logger.warning(f"존재하지 않는 사용자: {req.email}")
+                logger.warning(
+                    "send_location_v3 존재하지 않는 사용자: email=%r",
+                    req.email,
+                )
                 return None
         except Exception as e:
             logger.error(
@@ -54,7 +57,10 @@ class WhereAmIServiceV3:
     async def send_raid_state_v3(req: RaidStateRequestV3):
         try:
             if not WhereAmIServiceV3.check_wpf_user_v3(req.email):
-                logger.warning(f"존재하지 않는 사용자: {req.email}")
+                logger.warning(
+                    "send_raid_state_v3 존재하지 않는 사용자: email=%r",
+                    req.email,
+                )
                 return None
 
             await send_wpf_raid_state(
@@ -73,7 +79,10 @@ class WhereAmIServiceV3:
     async def send_log_location_v3(req: LogLocationRequestV3):
         try:
             if not WhereAmIServiceV3.check_wpf_user_v3(req.email):
-                logger.warning(f"존재하지 않는 사용자: {req.email}")
+                logger.warning(
+                    "send_log_location_v3 존재하지 않는 사용자: email=%r",
+                    req.email,
+                )
                 return None
 
             await send_wpf_log_location(
