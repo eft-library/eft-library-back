@@ -176,6 +176,7 @@ class QuestQueryV3:
                    description_ja,
                    count,
                    found_in_raid,
+                   optional,
                    sort_order
             from quest_objectives
             where quest_id = :quest_id

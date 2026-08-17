@@ -755,6 +755,7 @@ class LiveMapServiceV3:
                         "description_ja": row["objective_description_ja"],
                         "count": row["objective_count"],
                         "found_in_raid": row["found_in_raid"],
+                        "optional": row["objective_optional"],
                     }
                     if row["objective_id"] is not None
                     else None

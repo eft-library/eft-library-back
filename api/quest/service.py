@@ -176,6 +176,7 @@ class QuestServiceV3:
                         "description_ja": objective["description_ja"],
                         "count": objective["count"],
                         "found_in_raid": objective["found_in_raid"],
+                        "optional": objective["optional"],
                         "items": [],
                         "required_keys": [],
                         "maps": [],
