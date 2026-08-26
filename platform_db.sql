@@ -1503,3 +1503,82 @@ create table if not exists live_map_event_point_details
     update_time timestamptz default now()
 );
 create index if not exists idx_live_map_event_point_details_point_id on live_map_event_point_details(point_id);
+
+-- 배틀패스 시즌
+create table if not exists battle_pass_seasons
+(
+    id text primary key,
+    code text not null unique,
+    title_en text,
+    title_ko text,
+    title_ja text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    page_count integer not null default 0 check (page_count >= 0),
+    start_time timestamptz,
+    end_time timestamptz,
+    is_active boolean not null default true,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_battle_pass_seasons_active on battle_pass_seasons(is_active);
+
+-- 시즌에서 사용하는 교환 문서 및 유료 문서
+create table if not exists battle_pass_documents
+(
+    id text primary key,
+    season_id text not null,
+    name_en text not null,
+    name_ko text,
+    name_ja text,
+    image text,
+    document_role text not null default 'exchange'
+        check (document_role in ('exchange', 'classified')),
+    is_use boolean not null default true,
+    sort_order integer,
+    update_time timestamptz default now(),
+    constraint fk_battle_pass_documents_season
+        foreign key (season_id) references battle_pass_seasons(id) on delete cascade
+);
+create index if not exists idx_battle_pass_documents_season on battle_pass_documents(season_id, sort_order);
+
+-- 페이지에 표시되는 보상
+create table if not exists battle_pass_rewards
+(
+    id text primary key,
+    season_id text not null,
+    page_number integer not null check (page_number > 0),
+    reward_type text not null,
+    name_en text not null,
+    name_ko text,
+    name_ja text,
+    image text,
+    reward_quantity integer not null default 1 check (reward_quantity > 0),
+    document_price integer not null default 0 check (document_price >= 0),
+    is_use boolean not null default true,
+    sort_order integer not null default 0,
+    update_time timestamptz default now(),
+    constraint uq_battle_pass_rewards_page_sort
+        unique (season_id, page_number, sort_order),
+    constraint fk_battle_pass_rewards_season
+        foreign key (season_id) references battle_pass_seasons(id) on delete cascade
+);
+create index if not exists idx_battle_pass_rewards_page on battle_pass_rewards(season_id, page_number, sort_order);
+create index if not exists idx_battle_pass_rewards_type on battle_pass_rewards(reward_type);
+
+-- 보상을 교환할 때 필요한 문서
+create table if not exists battle_pass_reward_requirements
+(
+    reward_id text not null,
+    document_id text not null,
+    quantity integer not null check (quantity > 0),
+    sort_order integer,
+    primary key (reward_id, document_id),
+    constraint fk_battle_pass_reward_requirements_reward
+        foreign key (reward_id) references battle_pass_rewards(id) on delete cascade,
+    constraint fk_battle_pass_reward_requirements_document
+        foreign key (document_id) references battle_pass_documents(id) on delete cascade
+);
+create index if not exists idx_battle_pass_requirements_reward on battle_pass_reward_requirements(reward_id, sort_order);
+create index if not exists idx_battle_pass_requirements_document on battle_pass_reward_requirements(document_id);
