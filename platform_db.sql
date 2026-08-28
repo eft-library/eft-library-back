@@ -1689,10 +1689,10 @@ create table if not exists prestige_reward_skills
         foreign key (prestige_id) references prestige_levels(id) on delete cascade
 );
 
-create table if not exists prestige_reward_customizations
+-- 퀘스트와 프레스티지에서 공통으로 사용하는 커스터마이징 본체
+create table if not exists customizations
 (
-    customization_id text primary key,
-    prestige_id text not null,
+    id text primary key,
     name_key text,
     name_en text,
     name_ko text,
@@ -1703,26 +1703,54 @@ create table if not exists prestige_reward_customizations
     customization_type_name_en text,
     customization_type_name_ko text,
     customization_type_name_ja text,
-    sort_order integer,
-    update_time timestamptz default now(),
-    constraint fk_prestige_reward_customizations_level
-        foreign key (prestige_id) references prestige_levels(id) on delete cascade
+    update_time timestamptz default now()
 );
-create index if not exists idx_prestige_reward_customizations_level on prestige_reward_customizations(prestige_id, sort_order, customization_id);
-create index if not exists idx_prestige_reward_customizations_type on prestige_reward_customizations(customization_type);
+create index if not exists idx_customizations_type on customizations(customization_type);
 
-create table if not exists prestige_reward_customization_items
+create table if not exists customization_items
 (
     customization_id text not null,
     item_id text not null,
     sort_order integer,
     primary key (customization_id, item_id),
-    constraint fk_prestige_customization_items_customization
+    constraint fk_customization_items_customization
         foreign key (customization_id)
-            references prestige_reward_customizations(customization_id)
+            references customizations(id)
             on delete cascade
 );
-create index if not exists idx_prestige_customization_items_item on prestige_reward_customization_items(item_id);
+create index if not exists idx_customization_items_item on customization_items(item_id);
+
+-- 프레스티지와 커스터마이징 보상의 연결
+create table if not exists prestige_reward_customizations
+(
+    prestige_id text not null,
+    customization_id text not null,
+    sort_order integer,
+    primary key (prestige_id, customization_id),
+    constraint fk_prestige_reward_customizations_level
+        foreign key (prestige_id) references prestige_levels(id) on delete cascade,
+    constraint fk_prestige_reward_customizations_customization
+        foreign key (customization_id) references customizations(id) on delete cascade
+);
+create index if not exists idx_prestige_reward_customizations_level on prestige_reward_customizations(prestige_id, sort_order, customization_id);
+
+-- 퀘스트의 시작/완료/실패 커스터마이징 보상
+create table if not exists quest_reward_customizations
+(
+    quest_id text not null,
+    customization_id text not null,
+    reward_type text not null
+        check (reward_type in ('start', 'finish', 'failure')),
+    sort_order integer,
+    update_time timestamptz default now(),
+    primary key (quest_id, customization_id, reward_type),
+    constraint fk_quest_reward_customizations_quest
+        foreign key (quest_id) references quests(id) on delete cascade,
+    constraint fk_quest_reward_customizations_customization
+        foreign key (customization_id) references customizations(id) on delete cascade
+);
+create index if not exists idx_quest_reward_customizations_customization on quest_reward_customizations(customization_id);
+create index if not exists idx_quest_reward_customizations_type on quest_reward_customizations(reward_type, customization_id);
 
 -- 프레스티지 이후 이전 가능한 아이템 및 스킬 설정
 create table if not exists prestige_transfer_settings

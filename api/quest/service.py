@@ -149,6 +149,71 @@ class QuestServiceV3:
                         {"quest_id": quest_id},
                     ).mappings()
                 ]
+                reward_customizations = [
+                    dict(row)
+                    for row in s.execute(
+                        text(QuestQueryV3.quest_reward_customizations_sql()),
+                        {"quest_id": quest_id},
+                    ).mappings()
+                ]
+                reward_customization_items = [
+                    dict(row)
+                    for row in s.execute(
+                        text(
+                            QuestQueryV3.quest_reward_customization_items_sql()
+                        ),
+                        {"quest_id": quest_id},
+                    ).mappings()
+                ]
+
+                customization_items_by_reward = {}
+                for row in reward_customization_items:
+                    key = (row["reward_type"], row["customization_id"])
+                    customization_items_by_reward.setdefault(key, []).append(
+                        {
+                            "id": row["item_id"],
+                            "normalized_name": row["normalized_name"],
+                            "name_en": row["name_en"],
+                            "name_ko": row["name_ko"],
+                            "name_ja": row["name_ja"],
+                            "image": row["image"],
+                        }
+                    )
+
+                customizations_by_reward_type = {
+                    "start": [],
+                    "finish": [],
+                    "failure": [],
+                }
+                for row in reward_customizations:
+                    customization = {
+                        "id": row["customization_id"],
+                        "name_key": row["name_key"],
+                        "name_en": row["name_en"],
+                        "name_ko": row["name_ko"],
+                        "name_ja": row["name_ja"],
+                        "image_link": row["image_link"],
+                        "customization_type": row["customization_type"],
+                        "customization_type_name_key": row[
+                            "customization_type_name_key"
+                        ],
+                        "customization_type_name_en": row[
+                            "customization_type_name_en"
+                        ],
+                        "customization_type_name_ko": row[
+                            "customization_type_name_ko"
+                        ],
+                        "customization_type_name_ja": row[
+                            "customization_type_name_ja"
+                        ],
+                        "items": customization_items_by_reward.get(
+                            (row["reward_type"], row["customization_id"]), []
+                        ),
+                        "sort_order": row["sort_order"],
+                    }
+                    customizations_by_reward_type[row["reward_type"]].append(
+                        customization
+                    )
 
                 require_quests = []
                 next_quests = []
@@ -262,6 +327,11 @@ class QuestServiceV3:
                     "require_quests": require_quests,
                     "next_quests": next_quests,
                     "objectives": list(objective_map.values()),
+                    "start_rewards": {
+                        "customizations": customizations_by_reward_type[
+                            "start"
+                        ],
+                    },
                     "finish_rewards": {
                         "skill_level_reward": reward_skills,
                         "trader_standing": [
@@ -343,6 +413,14 @@ class QuestServiceV3:
                                 ),
                             }
                             for row in reward_craft_unlocks
+                        ],
+                        "customizations": customizations_by_reward_type[
+                            "finish"
+                        ],
+                    },
+                    "failure_rewards": {
+                        "customizations": customizations_by_reward_type[
+                            "failure"
                         ],
                     },
                 }

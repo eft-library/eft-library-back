@@ -339,3 +339,47 @@ class QuestQueryV3:
             where qfrcu.quest_id = :quest_id
             order by qfrcu.sort_order, qfrcu.craft_id;
         """
+
+    @staticmethod
+    def quest_reward_customizations_sql():
+        return """
+            select qrc.reward_type,
+                   qrc.customization_id,
+                   qrc.sort_order,
+                   c.name_key,
+                   c.name_en,
+                   c.name_ko,
+                   c.name_ja,
+                   c.image_link,
+                   c.customization_type,
+                   c.customization_type_name_key,
+                   c.customization_type_name_en,
+                   c.customization_type_name_ko,
+                   c.customization_type_name_ja
+            from quest_reward_customizations qrc
+                     join customizations c on qrc.customization_id = c.id
+            where qrc.quest_id = :quest_id
+            order by qrc.reward_type, qrc.sort_order nulls last,
+                     qrc.customization_id;
+        """
+
+    @staticmethod
+    def quest_reward_customization_items_sql():
+        return """
+            select qrc.reward_type,
+                   ci.customization_id,
+                   ci.item_id,
+                   ci.sort_order,
+                   i.normalized_name,
+                   i.name_en,
+                   i.name_ko,
+                   i.name_ja,
+                   i.image
+            from quest_reward_customizations qrc
+                     join customization_items ci
+                          on qrc.customization_id = ci.customization_id
+                     left join items i on ci.item_id = i.id
+            where qrc.quest_id = :quest_id
+            order by qrc.reward_type, ci.customization_id,
+                     ci.sort_order nulls last, ci.item_id;
+        """

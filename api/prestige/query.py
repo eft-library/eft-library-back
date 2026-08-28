@@ -99,27 +99,29 @@ class PrestigeQueryV3:
     @staticmethod
     def reward_customizations_sql():
         return """
-            select customization_id, prestige_id, name_key,
-                   name_en, name_ko, name_ja, image_link,
-                   customization_type, customization_type_name_key,
-                   customization_type_name_en, customization_type_name_ko,
-                   customization_type_name_ja, sort_order
-            from prestige_reward_customizations
-            where prestige_id = any(:prestige_ids)
-            order by prestige_id, sort_order nulls last, customization_id;
+            select prc.customization_id, prc.prestige_id,
+                   c.name_key, c.name_en, c.name_ko, c.name_ja, c.image_link,
+                   c.customization_type, c.customization_type_name_key,
+                   c.customization_type_name_en, c.customization_type_name_ko,
+                   c.customization_type_name_ja, prc.sort_order
+            from prestige_reward_customizations prc
+                     join customizations c on prc.customization_id = c.id
+            where prc.prestige_id = any(:prestige_ids)
+            order by prc.prestige_id, prc.sort_order nulls last,
+                     prc.customization_id;
         """
 
     @staticmethod
     def reward_customization_items_sql():
         return """
-            select prci.customization_id, prci.item_id, prci.sort_order,
+            select ci.customization_id, ci.item_id, ci.sort_order,
                    i.normalized_name, i.name_en, i.name_ko, i.name_ja, i.image
-            from prestige_reward_customization_items prci
+            from customization_items ci
                      join prestige_reward_customizations prc
-                          on prci.customization_id = prc.customization_id
-                     left join items i on prci.item_id = i.id
+                          on ci.customization_id = prc.customization_id
+                     left join items i on ci.item_id = i.id
             where prc.prestige_id = any(:prestige_ids)
-            order by prci.customization_id, prci.sort_order nulls last, prci.item_id;
+            order by ci.customization_id, ci.sort_order nulls last, ci.item_id;
         """
 
     @staticmethod
