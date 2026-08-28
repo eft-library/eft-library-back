@@ -1582,3 +1582,186 @@ create table if not exists battle_pass_reward_requirements
 );
 create index if not exists idx_battle_pass_requirements_reward on battle_pass_reward_requirements(reward_id, sort_order);
 create index if not exists idx_battle_pass_requirements_document on battle_pass_reward_requirements(document_id);
+
+-- 프레스티지 단계
+create table if not exists prestige_levels
+(
+    id text primary key,
+    prestige_level integer not null unique check (prestige_level > 0),
+    name_key text,
+    name_en text,
+    name_ko text,
+    name_ja text,
+    icon_link text,
+    image_link text,
+    is_use boolean not null default true,
+    sort_order integer,
+    update_time timestamptz default now()
+);
+create index if not exists idx_prestige_levels_use on prestige_levels(is_use, prestige_level);
+
+-- 프레스티지 달성 조건
+create table if not exists prestige_conditions
+(
+    id text primary key,
+    prestige_id text not null,
+    condition_type text not null,
+    description_key text,
+    description_en text,
+    description_ko text,
+    description_ja text,
+    count integer,
+    is_optional boolean not null default false,
+    player_level integer,
+    task_id text,
+    station_id text,
+    station_level integer,
+    skill_name text,
+    skill_level integer,
+    dog_tag_level integer,
+    max_durability numeric,
+    min_durability numeric,
+    found_in_raid boolean,
+    sort_order integer,
+    update_time timestamptz default now(),
+    constraint fk_prestige_conditions_level
+        foreign key (prestige_id) references prestige_levels(id) on delete cascade
+);
+create index if not exists idx_prestige_conditions_level on prestige_conditions(prestige_id, sort_order, id);
+create index if not exists idx_prestige_conditions_type on prestige_conditions(condition_type);
+create index if not exists idx_prestige_conditions_task on prestige_conditions(task_id);
+create index if not exists idx_prestige_conditions_station on prestige_conditions(station_id);
+
+create table if not exists prestige_condition_items
+(
+    condition_id text not null,
+    item_id text not null,
+    sort_order integer,
+    primary key (condition_id, item_id),
+    constraint fk_prestige_condition_items_condition
+        foreign key (condition_id) references prestige_conditions(id) on delete cascade
+);
+create index if not exists idx_prestige_condition_items_item on prestige_condition_items(item_id);
+
+create table if not exists prestige_condition_statuses
+(
+    condition_id text not null,
+    status text not null,
+    sort_order integer,
+    primary key (condition_id, status),
+    constraint fk_prestige_condition_statuses_condition
+        foreign key (condition_id) references prestige_conditions(id) on delete cascade
+);
+
+create table if not exists prestige_condition_maps
+(
+    condition_id text not null,
+    map_id text not null,
+    sort_order integer,
+    primary key (condition_id, map_id),
+    constraint fk_prestige_condition_maps_condition
+        foreign key (condition_id) references prestige_conditions(id) on delete cascade
+);
+create index if not exists idx_prestige_condition_maps_map on prestige_condition_maps(map_id);
+
+-- 프레스티지 보상
+create table if not exists prestige_reward_items
+(
+    prestige_id text not null,
+    item_id text not null,
+    quantity integer not null check (quantity > 0),
+    attributes jsonb not null default '{}'::jsonb,
+    sort_order integer,
+    primary key (prestige_id, item_id),
+    constraint fk_prestige_reward_items_level
+        foreign key (prestige_id) references prestige_levels(id) on delete cascade
+);
+create index if not exists idx_prestige_reward_items_item on prestige_reward_items(item_id);
+
+create table if not exists prestige_reward_skills
+(
+    prestige_id text not null,
+    skill_name text not null,
+    skill_level integer not null,
+    sort_order integer,
+    primary key (prestige_id, skill_name),
+    constraint fk_prestige_reward_skills_level
+        foreign key (prestige_id) references prestige_levels(id) on delete cascade
+);
+
+create table if not exists prestige_reward_customizations
+(
+    customization_id text primary key,
+    prestige_id text not null,
+    name_key text,
+    name_en text,
+    name_ko text,
+    name_ja text,
+    image_link text,
+    customization_type text,
+    customization_type_name_key text,
+    customization_type_name_en text,
+    customization_type_name_ko text,
+    customization_type_name_ja text,
+    sort_order integer,
+    update_time timestamptz default now(),
+    constraint fk_prestige_reward_customizations_level
+        foreign key (prestige_id) references prestige_levels(id) on delete cascade
+);
+create index if not exists idx_prestige_reward_customizations_level on prestige_reward_customizations(prestige_id, sort_order, customization_id);
+create index if not exists idx_prestige_reward_customizations_type on prestige_reward_customizations(customization_type);
+
+create table if not exists prestige_reward_customization_items
+(
+    customization_id text not null,
+    item_id text not null,
+    sort_order integer,
+    primary key (customization_id, item_id),
+    constraint fk_prestige_customization_items_customization
+        foreign key (customization_id)
+            references prestige_reward_customizations(customization_id)
+            on delete cascade
+);
+create index if not exists idx_prestige_customization_items_item on prestige_reward_customization_items(item_id);
+
+-- 프레스티지 이후 이전 가능한 아이템 및 스킬 설정
+create table if not exists prestige_transfer_settings
+(
+    id text primary key,
+    prestige_id text not null,
+    setting_type text not null check (setting_type in ('item_grid', 'skill')),
+    name_key text,
+    name_en text,
+    name_ko text,
+    name_ja text,
+    skill_type text,
+    transfer_rate numeric,
+    grid_width integer,
+    grid_height integer,
+    sort_order integer,
+    update_time timestamptz default now(),
+    constraint fk_prestige_transfer_settings_level
+        foreign key (prestige_id) references prestige_levels(id) on delete cascade
+);
+create index if not exists idx_prestige_transfer_settings_level on prestige_transfer_settings(prestige_id, sort_order, id);
+create index if not exists idx_prestige_transfer_settings_type on prestige_transfer_settings(setting_type);
+
+create table if not exists prestige_transfer_filter_values
+(
+    transfer_setting_id text not null,
+    filter_type text not null
+        check (filter_type in (
+            'allowed_category',
+            'allowed_item',
+            'excluded_category',
+            'excluded_item'
+        )),
+    value_id text not null,
+    sort_order integer,
+    primary key (transfer_setting_id, filter_type, value_id),
+    constraint fk_prestige_transfer_filters_setting
+        foreign key (transfer_setting_id)
+            references prestige_transfer_settings(id)
+            on delete cascade
+);
+create index if not exists idx_prestige_transfer_filters_value on prestige_transfer_filter_values(filter_type, value_id);

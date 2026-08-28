@@ -22,6 +22,7 @@ from api.live_map import live_map_router
 from api.kord_breach import router as kord_breach_router
 from api.deployment_notice import router as deployment_notice_router
 from api.battle_pass import router as battle_pass_router
+from api.prestige import router as prestige_router
 
 api_router = APIRouter()
 
@@ -48,3 +49,4 @@ api_router.include_router(live_map_router.router, prefix="/live-map")
 api_router.include_router(kord_breach_router.router, prefix="/kord-breach")
 api_router.include_router(deployment_notice_router.router, prefix="/deployment-notice")
 api_router.include_router(battle_pass_router.router, prefix="/battle-pass")
+api_router.include_router(prestige_router.router, prefix="/prestige")
