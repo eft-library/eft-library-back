@@ -1524,6 +1524,21 @@ create table if not exists battle_pass_seasons
 );
 create index if not exists idx_battle_pass_seasons_active on battle_pass_seasons(is_active);
 
+-- 시즌별 페이지와 이전 페이지 보상 획득 해금 조건
+create table if not exists battle_pass_pages
+(
+    season_id text not null,
+    page_number integer not null check (page_number > 0),
+    required_previous_page_reward_count integer not null default 0
+        check (required_previous_page_reward_count >= 0),
+    sort_order integer,
+    update_time timestamptz default now(),
+    primary key (season_id, page_number),
+    constraint fk_battle_pass_pages_season
+        foreign key (season_id) references battle_pass_seasons(id) on delete cascade
+);
+create index if not exists idx_battle_pass_pages_season on battle_pass_pages(season_id, page_number);
+
 -- 시즌에서 사용하는 교환 문서 및 유료 문서
 create table if not exists battle_pass_documents
 (

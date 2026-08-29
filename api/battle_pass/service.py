@@ -51,6 +51,13 @@ class BattlePassServiceV3:
                 {"season_id": season_id},
             ).mappings()
         ]
+        page_settings = [
+            dict(row)
+            for row in session.execute(
+                text(BattlePassQueryV3.pages_by_season_sql()),
+                {"season_id": season_id},
+            ).mappings()
+        ]
         rewards = [
             dict(row)
             for row in session.execute(
@@ -100,10 +107,23 @@ class BattlePassServiceV3:
             )
 
         highest_page = max(rewards_by_page, default=0)
-        page_count = max(season["page_count"] or 0, highest_page)
+        page_settings_by_number = {
+            page["page_number"]: page for page in page_settings
+        }
+        highest_configured_page = max(page_settings_by_number, default=0)
+        page_count = max(
+            season["page_count"] or 0,
+            highest_page,
+            highest_configured_page,
+        )
         pages = [
             {
                 "page_number": page_number,
+                "required_previous_page_reward_count": (
+                    page_settings_by_number.get(page_number, {}).get(
+                        "required_previous_page_reward_count", 0
+                    )
+                ),
                 "rewards": rewards_by_page.get(page_number, []),
             }
             for page_number in range(1, page_count + 1)

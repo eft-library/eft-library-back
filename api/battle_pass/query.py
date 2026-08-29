@@ -62,6 +62,17 @@ class BattlePassQueryV3:
         """
 
     @staticmethod
+    def pages_by_season_sql():
+        return """
+            select page_number,
+                   required_previous_page_reward_count,
+                   sort_order
+            from battle_pass_pages
+            where season_id = :season_id
+            order by page_number, sort_order nulls last;
+        """
+
+    @staticmethod
     def rewards_by_season_sql():
         return """
             select id,
