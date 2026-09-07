@@ -9,7 +9,7 @@ class NormalizedEmailRequestV3(BaseModel):
     @classmethod
     def normalize_email_v3(cls, value):
         if isinstance(value, str):
-            return value.replace("\\", "").strip()
+            return value.replace("\\", "").strip().rstrip(".")
         return value
 
 
