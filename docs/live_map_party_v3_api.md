@@ -1,5 +1,8 @@
 # Live Map 파티 V3 REST API
 
+프론트 개발은 이 문서와 [WebSocket 연동 문서](live_map_party_v3_websocket.md)를 함께 따른다.
+화면 구현 순서와 JavaScript 연결 예시는 WebSocket 문서에 있다.
+
 기본 경로: `{API_PREFIX}/live-map/v3/party`.
 예: `API_PREFIX=/api`이면 `/api/live-map/v3/party/rooms`.
 Swagger의 **Live Map Party V3** 태그에서 요청/응답 스키마를 확인할 수 있다.
@@ -12,6 +15,9 @@ Swagger의 **Live Map Party V3** 태그에서 요청/응답 스키마를 확인�
 - `GOOGLE_TOKEN_INFO_URL`과 V3 DB 설정은 기존 설정을 사용한다.
 - 시도 제한에는 `REDIS_URL`을 우선 사용하고, 없으면 기존 `REDIS_HOST`를 사용한다.
   Redis 연결 실패 시 생성·입장·비밀번호 변경은 503을 반환한다.
+  나머지 변경은 DB 커밋 후 방의 WebSocket으로 갱신을 전파한다. 커밋 이후 알림만 실패하면
+  REST 성공 응답을 유지하고 `X-Party-Realtime: unavailable` 헤더를 붙인다.
+  연결 복구 또는 heartbeat의 전체 스냅샷으로 동기화하므로 같은 변경을 재전송하지 않는다.
 - 파티 테이블은 `platform_db.sql`에 정의된 3개 테이블을 사용한다.
   애플리케이션이 테이블을 생성하거나 변경하지 않는다. 추가 패키지 설치는 필요 없다.
 
@@ -126,8 +132,11 @@ Swagger의 **Live Map Party V3** 태그에서 요청/응답 스키마를 확인�
   요청 본문의 이메일/작성자 ID/권한 값은 받지 않는다.
 
 **`member_count`는 입장 상태(joined)의 인원이며 실시간 온라인 접속자 수가 아니다.**
-현재 REST 단계에서는 브라우저를 닫아도 자동 퇴장하지 않는다.
-새로고침 시 GET 상세로 상태를 복원하며, 퇴장 버튼은 반드시 leave API를 호출한다.
+실시간 온라인 인원은 WebSocket snapshot의 `presence.online_count`를 사용한다.
+새로고침 시 WebSocket에 다시 인증하면 상태를 복원하며, 퇴장 버튼은 leave API를 호출한다.
+정상 연결 종료 후 90초 동안 재접속하지 않으면 자동 퇴장한다. 비정상 종료는
+45초 연결 만료 감지 및 정리 주기에 따라 더 늦게 정리될 수 있다.
+REST 입장 후 WebSocket에 연결하지 않는 경우에도 유예 후 자동 퇴장한다.
 
 방장이 퇴장하면 입장 시각이 가장 빠른 남은 참여자에게 자동 양도한다.
 마지막 참여자의 명시적 퇴장 또는 방장의 DELETE 요청은 즉시 방을 종료한다.
@@ -157,13 +166,15 @@ Swagger의 **Live Map Party V3** 태그에서 요청/응답 스키마를 확인�
 비밀번호 변경 요청은 분당 5회로 제한한다. 성공/실패 모두 요청 횟수에 포함한다.
 제한 값은 `PartyServiceV3`에서 관리하고, Redis의 원자적 카운터와 TTL을 사용한다.
 
-## 검증과 후속 범위
+## 검증과 운영
 
-실행: `.venv/bin/python -m unittest tests.test_live_map_party_v3 -v`.
-테스트는 격리된 SQLite와 가짜 인증/Redis 응답을 사용하며 운영 DB에 연결하지 않는다.
-권한, 비밀번호, 정원, 강퇴, 방장 양도, 층 관계, 버전 충돌, DB 실패 롤백을 검증한다.
-PostgreSQL 행 잠금에 의한 동시 입장/수정 직렬화는 별도의 PostgreSQL 환경 검증이 필요하다.
+테스트 실행 및 환경 조건은 [WebSocket 문서](live_map_party_v3_websocket.md)의 검증 항목을 참고한다.
+권한, 비밀번호, 정원, 강퇴, 방장 양도, 층 관계, 버전 충돌, DB 실패 롤백과
+실시간 메시지 전달·재접속·자동 퇴장을 검증한다. 운영 DB에는 테스트로 접속하지 않는다.
 
-실시간 WebSocket 브로드캐스트, 순간 핑, 현재 위치, 온라인 인원, 연결 종료 유예,
-빈 방 자동 정리/기록 삭제 스케줄러는 후속 단계다. 이 API의 변경 내용은 현재
-WebSocket으로 전송되지 않으며, 스냅샷/마커 GET으로 조회한다.
+기존처럼 FastAPI를 실행하면 파티 라우터의 lifespan이 자동 정리 작업을 시작한다.
+15초마다 최대 100개의 열린 방을 순회하며, 동시 정리 작업은 방 행 잠금으로 조정한다.
+방이 많으면 한 바퀴 순회하는 데 더 오래 걸린다. `PARTY_CLEANUP_ENABLED=false`로
+정리 작업을 끌 수 있으나 이 경우 접속이 끊긴 참여자는 자동 퇴장하지 않는다.
+Redis 오류 중에는 정리를 보류하고, Redis 데이터가 유실되면 새 유예 시간을 부여한다.
+닫힌 방의 DB 기록은 보관하며 물리 삭제 스케줄러는 포함하지 않는다.
