@@ -29,6 +29,7 @@ class PartyPositionV3(PartyRequestV3):
     floor_id: IdV3
     x: CoordinateV3
     z: CoordinateV3
+    yaw: float | None = Field(default=None, ge=0, lt=360, allow_inf_nan=False)
     request_id: str | None = Field(default=None, max_length=64)
 
 

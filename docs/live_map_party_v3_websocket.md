@@ -57,7 +57,7 @@ heartbeat 응답도 전체 `snapshot`이다. 별도 `pong` 이벤트는 없다.
 | heartbeat | 추가 필드 없음 | 연결 유지와 전체 상태 복원 |
 | sync | 추가 필드 없음 | 전체 상태 다시 받기 |
 | ping | floor_id, x, z, marker_type?, label?, request_id? | 5초간 표시할 순간 핑 |
-| position | floor_id, x, z, request_id? | 참여자의 최신 수동 위치, 60초 유효 |
+| position | floor_id, x, z, yaw?, request_id? | 참여자의 최신 위치, 60초 유효 |
 
 순간 핑:
 
@@ -76,7 +76,7 @@ heartbeat 응답도 전체 `snapshot`이다. 별도 `pong` 이벤트는 없다.
 수동 위치:
 
 ```json
-{"type":"position","floor_id":"live_map_floors.id","x":120,"z":-40,"request_id":"local-position-1"}
+{"type":"position","floor_id":"live_map_floors.id","x":120,"z":-40,"yaw":90,"request_id":"local-position-1"}
 ```
 
 - `request_id`는 선택, 최대 64자다. 서버 이벤트에 그대로 포함되어 자신의 요청과 연결할 수 있다.
@@ -107,7 +107,7 @@ heartbeat 응답도 전체 `snapshot`이다. 별도 `pong` 이벤트는 없다.
 | --- | --- | --- |
 | snapshot | room, me, members, markers, presence, positions, heartbeat_interval_seconds, reconnect_grace_seconds, reason | 저장 상태 전체 교체 |
 | ping | member_id, membership_epoch, nickname, color, floor_id, x, z, marker_type, expires_at, label?, request_id? | 만료 시각까지 순간 핑 표시 |
-| position | member_id, membership_epoch, nickname, color, floor_id, x, z, expires_at, request_id? | 참여자별 최신 위치 갱신 |
+| position | member_id, membership_epoch, nickname, color, floor_id, x, z, yaw?, expires_at, request_id? | 참여자별 최신 위치 갱신 |
 | error | 공통 정상 이벤트 구조와 다름. 아래 오류 형식 참고 | 오류 표시/재접속 판단 |
 
 snapshot.data 예시(배열의 상세 객체는 REST 스키마와 동일):
@@ -250,3 +250,19 @@ uv pip install --python .venv/bin/python 'pgserver==0.1.4' 'redislite==6.2.91218
 FK/체크 제약과 방 삭제 cascade, 소켓 전달·강퇴·방장 자동 양도를 검증한다.
 `platform_db.sql`의 관련 DDL을 그대로 읽되, 번들 PostgreSQL에 pg_trgm이 없어
 이 테스트에서만 방 이름 검색용 GIN 인덱스를 제외한다. 운영 스키마는 변경하지 않는다.
+
+### 위치 방향 (`yaw`)
+
+`position.yaw`는 선택 필드이며 기존 위치 쿼터니언에서 계산한 원본 방향(도 단위, 0 이상 360 미만)을 전달한다. 지도 회전이나 맵별 표시 보정은 클라이언트가 렌더링할 때 적용한다. 생략/null이면 방향 미상으로 취급하며 이전 방향을 유지하지 않는다. NaN, 무한대, 범위 밖 값은 거부한다.
+
+서버는 yaw를 같은 방의 position 방송과 Redis 위치 캐시에 포함하고, 재접속 snapshot.positions에서도 그대로 반환한다. 방향 없는 구형 클라이언트도 허용한다. 프론트가 yaw를 보내기 전에 이 스키마가 반영된 백엔드를 먼저 배포해야 한다.
+
+### 기존 위치 전송과 파티 공유
+
+현재 프론트 연동 흐름은 `send-location → 개인 WebSocket의 wpf_location → 송신자의 웹페이지 → 파티 WebSocket의 position → 같은 방의 참여자`이다. 웹페이지가 위치 문자열을 파싱하고 층을 결정하여 좌표와 방향을 전달한다. 기존 `send-location` API가 직접 파티 채널에 방송하는 구조는 아니다.
+
+- 송신자의 웹페이지가 파티 WebSocket에 연결된 상태에서 새 위치를 받아야 공유된다. 연결 전에 받은 위치는 자동 재전송하지 않는다.
+- 현재 프론트는 관리자 계정만 파티 연결을 허용하므로 양방향 검증에는 관리자 계정 두 개가 필요하다.
+- 프론트는 선택한 층과 같은 `floor_id`의 위치만 표시한다. 다른 층의 위치는 해당 층으로 전환해서 확인한다.
+- 위치는 60초 후 만료된다. heartbeat만으로 위치 유효 시간이 연장되지는 않는다.
+- `yaw`를 허용하지 않는 구버전 백엔드에 새 프론트를 연결하면 `INVALID_MESSAGE`로 위치 메시지 전체가 거절된다. 백엔드 스키마를 먼저 배포한 뒤 같은 방의 두 계정에서 각각 새 위치를 전송하여 확인한다.

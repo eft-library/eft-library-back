@@ -12,6 +12,7 @@ import anyio
 import fakeredis
 from fastapi import APIRouter, FastAPI, HTTPException, WebSocketDisconnect
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 from redis.exceptions import ConnectionError as RedisConnectionError
 
 from api.live_map.party_v3.models import PartyMemberV3, PartyRoomV3
@@ -96,6 +97,28 @@ class PartyRealtimeFixtureV3(PartyApiFixtureV3):
 
 
 class PartyRealtimeTestV3(PartyRealtimeFixtureV3):
+    def test_position_yaw_broadcast_and_unknown_direction_v3(self):
+        room_id = self.create_v3()["room"]["id"]
+        self.join_v3(room_id)
+        with self.socket_v3(room_id) as owner, self.socket_v3(room_id, "member") as member:
+            self.snapshot_v3(owner)
+            self.snapshot_v3(member)
+            for extra in ({"yaw": 270.5}, {}):
+                owner.send_json({"type": "position", "floor_id": "floor-a", "x": 1, "z": 2, **extra})
+                for socket in (owner, member):
+                    event = self.receive_v3(socket, lambda e: e["type"] == "position")
+                    self.assertEqual(event["data"].get("yaw"), extra.get("yaw"))
+
+    def test_position_yaw_validation_v3(self):
+        body = {"type": "position", "floor_id": "floor-a", "x": 1, "z": 2}
+        self.assertIsNone(PartyPositionV3(**body).yaw)
+        for yaw in (0, 90, 359.99):
+            self.assertEqual(PartyPositionV3(**body, yaw=yaw).yaw, yaw)
+        for yaw in (-1, 360, float("nan"), float("inf")):
+            with self.assertRaises(ValidationError):
+                PartyPositionV3(**body, yaw=yaw)
+
+
     def test_cleanup_lifespan_starts_and_stops_through_nested_routers_v3(self):
         started, stopped = threading.Event(), threading.Event()
 
@@ -175,11 +198,13 @@ class PartyRealtimeTestV3(PartyRealtimeFixtureV3):
         room_id = self.create_v3()["room"]["id"]
         with self.socket_v3(room_id) as owner:
             self.snapshot_v3(owner)
-            owner.send_json({"type": "position", "floor_id": "floor-a", "x": 7, "z": 8})
-            self.receive_v3(owner, lambda e: e["type"] == "position")
+            owner.send_json({"type": "position", "floor_id": "floor-a", "x": 7, "z": 8, "yaw": 123.5})
+            event = self.receive_v3(owner, lambda e: e["type"] == "position")
+            self.assertEqual(event["data"]["yaw"], 123.5)
         with self.socket_v3(room_id) as owner:
             snapshot = self.snapshot_v3(owner)
             self.assertEqual(snapshot["data"]["positions"][0]["data"]["x"], 7)
+            self.assertEqual(snapshot["data"]["positions"][0]["data"]["yaw"], 123.5)
             with patch.object(self.store_v3, "changed_v3", side_effect=RedisConnectionError("down")):
                 response = self.marker_v3(room_id)
             self.assertEqual(response.status_code, 201)
