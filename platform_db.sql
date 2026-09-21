@@ -1808,3 +1808,102 @@ create table if not exists prestige_transfer_filter_values
             on delete cascade
 );
 create index if not exists idx_prestige_transfer_filters_value on prestige_transfer_filter_values(filter_type, value_id);
+
+-- Live Map 파티 V3: 목록 공개, 비밀번호 입장, 생성/참여 모두 로그인 필수.
+-- UUID는 애플리케이션에서 생성하고 update_time은 V3 서비스에서 갱신한다.
+-- 기본 정원은 서비스 설정으로 전달한다. 순간 핑/접속 상태는 이 테이블에 저장하지 않는다.
+create table if not exists live_map_party_rooms_v3
+(
+    id uuid primary key,
+    name varchar(60) not null check (name ~ '[^[:space:]]'),
+    map_id text not null,
+    password_hash text not null check (password_hash ~ '[^[:space:]]'),
+    is_locked boolean not null default false,
+    max_members smallint not null check (max_members > 0),
+    empty_since timestamptz,
+    closed_at timestamptz,
+    create_time timestamptz not null default now(),
+    update_time timestamptz not null default now(),
+    constraint fk_live_map_party_rooms_v3_map
+        foreign key (map_id) references maps(id) on delete restrict
+);
+create index if not exists idx_live_map_party_rooms_v3_open
+    on live_map_party_rooms_v3(create_time desc, id) where closed_at is null;
+create index if not exists idx_live_map_party_rooms_v3_open_map
+    on live_map_party_rooms_v3(map_id, create_time desc, id) where closed_at is null;
+-- 종료된 방도 맵 FK 확인 대상이므로 전체 map_id 인덱스를 둔다.
+create index if not exists idx_live_map_party_rooms_v3_map
+    on live_map_party_rooms_v3(map_id);
+create index if not exists idx_live_map_party_rooms_v3_empty
+    on live_map_party_rooms_v3(empty_since)
+    where closed_at is null and empty_since is not null;
+create index if not exists idx_live_map_party_rooms_v3_name
+    on live_map_party_rooms_v3 using gin(name gin_trgm_ops) where closed_at is null;
+
+-- joined는 입장 자격이며 현재 WebSocket 연결 여부와 다르다.
+-- 퇴장/강퇴 시 행을 유지하고, 재입장 시 같은 계정의 기존 행을 갱신한다.
+create table if not exists live_map_party_members_v3
+(
+    id uuid primary key,
+    room_id uuid not null,
+    user_email text not null,
+    nickname varchar(30) not null check (nickname ~ '[^[:space:]]'),
+    color varchar(7) not null check (color ~ '^#[0-9A-F]{6}$'),
+    role text not null default 'member' check (role in ('owner', 'member')),
+    status text not null default 'joined' check (status in ('joined', 'left', 'kicked')),
+    joined_at timestamptz not null default now(),
+    left_at timestamptz,
+    create_time timestamptz not null default now(),
+    update_time timestamptz not null default now(),
+    constraint uq_live_map_party_members_v3_room_member unique (room_id, id),
+    constraint uq_live_map_party_members_v3_room_user unique (room_id, user_email),
+    constraint ck_live_map_party_members_v3_left_at check (
+        (status = 'joined' and left_at is null)
+        or (status in ('left', 'kicked') and left_at is not null and left_at >= joined_at)
+    ),
+    constraint fk_live_map_party_members_v3_room
+        foreign key (room_id) references live_map_party_rooms_v3(id) on delete cascade,
+    constraint fk_live_map_party_members_v3_user
+        foreign key (user_email) references user_info(email) on delete restrict
+);
+-- 최대 한 명만 보장한다. 방 생성/방장 양도 트랜잭션에서 방장 존재를 보장한다.
+create unique index if not exists uq_live_map_party_members_v3_owner
+    on live_map_party_members_v3(room_id) where role = 'owner' and status = 'joined';
+create unique index if not exists uq_live_map_party_members_v3_color
+    on live_map_party_members_v3(room_id, color) where status = 'joined';
+create index if not exists idx_live_map_party_members_v3_status
+    on live_map_party_members_v3(room_id, status);
+create index if not exists idx_live_map_party_members_v3_user
+    on live_map_party_members_v3(user_email);
+
+-- 지속 마커: 기존 live map과 동일한 floor_id 및 x/z 좌표계를 사용한다.
+-- 방 맵과 층 맵의 동일/부모 관계, 참여 권한, 정원은 V3 서비스에서 검증한다.
+-- 방 맵은 생성 이후 고정한다. version은 수정 시 일치 조건으로 검사하고 증가시킨다.
+create table if not exists live_map_party_markers_v3
+(
+    id uuid primary key,
+    room_id uuid not null,
+    created_by_member_id uuid not null,
+    floor_id text not null,
+    x numeric not null check (x::text not in ('NaN', 'Infinity', '-Infinity')),
+    z numeric not null check (z::text not in ('NaN', 'Infinity', '-Infinity')),
+    marker_type text not null default 'normal'
+        check (marker_type in ('normal', 'danger', 'rally', 'target')),
+    label varchar(100),
+    version integer not null default 1 check (version > 0),
+    create_time timestamptz not null default now(),
+    update_time timestamptz not null default now(),
+    constraint fk_live_map_party_markers_v3_room
+        foreign key (room_id) references live_map_party_rooms_v3(id) on delete cascade,
+    constraint fk_live_map_party_markers_v3_member
+        foreign key (room_id, created_by_member_id)
+            references live_map_party_members_v3(room_id, id) on delete no action,
+    constraint fk_live_map_party_markers_v3_floor
+        foreign key (floor_id) references live_map_floors(id) on delete restrict
+);
+create index if not exists idx_live_map_party_markers_v3_room_floor
+    on live_map_party_markers_v3(room_id, floor_id, id);
+create index if not exists idx_live_map_party_markers_v3_member
+    on live_map_party_markers_v3(room_id, created_by_member_id);
+create index if not exists idx_live_map_party_markers_v3_floor
+    on live_map_party_markers_v3(floor_id);
