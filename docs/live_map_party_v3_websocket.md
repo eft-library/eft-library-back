@@ -57,7 +57,7 @@ heartbeat 응답도 전체 `snapshot`이다. 별도 `pong` 이벤트는 없다.
 | heartbeat | 추가 필드 없음 | 연결 유지와 전체 상태 복원 |
 | sync | 추가 필드 없음 | 전체 상태 다시 받기 |
 | ping | floor_id, x, z, marker_type?, label?, request_id? | 5초간 표시할 순간 핑 |
-| position | floor_id, x, z, yaw?, request_id? | 참여자의 최신 위치, 60초 유효 |
+| position | floor_id, x, z, yaw?, persistent?, request_id? | 최신 위치, 기본 60초 / persistent=true이면 만료 없음 |
 
 순간 핑:
 
@@ -84,7 +84,7 @@ heartbeat 응답도 전체 `snapshot`이다. 별도 `pong` 이벤트는 없다.
 - `member_id`, nickname, color, 만료 시각, membership_epoch는 서버가 결정한다.
   클라이언트가 보내면 유효성 오류다. 방에 속하지 않는 층과 유한하지 않은 좌표도 거절한다.
 - 위치는 실제 게임 좌표를 자동 추적하는 기능이 아니다. 새 위치 메시지를 보내지 않으면
-  60초 후 사라지고, heartbeat가 위치 유효 시간을 연장하지 않는다.
+  기본 60초 후 사라진다. persistent=true이면 expires_at=null로 다음 위치 또는 참여 종료까지 유지한다.
 - 지속 마커의 생성·수정·삭제는 REST API를 사용한다. WebSocket에 해당 명령을 보내지 않는다.
 - 계정·방별 일반 메시지 합계 분당 120회, 그중 ping 분당 30회로 제한한다.
   heartbeat와 sync도 합계에 포함하며 여러 탭은 한 계정의 제한을 공유한다.
@@ -132,7 +132,7 @@ snapshot.data 예시(배열의 상세 객체는 REST 스키마와 동일):
 - members에는 기존 마커의 작성자를 표시할 수 있도록 퇴장·강퇴 참여자도 포함한다.
   참여자 UI에는 status가 joined인 사람만 표시하고 online_member_ids로 접속 배지를 붙인다.
 - positions는 **position 이벤트 전체 객체의 배열**이다. 각 객체의 data.member_id로 위치를 찾는다.
-- `expires_at`은 밀리초가 아닌 Unix 초 실수다. server_time으로 서버/브라우저 시각 차이를
+- `expires_at`은 밀리초가 아닌 Unix 초 실수다. position에서는 null이면 만료 없음이다. server_time으로 서버/브라우저 시각 차이를
   보정한 뒤 만료된 핑·위치를 제거한다. snapshot에는 만료된 위치와 과거 핑이 포함되지 않는다.
 - `membership_epoch`는 재입장 세대를 구분하는 서버 문자열이다. 이전 입장 세대의 위치를
   새 참여 상태에 재사용하지 않는다. snapshot의 positions를 기준으로 상태를 다시 맞춘다.
@@ -264,5 +264,11 @@ FK/체크 제약과 방 삭제 cascade, 소켓 전달·강퇴·방장 자동 양
 - 송신자의 웹페이지가 파티 WebSocket에 연결된 상태에서 새 위치를 받아야 공유된다. 연결 전에 받은 위치는 자동 재전송하지 않는다.
 - 현재 프론트는 관리자 계정만 파티 연결을 허용하므로 양방향 검증에는 관리자 계정 두 개가 필요하다.
 - 프론트는 선택한 층과 같은 `floor_id`의 위치만 표시한다. 다른 층의 위치는 해당 층으로 전환해서 확인한다.
-- 위치는 60초 후 만료된다. heartbeat만으로 위치 유효 시간이 연장되지는 않는다.
+- send-location 파일명 위치는 persistent=true로 다음 위치까지 유지한다. 지도 클릭·로그 위치는 기본 60초 후 만료된다.
 - `yaw`를 허용하지 않는 구버전 백엔드에 새 프론트를 연결하면 `INVALID_MESSAGE`로 위치 메시지 전체가 거절된다. 백엔드 스키마를 먼저 배포한 뒤 같은 방의 두 계정에서 각각 새 위치를 전송하여 확인한다.
+
+### 수신 위치 유지
+
+`position.persistent`는 선택 boolean(기본 false)이다. true인 최신 위치는 `expires_at:null`로 방송·복원하며 클라이언트 만료 타이머에서 제외한다. 같은 참여자의 새 position은 기존 위치를 교체한다. 퇴장·강퇴·재입장 세대 변경 시 이전 위치는 복원하지 않는다. Redis 위치 키는 활동 중 snapshot으로 24시간 정리 TTL을 갱신하며, 비활성 방의 잔여 데이터는 정리된다. Redis 데이터 소실 시 위치는 복원되지 않는다.
+
+persistent 지원 백엔드를 먼저 배포한 뒤 프론트를 배포한다.

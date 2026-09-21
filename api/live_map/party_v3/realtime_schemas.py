@@ -26,6 +26,7 @@ class PartyPingV3(PartyRequestV3):
 
 class PartyPositionV3(PartyRequestV3):
     type: Literal["position"]
+    persistent: bool = False
     floor_id: IdV3
     x: CoordinateV3
     z: CoordinateV3

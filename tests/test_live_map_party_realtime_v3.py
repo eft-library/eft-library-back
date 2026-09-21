@@ -109,6 +109,28 @@ class PartyRealtimeTestV3(PartyRealtimeFixtureV3):
                     event = self.receive_v3(socket, lambda e: e["type"] == "position")
                     self.assertEqual(event["data"].get("yaw"), extra.get("yaw"))
 
+    def test_persistent_position_survives_time_and_is_replaced_v3(self):
+        room_id = self.create_v3()["room"]["id"]
+        owner = self.connect_service_v3(room_id)
+        self.realtime_v3.message_v3(owner, PartyPositionV3(
+            type="position", floor_id="floor-a", x=1, z=2, yaw=90, persistent=True,
+        ))
+        epochs = {str(owner.member_id): owner.epoch}
+        with patch("api.live_map.party_v3.realtime_store.time.time", return_value=time.time() + 3600):
+            positions = self.store_v3.positions_v3(room_id, epochs)
+            self.assertEqual(len(positions), 1)
+            self.assertIsNone(positions[0]["data"]["expires_at"])
+            self.assertIsNotNone(self.realtime_v3.forward_v3(owner, positions[0]))
+        restored = self.realtime_v3.refresh_v3(owner)["data"]["positions"]
+        self.assertEqual(restored[0]["data"]["yaw"], 90)
+        self.realtime_v3.message_v3(owner, PartyPositionV3(
+            type="position", floor_id="floor-a", x=3, z=4, yaw=180, persistent=True,
+        ))
+        positions = self.store_v3.positions_v3(room_id, epochs)
+        self.assertEqual(len(positions), 1)
+        self.assertEqual(positions[0]["data"]["x"], 3)
+        self.assertEqual(self.store_v3.positions_v3(room_id, {}), [])
+
     def test_position_yaw_validation_v3(self):
         body = {"type": "position", "floor_id": "floor-a", "x": 1, "z": 2}
         self.assertIsNone(PartyPositionV3(**body).yaw)

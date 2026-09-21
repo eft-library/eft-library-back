@@ -84,11 +84,11 @@ class PartyRealtimeServiceV3:
             self.store.touch_v3(room.id, member.id, connection.epoch, connection.connection_id)
             room.empty_since = None
             seconds = self.store.ping_seconds_v3 if isinstance(message, PartyPingV3) else self.store.position_seconds_v3
-            payload = message.model_dump(exclude={"type"}, exclude_none=True)
+            payload = message.model_dump(exclude={"type", "persistent"}, exclude_none=True)
             payload.update({
                 "member_id": str(member.id), "membership_epoch": connection.epoch,
                 "nickname": member.nickname, "color": member.color,
-                "expires_at": time.time() + seconds,
+                "expires_at": None if isinstance(message, PartyPositionV3) and message.persistent else time.time() + seconds,
             })
             event = self.store.event_v3(room.id, message.type, payload)
             if isinstance(message, PartyPositionV3):
@@ -112,7 +112,7 @@ class PartyRealtimeServiceV3:
             if (
                 actor is None or actor.room_id != connection.room_id or actor.status != "joined"
                 or membership_epoch_v3(actor.joined_at) != payload["membership_epoch"]
-                or payload["expires_at"] <= time.time()
+                or (payload["expires_at"] is not None and payload["expires_at"] <= time.time())
             ):
                 return None
             return event

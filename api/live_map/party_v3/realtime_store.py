@@ -107,7 +107,7 @@ class PartyRealtimeStoreV3:
         key = self.key_v3(room_id, "positions")
         pipe = self.client.pipeline(transaction=True)
         pipe.hset(key, f"{member_id}:{epoch}", json.dumps(event, allow_nan=False))
-        pipe.expire(key, self.position_seconds_v3 * 2)
+        pipe.expire(key, 86400)
         pipe.execute()
 
     def presence_v3(self, room_id: UUID | str, epochs: dict[str, str]) -> dict:
@@ -121,12 +121,15 @@ class PartyRealtimeStoreV3:
     def positions_v3(self, room_id: UUID | str, epochs: dict[str, str]) -> list[dict]:
         now = time.time()
         positions = []
-        for field, raw in self.client.hgetall(self.key_v3(room_id, "positions")).items():
+        key = self.key_v3(room_id, "positions")
+        # Active rooms refresh this housekeeping TTL through heartbeat snapshots.
+        self.client.expire(key, 86400)
+        for field, raw in self.client.hgetall(key).items():
             member_id, epoch = field.split(":", 1)
             if epochs.get(member_id) != epoch:
                 continue
             event = json.loads(raw)
-            if event["data"]["expires_at"] > now:
+            if event["data"]["expires_at"] is None or event["data"]["expires_at"] > now:
                 positions.append(event)
         return positions
 
