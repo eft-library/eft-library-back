@@ -4,6 +4,7 @@ HTTP/service integration uses isolated SQLite, never the configured application 
 PostgreSQL row-lock concurrency still needs a dedicated PostgreSQL integration run.
 """
 import unittest
+import tempfile
 from unittest.mock import Mock, patch
 from uuid import uuid4
 
@@ -15,7 +16,6 @@ from redis.exceptions import ConnectionError as RedisConnectionError
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
 from api.live_map.models import LiveMapFloorV3
 from api.live_map.party_v3.models import PartyMarkerV3, PartyMemberV3, PartyRoomV3
@@ -28,10 +28,13 @@ from api.user.user_res_models import UserV3
 from database import V3Database
 
 
-class PartyApiTestV3(unittest.TestCase):
-    def setUp(self):
+class PartyApiFixtureV3(unittest.TestCase):
+    def create_database_v3(self):
+        self.directory_v3 = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory_v3.cleanup)
         self.engine_v3 = create_engine(
-            "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool,
+            f"sqlite:///{self.directory_v3.name}/party-test.sqlite",
+            connect_args={"check_same_thread": False},
         )
         tables = [model.__table__ for model in (
             MapV3, LiveMapFloorV3, UserV3, PartyRoomV3, PartyMemberV3, PartyMarkerV3,
@@ -40,16 +43,19 @@ class PartyApiTestV3(unittest.TestCase):
         # Match the partial indexes that require deliberate flush ordering on transfer.
         with self.engine_v3.begin() as connection:
             connection.exec_driver_sql("""
-                CREATE UNIQUE INDEX test_owner_v3 ON live_map_party_members_v3(room_id)
+                CREATE UNIQUE INDEX test_owner_v3 ON live_map_party_members(room_id)
                 WHERE role = 'owner' AND status = 'joined'
             """)
             connection.exec_driver_sql("""
-                CREATE UNIQUE INDEX test_color_v3 ON live_map_party_members_v3(room_id, color)
+                CREATE UNIQUE INDEX test_color_v3 ON live_map_party_members(room_id, color)
                 WHERE status = 'joined'
             """)
             connection.exec_driver_sql("""
-                CREATE UNIQUE INDEX test_user_v3 ON live_map_party_members_v3(room_id, user_email)
+                CREATE UNIQUE INDEX test_user_v3 ON live_map_party_members(room_id, user_email)
             """)
+
+    def setUp(self):
+        self.create_database_v3()
         self.sessions_v3 = sessionmaker(self.engine_v3, autoflush=False)
         with self.sessions_v3.begin() as session:
             session.add_all([UserV3(email=f"{user}@example.test", nickname=user) for user in (
@@ -74,6 +80,9 @@ class PartyApiTestV3(unittest.TestCase):
         )
         self.session_patch_v3.start()
         self.limiter_patch_v3.start()
+        self.publish_patch_v3 = patch("api.live_map.party_v3.router.publish_party_change_v3", return_value=True)
+        self.publish_mock_v3 = self.publish_patch_v3.start()
+        self.addCleanup(self.publish_patch_v3.stop)
         self.addCleanup(self.session_patch_v3.stop)
         self.addCleanup(self.limiter_patch_v3.stop)
         self.addCleanup(self.engine_v3.dispose)
@@ -110,6 +119,8 @@ class PartyApiTestV3(unittest.TestCase):
         body.update(changes)
         return self.request_v3("POST", f"/{room_id}/markers", user=user, json=body)
 
+
+class PartyApiTestV3(PartyApiFixtureV3):
     def test_public_list_and_private_snapshot_v3(self):
         snapshot = self.create_v3()
         room_id = snapshot["room"]["id"]
@@ -273,13 +284,14 @@ class PartyApiTestV3(unittest.TestCase):
             event.remove(self.sessions_v3, "before_commit", reject_commit_v3)
         self.assertEqual(response.status_code, 503, response.text)
         self.assertNotIn("do-not-echo", response.text)
+        self.publish_mock_v3.assert_not_called()
         with self.sessions_v3() as session:
             self.assertEqual(session.scalar(select(func.count()).select_from(PartyRoomV3)), 0)
             self.assertEqual(session.scalar(select(func.count()).select_from(PartyMemberV3)), 0)
 
     def test_openapi_and_missing_entities_v3(self):
         schema = self.app_v3.openapi()
-        self.assertEqual(len(router_v3.routes), 14)
+        self.assertEqual(sum(hasattr(route, "methods") for route in router_v3.routes), 14)
         self.assertIn("requestBody", schema["paths"][self.base_v3]["post"])
         self.assertEqual(self.request_v3("GET", f"/{uuid4()}").status_code, 404)
 

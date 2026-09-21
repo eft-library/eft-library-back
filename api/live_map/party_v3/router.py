@@ -2,14 +2,17 @@ import logging
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from redis.exceptions import RedisError
 from starlette.concurrency import run_in_threadpool
 
 from database import V3Database
+from .lifecycle import party_lifespan_v3
+from .realtime_store import get_party_realtime_store_v3
 from .schemas import (
     PartyCreateV3, PartyDeletedV3, PartyJoinV3, PartyLeaveResponseV3,
     PartyMarkerCreateV3, PartyMarkerResponseV3, PartyMarkerUpdateV3,
@@ -18,9 +21,22 @@ from .schemas import (
 )
 from .security import authenticate_party_user_v3
 from .service import PartyServiceV3
+from .websocket import party_socket_handler_v3
 
 
 logger_v3 = logging.getLogger("api.live_map.party_v3")
+
+
+async def publish_party_change_v3(room_id: UUID) -> bool:
+    try:
+        store = await run_in_threadpool(get_party_realtime_store_v3)
+        await run_in_threadpool(store.changed_v3, room_id)
+        return True
+    except (RedisError, HTTPException) as exc:
+        # Persistence already succeeded. Never turn a committed write into a retryable failure.
+        # Socket reconnect/heartbeat snapshots reconcile a missed notification.
+        logger_v3.warning("Party notification unavailable (%s)", type(exc).__name__)
+        return False
 
 
 class PartyRouteV3(APIRoute):
@@ -35,6 +51,10 @@ class PartyRouteV3(APIRoute):
                     # Commit here, within error handling and before the response is sent.
                     # Yield-dependency teardown runs outside this route handler.
                     await run_in_threadpool(session.commit)
+                    room_id = session.info.get("party_room_id_v3")
+                    if room_id is not None and request.method not in ("GET", "HEAD", "OPTIONS"):
+                        if not await publish_party_change_v3(room_id):
+                            response.headers["X-Party-Realtime"] = "unavailable"
                 return response
             except RequestValidationError as exc:
                 # FastAPI's default validation response can echo passwords in `input`.
@@ -62,7 +82,13 @@ class PartyRouteV3(APIRoute):
 
 router_v3 = APIRouter(
     prefix="/v3/party", tags=["Live Map Party V3"], route_class=PartyRouteV3,
+    lifespan=party_lifespan_v3,
 )
+
+
+@router_v3.websocket("/rooms/{room_id}/ws")
+async def party_websocket_v3(websocket: WebSocket, room_id: UUID):
+    await party_socket_handler_v3(websocket, room_id)
 
 
 def get_party_service_v3(request: Request):

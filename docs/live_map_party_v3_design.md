@@ -23,7 +23,7 @@
 - 현재 맵 선택 쿼리는 `coalesce(m.parent_map_id, m.id)`를 표시용 맵으로 사용한다.
   따라서 마커 층의 맵 ID와 방의 맵 ID가 항상 같다고 가정하면 안 된다.
 
-## 1. live_map_party_rooms_v3 — 방
+## 1. live_map_party_rooms — 방
 
 | 필드 | 타입 | 제약 / 의미 |
 | --- | --- | --- |
@@ -49,12 +49,12 @@
 공개/비공개 컬럼은 두지 않는다. 모든 방에 동일한 입장 정책을 적용한다.
 현재 인원은 접속 상태에서 계산하고 별도 카운터 컬럼으로 중복 저장하지 않는다.
 
-## 2. live_map_party_members_v3 — 참여자와 방 내 권한
+## 2. live_map_party_members — 참여자와 방 내 권한
 
 | 필드 | 타입 | 제약 / 의미 |
 | --- | --- | --- |
 | id | uuid | PK, 애플리케이션에서 생성 |
-| room_id | uuid | NOT NULL, FK → rooms_v3.id, 삭제 CASCADE |
+| room_id | uuid | NOT NULL, FK → live_map_party_rooms.id, 삭제 CASCADE |
 | user_email | text | NOT NULL, FK → user_info.email, 삭제 RESTRICT |
 | nickname | varchar(30) | NOT NULL, 방에서 표시할 이름, 공백만 있는 값 금지 |
 | color | varchar(7) | NOT NULL, `#RRGGBB` 형식, 서비스에서 대문자로 정규화 |
@@ -85,12 +85,12 @@
 닉네임은 표시용이며 계정 이메일을 다른 참여자나 공개 목록에 노출하지 않는다.
 재접속은 로그인 계정과 해당 방의 참여 상태를 확인한다. 별도 게스트 토큰은 필요 없다.
 
-## 3. live_map_party_markers_v3 — 지속되는 공유 마커
+## 3. live_map_party_markers — 지속되는 공유 마커
 
 | 필드 | 타입 | 제약 / 의미 |
 | --- | --- | --- |
 | id | uuid | PK, 애플리케이션에서 생성 |
-| room_id | uuid | NOT NULL, FK → rooms_v3.id, 삭제 CASCADE |
+| room_id | uuid | NOT NULL, FK → live_map_party_rooms.id, 삭제 CASCADE |
 | created_by_member_id | uuid | NOT NULL, 아래 복합 FK 적용 |
 | floor_id | text | NOT NULL, FK → live_map_floors.id, 삭제 RESTRICT |
 | x | numeric | NOT NULL, 기존 live map 좌표계의 유한 값 |
@@ -101,7 +101,7 @@
 | create_time | timestamptz | NOT NULL DEFAULT now() |
 | update_time | timestamptz | NOT NULL DEFAULT now(), 변경 시 갱신 |
 
-- 복합 FK `(room_id, created_by_member_id)` → members_v3 `(room_id, id)`.
+- 복합 FK `(room_id, created_by_member_id)` → live_map_party_members `(room_id, id)`.
   참여자 단독 삭제는 NO ACTION, 방 전체 삭제 시에는 방의 CASCADE로 함께 정리한다.
 - `(room_id, floor_id, id)`: 입장/재접속 시 마커 목록 조회.
 - `(room_id, created_by_member_id)`: 작성자별 마커 조회.

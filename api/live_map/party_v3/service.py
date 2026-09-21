@@ -41,6 +41,7 @@ class PartyServiceV3:
             raise HTTPException(404, "ROOM_NOT_FOUND")
         if room.closed_at is not None:
             raise HTTPException(410, "ROOM_CLOSED")
+        self.session.info["party_room_id_v3"] = room.id
         return room
 
     def _member_v3(self, room_id: UUID, email: str) -> PartyMemberV3:
@@ -136,6 +137,7 @@ class PartyServiceV3:
         )
         self.session.add(room)
         self.session.flush()
+        self.session.info["party_room_id_v3"] = room.id
         owner = PartyMemberV3(
             id=uuid4(), room_id=room.id, user_email=email,
             nickname=self._nickname_v3(account, data.nickname), color=self.colors_v3[0],

@@ -10,7 +10,7 @@ from database import V3Database
 
 # Constraints/indexes are maintained in platform_db.sql; these mappings never create tables.
 class PartyRoomV3(V3Database.Base):
-    __tablename__ = "live_map_party_rooms_v3"
+    __tablename__ = "live_map_party_rooms"
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     name: Mapped[str] = mapped_column(String(60))
@@ -25,7 +25,7 @@ class PartyRoomV3(V3Database.Base):
 
 
 class PartyMemberV3(V3Database.Base):
-    __tablename__ = "live_map_party_members_v3"
+    __tablename__ = "live_map_party_members"
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     room_id: Mapped[UUID] = mapped_column(Uuid)
@@ -41,7 +41,7 @@ class PartyMemberV3(V3Database.Base):
 
 
 class PartyMarkerV3(V3Database.Base):
-    __tablename__ = "live_map_party_markers_v3"
+    __tablename__ = "live_map_party_markers"
 
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     room_id: Mapped[UUID] = mapped_column(Uuid)
