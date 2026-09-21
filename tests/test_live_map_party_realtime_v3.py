@@ -16,7 +16,9 @@ from pydantic import ValidationError
 from redis.exceptions import ConnectionError as RedisConnectionError
 
 from api.live_map.party_v3.models import PartyMemberV3, PartyRoomV3
-from api.live_map.party_v3.realtime_schemas import PartyHeartbeatV3, PartyPositionV3
+from api.live_map.party_v3.realtime_schemas import PartyHeartbeatV3, PartyPositionV3, PartyViewMapV3
+from api.map.models import MapV3
+from api.live_map.models import LiveMapFloorV3
 from api.live_map.party_v3.router import router_v3
 from api.live_map.party_v3.realtime_service import PartyRealtimeServiceV3
 from api.live_map.party_v3.realtime_store import PartyRealtimeStoreV3
@@ -97,6 +99,63 @@ class PartyRealtimeFixtureV3(PartyApiFixtureV3):
 
 
 class PartyRealtimeTestV3(PartyRealtimeFixtureV3):
+    def test_view_map_broadcast_snapshot_and_position_independence_v3(self):
+        room_id = self.create_v3()["room"]["id"]
+        self.join_v3(room_id)
+        with self.sessions_v3.begin() as session:
+            map_data = session.get(MapV3, "map-b")
+            floor = session.get(LiveMapFloorV3, "floor-b")
+            map_data.name_ko, map_data.name_en, map_data.name_ja = "지도", "Map", "マップ"
+            floor.name_ko, floor.name_en, floor.name_ja = "층", "Floor", "階"
+        with self.socket_v3(room_id) as owner, self.socket_v3(room_id, "member") as member:
+            self.snapshot_v3(owner)
+            self.snapshot_v3(member)
+            owner.send_json({"type": "position", "floor_id": "floor-a", "x": 1, "z": 2})
+            self.receive_v3(member, lambda e: e["type"] == "position")
+            owner.send_json({"type": "view_map", "map_id": "map-b", "floor_id": "floor-b"})
+            for socket in (owner, member):
+                event = self.receive_v3(socket, lambda e: e["type"] == "view_map")
+                self.assertEqual(event["data"]["map"]["name_ja"], "マップ")
+                self.assertEqual(event["data"]["floor"]["name_en"], "Floor")
+            member.send_json({"type": "sync"})
+            snapshot = self.snapshot_v3(member, lambda e: e["data"]["reason"] == "sync")["data"]
+            self.assertEqual(snapshot["view_maps"][0]["data"]["map_id"], "map-b")
+            self.assertEqual(snapshot["positions"][0]["data"]["map_id"], "map-a")
+        with self.socket_v3(room_id) as owner:
+            self.assertEqual(self.snapshot_v3(owner)["data"]["view_maps"][0]["data"]["floor_id"], "floor-b")
+
+    def test_view_map_validation_replacement_and_membership_v3(self):
+        room_id = self.create_v3()["room"]["id"]
+        owner = self.connect_service_v3(room_id)
+        for map_id, floor_id in (("missing", "floor-a"), ("map-a", "floor-b")):
+            with self.assertRaises(HTTPException) as error:
+                self.realtime_v3.message_v3(owner, PartyViewMapV3(type="view_map", map_id=map_id, floor_id=floor_id))
+            self.assertEqual(error.exception.status_code, 422)
+        for map_id, floor_id in (("map-a", "floor-child"), ("map-b", "floor-b")):
+            self.realtime_v3.message_v3(owner, PartyViewMapV3(type="view_map", map_id=map_id, floor_id=floor_id))
+        events = self.realtime_v3.refresh_v3(owner)["data"]["view_maps"]
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0]["data"]["map_id"], "map-b")
+        self.assertEqual(self.store_v3.view_maps_v3(room_id, {str(owner.member_id): "new-epoch"}), [])
+        self.assertEqual(self.redis_v3.hlen(self.store_v3.key_v3(room_id, "view-maps")), 0)
+        self.request_v3("POST", f"/{room_id}/leave")
+        with self.assertRaises(HTTPException):
+            self.realtime_v3.message_v3(owner, PartyViewMapV3(type="view_map", map_id="map-a", floor_id="floor-a"))
+
+    def test_position_explicit_map_allows_other_map_without_view_change_v3(self):
+        room_id = self.create_v3()["room"]["id"]
+        owner = self.connect_service_v3(room_id)
+        self.realtime_v3.message_v3(owner, PartyPositionV3(
+            type="position", map_id="map-b", floor_id="floor-b", x=1, z=2, yaw=90,
+        ))
+        snapshot = self.realtime_v3.refresh_v3(owner)["data"]
+        self.assertEqual(snapshot["positions"][0]["data"]["map_id"], "map-b")
+        self.assertEqual(snapshot["view_maps"], [])
+        with self.assertRaises(HTTPException):
+            self.realtime_v3.message_v3(owner, PartyPositionV3(
+                type="position", map_id="map-b", floor_id="floor-a", x=1, z=2,
+            ))
+
     def test_position_yaw_broadcast_and_unknown_direction_v3(self):
         room_id = self.create_v3()["room"]["id"]
         self.join_v3(room_id)
@@ -184,7 +243,8 @@ class PartyRealtimeTestV3(PartyRealtimeFixtureV3):
             for socket in (owner, member):
                 ping = self.receive_v3(socket, lambda event: event["type"] == "ping")
                 self.assertEqual(ping["data"]["request_id"], "ping-1")
-                self.assertGreater(ping["data"]["expires_at"], time.time())
+                self.assertGreater(ping["data"]["expires_at"], time.time() + 55)
+                self.assertLessEqual(ping["data"]["expires_at"], time.time() + 60)
             marker = self.marker_v3(room_id).json()["data"]
             snapshot = self.snapshot_v3(member, lambda e: any(m["id"] == marker["id"] for m in e["data"]["markers"]))
             self.assertEqual(snapshot["data"]["presence"]["online_count"], 2)

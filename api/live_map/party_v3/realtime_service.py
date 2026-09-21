@@ -7,8 +7,10 @@ from fastapi import HTTPException
 from sqlalchemy import select
 
 from database import V3Database
+from api.map.models import MapV3
+from api.live_map.models import LiveMapFloorV3
 from .models import PartyMemberV3, PartyRoomV3
-from .realtime_schemas import PartyHeartbeatV3, PartyPingV3, PartyPositionV3
+from .realtime_schemas import PartyHeartbeatV3, PartyPingV3, PartyPositionV3, PartyViewMapV3
 from .realtime_store import PartyRealtimeStoreV3, get_party_realtime_store_v3, membership_epoch_v3
 from .security import PartyRateLimiterV3
 from .service import PartyServiceV3
@@ -44,6 +46,7 @@ class PartyRealtimeServiceV3:
         data.update({
             "presence": self.store.presence_v3(room.id, epochs),
             "positions": self.store.positions_v3(room.id, epochs),
+            "view_maps": self.store.view_maps_v3(room.id, epochs),
             "heartbeat_interval_seconds": 15,
             "reconnect_grace_seconds": self.store.reconnect_seconds_v3,
             "reason": reason,
@@ -71,7 +74,19 @@ class PartyRealtimeServiceV3:
                 room.empty_since = None
             return self._snapshot_v3(service, room, member, reason)
 
-    def message_v3(self, connection: PartyConnectionV3, message: PartyHeartbeatV3 | PartyPingV3 | PartyPositionV3):
+    def _map_floor_v3(self, service: PartyServiceV3, map_id: str, floor_id: str):
+        map_data = service.session.get(MapV3, map_id)
+        if map_data is None or not map_data.is_use:
+            raise HTTPException(422, "INVALID_MAP")
+        floor = service.session.get(LiveMapFloorV3, floor_id)
+        floor_map = service.session.get(MapV3, floor.map_id) if floor else None
+        if floor_map is None or not floor_map.is_use or (
+            floor_map.id != map_id and floor_map.parent_map_id != map_id
+        ):
+            raise HTTPException(422, "FLOOR_NOT_IN_MAP")
+        return map_data, floor
+
+    def message_v3(self, connection: PartyConnectionV3, message: PartyHeartbeatV3 | PartyPingV3 | PartyPositionV3 | PartyViewMapV3):
         PartyRateLimiterV3(self.store.client).consume_v3(connection.email, f"ws-message:{connection.room_id}", 120)
         if isinstance(message, PartyHeartbeatV3):
             return self.refresh_v3(connection, message.type, touch=True)
@@ -80,17 +95,33 @@ class PartyRealtimeServiceV3:
         with V3Database.SessionLocal.begin() as session:
             service = PartyServiceV3(session)
             room, member = self._authorized_v3(service, connection)
-            service._validate_floor_v3(room, message.floor_id)
+            if message.map_id is None:
+                # Existing clients scope coordinates to the room's original map.
+                service._validate_floor_v3(room, message.floor_id)
+            map_data, floor = self._map_floor_v3(service, message.map_id or room.map_id, message.floor_id)
             self.store.touch_v3(room.id, member.id, connection.epoch, connection.connection_id)
             room.empty_since = None
             seconds = self.store.ping_seconds_v3 if isinstance(message, PartyPingV3) else self.store.position_seconds_v3
             payload = message.model_dump(exclude={"type", "persistent"}, exclude_none=True)
             payload.update({
+                "map_id": map_data.id,
                 "member_id": str(member.id), "membership_epoch": connection.epoch,
                 "nickname": member.nickname, "color": member.color,
                 "expires_at": None if isinstance(message, PartyPositionV3) and message.persistent else time.time() + seconds,
             })
+            if isinstance(message, PartyViewMapV3):
+                payload.pop("expires_at")
+                payload["map"] = {
+                    "id": map_data.id,
+                    **{name: getattr(map_data, name) for name in ("name_ko", "name_en", "name_ja")},
+                }
+                payload["floor"] = {
+                    "id": floor.id, "map_id": floor.map_id, "floor_no": floor.floor_no,
+                    **{name: getattr(floor, name) for name in ("name_ko", "name_en", "name_ja")},
+                }
             event = self.store.event_v3(room.id, message.type, payload)
+            if isinstance(message, PartyViewMapV3):
+                self.store.save_view_map_v3(room.id, str(member.id), connection.epoch, event)
             if isinstance(message, PartyPositionV3):
                 self.store.save_position_v3(room.id, str(member.id), connection.epoch, event)
             self.store.publish_v3(room.id, event)
@@ -102,7 +133,7 @@ class PartyRealtimeServiceV3:
             return None
         if event.get("type") in ("room.changed", "presence.changed"):
             return self.refresh_v3(connection)
-        if event.get("type") not in ("ping", "position"):
+        if event.get("type") not in ("ping", "position", "view_map"):
             return None
         with V3Database.SessionLocal.begin() as session:
             service = PartyServiceV3(session)
@@ -112,7 +143,7 @@ class PartyRealtimeServiceV3:
             if (
                 actor is None or actor.room_id != connection.room_id or actor.status != "joined"
                 or membership_epoch_v3(actor.joined_at) != payload["membership_epoch"]
-                or (payload["expires_at"] is not None and payload["expires_at"] <= time.time())
+                or (payload.get("expires_at") is not None and payload["expires_at"] <= time.time())
             ):
                 return None
             return event

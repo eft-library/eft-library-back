@@ -56,8 +56,9 @@ heartbeat 응답도 전체 `snapshot`이다. 별도 `pong` 이벤트는 없다.
 | auth | token | 첫 메시지에서만 로그인 인증 |
 | heartbeat | 추가 필드 없음 | 연결 유지와 전체 상태 복원 |
 | sync | 추가 필드 없음 | 전체 상태 다시 받기 |
-| ping | floor_id, x, z, marker_type?, label?, request_id? | 5초간 표시할 순간 핑 |
-| position | floor_id, x, z, yaw?, persistent?, request_id? | 최신 위치, 기본 60초 / persistent=true이면 만료 없음 |
+| ping | floor_id, x, z, map_id?, marker_type?, label?, request_id? | 60초간 표시할 순간 핑 |
+| position | floor_id, x, z, map_id?, yaw?, persistent?, request_id? | 최신 위치, 기본 60초 / persistent=true이면 만료 없음 |
+| view_map | map_id, floor_id | 현재 보고 있는 지도·층 공유, 실제 위치와 별개 |
 
 순간 핑:
 
@@ -105,9 +106,10 @@ heartbeat 응답도 전체 `snapshot`이다. 별도 `pong` 이벤트는 없다.
 
 | type | data | 프론트 처리 |
 | --- | --- | --- |
-| snapshot | room, me, members, markers, presence, positions, heartbeat_interval_seconds, reconnect_grace_seconds, reason | 저장 상태 전체 교체 |
-| ping | member_id, membership_epoch, nickname, color, floor_id, x, z, marker_type, expires_at, label?, request_id? | 만료 시각까지 순간 핑 표시 |
-| position | member_id, membership_epoch, nickname, color, floor_id, x, z, yaw?, expires_at, request_id? | 참여자별 최신 위치 갱신 |
+| snapshot | room, me, members, markers, presence, positions, view_maps, heartbeat_interval_seconds, reconnect_grace_seconds, reason | 저장 상태 전체 교체 |
+| ping | member_id, membership_epoch, nickname, color, map_id, floor_id, x, z, marker_type, expires_at, label?, request_id? | 만료 시각까지 순간 핑 표시 |
+| position | member_id, membership_epoch, nickname, color, map_id, floor_id, x, z, yaw?, expires_at, request_id? | 참여자별 최신 위치 갱신 |
+| view_map | member_id, membership_epoch, nickname, color, map_id, floor_id, map, floor | 참여자별 현재 화면 갱신 |
 | error | 공통 정상 이벤트 구조와 다름. 아래 오류 형식 참고 | 오류 표시/재접속 판단 |
 
 snapshot.data 예시(배열의 상세 객체는 REST 스키마와 동일):
@@ -120,6 +122,7 @@ snapshot.data 예시(배열의 상세 객체는 REST 스키마와 동일):
   "markers":[],
   "presence":{"online_member_ids":["내 참여자 UUID"],"online_count":1},
   "positions":[],
+  "view_maps":[],
   "heartbeat_interval_seconds":15,
   "reconnect_grace_seconds":90,
   "reason":"connected"
@@ -272,3 +275,73 @@ FK/체크 제약과 방 삭제 cascade, 소켓 전달·강퇴·방장 자동 양
 `position.persistent`는 선택 boolean(기본 false)이다. true인 최신 위치는 `expires_at:null`로 방송·복원하며 클라이언트 만료 타이머에서 제외한다. 같은 참여자의 새 position은 기존 위치를 교체한다. 퇴장·강퇴·재입장 세대 변경 시 이전 위치는 복원하지 않는다. Redis 위치 키는 활동 중 snapshot으로 24시간 정리 TTL을 갱신하며, 비활성 방의 잔여 데이터는 정리된다. Redis 데이터 소실 시 위치는 복원되지 않는다.
 
 persistent 지원 백엔드를 먼저 배포한 뒤 프론트를 배포한다.
+
+### 지도 전환과 멤버 화면 상태 (2026-09-22)
+
+DB 테이블 추가나 마이그레이션은 필요 없다. 화면 상태는 Redis에 저장하며 위치 상태와 별개다.
+프론트는 방 선택과 WebSocket 수명을 지도 화면보다 상위에서 관리하고, 참여 방 저장 키를
+계정 기준으로 변경해야 한다. 지도·층 변경 시 leave나 소켓 종료를 하지 않는다.
+관리자 제한은 운영 테스트 동안 유지한다.
+
+최초 연결 snapshot 이후, 재접속 snapshot 이후, 지도·층 변경 시 전송한다:
+
+```json
+{"type":"view_map","map_id":"map-b","floor_id":"floor-b"}
+```
+
+`map_id`는 maps.id, `floor_id`는 live_map_floors.id다. 둘 다 필수다.
+지도/층을 아직 선택하지 않았거나 로딩 중이면 선택 완료 후 전송한다.
+서버는 활성 지도 및 해당 지도 또는 직계 하위 지도의 층인지 검증한다.
+존재하지 않거나 비활성 지도는 `INVALID_MAP`, 지도·층 불일치는 `FLOOR_NOT_IN_MAP` 오류다.
+방 생성 시 지정한 지도와 다른 지도도 허용한다.
+
+같은 방의 모든 연결(송신자 포함)에 공통 이벤트 envelope로 방송한다. data 예시:
+
+```json
+{
+  "member_id":"참여자 UUID",
+  "membership_epoch":"입장 세대",
+  "nickname":"플레이어",
+  "color":"#EF4444",
+  "map_id":"map-b",
+  "floor_id":"floor-b",
+  "map":{"id":"map-b","name_ko":"지도","name_en":"Map","name_ja":"マップ"},
+  "floor":{"id":"floor-b","map_id":"map-b","floor_no":1,"name_ko":"1층","name_en":"Floor 1","name_ja":"1階"}
+}
+```
+
+이름과 floor_no는 DB 값이며 null일 수 있다. 현재 언어 → 영어 → ID 순으로 표시 대체를 권장한다.
+`floor.map_id`는 층의 실제 소속 지도이므로 하위 지도인 경우 최상위 `map_id`와 다를 수 있다.
+`snapshot.data.view_maps`는 **view_map 이벤트 전체 객체의 배열**이다(positions와 같은 구조).
+member_id로 멤버 목록과 연결하고 snapshot 수신 시 배열 전체를 교체한다.
+항목이 없으면 화면 상태 미확인이다. 온라인 여부는 기존 presence를 사용한다.
+이벤트 순서는 공통 server_time으로 비교하고 membership_epoch가 다른 데이터는 재사용하지 않는다.
+
+같은 계정의 여러 탭에서는 서버가 마지막으로 수신한 화면 상태가 우선한다.
+화면 상태에는 위치의 60초 만료를 적용하지 않으며, 재접속 유예 중에는 마지막 상태를 보관한다.
+퇴장·강퇴·재입장 세대 변경 이후에는 snapshot에서 제외하고 잔여 항목을 정리한다.
+Redis 키의 24시간 정리 TTL은 snapshot 조회 시 갱신하며 비활성 방의 잔여 데이터는 만료된다.
+Redis 소실 시 프론트에서 다시 보고해야 한다. heartbeat snapshot에서 내 화면 상태가 없으면
+현재 선택된 지도·층을 재전송하여 복구할 수 있다.
+
+#### 여러 지도의 위치와 핑
+
+`position`과 `ping`에 선택 필드 `map_id`를 추가했다. 방의 최초 지도와 다른 위치를 보낼 때는
+반드시 실제 좌표가 속하는 지도 ID를 지정한다. 지도·층 관계는 view_map과 동일하게 검증한다.
+map_id를 생략하는 기존 요청은 이전처럼 room.map_id 기준으로 검증하며, 새 방송에는 map_id를 붙인다.
+배포 전 Redis에 저장된 position은 map_id가 없을 수 있으므로 이 경우에만 room.map_id를 사용한다.
+
+```json
+{"type":"position","map_id":"map-b","floor_id":"floor-b","x":120,"z":-40,"yaw":90,"persistent":true}
+```
+
+프론트는 position/ping의 map_id와 floor_id가 현재 화면과 모두 일치할 때만 그린다.
+view_map으로 위치의 소속 지도를 덮어쓰거나 기존 좌표를 다른 지도에 옮기지 않는다.
+파일 이름에는 지도 정보가 없으므로 실제 게임 지도 정보나 명시적인 위치 공유용 지도 설정이
+없는 경우, 현재 보는 지도로 추측하여 위치를 전송하지 않는다. 서버도 이를 추측하지 않는다.
+원본 yaw 전송 및 수신 화면에서의 회전 보정은 기존과 같다.
+
+room.map_id는 방 목록 필터/생성 시 기준 지도이며 view_map에 따라 변경되지 않는다.
+기존 REST 영구 마커는 계속 방의 기준 지도에 속한다. 이번 변경은 화면 상태와 실시간 위치·핑에 적용된다.
+백엔드를 먼저 배포하고 새 프론트를 배포한다. 기존 프론트는 새 필드를 무시할 수 있으나,
+지도 전환 시 파티 연결 유지 및 여러 지도 표시 필터는 새 프론트 적용 후 동작한다.

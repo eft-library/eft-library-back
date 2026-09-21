@@ -33,7 +33,7 @@ class PartyRealtimeStoreV3:
     lease_seconds_v3 = 45
     reconnect_seconds_v3 = 90
     position_seconds_v3 = 60
-    ping_seconds_v3 = 5
+    ping_seconds_v3 = 60
     max_connections_v3 = 5
 
     def __init__(self, client: Redis):
@@ -117,6 +117,28 @@ class PartyRealtimeStoreV3:
             if epochs.get(member_id) == epoch:
                 online.add(member_id)
         return {"online_member_ids": sorted(online), "online_count": len(online)}
+
+    def save_view_map_v3(self, room_id: UUID | str, member_id: str, epoch: str, event: dict):
+        key = self.key_v3(room_id, "view-maps")
+        pipe = self.client.pipeline(transaction=True)
+        pipe.hset(key, f"{member_id}:{epoch}", json.dumps(event, allow_nan=False))
+        pipe.expire(key, 86400)
+        pipe.execute()
+
+    def view_maps_v3(self, room_id: UUID | str, epochs: dict[str, str]) -> list[dict]:
+        key = self.key_v3(room_id, "view-maps")
+        self.client.expire(key, 86400)
+        events = []
+        stale = []
+        for field, raw in self.client.hgetall(key).items():
+            member_id, epoch = field.split(":", 1)
+            if epochs.get(member_id) == epoch:
+                events.append(json.loads(raw))
+            else:
+                stale.append(field)
+        if stale:
+            self.client.hdel(key, *stale)
+        return events
 
     def positions_v3(self, room_id: UUID | str, epochs: dict[str, str]) -> list[dict]:
         now = time.time()

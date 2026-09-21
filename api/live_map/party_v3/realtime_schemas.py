@@ -16,6 +16,7 @@ class PartyHeartbeatV3(PartyRequestV3):
 
 class PartyPingV3(PartyRequestV3):
     type: Literal["ping"]
+    map_id: IdV3 | None = None
     floor_id: IdV3
     x: CoordinateV3
     z: CoordinateV3
@@ -26,6 +27,7 @@ class PartyPingV3(PartyRequestV3):
 
 class PartyPositionV3(PartyRequestV3):
     type: Literal["position"]
+    map_id: IdV3 | None = None
     persistent: bool = False
     floor_id: IdV3
     x: CoordinateV3
@@ -34,7 +36,13 @@ class PartyPositionV3(PartyRequestV3):
     request_id: str | None = Field(default=None, max_length=64)
 
 
+class PartyViewMapV3(PartyRequestV3):
+    type: Literal["view_map"]
+    map_id: IdV3
+    floor_id: IdV3
+
+
 PartySocketMessageV3 = Annotated[
-    PartyHeartbeatV3 | PartyPingV3 | PartyPositionV3, Field(discriminator="type"),
+    PartyHeartbeatV3 | PartyPingV3 | PartyPositionV3 | PartyViewMapV3, Field(discriminator="type"),
 ]
 socket_message_adapter_v3 = TypeAdapter(PartySocketMessageV3)
