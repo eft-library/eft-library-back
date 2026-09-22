@@ -99,6 +99,19 @@ class PartyRealtimeFixtureV3(PartyApiFixtureV3):
 
 
 class PartyRealtimeTestV3(PartyRealtimeFixtureV3):
+    def test_other_map_marker_create_delete_snapshot_v3(self):
+        room_id = self.create_v3()["room"]["id"]
+        self.join_v3(room_id)
+        with self.socket_v3(room_id, "member") as member:
+            self.snapshot_v3(member)
+            response = self.marker_v3(room_id, map_id="map-b", floor_id="floor-b")
+            self.assertEqual(response.status_code, 201)
+            marker = response.json()["data"]
+            snapshot = self.snapshot_v3(member, lambda e: bool(e["data"]["markers"]))
+            self.assertEqual(snapshot["data"]["markers"][0]["map_id"], "map-b")
+            self.assertEqual(self.request_v3("DELETE", f"/{room_id}/markers/{marker['id']}", params={"version": 1}).status_code, 200)
+            self.snapshot_v3(member, lambda e: not e["data"]["markers"])
+
     def test_view_map_broadcast_snapshot_and_position_independence_v3(self):
         room_id = self.create_v3()["room"]["id"]
         self.join_v3(room_id)

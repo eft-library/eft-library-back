@@ -1884,6 +1884,7 @@ create table if not exists live_map_party_markers
     id uuid primary key,
     room_id uuid not null,
     created_by_member_id uuid not null,
+    map_id text not null references maps(id) on delete restrict,
     floor_id text not null,
     x numeric not null check (x::text not in ('NaN', 'Infinity', '-Infinity')),
     z numeric not null check (z::text not in ('NaN', 'Infinity', '-Infinity')),

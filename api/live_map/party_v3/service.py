@@ -271,6 +271,18 @@ class PartyServiceV3:
         if floor is None:
             raise HTTPException(422, "FLOOR_NOT_IN_ROOM_MAP")
 
+    def _validate_map_floor_v3(self, map_id: str, floor_id: str):
+        map_data = self.session.get(MapV3, map_id)
+        if map_data is None or not map_data.is_use:
+            raise HTTPException(422, "INVALID_MAP")
+        floor = self.session.get(LiveMapFloorV3, floor_id)
+        floor_map = self.session.get(MapV3, floor.map_id) if floor else None
+        if floor_map is None or not floor_map.is_use or (
+            floor_map.id != map_id and floor_map.parent_map_id != map_id
+        ):
+            raise HTTPException(422, "FLOOR_NOT_IN_MAP")
+        return map_data, floor
+
     def list_markers_v3(self, room_id: UUID, email: str):
         room = self._room_v3(room_id)
         self._member_v3(room.id, email)
@@ -282,7 +294,10 @@ class PartyServiceV3:
     def create_marker_v3(self, room_id: UUID, email: str, data: PartyMarkerCreateV3):
         room = self._room_v3(room_id)
         me = self._member_v3(room.id, email)
-        self._validate_floor_v3(room, data.floor_id)
+        map_id = data.map_id or room.map_id
+        if data.map_id is None:
+            self._validate_floor_v3(room, data.floor_id)
+        self._validate_map_floor_v3(map_id, data.floor_id)
         count = self.session.scalar(select(func.count()).select_from(PartyMarkerV3).where(
             PartyMarkerV3.room_id == room.id,
         ))
@@ -291,7 +306,8 @@ class PartyServiceV3:
         now = datetime.now(timezone.utc)
         marker = PartyMarkerV3(
             id=uuid4(), room_id=room.id, created_by_member_id=me.id,
-            **data.model_dump(), version=1, create_time=now, update_time=now,
+            **data.model_dump(exclude={"map_id"}), map_id=map_id,
+            version=1, create_time=now, update_time=now,
         )
         self.session.add(marker)
         room.update_time = now
@@ -312,8 +328,10 @@ class PartyServiceV3:
         room = self._room_v3(room_id)
         me = self._member_v3(room.id, email)
         marker = self._editable_marker_v3(room.id, me, marker_id, data.version)
-        self._validate_floor_v3(room, data.floor_id)
-        for field, value in data.model_dump(exclude={"version"}).items():
+        map_id = data.map_id or marker.map_id
+        self._validate_map_floor_v3(map_id, data.floor_id)
+        marker.map_id = map_id
+        for field, value in data.model_dump(exclude={"version", "map_id"}).items():
             setattr(marker, field, value)
         marker.version += 1
         marker.update_time = room.update_time = datetime.now(timezone.utc)

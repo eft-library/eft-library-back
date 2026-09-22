@@ -93,6 +93,17 @@ class PartyPostgresTestV3(realtime_tests_v3.PartyRealtimeFixtureV3):
             self.assertEqual(len(members), 2)
             self.assertEqual(len({member.color for member in members}), 2)
 
+    def test_marker_map_migration_backfills_existing_rows_v3(self):
+        room_id = self.create_v3()["room"]["id"]
+        self.marker_v3(room_id, floor_id="floor-child")
+        with self.engine_v3.begin() as connection:
+            connection.exec_driver_sql("ALTER TABLE live_map_party_markers DROP COLUMN map_id")
+        migration = (Path(__file__).parents[1] / "sql/migrations/20260922_party_marker_map_v3.sql").read_text()
+        with self.engine_v3.connect().execution_options(isolation_level="AUTOCOMMIT") as connection:
+            connection.exec_driver_sql(migration)
+            connection.exec_driver_sql(migration)
+            self.assertEqual(connection.exec_driver_sql("SELECT map_id FROM live_map_party_markers").scalar_one(), "map-a")
+
     def test_concurrent_marker_edits_detect_stale_version_v3(self):
         room_id = self.create_v3()["room"]["id"]
         marker_id = self.marker_v3(room_id).json()["data"]["id"]

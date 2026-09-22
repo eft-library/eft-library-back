@@ -46,6 +46,7 @@ class PartyMarkerV3(V3Database.Base):
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     room_id: Mapped[UUID] = mapped_column(Uuid)
     created_by_member_id: Mapped[UUID] = mapped_column(Uuid)
+    map_id: Mapped[str] = mapped_column(Text)
     floor_id: Mapped[str] = mapped_column(Text)
     x: Mapped[Decimal] = mapped_column(Numeric)
     z: Mapped[Decimal] = mapped_column(Numeric)

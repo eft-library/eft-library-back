@@ -7,8 +7,6 @@ from fastapi import HTTPException
 from sqlalchemy import select
 
 from database import V3Database
-from api.map.models import MapV3
-from api.live_map.models import LiveMapFloorV3
 from .models import PartyMemberV3, PartyRoomV3
 from .realtime_schemas import PartyHeartbeatV3, PartyPingV3, PartyPositionV3, PartyViewMapV3
 from .realtime_store import PartyRealtimeStoreV3, get_party_realtime_store_v3, membership_epoch_v3
@@ -74,18 +72,6 @@ class PartyRealtimeServiceV3:
                 room.empty_since = None
             return self._snapshot_v3(service, room, member, reason)
 
-    def _map_floor_v3(self, service: PartyServiceV3, map_id: str, floor_id: str):
-        map_data = service.session.get(MapV3, map_id)
-        if map_data is None or not map_data.is_use:
-            raise HTTPException(422, "INVALID_MAP")
-        floor = service.session.get(LiveMapFloorV3, floor_id)
-        floor_map = service.session.get(MapV3, floor.map_id) if floor else None
-        if floor_map is None or not floor_map.is_use or (
-            floor_map.id != map_id and floor_map.parent_map_id != map_id
-        ):
-            raise HTTPException(422, "FLOOR_NOT_IN_MAP")
-        return map_data, floor
-
     def message_v3(self, connection: PartyConnectionV3, message: PartyHeartbeatV3 | PartyPingV3 | PartyPositionV3 | PartyViewMapV3):
         PartyRateLimiterV3(self.store.client).consume_v3(connection.email, f"ws-message:{connection.room_id}", 120)
         if isinstance(message, PartyHeartbeatV3):
@@ -98,7 +84,7 @@ class PartyRealtimeServiceV3:
             if message.map_id is None:
                 # Existing clients scope coordinates to the room's original map.
                 service._validate_floor_v3(room, message.floor_id)
-            map_data, floor = self._map_floor_v3(service, message.map_id or room.map_id, message.floor_id)
+            map_data, floor = service._validate_map_floor_v3(message.map_id or room.map_id, message.floor_id)
             self.store.touch_v3(room.id, member.id, connection.epoch, connection.connection_id)
             room.empty_since = None
             seconds = self.store.ping_seconds_v3 if isinstance(message, PartyPingV3) else self.store.position_seconds_v3

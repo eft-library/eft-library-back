@@ -66,6 +66,7 @@ class PartyOwnerTransferV3(PartyRequestV3):
 
 
 class PartyMarkerCreateV3(PartyRequestV3):
+    map_id: IdV3 | None = None
     floor_id: IdV3
     x: CoordinateV3
     z: CoordinateV3
@@ -120,6 +121,7 @@ class PartyMarkerResponseV3(BaseModel):
     id: UUID
     room_id: UUID
     created_by_member_id: UUID
+    map_id: str
     floor_id: str
     x: float
     z: float

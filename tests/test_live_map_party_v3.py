@@ -121,6 +121,26 @@ class PartyApiFixtureV3(unittest.TestCase):
 
 
 class PartyApiTestV3(PartyApiFixtureV3):
+    def test_marker_maps_create_update_and_snapshot_v3(self):
+        room_id = self.create_v3()["room"]["id"]
+        self.join_v3(room_id)
+        marker = self.marker_v3(room_id, user="member", map_id="map-b", floor_id="floor-b")
+        self.assertEqual(marker.status_code, 201)
+        data = marker.json()["data"]
+        self.assertEqual(data["map_id"], "map-b")
+        self.assertEqual(self.request_v3("GET", f"/{room_id}").json()["data"]["markers"][0]["map_id"], "map-b")
+        path = f"/{room_id}/markers/{data['id']}"
+        body = {"floor_id": "floor-b", "x": 3, "z": 4, "version": 1}
+        updated = self.request_v3("PUT", path, user="member", json=body)
+        self.assertEqual(updated.status_code, 200)
+        self.assertEqual(updated.json()["data"]["map_id"], "map-b")
+        body.update(map_id="map-a", floor_id="floor-child", version=2)
+        self.assertEqual(self.request_v3("PUT", path, user="member", json=body).status_code, 200)
+        self.assertEqual(self.marker_v3(room_id, map_id="map-b", floor_id="floor-a").status_code, 422)
+        self.assertEqual(self.marker_v3(room_id, map_id="missing").status_code, 422)
+        self.assertEqual(self.request_v3("DELETE", path, user="member", params={"version": 3}).status_code, 200)
+        self.assertEqual(self.request_v3("GET", f"/{room_id}/markers").json()["data"], [])
+
     def test_public_list_and_private_snapshot_v3(self):
         snapshot = self.create_v3()
         room_id = snapshot["room"]["id"]

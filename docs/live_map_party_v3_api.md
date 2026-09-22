@@ -97,6 +97,7 @@ Swagger의 **Live Map Party V3** 태그에서 요청/응답 스키마를 확인�
 
 ```json
 {
+  "map_id": "실제 maps.id",
   "floor_id": "실제 live_map_floors.id",
   "x": 125.5,
   "z": -48.25,
@@ -106,7 +107,7 @@ Swagger의 **Live Map Party V3** 태그에서 요청/응답 스키마를 확인�
 ```
 
 - 좌표는 기존 live map의 `x/z`이며 NaN·무한대는 거절한다.
-- 방 맵에 속하거나 방 맵의 직속 하위 맵에 속한 층만 허용한다.
+- 지정한 map_id에 속하거나 해당 지도의 직속 하위 지도에 속한 층만 허용한다. 생성 시 map_id 생략은 방 지도 기준이다.
 - `marker_type`: `normal`(기본), `danger`, `rally`, `target`.
 - `label`: 선택, 최대 100자. 일반 텍스트로 표시한다.
 - 방당 지속 마커는 최대 200개.
@@ -178,3 +179,31 @@ REST 입장 후 WebSocket에 연결하지 않는 경우에도 유예 후 자동 
 정리 작업을 끌 수 있으나 이 경우 접속이 끊긴 참여자는 자동 퇴장하지 않는다.
 Redis 오류 중에는 정리를 보류하고, Redis 데이터가 유실되면 새 유예 시간을 부여한다.
 닫힌 방의 DB 기록은 보관하며 물리 삭제 스케줄러는 포함하지 않는다.
+
+### 영구 공유 마커 지도 (2026-09-22)
+
+영구 마커는 자체 `map_id`를 저장하며 방 생성 지도와 다른 지도에도 생성할 수 있다.
+POST 생성 및 PUT 수정 요청 예시(PUT에는 version 추가):
+
+```json
+{"map_id":"map-b","floor_id":"floor-b","x":120,"z":-40,"marker_type":"normal","label":"합류"}
+```
+
+- map_id는 maps.id다. 활성 지도와 해당 지도 또는 직계 하위 지도의 floor_id 관계를 검증한다.
+- 잘못된 지도는 422 INVALID_MAP, 지도·층 불일치는 422 FLOOR_NOT_IN_MAP이다.
+- 기존 클라이언트 호환: 생성에서 map_id 생략/null이면 room.map_id를 사용한다. 수정에서 생략/null이면 마커의 기존 map_id를 유지한다.
+- 생성·수정 응답, GET 마커 목록, REST 및 WebSocket snapshot.markers의 각 항목에 map_id가 포함된다.
+- 목록과 snapshot은 모든 지도의 마커를 포함한다. 현재 화면의 map_id 및 floor_id가 일치하는 항목만 표시한다.
+- 생성·수정·삭제 후 기존 post-commit room.changed → WebSocket snapshot 방송을 유지한다.
+- 방당 최대 200개 제한은 모든 지도의 마커를 합산한다.
+- 삭제/수정 권한은 작성자 또는 방장이다. 일반 참여자는 다른 사람의 마커를 삭제할 수 없다.
+- 지도 전환 시 프론트가 DELETE를 호출하면 그 마커는 파티 전체에서 삭제된다. 서버는 view_map 수신만으로 마커를 삭제하지 않는다. 각 DELETE에는 최신 version이 필요하며, 409 충돌 시 snapshot을 갱신한다.
+- 지도 전환 시 이전 지도의 모든 마커를 삭제하려면 방장 권한이 필요하다. 일반 멤버는 본인이 작성한 마커만 삭제할 수 있다.
+
+배포에는 기존 live_map_party_markers 테이블의 map_id 컬럼 추가가 필요하다.
+`sql/migrations/20260922_party_marker_map_v3.sql`은 기존 마커를 room.map_id로 채우고
+NOT NULL 및 maps 외래 키를 설정한다. 신규 DB 정의는 platform_db.sql에 반영했다.
+
+배포 순서: 마커 쓰기 일시 중지 → 마이그레이션 SQL 실행 → 새 백엔드로 전체 교체 → 쓰기 재개 → 프론트 배포.
+구버전 백엔드는 map_id를 저장하지 않으므로 마이그레이션 후 신버전으로 교체하기 전에는 마커 생성 요청을 받지 않는다.
+화면 상태(view_map)만 추가했던 이전 변경과 달리, 이번 영구 마커 변경에는 이 마이그레이션이 필수다.
