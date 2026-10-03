@@ -8,14 +8,14 @@ from database import V3Database
 
 
 class ChatUserV3(V3Database.Base):
-    __tablename__ = "live_map_chat_users_v3"
+    __tablename__ = "live_map_chat_users"
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     user_email: Mapped[str] = mapped_column(Text, unique=True)
     create_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class ChatMessageV3(V3Database.Base):
-    __tablename__ = "live_map_chat_messages_v3"
+    __tablename__ = "live_map_chat_messages"
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     user_id: Mapped[UUID] = mapped_column(Uuid)
     channel: Mapped[str] = mapped_column(Text)
@@ -27,14 +27,14 @@ class ChatMessageV3(V3Database.Base):
 
 
 class ChatBlockV3(V3Database.Base):
-    __tablename__ = "live_map_chat_blocks_v3"
+    __tablename__ = "live_map_chat_blocks"
     user_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     target_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     create_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class ChatReportV3(V3Database.Base):
-    __tablename__ = "live_map_chat_reports_v3"
+    __tablename__ = "live_map_chat_reports"
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     user_id: Mapped[UUID] = mapped_column(Uuid)
     message_id: Mapped[UUID] = mapped_column(Uuid)
@@ -44,7 +44,7 @@ class ChatReportV3(V3Database.Base):
 
 
 class ChatRestrictionV3(V3Database.Base):
-    __tablename__ = "live_map_chat_restrictions_v3"
+    __tablename__ = "live_map_chat_restrictions"
     user_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     moderator_id: Mapped[UUID | None] = mapped_column(Uuid)
     reason: Mapped[str] = mapped_column(String(1000))
@@ -53,7 +53,7 @@ class ChatRestrictionV3(V3Database.Base):
 
 
 class PartyInvitationV3(V3Database.Base):
-    __tablename__ = "live_map_party_invitations_v3"
+    __tablename__ = "live_map_party_invitations"
     id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
     room_id: Mapped[UUID] = mapped_column(Uuid)
     inviter_id: Mapped[UUID] = mapped_column(Uuid)

@@ -307,7 +307,7 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
         self.assertIn('$ref', history['responses']['200']['content']['application/json']['schema'])
         # A missing chat table must not break the existing party endpoints.
         with self.engine_v3.begin() as conn:
-            conn.exec_driver_sql('ALTER TABLE live_map_chat_messages_v3 RENAME TO hidden_chat_messages_v3')
+            conn.exec_driver_sql('ALTER TABLE live_map_chat_messages RENAME TO hidden_chat_messages_v3')
         try:
             room_id = self.create_v3()['room']['id']
             self.assertEqual(self.join_v3(room_id).status_code, 200)
@@ -316,7 +316,7 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
             self.assertEqual(self.request_v3('GET').status_code, 200)
         finally:
             with self.engine_v3.begin() as conn:
-                conn.exec_driver_sql('ALTER TABLE hidden_chat_messages_v3 RENAME TO live_map_chat_messages_v3')
+                conn.exec_driver_sql('ALTER TABLE hidden_chat_messages_v3 RENAME TO live_map_chat_messages')
 
     def test_socket_party_switch_and_leave_revokes_sending_v3(self):
         room_id = self.create_v3()['room']['id']
@@ -356,6 +356,49 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
         self.chat_store_v3.disconnect_v3(user_id, '0')
         self.chat_store_v3.lease_v3(user_id, 'sixth')
         self.assertLessEqual(self.redis_v3.ttl('live-map:chat:v3:connections:' + user_id), 90)
+
+
+    def test_migration_renames_existing_tables_preserving_data_v3(self):
+        message_id = UUID(self.chat_send_v3()['message_id'])
+        names = ('live_map_chat_users', 'live_map_chat_messages', 'live_map_chat_blocks',
+                 'live_map_chat_reports', 'live_map_chat_restrictions', 'live_map_party_invitations')
+        migration = (Path(__file__).parents[1] / 'sql/migrations/20261003_live_map_chat_v3.sql').read_text()
+        rename = (Path(__file__).parents[1] / 'sql/migrations/20261004_rename_chat_objects.sql').read_text()
+        with self.engine_v3.begin() as conn:
+            for name in names:
+                constraints = conn.exec_driver_sql(
+                    f"SELECT conname FROM pg_constraint WHERE conrelid = '{name}'::regclass"
+                ).scalars().all()
+                for constraint in constraints:
+                    old_name = constraint.replace(name, name + '_v3', 1)
+                    conn.exec_driver_sql(f'ALTER TABLE {name} RENAME CONSTRAINT {constraint} TO {old_name}')
+                indexes = conn.exec_driver_sql(
+                    f"SELECT indexname FROM pg_indexes WHERE tablename = '{name}'"
+                ).scalars().all()
+                for index in indexes:
+                    if '_v3' not in index:
+                        prefix, suffix = index.rsplit('_', 1)
+                        conn.exec_driver_sql(f'ALTER INDEX {index} RENAME TO {prefix}_v3_{suffix}')
+                conn.exec_driver_sql(f'ALTER TABLE {name} RENAME TO {name}_v3')
+        with self.engine_v3.connect().execution_options(isolation_level='AUTOCOMMIT') as conn:
+            conn.exec_driver_sql(rename)
+            conn.exec_driver_sql(rename)
+            conn.exec_driver_sql(migration)
+            for name in names:
+                self.assertIsNone(conn.exec_driver_sql(f"SELECT to_regclass('{name}_v3')").scalar())
+                indexes = conn.exec_driver_sql(
+                    f"SELECT indexname FROM pg_indexes WHERE tablename = '{name}'"
+                ).scalars().all()
+                self.assertTrue(indexes)
+                self.assertTrue(all('_v3' not in index for index in indexes))
+                constraints = conn.exec_driver_sql(
+                    f"SELECT conname FROM pg_constraint WHERE conrelid = '{name}'::regclass"
+                ).scalars().all()
+                self.assertTrue(all('_v3' not in constraint for constraint in constraints))
+        with self.sessions_v3() as session:
+            self.assertEqual(session.get(ChatMessageV3, message_id).message, 'hello')
+        self.assertEqual(self.chat_request_v3('POST', '/chat/messages/' + str(message_id) + '/report',
+                                            json={'reason': 'spam'}).status_code, 201)
 
 
 class ChatLifecycleTestV3(unittest.IsolatedAsyncioTestCase):
