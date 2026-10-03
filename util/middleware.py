@@ -25,6 +25,7 @@ NO_FOOTPRINT_PATHS = {"/api/deployment-notice/v3/status"}
 
 logger = logging.getLogger("api.access")
 load_dotenv()
+API_RATE_LIMIT_PER_MINUTE = int(os.getenv("API_RATE_LIMIT_PER_MINUTE", "1000"))
 
 
 def get_real_ip(request) -> str:
@@ -87,7 +88,7 @@ class KafkaProducerMiddleware(BaseHTTPMiddleware):
                 if now - t < timedelta(minutes=1)
             ]
 
-            if len(self.request_counts[real_ip]) > 100:
+            if len(self.request_counts[real_ip]) >= API_RATE_LIMIT_PER_MINUTE:
                 logger.warning(f"Rate limit exceeded: {real_ip}")
                 return Response(status_code=429)
 
