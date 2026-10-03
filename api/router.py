@@ -19,6 +19,7 @@ from api.progress import progress_router
 from api.story import story_router
 from api.chat import chat_router
 from api.live_map import live_map_router
+from api.live_map.chat_v3.router import router_v3 as live_map_chat_router_v3
 from api.live_map.party_v3.router import router_v3 as live_map_party_router_v3
 from api.kord_breach import router as kord_breach_router
 from api.deployment_notice import router as deployment_notice_router
@@ -52,3 +53,6 @@ api_router.include_router(kord_breach_router.router, prefix="/kord-breach")
 api_router.include_router(deployment_notice_router.router, prefix="/deployment-notice")
 api_router.include_router(battle_pass_router.router, prefix="/battle-pass")
 api_router.include_router(prestige_router.router, prefix="/prestige")
+
+# Additive chat routes; legacy and party routes remain registered unchanged.
+api_router.include_router(live_map_chat_router_v3, prefix="/live-map")
