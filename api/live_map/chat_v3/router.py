@@ -2,7 +2,7 @@ import logging
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, WebSocket
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, WebSocket
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
@@ -20,6 +20,7 @@ from .schemas import (
 )
 from .lifecycle import chat_lifespan_v3
 from .schemas import ChannelV3, ChatReportCreateV3, ChatRestrictionCreateV3, InvitationCreateV3, StatusV3
+from .security import optional_chat_user_v3
 from .service import ChatServiceV3
 from .store import get_chat_store_v3
 
@@ -80,6 +81,7 @@ def get_chat_service_v3(request: Request):
 
 ServiceV3 = Annotated[ChatServiceV3, Depends(get_chat_service_v3, scope='request')]
 EmailV3 = Annotated[str, Depends(authenticate_party_user_v3)]
+OptionalEmailV3 = Annotated[str | None, Depends(optional_chat_user_v3)]
 
 
 def response_v3(data, status=200, msg='OK'):
@@ -92,11 +94,14 @@ async def chat_websocket_v3(websocket: WebSocket):
     await chat_socket_v3(websocket)
 
 
-@router_v3.get('/chat/messages', response_model=PartyResponseV3[ChatHistoryResponseV3])
-def history_v3(email: EmailV3, service: ServiceV3, channel: ChannelV3,
+@router_v3.get('/chat/messages', response_model=PartyResponseV3[ChatHistoryResponseV3],
+               openapi_extra={'security': [{'HTTPBearer': []}, {}]})
+def history_v3(email: OptionalEmailV3, service: ServiceV3, channel: ChannelV3, response: Response,
                room_id: UUID | None = None, before: str | None = Query(default=None, max_length=512),
                limit: int = Query(default=50, ge=1, le=100)):
-    return response_v3(service.history_v3(service.identity_v3(email), channel, room_id, before, limit))
+    response.headers['Cache-Control'] = 'private, no-store'
+    return response_v3(service.history_v3(
+        service.identity_v3(email) if email is not None else None, channel, room_id, before, limit))
 
 
 @router_v3.get('/chat/blocks', response_model=PartyResponseV3[list[ChatUserResponseV3]])

@@ -4,7 +4,7 @@
 
 ## 확정 정책
 
-- 로그인 및 `user_info` 등록이 필요하다. REST는 `Authorization: Bearer <Google access token>`을 사용한다. 서버가 계정·권한을 조회한다.
+- **비로그인 사용자는 모집(lobby) 채팅의 과거 메시지 조회와 실시간 읽기가 가능하다.** 파티 채팅 조회, 메시지 작성, 초대·차단·신고·관리 기능은 로그인 및 `user_info` 등록이 필요하다. 로그인 REST는 `Authorization: Bearer <Google access token>`을 사용한다. 서버가 계정·권한을 조회한다.
 - **초대 생성은 현재 방장만 가능하다.** 일반 멤버는 `PARTY_OWNER_REQUIRED`(403)를 받는다. 방장 양도 전에 생성된 초대는 만료·취소 전까지 유효하다.
 - 채팅 제재는 전송에만 적용한다. 일시·영구 제재 중에도 읽기는 가능하다.
 - 차단은 단방향: 내가 차단한 상대의 메시지가 내 조회·실시간 수신에서 제외된다. 상대방의 조회나 파티 권한을 변경하지 않는다.
@@ -109,13 +109,25 @@ REST 및 snapshot 배열은 **최신순** (`create_time DESC, id DESC`). 프론�
 
 ## WebSocket
 
-URL: `/api/live-map/v3/chat/ws`. 기존 파티 WS와 별개다. query string에 토큰을 넣지 않는다. 연결 후 10초 안에 첫 메시지로 인증한다.
+URL: `/api/live-map/v3/chat/ws`. 기존 파티 WS와 별개다. query string에 토큰을 넣지 않는다. 연결 후 10초 안에 첫 메시지로 로그인 인증 또는 게스트 모드를 선택한다. 로그인 사용자는 기존 auth 형식을 사용한다.
 
 ```json
 {"type":"auth","token":"Google access token"}
 ```
 
-성공 시 snapshot:
+비로그인 사용자는 다음 메시지를 보낸다.
+
+```json
+{"type":"guest"}
+```
+
+게스트는 모집 메시지 및 모집 메시지 삭제 이벤트만 수신한다. snapshot은 `user=null`, `party=[]`, `party_room_id=null`, `party_next_before=null`, `party_invitations=[]`이며 모집 최근 메시지와 cursor는 제공한다. 게스트 계정이나 공개 UUID를 DB에 만들지 않는다. 게스트가 메시지를 전송하면 401 `LOGIN_REQUIRED` 오류만 반환하고 읽기 연결은 유지한다.
+
+REST 비로그인 조회는 `GET /api/live-map/v3/chat/messages?channel=lobby`에 Authorization 헤더를 **생략**한다. 파티 조회는 401이다. 토큰을 보냈지만 잘못되었거나 미등록 계정이면 게스트로 전환하지 않고 기존 인증 오류를 반환한다. WebSocket도 잘못된 auth를 게스트로 전환하지 않는다. 계정 차단 목록은 로그인 조회에만 적용된다. 메시지 조회 응답에는 `Cache-Control: private, no-store`를 설정한다.
+
+프론트는 비로그인 상태에서도 모집 탭을 표시하고 입력창에 로그인 안내를 제공한다. 파티 탭·초대·차단·신고 등 계정 기능은 비활성화한다. 로그인/로그아웃 시 기존 채팅 연결을 닫고 auth/guest 방식으로 다시 연결하여 snapshot으로 UI를 갱신한다. 연결 중 auth/guest 모드 전환은 지원하지 않는다. 이 변경에 추가 DB 마이그레이션은 필요 없다.
+
+로그인 성공 시 snapshot:
 
 ```json
 {
@@ -147,6 +159,7 @@ URL: `/api/live-map/v3/chat/ws`. 기존 파티 WS와 별개다. query string에 
 
 | 방향 / type | data 또는 요청 필드 |
 |---|---|
+| 클라이언트 `guest` | 추가 필드 없음, 비로그인 읽기 전용 연결의 최초 메시지 |
 | 클라이언트 `auth` | `token` (최초 한 번) |
 | 클라이언트 `send_message` | `channel`, `room_id?`, `message`, `request_id` |
 | 클라이언트 `heartbeat` | 추가 필드 없음, 30초마다 전송 |
@@ -166,14 +179,14 @@ URL: `/api/live-map/v3/chat/ws`. 기존 파티 WS와 별개다. query string에 
 
 ### heartbeat·복원·종료
 
-- 30초마다 `{"type":"heartbeat"}`. 응답은 새 snapshot이다. heartbeat는 1분당 4회 제한. 정상 명령을 75초 동안 받지 못하면 4408 종료.
-- 토큰 재검증을 위해 연결 15분 후 `SESSION_REFRESH_REQUIRED` 및 1012 종료. 프론트는 토큰을 갱신하고 재연결한다.
-- 재연결은 jitter가 있는 지수 backoff(예: 1, 2, 4, 8, 최대 30초). 매번 첫 auth와 snapshot을 처리한다.
+- 30초마다 `{"type":"heartbeat"}`. 응답은 새 snapshot이다. heartbeat는 로그인 사용자별, 게스트 연결별로 1분당 4회 제한. 정상 명령을 75초 동안 받지 못하면 4408 종료.
+- 토큰 재검증을 위해 연결 15분 후 `SESSION_REFRESH_REQUIRED` 및 1012 종료. 로그인 사용자는 토큰을 갱신하고 재연결한다. 게스트도 15분 후 같은 종료 코드를 받고 guest 모드로 재연결한다.
+- 재연결은 jitter가 있는 지수 backoff(예: 1, 2, 4, 8, 최대 30초). 매번 로그인 사용자는 auth, 비로그인 사용자는 guest를 보내고 snapshot을 처리한다.
 - Redis는 메시지 ID 알림과 전송 제한에 사용한다. 본문/이메일/비밀번호/토큰은 알림에 포함하지 않는다. 최근 메시지 원본 조회는 PostgreSQL 인덱스를 사용하며 Redis 본문 캐시는 두지 않는다.
 - Redis Pub/Sub는 durable replay가 아니다. 재접속/heartbeat snapshot은 최근 DB 상태를 복구한다. 50개보다 많은 누락은 snapshot의 `*_next_before`와 REST를 사용하여 마지막으로 본 메시지 ID까지 과거 페이지를 가져온다. retention 밖 메시지는 복원되지 않는다.
 - snapshot은 최근 구간의 권위 있는 목록이다. 삭제·차단으로 빠진 메시지를 최근 UI 구간에서 제거한다. 오래된 로컬 페이지를 재사용할 때에는 REST로 다시 조회한다. 권한을 잃거나 방이 바뀌면 이전 파티의 UI 메시지를 비운다.
 - 4401 인증, 4403 등록/권한, 4408 인증/heartbeat timeout, 4429 연결 속도 제한, 1009 패킷 크기 초과, 1008 잘못된 프로토콜, 1013 DB/Redis/전송 timeout, 1012 세션 재인증.
-- 텍스트 JSON만 허용한다. 패킷 최대 8192 UTF-8 바이트. 잘못된 명령 3회 시 종료한다. 느린 수신자는 서버 전송 5초 timeout 적용. 연결 시도는 사용자당 1분 20회, 동시 연결은 5개 제한이다. Redis 연결 lease는 90초 후 만료하며 정상 종료 시 즉시 해제한다.
+- 텍스트 JSON만 허용한다. 패킷 최대 8192 UTF-8 바이트. 잘못된 명령 3회 시 종료한다. 느린 수신자는 서버 전송 5초 timeout 적용. 연결 시도는 사용자당 1분 20회, 동시 연결은 5개 제한이다. 게스트는 서버가 인식한 접속 IP별로 동일한 연결 제한을 적용하며 Redis 키에는 IP 해시만 저장한다. 프록시를 쓰면 ASGI 서버의 신뢰 프록시 설정에 따라 실제 클라이언트 IP를 전달해야 한다. Redis 연결 lease는 90초 후 만료하며 정상 종료 시 즉시 해제한다.
 
 ## 보관·정리
 
@@ -206,6 +219,6 @@ URL: `/api/live-map/v3/chat/ws`. 기존 파티 WS와 별개다. query string에 
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
-검증 범위: 인증/등록, 공개 식별자와 닉네임만 노출, 파티 권한 재검사, 방장 초대, 지정 대상 수락, 만료·잠금·정원·강퇴·중복/재사용, 동시 수락, cursor, 메시지 중복 및 rate limit, 차단/신고/관리자 제재·삭제, 실제 WS 양방향 전달과 복원, 알림 실패 후 중복 방지, 보관 정리, 마이그레이션 재실행, 별도 활성화 설정 없이 REST·WS 사용, 신규 테이블 누락 시 기존 파티·마커 동작, 기존 위치·지도·파티·마커 회귀 테스트.
+검증 범위: 비로그인 모집 조회·실시간 수신·삭제 이벤트·쓰기 거절·파티/초대 비노출, 잘못된 토큰 거절, 인증/등록, 공개 식별자와 닉네임만 노출, 파티 권한 재검사, 방장 초대, 지정 대상 수락, 만료·잠금·정원·강퇴·중복/재사용, 동시 수락, cursor, 메시지 중복 및 rate limit, 차단/신고/관리자 제재·삭제, 실제 WS 양방향 전달과 복원, 알림 실패 후 중복 방지, 보관 정리, 마이그레이션 재실행, 별도 활성화 설정 없이 REST·WS 사용, 신규 테이블 누락 시 기존 파티·마커 동작, 기존 위치·지도·파티·마커 회귀 테스트.
 
 실제 운영 배포와 운영 프론트 smoke test는 별도로 수행한다. 로컬 테스트 통과를 운영 배포 완료로 간주하지 않는다.

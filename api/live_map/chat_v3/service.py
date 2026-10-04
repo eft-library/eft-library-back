@@ -71,6 +71,8 @@ class ChatServiceV3:
         if (channel == 'party') != (room_id is not None):
             raise HTTPException(422, 'CHAT_INVALID_CHANNEL')
         if channel == 'party':
+            if user is None:
+                raise HTTPException(401, 'LOGIN_REQUIRED')
             self.party._room_v3(room_id)
             self.party._member_v3(room_id, user.user_email)
 
@@ -84,7 +86,7 @@ class ChatServiceV3:
             .order_by(PartyMemberV3.joined_at.desc(), PartyMemberV3.id.desc()).limit(1))
 
     def blocked_v3(self, user, target_id):
-        return self.session.get(ChatBlockV3, (user.id, target_id)) is not None
+        return user is not None and self.session.get(ChatBlockV3, (user.id, target_id)) is not None
 
     def message_data_v3(self, message):
         return {'id': str(message.id), 'channel': message.channel,
@@ -107,8 +109,10 @@ class ChatServiceV3:
     def history_v3(self, user, channel, room_id=None, before=None, limit=50):
         self.channel_v3(user, channel, room_id)
         filters = [ChatMessageV3.channel == channel, ChatMessageV3.room_id == room_id,
-                   ChatMessageV3.deleted_at.is_(None), ~ChatMessageV3.user_id.in_(
-                       select(ChatBlockV3.target_id).where(ChatBlockV3.user_id == user.id))]
+                   ChatMessageV3.deleted_at.is_(None)]
+        if user is not None:
+            filters.append(~ChatMessageV3.user_id.in_(
+                select(ChatBlockV3.target_id).where(ChatBlockV3.user_id == user.id)))
         if channel == 'lobby':
             filters.append(ChatMessageV3.create_time > now_v3() - timedelta(days=7))
         if before:
@@ -129,6 +133,8 @@ class ChatServiceV3:
                 'next_before': self.cursor_v3(rows[limit - 1]) if len(rows) > limit else None}
 
     def send_v3(self, user, data):
+        if user is None:
+            raise HTTPException(401, 'LOGIN_REQUIRED')
         self.channel_v3(user, data.channel, data.room_id)
         self.lock_user_v3(user)  # serializes idempotency, repetition and moderation per sender
         existing = self.session.scalar(select(ChatMessageV3).where(
@@ -166,7 +172,9 @@ class ChatServiceV3:
         if event['type'] not in ('chat_message', 'message_deleted'):
             return None
         message = self.session.get(ChatMessageV3, UUID(event['data']['message_id']))
-        if message is None or not self.retained_v3(message) or self.blocked_v3(user, message.user_id):
+        if message is None or (user is None and message.channel != 'lobby'):
+            return None
+        if not self.retained_v3(message) or self.blocked_v3(user, message.user_id):
             return None
         try:
             self.channel_v3(user, message.channel, message.room_id)
@@ -398,12 +406,11 @@ class ChatServiceV3:
         return self.invitation_data_v3(invitation)
 
     def snapshot_v3(self, user):
-        # Lock rooms in sorted order during invitations reconciliation before history.
-        invitations = self.invitations_v3(user)
-        room_id = self.current_room_v3(user)
+        invitations = self.invitations_v3(user) if user is not None else []
+        room_id = self.current_room_v3(user) if user is not None else None
         lobby = self.history_v3(user, 'lobby')
         party = self.history_v3(user, 'party', room_id) if room_id else {'messages': [], 'next_before': None}
-        return {'user': self.public_user_v3(user.id), 'lobby': lobby['messages'], 'party': party['messages'],
+        return {'user': self.public_user_v3(user.id) if user is not None else None, 'lobby': lobby['messages'], 'party': party['messages'],
                 'lobby_next_before': lobby['next_before'], 'party_next_before': party['next_before'],
                 'party_room_id': str(room_id) if room_id else None,
                 'party_invitations': invitations, 'heartbeat_interval_seconds': 30}

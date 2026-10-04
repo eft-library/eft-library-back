@@ -9,13 +9,14 @@ from pathlib import Path
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from redis.exceptions import ConnectionError as RedisConnectionError
 from sqlalchemy import func, select
 
-from api.live_map.chat_v3.models import ChatMessageV3, PartyInvitationV3
+from api.live_map.chat_v3.models import ChatMessageV3, ChatUserV3, PartyInvitationV3
 from api.live_map.chat_v3.router import router_v3
 from api.live_map.chat_v3.schemas import ChatSendV3
+from api.live_map.chat_v3.security import optional_chat_user_v3
 from api.live_map.chat_v3.service import ChatServiceV3, event_v3, now_v3
 from api.live_map.chat_v3.store import ChatStoreV3
 from api.user.user_res_models import UserV3
@@ -44,6 +45,10 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
         patcher.start()
         self.addCleanup(patcher.stop)
         self.app_v3.include_router(router_v3, prefix='/live-map')
+        def optional_identity_v3(request: Request):
+            user = request.headers.get('x-test-user')
+            return user + '@example.test' if user else None
+        self.app_v3.dependency_overrides[optional_chat_user_v3] = optional_identity_v3
         with self.sessions_v3.begin() as session:
             session.get(UserV3, 'owner@example.test').is_admin = True
         self.ids_v3 = {}
@@ -80,7 +85,7 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
             self.assertEqual(self.snapshot_v3(websocket)['data']['party_room_id'], room['room']['id'])
 
     def test_registration_history_cursor_and_privacy_v3(self):
-        for user, status in ((None, 401), ('unknown', 403)):
+        for user, status in ((None, 200), ('unknown', 403)):
             self.assertEqual(self.chat_request_v3('GET', '/chat/messages?channel=lobby', user=user).status_code, status)
         for index in range(3):
             self.chat_send_v3(message=f'line {index}')
@@ -399,6 +404,72 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
             self.assertEqual(session.get(ChatMessageV3, message_id).message, 'hello')
         self.assertEqual(self.chat_request_v3('POST', '/chat/messages/' + str(message_id) + '/report',
                                             json={'reason': 'spam'}).status_code, 201)
+
+    def test_guest_history_is_lobby_only_and_mutations_require_login_v3(self):
+        room_id = self.create_v3()['room']['id']
+        self.chat_send_v3(message='public')
+        private = self.chat_send_v3(channel='party', room_id=UUID(room_id), message='private')
+        response = self.chat_request_v3('GET', '/chat/messages?channel=lobby', user=None)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([m['message'] for m in response.json()['data']['messages']], ['public'])
+        for room in (room_id, str(uuid4())):
+            self.assertEqual(self.chat_request_v3('GET', '/chat/messages?channel=party&room_id=' + room,
+                                                 user=None).status_code, 401)
+        for method, path, body in (
+            ('GET', '/party-invitations', None),
+            ('POST', '/party-invitations', {'room_id': room_id, 'invitee_user_id': str(self.ids_v3['member'])}),
+            ('POST', '/party-invitations/' + str(uuid4()) + '/accept', None),
+            ('GET', '/chat/blocks', None),
+            ('POST', '/chat/blocks/' + str(self.ids_v3['owner']), None),
+            ('POST', '/chat/messages/' + private['message_id'] + '/report', {'reason': 'spam'}),
+            ('GET', '/chat/admin/reports', None),
+        ):
+            self.assertEqual(self.chat_request_v3(method, path, user=None, json=body).status_code, 401)
+        with self.sessions_v3.begin() as session:
+            service = ChatServiceV3(session)
+            self.assertIsNone(service.forward_v3(None, event_v3('chat_message', {'message_id': private['message_id']})))
+            self.assertIsNone(service.forward_v3(None, event_v3('message_deleted', {'message_id': private['message_id']})))
+            self.assertEqual(session.scalar(select(func.count()).select_from(ChatUserV3)), 4)
+
+    def test_optional_auth_does_not_downgrade_invalid_credentials_v3(self):
+        self.app_v3.dependency_overrides.pop(optional_chat_user_v3)
+        self.assertEqual(self.chat_request_v3('GET', '/chat/messages?channel=lobby', user=None).status_code, 200)
+        for header in ('Bearer', 'Basic abc', ''):
+            response = self.client_v3.get('/live-map/v3/chat/messages?channel=lobby', headers={'Authorization': header})
+            self.assertEqual(response.status_code, 401)
+        with patch('api.live_map.chat_v3.security.authenticate_party_user_v3', side_effect=HTTPException(401, 'INVALID_TOKEN')):
+            response = self.client_v3.get('/live-map/v3/chat/messages?channel=lobby', headers={'Authorization': 'Bearer bad'})
+            self.assertEqual(response.status_code, 401)
+
+    def test_guest_socket_snapshot_live_delivery_deletion_and_read_only_v3(self):
+        room_id = self.create_v3()['room']['id']
+        self.invite_v3(room_id)
+        with self.client_v3.websocket_connect('/live-map/v3/chat/ws') as guest, self.chat_socket_v3() as owner:
+            guest.send_json({'type': 'guest'})
+            snapshot = self.snapshot_v3(guest)['data']
+            self.assertIsNone(snapshot['user'])
+            self.assertIsNone(snapshot['party_room_id'])
+            self.assertEqual(snapshot['party'], [])
+            self.assertEqual(snapshot['party_invitations'], [])
+            self.snapshot_v3(owner)
+            for channel, room, message in (('party', room_id, 'private'), ('lobby', None, 'public')):
+                owner.send_json({'type': 'send_message', 'channel': channel, 'room_id': room,
+                                 'message': message, 'request_id': str(uuid4())})
+                self.receive_v3(owner, lambda e: e['type'] == 'message_ack')
+            received = self.receive_v3(guest, lambda e: e['type'] == 'chat_message')['data']
+            self.assertEqual(received['message'], 'public')
+            for channel, room in (('lobby', None), ('party', room_id)):
+                guest.send_json({'type': 'send_message', 'channel': channel, 'room_id': room,
+                                 'message': 'forbidden', 'request_id': str(uuid4())})
+                self.receive_v3(guest, lambda e: e['type'] == 'error' and e['msg'] == 'LOGIN_REQUIRED')
+            guest.send_json({'type': 'heartbeat'})
+            self.assertEqual(len(self.snapshot_v3(guest)['data']['lobby']), 1)
+            self.chat_request_v3('DELETE', '/chat/admin/messages/' + received['id'])
+            self.receive_v3(guest, lambda e: e['type'] == 'message_deleted')
+        with self.sessions_v3() as session:
+            self.assertEqual(session.scalar(select(func.count()).select_from(ChatMessageV3)), 2)
+            self.assertEqual(session.scalar(select(func.count()).select_from(ChatUserV3)), 4)
+
 
 
 class ChatLifecycleTestV3(unittest.IsolatedAsyncioTestCase):

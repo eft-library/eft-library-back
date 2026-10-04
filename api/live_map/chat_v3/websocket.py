@@ -1,5 +1,6 @@
 import asyncio
 import json
+import hashlib
 import logging
 import time
 from contextlib import suppress
@@ -27,7 +28,7 @@ async def transaction_v3(email, operation):
     def execute_v3():
         with V3Database.SessionLocal.begin() as session:
             service = ChatServiceV3(session)
-            user = service.identity_v3(email)
+            user = service.identity_v3(email) if email is not None else None
             result = operation(service, user)
             events = session.info.get('chat_events_v3', [])
         # Commit precedes publication and acknowledgement. Missed publication is
@@ -58,16 +59,23 @@ async def chat_socket_v3(websocket):
         except TimeoutError:
             raise HTTPException(408, 'AUTH_TIMEOUT') from None
         try:
-            auth = PartySocketAuthV3.model_validate_json(raw)
-        except ValidationError:
+            guest = json.loads(raw) == {'type': 'guest'}
+            auth = None if guest else PartySocketAuthV3.model_validate_json(raw)
+        except (ValidationError, ValueError):
             raise HTTPException(401, 'AUTH_MESSAGE_REQUIRED') from None
-        email = await run_in_threadpool(authenticate_party_user_v3,
-            HTTPAuthorizationCredentials(scheme='Bearer', credentials=auth.token.get_secret_value()))
-        # Connection attempts and commands are bounded per account across workers.
-        def connect_v3(service, user):
-            service.rate_v3(user, 'connect', 20)
-            return str(user.id)
-        leased_user_id, _ = await transaction_v3(email, connect_v3)
+        email = None
+        if guest:
+            # Use only the ASGI peer (configured trusted proxy handling), not arbitrary headers.
+            peer = websocket.client.host if websocket.client else 'unknown'
+            leased_user_id = 'guest:' + hashlib.sha256(peer.encode()).hexdigest()
+            await run_in_threadpool(get_chat_store_v3().consume_v3, leased_user_id, 'connect', 20)
+        else:
+            email = await run_in_threadpool(authenticate_party_user_v3,
+                HTTPAuthorizationCredentials(scheme='Bearer', credentials=auth.token.get_secret_value()))
+            def connect_v3(service, user):
+                service.rate_v3(user, 'connect', 20)
+                return str(user.id)
+            leased_user_id, _ = await transaction_v3(email, connect_v3)
         await run_in_threadpool(get_chat_store_v3().lease_v3, leased_user_id, connection_id)
         client = create_party_subscriber_v3()
         async with client, client.pubsub() as pubsub:
@@ -100,7 +108,11 @@ async def chat_socket_v3(websocket):
                         if not isinstance(packet, dict):
                             raise ValueError
                         if packet.get('type') == 'heartbeat' and set(packet) == {'type'}:
-                            await transaction_v3(email, lambda s, u: s.rate_v3(u, 'heartbeat', 4))
+                            if guest:
+                                await run_in_threadpool(get_chat_store_v3().consume_v3,
+                                    'guest:' + connection_id, 'heartbeat', 4)
+                            else:
+                                await transaction_v3(email, lambda s, u: s.rate_v3(u, 'heartbeat', 4))
                             snapshot, _ = await transaction_v3(email, lambda s, u: s.snapshot_v3(u))
                             await send_packet_v3(websocket, event_v3('snapshot', snapshot))
                             room_id = snapshot['party_room_id']
@@ -116,7 +128,7 @@ async def chat_socket_v3(websocket):
                             raise HTTPException(400, 'TOO_MANY_INVALID_MESSAGES') from None
                         await socket_error_v3(websocket, 422, 'INVALID_MESSAGE')
                     except HTTPException as exc:
-                        if exc.status_code in (401, 503):
+                        if exc.status_code == 503 or (exc.status_code == 401 and not guest):
                             raise
                         await socket_error_v3(websocket, exc.status_code, exc.detail,
                                               (exc.headers or {}).get('Retry-After'))
@@ -135,7 +147,7 @@ async def chat_socket_v3(websocket):
                     tasks.add(published)
                 # Read party state independently: old party endpoints and automatic
                 # cleanup need no dependency on chat tables or the chat event bus.
-                if now - last_state >= 2:
+                if not guest and now - last_state >= 2:
                     state, _ = await transaction_v3(email, state_v3)
                     for invitation in state['invitations']:
                         previous = known.get(invitation['id'])
