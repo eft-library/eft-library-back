@@ -278,7 +278,7 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
         party = UUID(self.chat_send_v3(channel='party', room_id=UUID(room), message='party')['message_id'])
         from api.live_map.party_v3.models import PartyRoomV3
         with self.sessions_v3.begin() as session:
-            session.get(ChatMessageV3, lobby).create_time = now_v3() - timedelta(days=8)
+            session.get(ChatMessageV3, lobby).create_time = now_v3() - timedelta(hours=25)
             session.get(PartyRoomV3, UUID(room)).closed_at = now_v3() - timedelta(hours=25)
         with self.sessions_v3.begin() as session:
             ChatServiceV3(session).cleanup_v3()
@@ -469,6 +469,28 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
         with self.sessions_v3() as session:
             self.assertEqual(session.scalar(select(func.count()).select_from(ChatMessageV3)), 2)
             self.assertEqual(session.scalar(select(func.count()).select_from(ChatUserV3)), 4)
+
+
+    def test_lobby_retention_boundary_applies_to_reads_events_and_cleanup_v3(self):
+        reference = now_v3()
+        ids = [UUID(self.chat_send_v3(message=f'age {index}')['message_id']) for index in range(3)]
+        with self.sessions_v3.begin() as session:
+            for message_id, age in zip(ids, (timedelta(hours=24, seconds=1),
+                                            timedelta(hours=24), timedelta(hours=24) - timedelta(seconds=1))):
+                session.get(ChatMessageV3, message_id).create_time = reference - age
+        with patch('api.live_map.chat_v3.service.now_v3', return_value=reference):
+            for user in (None, 'owner'):
+                response = self.chat_request_v3('GET', '/chat/messages?channel=lobby', user=user)
+                self.assertEqual([m['id'] for m in response.json()['data']['messages']], [str(ids[2])])
+            with self.sessions_v3.begin() as session:
+                service = ChatServiceV3(session)
+                self.assertEqual([m['id'] for m in service.snapshot_v3(None)['lobby']], [str(ids[2])])
+                for message_id in ids[:2]:
+                    self.assertIsNone(service.forward_v3(None, event_v3('chat_message', {'message_id': str(message_id)})))
+                self.assertIsNotNone(service.forward_v3(None, event_v3('chat_message', {'message_id': str(ids[2])})))
+                service.cleanup_v3()
+            with self.sessions_v3() as session:
+                self.assertEqual(list(session.scalars(select(ChatMessageV3.id))), [ids[2]])
 
 
 

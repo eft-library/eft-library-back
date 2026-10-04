@@ -25,6 +25,8 @@ def event_v3(kind, data):
 
 
 class ChatServiceV3:
+    lobby_retention_v3 = timedelta(hours=24)
+
     def __init__(self, session, limiter=None):
         self.session = session
         # Bounds apply only to new chat transactions, never the existing API sessions.
@@ -96,7 +98,7 @@ class ChatServiceV3:
 
     def retained_v3(self, message):
         if message.channel == 'lobby':
-            return message.create_time > now_v3() - timedelta(days=7)
+            return message.create_time > now_v3() - self.lobby_retention_v3
         room = self.session.get(PartyRoomV3, message.room_id)
         return room is not None and (room.closed_at is None or room.closed_at > now_v3() - timedelta(hours=24))
 
@@ -114,7 +116,7 @@ class ChatServiceV3:
             filters.append(~ChatMessageV3.user_id.in_(
                 select(ChatBlockV3.target_id).where(ChatBlockV3.user_id == user.id)))
         if channel == 'lobby':
-            filters.append(ChatMessageV3.create_time > now_v3() - timedelta(days=7))
+            filters.append(ChatMessageV3.create_time > now_v3() - self.lobby_retention_v3)
         if before:
             try:
                 stamp, message_id, cursor_channel, cursor_room = json.loads(base64.b64decode(
@@ -418,7 +420,7 @@ class ChatServiceV3:
     def cleanup_v3(self, limit=500):
         old_rooms = select(PartyRoomV3.id).where(PartyRoomV3.closed_at <= now_v3() - timedelta(hours=24))
         ids = select(ChatMessageV3.id).where(or_(
-            (ChatMessageV3.channel == 'lobby') & (ChatMessageV3.create_time <= now_v3() - timedelta(days=7)),
+            (ChatMessageV3.channel == 'lobby') & (ChatMessageV3.create_time <= now_v3() - self.lobby_retention_v3),
             ChatMessageV3.room_id.in_(old_rooms),
         )).limit(limit)
         self.session.execute(delete(ChatMessageV3).where(ChatMessageV3.id.in_(ids)))
