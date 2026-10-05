@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_vali
 TextV3 = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=300)]
 ChannelV3 = Literal['lobby', 'party']
 StatusV3 = Literal['pending', 'accepted', 'rejected', 'revoked', 'expired']
+StatusReasonV3 = Literal['cancelled', 'room_closed', 'room_full', 'already_joined', 'member_kicked']
 
 
 class ChatRequestV3(BaseModel):
@@ -87,6 +88,7 @@ class InvitationResponseV3(BaseModel):
     inviter: ChatUserResponseV3
     invitee_user_id: UUID
     status: StatusV3
+    status_reason: StatusReasonV3 | None
     expires_at: datetime
     party: InvitationPartyResponseV3
 

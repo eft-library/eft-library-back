@@ -1966,6 +1966,9 @@ create table if not exists live_map_party_invitations (
     inviter_id uuid not null references live_map_chat_users(id) on delete cascade,
     invitee_id uuid not null references live_map_chat_users(id) on delete cascade,
     status text not null check (status in ('pending', 'accepted', 'rejected', 'revoked', 'expired')),
+    status_reason text constraint ck_party_invitations_status_reason check (status_reason in (
+        'cancelled', 'room_closed', 'room_full', 'already_joined', 'member_kicked'
+    )),
     expires_at timestamptz not null,
     create_time timestamptz not null default now(),
     update_time timestamptz not null default now(),

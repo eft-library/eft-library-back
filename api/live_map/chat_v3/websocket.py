@@ -17,11 +17,19 @@ from database import V3Database
 from api.live_map.party_v3.realtime_schemas import PartySocketAuthV3
 from api.live_map.party_v3.security import authenticate_party_user_v3
 from api.live_map.party_v3.websocket import (
-    create_party_subscriber_v3, receive_packet_v3, send_packet_v3, socket_error_v3, subscribe_ready_v3,
+    create_party_subscriber_v3, receive_packet_v3, send_packet_v3, subscribe_ready_v3,
 )
 from .schemas import ChatSendV3
 from .service import ChatServiceV3, event_v3
 from .store import ChatStoreV3, get_chat_store_v3
+
+
+async def chat_error_v3(websocket, status, message, retry_after=None, request_id=None):
+    await send_packet_v3(websocket, {
+        'type': 'error', 'status': status, 'msg': message,
+        'retry_after': int(retry_after) if retry_after else None,
+        'request_id': request_id,
+    })
 
 
 async def transaction_v3(email, operation):
@@ -95,7 +103,7 @@ async def chat_socket_v3(websocket):
                 if now - last_received >= 75:
                     raise HTTPException(408, 'HEARTBEAT_TIMEOUT')
                 if now - started >= 900:
-                    await socket_error_v3(websocket, 401, 'SESSION_REFRESH_REQUIRED')
+                    await chat_error_v3(websocket, 401, 'SESSION_REFRESH_REQUIRED')
                     await websocket.close(code=1012)
                     return
                 if now - last_lease >= 30:
@@ -103,6 +111,7 @@ async def chat_socket_v3(websocket):
                     last_lease = now
                 if incoming in done:
                     raw = incoming.result()
+                    request_id = None
                     try:
                         packet = json.loads(raw)
                         if not isinstance(packet, dict):
@@ -118,6 +127,7 @@ async def chat_socket_v3(websocket):
                             room_id = snapshot['party_room_id']
                         else:
                             data = ChatSendV3.model_validate(packet)
+                            request_id = str(data.request_id)
                             ack, available = await transaction_v3(email, lambda s, u: s.send_v3(u, data))
                             ack['realtime_available'] = available
                             await send_packet_v3(websocket, event_v3('message_ack', ack))
@@ -126,12 +136,12 @@ async def chat_socket_v3(websocket):
                         invalid += 1
                         if invalid >= 3:
                             raise HTTPException(400, 'TOO_MANY_INVALID_MESSAGES') from None
-                        await socket_error_v3(websocket, 422, 'INVALID_MESSAGE')
+                        await chat_error_v3(websocket, 422, 'INVALID_MESSAGE')
                     except HTTPException as exc:
                         if exc.status_code == 503 or (exc.status_code == 401 and not guest):
                             raise
-                        await socket_error_v3(websocket, exc.status_code, exc.detail,
-                                              (exc.headers or {}).get('Retry-After'))
+                        await chat_error_v3(websocket, exc.status_code, exc.detail,
+                                           (exc.headers or {}).get('Retry-After'), request_id)
                     tasks.remove(incoming)
                     incoming = asyncio.create_task(receive_packet_v3(websocket))
                     tasks.add(incoming)
@@ -165,12 +175,13 @@ async def chat_socket_v3(websocket):
     except HTTPException as exc:
         codes = {401: 4401, 403: 4403, 404: 4404, 408: 4408, 413: 1009, 429: 4429, 503: 1013}
         with suppress(WebSocketDisconnect, RuntimeError, TimeoutError):
-            await socket_error_v3(websocket, exc.status_code, exc.detail, (exc.headers or {}).get('Retry-After'))
+            await chat_error_v3(websocket, exc.status_code, exc.detail,
+                                (exc.headers or {}).get('Retry-After'))
             await websocket.close(code=codes.get(exc.status_code, 1008))
     except (RedisError, SQLAlchemyError, TimeoutError) as exc:
         logging.getLogger('api.live_map.chat_v3').warning('Chat socket unavailable (%s)', type(exc).__name__)
         with suppress(WebSocketDisconnect, RuntimeError, TimeoutError):
-            await socket_error_v3(websocket, 503, 'CHAT_UNAVAILABLE')
+            await chat_error_v3(websocket, 503, 'CHAT_UNAVAILABLE')
             await websocket.close(code=1013)
     finally:
         for task in tasks:

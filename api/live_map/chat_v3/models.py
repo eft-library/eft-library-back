@@ -59,6 +59,7 @@ class PartyInvitationV3(V3Database.Base):
     inviter_id: Mapped[UUID] = mapped_column(Uuid)
     invitee_id: Mapped[UUID] = mapped_column(Uuid)
     status: Mapped[str] = mapped_column(Text)
+    status_reason: Mapped[str | None] = mapped_column(Text)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     create_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     update_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))

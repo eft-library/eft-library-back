@@ -91,6 +91,7 @@ REST 및 snapshot 배열은 **최신순** (`create_time DESC, id DESC`). 프론�
   "inviter": {"id": "public user UUID", "nickname": "방장"},
   "invitee_user_id": "public user UUID",
   "status": "pending",
+  "status_reason": null,
   "expires_at": "2026-10-03T00:10:00+00:00",
   "party": {
     "id": "room UUID", "name": "야간 퀘스트", "member_count": 2,
@@ -105,7 +106,7 @@ REST 및 snapshot 배열은 **최신순** (`create_time DESC, id DESC`). 프론�
 
 수락은 지정된 대상만 가능하고, 방·대상 사용자 잠금 후 현재 상태를 다시 검사한다. 비밀번호 확인 없이 기존 파티 멤버를 생성/복원하며 기존 파티 변경 알림을 발행한다. 재사용은 불가능하다. 거절은 대상만, 취소는 생성자 또는 현재 방장만 가능하다.
 
-파티 잠금은 pending을 유지하며 `can_join=false`로 표시한다. 만료는 expired, 종료·정원 도달·해당 방 참가/강퇴는 revoked로 정리한다. 기존 파티 경로에 채팅 의존성을 넣지 않기 위해 상태 관찰·정리는 별도 루프로 수행한다. 개인 이벤트는 통상 2초 이내 갱신되며 부하/DB 장애 시 지연될 수 있다. 짧게 정원이 찼다가 다음 관찰 전에 비워지는 경우 pending이 유지될 수 있으나, **수락 시 실제 잠금·정원·강퇴 상태는 항상 검사**한다. 만료·종료·접근 거부는 정리 루프 지연과 무관하게 조회/수락 시 적용된다.
+파티 잠금은 pending을 유지하며 `can_join=false`로 표시한다. 만료는 expired, 종료·정원 도달·해당 방 참가/강퇴는 revoked로 정리한다. `status_reason`은 revoked일 때 `cancelled`, `room_closed`, `room_full`, `already_joined`, `member_kicked` 중 하나이며, pending·accepted·rejected·expired에는 null이다. 기존 데이터 중 이미 revoked였던 행은 null일 수 있으므로 프론트는 일반적인 취소 문구로 처리한다. 기존 파티 경로에 채팅 의존성을 넣지 않기 위해 상태 관찰·정리는 별도 루프로 수행한다. 개인 이벤트는 통상 2초 이내 갱신되며 부하/DB 장애 시 지연될 수 있다. 짧게 정원이 찼다가 다음 관찰 전에 비워지는 경우 pending이 유지될 수 있으나, **수락 시 실제 잠금·정원·강퇴 상태는 항상 검사**한다. 만료·종료·접근 거부는 정리 루프 지연과 무관하게 조회/수락 시 적용된다.
 
 ## WebSocket
 
@@ -153,7 +154,7 @@ REST 비로그인 조회는 `GET /api/live-map/v3/chat/messages?channel=lobby`�
 {"type":"send_message","channel":"party","room_id":"UUID","message":"3층으로 이동","request_id":"UUID"}
 ```
 
-닉네임·사용자 ID·권한 필드를 보내지 않는다. 여분 필드는 거절한다. 공백 제거 후 1~300자, 사용자 전체 채널 합산 sliding window 5초당 5개 및 60초당 30개다. 같은 본문은 30초 안에 반복할 수 없다. `request_id`는 사용자별 중복 방지 키로 DB에 저장한다. 중복 요청은 다시 저장/방송하지 않고 기존 ID의 ack만 반환한다. 같은 키를 다른 본문/채널/방으로 재사용하면 409다. 이미 관리자가 본문을 제거한 메시지는 본문 비교 없이 같은 채널/방의 기존 ID만 ack한다. 중복 방지는 메시지 보관 기간 동안 유효하다.
+닉네임·사용자 ID·권한 필드를 보내지 않는다. 여분 필드는 거절한다. 공백 제거 후 1~300자, 사용자 전체 채널 합산 sliding window 5초당 5개 및 60초당 30개다. 모집 채팅은 같은 사용자가 모집에 보낸 동일 본문만 30초간 반복 전송을 제한한다. 앞뒤 공백을 제거한 뒤 본문 전체가 같은 경우에만 적용한다. 파티 채팅에는 동일 본문 반복 제한이 없고, 모집·파티 사이 동일 본문 전송도 허용한다. 일반 전송 속도 제한과 request_id 중복 방지는 두 채널 모두 유지한다. `request_id`는 사용자별 중복 방지 키로 DB에 저장한다. 중복 요청은 다시 저장/방송하지 않고 기존 ID의 ack만 반환한다. 같은 키를 다른 본문/채널/방으로 재사용하면 409다. 이미 관리자가 본문을 제거한 메시지는 본문 비교 없이 같은 채널/방의 기존 ID만 ack한다. 중복 방지는 메시지 보관 기간 동안 유효하다.
 
 ### 전체 명령·이벤트
 
@@ -171,9 +172,13 @@ REST 비로그인 조회는 `GET /api/live-map/v3/chat/messages?channel=lobby`�
 | 서버 `message_deleted` | `{message_id, channel, room_id}` |
 | 서버 `error` | 아래 별도 형식 |
 
-일반 서버 이벤트는 `{type, event_id: UUID, server_time: ISO8601, data}`. 오류는 `{type:"error", status, msg, retry_after: 정수초|null}`이다. REST 속도 제한은 `Retry-After` 헤더도 제공한다.
+일반 서버 이벤트는 `{type, event_id: UUID, server_time: ISO8601, data}`. 오류는 `{type:"error", status, msg, retry_after: 정수초|null, request_id: UUID|null}`이다. 유효한 `send_message` 처리 중 발생한 오류에는 요청의 `request_id`가 포함되며, 연결·인증·형식 오류에는 null이다. REST 속도 제한은 `Retry-After` 헤더도 제공한다.
 
 전송자도 본인 메시지의 `chat_message`를 받는다. ack와 broadcast 순서는 UI에서 가정하지 않는다. 메시지 `id`로 중복 제거한다. 실시간 권한과 차단은 전달 직전 DB에서 검사한다. 퇴장·강퇴·자동 퇴장·방 종료 이후 새 파티 메시지의 전송/조회/전달을 허용하지 않는다. 파티 상태 표시 snapshot은 별도 관찰 루프에 따라 통상 2초 안에 갱신된다.
+
+프론트는 전송 직후 `sending`, ack 수신 후 `sent`, 같은 `request_id`가 포함된 error 또는 10초 ack timeout 후 `failed`로 표시한다. 재전송은 최초의 `request_id`를 그대로 사용한다. `duplicate=true` ack는 앞선 저장이 성공한 것이므로 sent로 처리한다. `realtime_available=false`도 DB 저장은 완료된 상태이므로 sent로 처리한다. 429는 `retry_after` 이후 사용자가 재시도할 수 있게 하고 자동 무한 재시도는 하지 않는다.
+
+읽지 않은 수는 서버에 저장하거나 여러 기기에서 동기화하지 않는다. 프론트는 탭 메모리 상태로 모집·현재 파티의 unread를 관리하며 새로고침, 로그인 전환, 다른 기기에는 이어지지 않는다. 메시지 목록이 실제로 최하단에 노출됐을 때 해당 채널의 unread를 0으로 만든다. 과거 메시지를 보는 동안 새 메시지가 오면 자동 스크롤하지 않고 `새 메시지 N개` 버튼을 표시한다.
 
 채팅 연결은 기존 파티의 접속 lease를 연장하지 않는다. 위치 공유 및 기존 자동 퇴장 정책을 유지하려면 기존 파티 WebSocket도 계속 사용한다.
 

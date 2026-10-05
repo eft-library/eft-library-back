@@ -153,12 +153,14 @@ class ChatServiceV3:
             raise HTTPException(403, 'CHAT_RESTRICTED')
         self.rate_v3(user, 'send-short', 5, 5)
         self.rate_v3(user, 'send-minute', 30)
-        repeated = self.session.scalar(select(ChatMessageV3.id).where(
-            ChatMessageV3.user_id == user.id, ChatMessageV3.message == data.message,
-            ChatMessageV3.create_time > now_v3() - timedelta(seconds=30),
-        ).limit(1))
-        if repeated:
-            raise HTTPException(429, 'CHAT_REPEATED_MESSAGE', headers={'Retry-After': '30'})
+        if data.channel == 'lobby':
+            repeated = self.session.scalar(select(ChatMessageV3.id).where(
+                ChatMessageV3.user_id == user.id, ChatMessageV3.channel == 'lobby',
+                ChatMessageV3.message == data.message,
+                ChatMessageV3.create_time > now_v3() - timedelta(seconds=30),
+            ).limit(1))
+            if repeated:
+                raise HTTPException(429, 'CHAT_REPEATED_MESSAGE', headers={'Retry-After': '30'})
         message = ChatMessageV3(id=uuid4(), user_id=user.id, channel=data.channel,
                                 room_id=data.room_id, request_id=data.request_id,
                                 message=data.message, create_time=now_v3())
@@ -272,19 +274,29 @@ class ChatServiceV3:
         room = self.session.get(PartyRoomV3, invitation.room_id)
         state = self.room_state_v3(room)
         status = invitation.status
+        status_reason = invitation.status_reason
         if status == 'pending':
             target = self.target_v3(invitation.invitee_id)
             member = self.session.scalar(select(PartyMemberV3).where(
                 PartyMemberV3.room_id == room.id, PartyMemberV3.user_email == target.user_email))
             if invitation.expires_at <= now_v3():
                 status = 'expired'
-            elif state['closed'] or state['member_count'] >= state['max_members'] or (
-                member is not None and member.status in ('joined', 'kicked')
-            ):
+            elif state['closed']:
                 status = 'revoked'
+                status_reason = 'room_closed'
+            elif member is not None and member.status == 'kicked':
+                status = 'revoked'
+                status_reason = 'member_kicked'
+            elif self.current_room_v3(target) is not None:
+                status = 'revoked'
+                status_reason = 'already_joined'
+            elif state['member_count'] >= state['max_members']:
+                status = 'revoked'
+                status_reason = 'room_full'
         return {'id': str(invitation.id), 'invitation_id': str(invitation.id),
                 'room_id': str(invitation.room_id), 'inviter': self.public_user_v3(invitation.inviter_id),
                 'invitee_user_id': str(invitation.invitee_id), 'status': status,
+                'status_reason': status_reason,
                 'expires_at': invitation.expires_at.isoformat(), 'party': state}
 
     def reconcile_room_v3(self, room):
@@ -296,15 +308,24 @@ class ChatServiceV3:
             target = self.target_v3(invitation.invitee_id)
             member = self.session.scalar(select(PartyMemberV3).where(
                 PartyMemberV3.room_id == room.id, PartyMemberV3.user_email == target.user_email))
-            status = None
+            status = reason = None
             if invitation.expires_at <= now_v3():
                 status = 'expired'
-            elif state['closed'] or state['member_count'] >= state['max_members'] or (
-                member is not None and member.status in ('joined', 'kicked')
-            ):
+            elif state['closed']:
                 status = 'revoked'
+                reason = 'room_closed'
+            elif member is not None and member.status == 'kicked':
+                status = 'revoked'
+                reason = 'member_kicked'
+            elif self.current_room_v3(target) is not None:
+                status = 'revoked'
+                reason = 'already_joined'
+            elif state['member_count'] >= state['max_members']:
+                status = 'revoked'
+                reason = 'room_full'
             if status:
-                invitation.status, invitation.update_time = status, now_v3()
+                invitation.status, invitation.status_reason = status, reason
+                invitation.update_time = now_v3()
         self.session.flush()
 
     def invitations_v3(self, user, status='pending'):
@@ -358,7 +379,8 @@ class ChatServiceV3:
             raise HTTPException(429, 'PARTY_INVITATION_LIMIT', headers={'Retry-After': '60'})
         now = now_v3()
         invitation = PartyInvitationV3(id=uuid4(), room_id=room.id, inviter_id=user.id,
-            invitee_id=target.id, status='pending', expires_at=now + timedelta(minutes=10),
+            invitee_id=target.id, status='pending', status_reason=None,
+            expires_at=now + timedelta(minutes=10),
             create_time=now, update_time=now)
         self.session.add(invitation)
         self.session.flush()
@@ -397,12 +419,13 @@ class ChatServiceV3:
             member.role, member.status, member.left_at = 'member', 'joined', None
             member.joined_at = member.update_time = now
             room.empty_since, room.update_time = None, now
-            invitation.status, invitation.update_time = 'accepted', now
+            invitation.status, invitation.status_reason, invitation.update_time = 'accepted', None, now
             self.session.info['chat_party_room_v3'] = room.id
             snapshot = self.party._snapshot_v3(room, member)
             self.reconcile_room_v3(room)
             return snapshot.model_dump(mode='json')
         invitation.status = 'rejected' if action == 'reject' else 'revoked'
+        invitation.status_reason = None if action == 'reject' else 'cancelled'
         invitation.update_time = now_v3()
         self.session.flush()
         return self.invitation_data_v3(invitation)

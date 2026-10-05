@@ -19,6 +19,7 @@ from api.live_map.chat_v3.schemas import ChatSendV3
 from api.live_map.chat_v3.security import optional_chat_user_v3
 from api.live_map.chat_v3.service import ChatServiceV3, event_v3, now_v3
 from api.live_map.chat_v3.store import ChatStoreV3
+from api.live_map.party_v3.models import PartyRoomV3
 from api.user.user_res_models import UserV3
 from tests import test_live_map_party_postgres_v3 as postgres_tests_v3
 
@@ -176,7 +177,9 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
         self.assertEqual(self.chat_request_v3('POST', '/party-invitations/' + invitation + '/reject', user='member').status_code, 200)
         invitation = self.invite_v3(room_id).json()['data']['id']
         self.assertEqual(self.chat_request_v3('DELETE', '/party-invitations/' + invitation, user='outsider').status_code, 403)
-        self.assertEqual(self.chat_request_v3('DELETE', '/party-invitations/' + invitation).status_code, 200)
+        revoked = self.chat_request_v3('DELETE', '/party-invitations/' + invitation)
+        self.assertEqual(revoked.status_code, 200)
+        self.assertEqual(revoked.json()['data']['status_reason'], 'cancelled')
         invitation = self.invite_v3(room_id).json()['data']['id']
         member_id = self.join_v3(room_id, user='other').json()['data']['me']['id']
         self.assertEqual(self.chat_request_v3('POST', '/party-invitations/' + invitation + '/accept', user='member').json()['msg'], 'PARTY_ROOM_FULL')
@@ -287,9 +290,14 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
             self.assertIsNone(session.get(ChatMessageV3, party))
             self.assertIsNotNone(session.get(PartyRoomV3, UUID(room)))
         migration = (Path(__file__).parents[1] / 'sql/migrations/20261003_live_map_chat_v3.sql').read_text()
+        reason_migration = (
+            Path(__file__).parents[1] / 'sql/migrations/20261004_party_invitation_status_reason.sql'
+        ).read_text()
         with self.engine_v3.connect().execution_options(isolation_level='AUTOCOMMIT') as conn:
             conn.exec_driver_sql(migration)
             conn.exec_driver_sql(migration)
+            conn.exec_driver_sql(reason_migration)
+            conn.exec_driver_sql(reason_migration)
 
     def test_post_commit_publish_failure_does_not_duplicate_messages_v3(self):
         with self.chat_socket_v3() as websocket:
@@ -347,8 +355,40 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
             ChatServiceV3(session).reconcile_batch_v3()
         self.request_v3('POST', f'/{room_id}/leave', user='other')
         with self.sessions_v3() as session:
-            self.assertEqual(session.get(PartyInvitationV3, UUID(invitation)).status, 'revoked')
+            row = session.get(PartyInvitationV3, UUID(invitation))
+            self.assertEqual(row.status, 'revoked')
+            self.assertEqual(row.status_reason, 'room_full')
         self.assertEqual(self.chat_request_v3('POST', '/party-invitations/' + invitation + '/accept', user='member').status_code, 409)
+
+    def test_invitation_status_reasons_cover_room_and_member_changes_v3(self):
+        cases = []
+        for action in ('close', 'kick', 'join'):
+            room_id = self.create_v3()['room']['id']
+            invitation_id = self.invite_v3(room_id).json()['data']['id']
+            if action == 'close':
+                self.request_v3('DELETE', f'/{room_id}')
+                expected = 'room_closed'
+            elif action == 'kick':
+                member_id = self.join_v3(room_id, user='member').json()['data']['me']['id']
+                self.request_v3('POST', f'/{room_id}/members/{member_id}/kick')
+                expected = 'member_kicked'
+            else:
+                other_room = self.create_v3(user='other')['room']['id']
+                self.join_v3(other_room, user='member')
+                expected = 'already_joined'
+            cases.append((UUID(room_id), UUID(invitation_id), expected))
+
+        with self.sessions_v3.begin() as session:
+            service = ChatServiceV3(session)
+            for room_id, _, _ in cases:
+                room = session.get(PartyRoomV3, room_id)
+                service.reconcile_room_v3(room)
+
+        with self.sessions_v3() as session:
+            for _, invitation_id, expected in cases:
+                invitation = session.get(PartyInvitationV3, invitation_id)
+                self.assertEqual(invitation.status, 'revoked')
+                self.assertEqual(invitation.status_reason, expected)
 
     def test_connection_lease_limit_and_release_v3(self):
         user_id = str(self.ids_v3['owner'])
@@ -376,7 +416,9 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
                 ).scalars().all()
                 for constraint in constraints:
                     old_name = constraint.replace(name, name + '_v3', 1)
-                    conn.exec_driver_sql(f'ALTER TABLE {name} RENAME CONSTRAINT {constraint} TO {old_name}')
+                    if old_name != constraint:
+                        conn.exec_driver_sql(
+                            f'ALTER TABLE {name} RENAME CONSTRAINT {constraint} TO {old_name}')
                 indexes = conn.exec_driver_sql(
                     f"SELECT indexname FROM pg_indexes WHERE tablename = '{name}'"
                 ).scalars().all()
@@ -459,9 +501,12 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
             received = self.receive_v3(guest, lambda e: e['type'] == 'chat_message')['data']
             self.assertEqual(received['message'], 'public')
             for channel, room in (('lobby', None), ('party', room_id)):
+                request_id = str(uuid4())
                 guest.send_json({'type': 'send_message', 'channel': channel, 'room_id': room,
-                                 'message': 'forbidden', 'request_id': str(uuid4())})
-                self.receive_v3(guest, lambda e: e['type'] == 'error' and e['msg'] == 'LOGIN_REQUIRED')
+                                 'message': 'forbidden', 'request_id': request_id})
+                error = self.receive_v3(
+                    guest, lambda e: e['type'] == 'error' and e['msg'] == 'LOGIN_REQUIRED')
+                self.assertEqual(error['request_id'], request_id)
             guest.send_json({'type': 'heartbeat'})
             self.assertEqual(len(self.snapshot_v3(guest)['data']['lobby']), 1)
             self.chat_request_v3('DELETE', '/chat/admin/messages/' + received['id'])
@@ -491,6 +536,28 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
                 service.cleanup_v3()
             with self.sessions_v3() as session:
                 self.assertEqual(list(session.scalars(select(ChatMessageV3.id))), [ids[2]])
+
+
+    def test_party_repetition_allowed_with_cross_channel_and_rate_limits_v3(self):
+        room_id = UUID(self.create_v3()['room']['id'])
+        first = self.chat_send_v3(channel='party', room_id=room_id, message='네')
+        second = self.chat_send_v3(channel='party', room_id=room_id, message='네')
+        self.assertNotEqual(first['message_id'], second['message_id'])
+        self.chat_send_v3(message='네')  # Party history must not block lobby.
+        self.chat_send_v3(channel='party', room_id=room_id, message='네')
+        self.chat_send_v3(channel='party', room_id=room_id, message='네')
+        with self.assertRaises(HTTPException) as error:
+            self.chat_send_v3(channel='party', room_id=room_id, message='네')
+        self.assertEqual(error.exception.detail, 'CHAT_RATE_LIMITED')
+        self.redis_v3.flushdb()
+        with self.assertRaises(HTTPException) as error:
+            self.chat_send_v3(message='  네  ')
+        self.assertEqual(error.exception.detail, 'CHAT_REPEATED_MESSAGE')
+        request_id = uuid4()
+        sent = self.chat_send_v3(channel='party', room_id=room_id, message='네', request_id=request_id)
+        duplicate = self.chat_send_v3(channel='party', room_id=room_id, message='네', request_id=request_id)
+        self.assertTrue(duplicate['duplicate'])
+        self.assertEqual(sent['message_id'], duplicate['message_id'])
 
 
 
