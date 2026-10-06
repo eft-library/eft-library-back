@@ -490,30 +490,61 @@ create table if not exists ROADMAP_EDGE
     update_time timestamptz default now()
 );
 
+create table if not exists price_seasons
+(
+    id text primary key,
+    name text,
+    starts_at timestamptz,
+    ends_at timestamptz,
+    is_current boolean not null default false,
+    collected_at timestamptz not null default now(),
+    update_time timestamptz not null default now(),
+    check (ends_at is null or starts_at is null or ends_at > starts_at)
+);
+create unique index if not exists uq_price_seasons_current
+    on price_seasons(is_current) where is_current;
+create index if not exists idx_price_seasons_start
+    on price_seasons(starts_at desc, id);
+
 create table if not exists item_prices
 (
     item_id text,
     game_mode text,
+    season_id text references price_seasons(id) on delete restrict,
+    season_key text generated always as (coalesce(season_id, '')) stored,
     highest_trader_price numeric,
     highest_trader_id text,
     flea_market_price numeric,
     trader_count integer,
     has_flea boolean,
     update_time timestamptz default now(),
-    primary key (item_id, game_mode)
+    primary key (item_id, game_mode, season_key),
+    check (
+        (game_mode = 'pvp-season' and season_id is not null)
+        or (game_mode <> 'pvp-season' and season_id is null)
+    )
 );
+create index if not exists idx_item_prices_mode_season
+    on item_prices(game_mode, season_id);
 
 create table if not exists item_trader_prices
 (
-    id text primary key,
+    id text not null,
     item_id text,
-    game_mode text, -- 'pve' | 'pvp'
+    game_mode text, -- 'pve' | 'pvp' | 'pvp-season'
+    season_id text references price_seasons(id) on delete restrict,
+    season_key text generated always as (coalesce(season_id, '')) stored,
     trader_id text,
-    price numeric
+    price numeric,
+    primary key (item_id, game_mode, season_key, trader_id),
+    check (
+        (game_mode = 'pvp-season' and season_id is not null)
+        or (game_mode <> 'pvp-season' and season_id is null)
+    )
 );
 create index idx_item_trader_prices_item_id on item_trader_prices(item_id);
 create index idx_item_trader_prices_trader_id on item_trader_prices(trader_id);
-create index idx_item_trader_prices_item_mode on item_trader_prices(item_id, game_mode);
+create index idx_item_trader_prices_item_mode on item_trader_prices(item_id, game_mode, season_id);
 
 -- 아이템 시세 조회 별도 테이블 말고 조회 쿼리로 수정
 select
@@ -529,10 +560,18 @@ create table if not exists item_price_history
     item_id text,
     price integer,
     game_mode text,
+    season_id text references price_seasons(id) on delete restrict,
+    season_key text generated always as (coalesce(season_id, '')) stored,
     price_time timestamptz default now(),
-    PRIMARY KEY (item_id, game_mode, price_time)
+    PRIMARY KEY (item_id, game_mode, season_key, price_time),
+    check (
+        (game_mode = 'pvp-season' and season_id is not null)
+        or (game_mode <> 'pvp-season' and season_id is null)
+    )
 );
 create index idx_item_price_history_time on item_price_history(price_time desc);
+create index if not exists idx_item_price_history_item_mode_season_time
+    on item_price_history(item_id, game_mode, season_id, price_time);
 
 create table if not exists wipe
 (

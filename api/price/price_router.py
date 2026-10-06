@@ -9,9 +9,21 @@ from api.price.models import PriceRankReqV3
 router = APIRouter(tags=["Item Price"])
 
 
+@router.get("/v3/seasons")
+def get_price_seasons_v3():
+    seasons = PriceServiceV3.get_price_seasons_v3()
+    if seasons is None:
+        return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+    return CustomResponse.response(seasons, HTTPCode.OK, Message.SUCCESS)
+
+
 @router.get("/v3/search")
-def get_item_price_v3(page: int, page_size: int, word: str):
-    price_list = PriceServiceV3.get_item_price_v3(page, page_size, word)
+def get_item_price_v3(
+    page: int, page_size: int, word: str, season_id: str | None = None
+):
+    price_list = PriceServiceV3.get_item_price_v3(
+        page, page_size, word, season_id
+    )
     if price_list is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(price_list, HTTPCode.OK, Message.SUCCESS)
