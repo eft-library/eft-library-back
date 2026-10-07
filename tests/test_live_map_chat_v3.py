@@ -559,6 +559,93 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
         self.assertTrue(duplicate['duplicate'])
         self.assertEqual(sent['message_id'], duplicate['message_id'])
 
+    def test_moderation_list_state_expiry_and_permissions_v3(self):
+        target = str(self.ids_v3['member'])
+        path = '/chat/admin/restrictions/' + target
+        self.assertEqual(self.chat_request_v3('GET', '/chat/admin/restrictions', user='member').status_code, 403)
+        self.assertEqual(self.chat_request_v3('PUT', path, user='member', json={'reason': 'spam'}).status_code, 403)
+        self.assertEqual(self.chat_request_v3('PUT', path, json={'reason': 'spam'}).status_code, 200)
+        state = self.chat_request_v3('GET', '/chat/me/moderation', user='member').json()['data']
+        self.assertEqual(state, {'is_admin': False, 'restricted': True, 'reason': 'spam', 'expires_at': None})
+        rows = self.chat_request_v3('GET', '/chat/admin/restrictions').json()['data']
+        self.assertEqual(rows[0]['user']['id'], target)
+        self.assertNotIn('email', str(rows))
+        with self.assertRaises(HTTPException) as error:
+            self.chat_send_v3(user='member')
+        self.assertEqual(error.exception.detail, 'CHAT_RESTRICTED')
+        from api.live_map.chat_v3.models import ChatRestrictionV3
+        with self.sessions_v3.begin() as session:
+            session.get(ChatRestrictionV3, self.ids_v3['member']).expires_at = now_v3() - timedelta(seconds=1)
+        self.assertFalse(self.chat_request_v3('GET', '/chat/me/moderation', user='member').json()['data']['restricted'])
+        self.assertEqual(self.chat_request_v3('GET', '/chat/admin/restrictions').json()['data'], [])
+        self.assertEqual(self.chat_request_v3('DELETE', path).status_code, 200)
+        self.chat_send_v3(user='member')
+
+    def test_party_badge_counts_incoming_effective_invitations_only_v3(self):
+        room_id = self.create_v3(max_members=2)['room']['id']
+        invitation = self.invite_v3(room_id).json()['data']
+        self.assertEqual(invitation['notification_tab'], 'party')
+        path = '/party-invitations/notifications'
+        self.assertEqual(self.chat_request_v3('GET', path, user=None).status_code, 401)
+        for name, count in (('owner', 0), ('member', 1), ('outsider', 0)):
+            data = self.chat_request_v3('GET', path, user=name).json()['data']
+            self.assertEqual(data, {'party_invitation_count': count, 'notification_tab': 'party'})
+        self.join_v3(room_id, user='other')
+        self.assertEqual(self.chat_request_v3('GET', path, user='member').json()['data']['party_invitation_count'], 0)
+        with self.sessions_v3.begin() as session:
+            service = ChatServiceV3(session)
+            self.assertEqual(service.snapshot_v3(None)['notifications']['party_invitation_count'], 0)
+
+    def test_nickname_actions_kick_reinvite_and_owner_privacy_v3(self):
+        room_id = self.create_v3()['room']['id']
+        target = str(self.ids_v3['member'])
+        path = '/chat/users/' + target + '/actions'
+        self.assertEqual(self.chat_request_v3('GET', path, user=None).status_code, 401)
+        data = self.chat_request_v3('GET', path, params={'room_id': room_id}).json()['data']
+        self.assertTrue(data['can_invite'])
+        self.assertTrue(data['can_restrict'])
+        self.assertFalse(data['can_unkick'])
+        self.assertEqual(self.chat_request_v3('GET', path, user='outsider', params={'room_id': room_id}).status_code, 403)
+        old_id = self.invite_v3(room_id).json()['data']['id']
+        self.assertEqual(self.chat_request_v3('GET', path, params={'room_id': room_id}).json()['data']['invite_disabled_reason'], 'PARTY_INVITATION_DUPLICATED')
+        member_id = self.join_v3(room_id).json()['data']['me']['id']
+        kick_path = f'/{room_id}/members/{member_id}/kick'
+        self.request_v3('POST', kick_path)
+        data = self.chat_request_v3('GET', path, params={'room_id': room_id}).json()['data']
+        self.assertEqual(data['member_id'], member_id)
+        self.assertTrue(data['can_unkick'])
+        self.assertEqual(data['invite_disabled_reason'], 'PARTY_MEMBER_KICKED')
+        self.assertEqual(self.request_v3('DELETE', kick_path).status_code, 200)
+        # The old pending invitation must not revive after an intervening join/kick.
+        self.assertEqual(self.chat_request_v3('GET', '/party-invitations', user='member').json()['data'], [])
+        data = self.chat_request_v3('GET', path, params={'room_id': room_id}).json()['data']
+        self.assertTrue(data['can_invite'])
+        self.assertFalse(data['can_unkick'])
+        self.assertEqual(self.chat_request_v3('POST', '/party-invitations/' + old_id + '/accept', user='member').status_code, 409)
+        reinvited = self.invite_v3(room_id)
+        self.assertEqual(reinvited.status_code, 201)
+        self.assertEqual(self.chat_request_v3('POST', '/party-invitations/' + reinvited.json()['data']['id'] + '/accept', user='member').status_code, 200)
+        self.chat_request_v3('POST', '/chat/blocks/' + target)
+        self.assertTrue(self.chat_request_v3('GET', path).json()['data']['blocked'])
+
+    def test_socket_party_badge_and_moderation_updates_v3(self):
+        room_id = self.create_v3()['room']['id']
+        with self.chat_socket_v3('member') as websocket:
+            snapshot = self.snapshot_v3(websocket)['data']
+            self.assertEqual(snapshot['notifications']['party_invitation_count'], 0)
+            self.assertFalse(snapshot['moderation']['restricted'])
+            invitation = self.invite_v3(room_id).json()['data']['id']
+            updated = self.receive_v3(websocket, lambda e: e['type'] == 'party_notifications_updated')
+            self.assertEqual(updated['data']['party_invitation_count'], 1)
+            self.chat_request_v3('POST', '/party-invitations/' + invitation + '/reject', user='member')
+            updated = self.receive_v3(websocket, lambda e: e['type'] == 'party_notifications_updated')
+            self.assertEqual(updated['data']['party_invitation_count'], 0)
+            path = '/chat/admin/restrictions/' + str(self.ids_v3['member'])
+            self.chat_request_v3('PUT', path, json={'reason': 'spam'})
+            self.assertTrue(self.receive_v3(websocket, lambda e: e['type'] == 'chat_moderation_updated')['data']['restricted'])
+            self.chat_request_v3('DELETE', path)
+            self.assertFalse(self.receive_v3(websocket, lambda e: e['type'] == 'chat_moderation_updated')['data']['restricted'])
+
 
 
 class ChatLifecycleTestV3(unittest.IsolatedAsyncioTestCase):

@@ -53,7 +53,8 @@ async def transaction_v3(email, operation):
 
 def state_v3(service, user):
     return {'party_room_id': str(room_id) if (room_id := service.current_room_v3(user)) else None,
-            'invitations': service.invitations_v3(user, None)}
+            'invitations': service.invitations_v3(user, None),
+            'notifications': service.notifications_v3(user), 'moderation': service.moderation_state_v3(user)}
 
 
 async def chat_socket_v3(websocket):
@@ -92,6 +93,7 @@ async def chat_socket_v3(websocket):
             await send_packet_v3(websocket, event_v3('snapshot', snapshot))
             known = {row['id']: row for row in snapshot['party_invitations']}
             room_id = snapshot['party_room_id']
+            notifications, moderation = snapshot['notifications'], snapshot['moderation']
             started = last_received = last_state = last_lease = time.monotonic()
             invalid = 0
             incoming = asyncio.create_task(receive_packet_v3(websocket))
@@ -159,6 +161,12 @@ async def chat_socket_v3(websocket):
                 # cleanup need no dependency on chat tables or the chat event bus.
                 if not guest and now - last_state >= 2:
                     state, _ = await transaction_v3(email, state_v3)
+                    if state['notifications'] != notifications:
+                        notifications = state['notifications']
+                        await send_packet_v3(websocket, event_v3('party_notifications_updated', notifications))
+                    if state['moderation'] != moderation:
+                        moderation = state['moderation']
+                        await send_packet_v3(websocket, event_v3('chat_moderation_updated', moderation))
                     for invitation in state['invitations']:
                         previous = known.get(invitation['id'])
                         if invitation != previous and (previous is not None or invitation['status'] == 'pending'):

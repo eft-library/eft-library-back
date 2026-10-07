@@ -16,6 +16,7 @@ from api.live_map.party_v3.security import authenticate_party_user_v3
 from api.live_map.party_v3.schemas import PartyResponseV3, PartySnapshotV3
 from .schemas import (
     ChatHistoryResponseV3, ChatUserResponseV3, ChatBlockResponseV3, ChatIdResponseV3,
+    ChatRestrictionDetailV3, ChatModerationStateV3, PartyNotificationsV3, ChatUserActionsV3,
     ChatDeletedResponseV3, ChatRestrictionResponseV3, ChatReportResponseV3, InvitationResponseV3,
 )
 from .lifecycle import chat_lifespan_v3
@@ -168,3 +169,25 @@ def reject_v3(invitation_id: UUID, email: EmailV3, service: ServiceV3):
 @router_v3.delete('/party-invitations/{invitation_id}', response_model=PartyResponseV3[InvitationResponseV3])
 def revoke_v3(invitation_id: UUID, email: EmailV3, service: ServiceV3):
     return response_v3(service.handle_invitation_v3(service.identity_v3(email), invitation_id, 'revoke'))
+
+
+@router_v3.get('/chat/me/moderation', response_model=PartyResponseV3[ChatModerationStateV3])
+def moderation_v3(email: EmailV3, service: ServiceV3):
+    return response_v3(service.moderation_state_v3(service.identity_v3(email)))
+
+
+@router_v3.get('/chat/admin/restrictions', response_model=PartyResponseV3[list[ChatRestrictionDetailV3]])
+def restrictions_v3(email: EmailV3, service: ServiceV3,
+                    limit: int = Query(default=50, ge=1, le=100),
+                    offset: int = Query(default=0, ge=0, le=10000)):
+    return response_v3(service.restrictions_v3(service.identity_v3(email), limit, offset))
+
+
+@router_v3.get('/party-invitations/notifications', response_model=PartyResponseV3[PartyNotificationsV3])
+def invitation_notifications_v3(email: EmailV3, service: ServiceV3):
+    return response_v3(service.notifications_v3(service.identity_v3(email)))
+
+
+@router_v3.get('/chat/users/{user_id}/actions', response_model=PartyResponseV3[ChatUserActionsV3])
+def user_actions_v3(user_id: UUID, email: EmailV3, service: ServiceV3, room_id: UUID | None = None):
+    return response_v3(service.user_actions_v3(service.identity_v3(email), user_id, room_id))

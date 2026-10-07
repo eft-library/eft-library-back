@@ -154,6 +154,11 @@ def kick_party_member_v3(room_id: UUID, member_id: UUID, email: EmailV3, service
     return PartyResponseV3(data=service.kick_member_v3(room_id, email, member_id))
 
 
+@router_v3.delete("/rooms/{room_id}/members/{member_id}/kick", response_model=PartyResponseV3[PartySnapshotV3])
+def unkick_party_member_v3(room_id: UUID, member_id: UUID, email: EmailV3, service: ServiceV3):
+    return PartyResponseV3(data=service.unkick_member_v3(room_id, email, member_id))
+
+
 @router_v3.post("/rooms/{room_id}/owner", response_model=PartyResponseV3[PartySnapshotV3])
 def transfer_party_owner_v3(room_id: UUID, data: PartyOwnerTransferV3, email: EmailV3, service: ServiceV3):
     return PartyResponseV3(data=service.transfer_owner_v3(room_id, email, data.member_id))

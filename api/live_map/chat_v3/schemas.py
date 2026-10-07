@@ -84,6 +84,7 @@ class InvitationPartyResponseV3(BaseModel):
 class InvitationResponseV3(BaseModel):
     id: UUID
     invitation_id: UUID
+    notification_tab: Literal['party'] = 'party'
     room_id: UUID
     inviter: ChatUserResponseV3
     invitee_user_id: UUID
@@ -119,3 +120,33 @@ class ChatReportResponseV3(BaseModel):
     detail: str | None
     create_time: datetime
     message: ChatMessageResponseV3
+
+
+class ChatRestrictionDetailV3(BaseModel):
+    user: ChatUserResponseV3
+    reason: str
+    expires_at: datetime | None
+    create_time: datetime
+
+
+class ChatModerationStateV3(BaseModel):
+    is_admin: bool
+    restricted: bool
+    reason: str | None
+    expires_at: datetime | None
+
+
+class PartyNotificationsV3(BaseModel):
+    party_invitation_count: int
+    notification_tab: Literal['party'] = 'party'
+
+
+class ChatUserActionsV3(BaseModel):
+    user: ChatUserResponseV3
+    blocked: bool
+    can_block: bool
+    can_restrict: bool
+    can_invite: bool
+    invite_disabled_reason: str | None
+    member_id: UUID | None
+    can_unkick: bool

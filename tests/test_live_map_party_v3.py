@@ -204,6 +204,28 @@ class PartyApiTestV3(PartyApiFixtureV3):
         self.assertEqual(self.request_v3("DELETE", f"/{room_id}").status_code, 403)
         self.assertEqual(self.request_v3("DELETE", f"/{room_id}", user="member").status_code, 200)
 
+    def test_unkick_owner_only_allows_reentry_without_joining_v3(self):
+        room_id = self.create_v3()["room"]["id"]
+        member_id = self.join_v3(room_id).json()["data"]["me"]["id"]
+        self.join_v3(room_id, user="other")
+        path = f"/{room_id}/members/{member_id}/kick"
+        self.assertEqual(self.request_v3("POST", path).status_code, 200)
+        self.assertEqual(self.join_v3(room_id).status_code, 403)
+        for user, status in ((None, 401), ("member", 403), ("other", 403)):
+            self.assertEqual(self.request_v3("DELETE", path, user=user).status_code, status)
+        response = self.request_v3("DELETE", path)
+        self.assertEqual(response.status_code, 200, response.text)
+        snapshot = response.json()["data"]
+        self.assertEqual(next(m for m in snapshot["members"] if m["id"] == member_id)["status"], "left")
+        self.assertEqual(snapshot["room"]["member_count"], 2)
+        self.assertEqual(self.request_v3("GET", f"/{room_id}", user="member").status_code, 403)
+        self.assertEqual(self.request_v3("DELETE", path).status_code, 200)
+        self.assertEqual(self.join_v3(room_id, password="incorrect-password").status_code, 403)
+        self.assertEqual(self.join_v3(room_id).status_code, 200)
+        self.assertEqual(self.request_v3("DELETE", path).status_code, 409)
+        other_room = self.create_v3(user="outsider")["room"]["id"]
+        self.assertEqual(self.request_v3("DELETE", f"/{other_room}/members/{member_id}/kick", user="outsider").status_code, 404)
+
     def test_kick_revokes_read_write_and_reentry_v3(self):
         room_id = self.create_v3()["room"]["id"]
         member_id = self.join_v3(room_id).json()["data"]["me"]["id"]
@@ -311,7 +333,7 @@ class PartyApiTestV3(PartyApiFixtureV3):
 
     def test_openapi_and_missing_entities_v3(self):
         schema = self.app_v3.openapi()
-        self.assertEqual(sum(hasattr(route, "methods") for route in router_v3.routes), 14)
+        self.assertEqual(sum(hasattr(route, "methods") for route in router_v3.routes), 15)
         self.assertIn("requestBody", schema["paths"][self.base_v3]["post"])
         self.assertEqual(self.request_v3("GET", f"/{uuid4()}").status_code, 404)
 

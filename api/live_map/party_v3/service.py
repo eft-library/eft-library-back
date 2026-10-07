@@ -237,6 +237,20 @@ class PartyServiceV3:
         target.left_at = target.update_time = room.update_time = now
         return self._snapshot_v3(room, me)
 
+    def unkick_member_v3(self, room_id: UUID, email: str, member_id: UUID):
+        room = self._room_v3(room_id)
+        me = self._owner_v3(room.id, email)
+        target = self.session.get(PartyMemberV3, member_id)
+        if target is None or target.room_id != room.id:
+            raise HTTPException(404, "MEMBER_NOT_FOUND")
+        if target.status == "joined":
+            raise HTTPException(409, "MEMBER_NOT_KICKED")
+        if target.status == "kicked":
+            now = datetime.now(timezone.utc)
+            target.status, target.role = "left", "member"
+            target.update_time = room.update_time = now
+        return self._snapshot_v3(room, me)
+
     def transfer_owner_v3(self, room_id: UUID, email: str, member_id: UUID):
         room = self._room_v3(room_id)
         me = self._owner_v3(room.id, email)

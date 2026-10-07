@@ -254,6 +254,64 @@ class ChatServiceV3:
             row.expires_at, row.create_time = data.expires_at, now_v3()
         return {'user_id': str(target_id), 'restricted': data is not None}
 
+    def moderation_state_v3(self, user):
+        if user is None:
+            return {'is_admin': False, 'restricted': False, 'reason': None, 'expires_at': None}
+        row = self.session.get(ChatRestrictionV3, user.id)
+        active = row is not None and (row.expires_at is None or row.expires_at > now_v3())
+        return {'is_admin': bool(self.party._account_v3(user.user_email).is_admin),
+                'restricted': active, 'reason': row.reason if active else None,
+                'expires_at': row.expires_at.isoformat() if active and row.expires_at else None}
+
+    def restrictions_v3(self, user, limit, offset):
+        self.admin_v3(user)
+        rows = self.session.scalars(select(ChatRestrictionV3).where(or_(
+            ChatRestrictionV3.expires_at.is_(None), ChatRestrictionV3.expires_at > now_v3(),
+        )).order_by(ChatRestrictionV3.create_time.desc(), ChatRestrictionV3.user_id)
+            .limit(limit).offset(offset))
+        return [{'user': self.public_user_v3(row.user_id), 'reason': row.reason,
+                 'expires_at': row.expires_at, 'create_time': row.create_time} for row in rows]
+
+    def notifications_v3(self, user):
+        # Count incoming effective pending invitations only, independently of the
+        # capped inbox list and without counting invitations the user sent.
+        rows = self.session.scalars(select(PartyInvitationV3).where(
+            PartyInvitationV3.invitee_id == user.id, PartyInvitationV3.status == 'pending',
+            PartyInvitationV3.expires_at > now_v3())) if user is not None else []
+        count = sum(self.invitation_data_v3(row)['status'] == 'pending' for row in rows)
+        return {'party_invitation_count': count, 'notification_tab': 'party'}
+
+    def user_actions_v3(self, user, target_id, room_id=None):
+        target = self.target_v3(target_id)
+        is_self = user.id == target.id
+        result = {'user': self.public_user_v3(target.id), 'blocked': self.blocked_v3(user, target.id),
+                  'can_block': not is_self, 'can_restrict': not is_self and
+                  bool(self.party._account_v3(user.user_email).is_admin), 'can_invite': False,
+                  'invite_disabled_reason': 'PARTY_ROOM_REQUIRED', 'member_id': None, 'can_unkick': False}
+        if room_id is None:
+            return result
+        room = self.party._room_v3(room_id)
+        # Membership identifiers and kick state are visible only to this room's owner.
+        self.party._owner_v3(room.id, user.user_email)
+        member = self.session.scalar(select(PartyMemberV3).where(
+            PartyMemberV3.room_id == room.id, PartyMemberV3.user_email == target.user_email))
+        result['member_id'] = str(member.id) if member else None
+        result['can_unkick'] = member is not None and member.status == 'kicked'
+        try:
+            if is_self:
+                raise HTTPException(422, 'PARTY_CANNOT_INVITE_SELF')
+            self.invite_checks_v3(room, target)
+            pending = self.session.scalars(select(PartyInvitationV3).where(
+                PartyInvitationV3.room_id == room.id, PartyInvitationV3.invitee_id == target.id,
+                PartyInvitationV3.status == 'pending'))
+            if any(self.invitation_data_v3(row)['status'] == 'pending' for row in pending):
+                raise HTTPException(409, 'PARTY_INVITATION_DUPLICATED')
+        except HTTPException as exc:
+            result['invite_disabled_reason'] = exc.detail
+        else:
+            result['can_invite'], result['invite_disabled_reason'] = True, None
+        return result
+
     def reports_v3(self, user, limit, offset):
         self.admin_v3(user)
         return [{'id': str(row.id), 'user_id': str(row.user_id), 'message_id': str(row.message_id),
@@ -287,14 +345,14 @@ class ChatServiceV3:
             elif member is not None and member.status == 'kicked':
                 status = 'revoked'
                 status_reason = 'member_kicked'
-            elif self.current_room_v3(target) is not None:
+            elif (member is not None and member.joined_at > invitation.create_time) or self.current_room_v3(target) is not None:
                 status = 'revoked'
                 status_reason = 'already_joined'
             elif state['member_count'] >= state['max_members']:
                 status = 'revoked'
                 status_reason = 'room_full'
         return {'id': str(invitation.id), 'invitation_id': str(invitation.id),
-                'room_id': str(invitation.room_id), 'inviter': self.public_user_v3(invitation.inviter_id),
+                'notification_tab': 'party', 'room_id': str(invitation.room_id), 'inviter': self.public_user_v3(invitation.inviter_id),
                 'invitee_user_id': str(invitation.invitee_id), 'status': status,
                 'status_reason': status_reason,
                 'expires_at': invitation.expires_at.isoformat(), 'party': state}
@@ -317,7 +375,7 @@ class ChatServiceV3:
             elif member is not None and member.status == 'kicked':
                 status = 'revoked'
                 reason = 'member_kicked'
-            elif self.current_room_v3(target) is not None:
+            elif (member is not None and member.joined_at > invitation.create_time) or self.current_room_v3(target) is not None:
                 status = 'revoked'
                 reason = 'already_joined'
             elif state['member_count'] >= state['max_members']:
@@ -408,6 +466,8 @@ class ChatServiceV3:
         if action == 'accept':
             self.lock_user_v3(user)  # concurrent acceptance into different rooms
             member = self.invite_checks_v3(room, user)
+            if member is not None and member.joined_at > invitation.create_time:
+                raise HTTPException(409, 'PARTY_INVITATION_ALREADY_HANDLED')
             joined = self.party._joined_v3(room.id)
             now = now_v3()
             if member is None:
@@ -438,7 +498,8 @@ class ChatServiceV3:
         return {'user': self.public_user_v3(user.id) if user is not None else None, 'lobby': lobby['messages'], 'party': party['messages'],
                 'lobby_next_before': lobby['next_before'], 'party_next_before': party['next_before'],
                 'party_room_id': str(room_id) if room_id else None,
-                'party_invitations': invitations, 'heartbeat_interval_seconds': 30}
+                'party_invitations': invitations, 'notifications': self.notifications_v3(user),
+                'moderation': self.moderation_state_v3(user), 'heartbeat_interval_seconds': 30}
 
     def cleanup_v3(self, limit=500):
         old_rooms = select(PartyRoomV3.id).where(PartyRoomV3.closed_at <= now_v3() - timedelta(hours=24))
