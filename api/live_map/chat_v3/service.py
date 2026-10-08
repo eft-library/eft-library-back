@@ -4,15 +4,16 @@ import json
 from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
 
+from redis.exceptions import RedisError
 from fastapi import HTTPException
-from sqlalchemy import delete, func, or_, select, text, tuple_
+from sqlalchemy import delete, func, or_, select, text, tuple_, update
 from sqlalchemy.dialects.postgresql import insert
 
 from api.live_map.party_v3.models import PartyMemberV3, PartyRoomV3
 from api.live_map.party_v3.service import PartyServiceV3
 from api.user.user_res_models import UserV3
 from .models import (
-    ChatBlockV3, ChatMessageV3, ChatReportV3, ChatRestrictionV3, ChatUserV3, PartyInvitationV3,
+    ChatConnectionV3, ChatBlockV3, ChatMessageV3, ChatReportV3, ChatRestrictionV3, ChatUserV3, PartyInvitationV3,
 )
 
 
@@ -490,6 +491,66 @@ class ChatServiceV3:
         self.session.flush()
         return self.invitation_data_v3(invitation)
 
+    def connect_session_v3(self, user, connection_id):
+        timestamp = now_v3()
+        self.session.add(ChatConnectionV3(
+            id=UUID(connection_id), user_id=user.id, connected_at=timestamp,
+            last_seen_at=timestamp, expires_at=timestamp + timedelta(seconds=90),
+        ))
+
+    def touch_session_v3(self, user, connection_id):
+        timestamp = now_v3()
+        self.session.execute(update(ChatConnectionV3).where(
+            ChatConnectionV3.id == UUID(connection_id), ChatConnectionV3.user_id == user.id,
+            ChatConnectionV3.disconnected_at.is_(None), ChatConnectionV3.expires_at > timestamp,
+        ).values(last_seen_at=timestamp, expires_at=timestamp + timedelta(seconds=90)))
+
+    def disconnect_session_v3(self, connection_id):
+        timestamp = now_v3()
+        self.session.execute(update(ChatConnectionV3).where(
+            ChatConnectionV3.id == UUID(connection_id), ChatConnectionV3.disconnected_at.is_(None),
+        ).values(disconnected_at=timestamp, disconnect_reason='closed'))
+
+    def expire_sessions_v3(self):
+        self.session.execute(update(ChatConnectionV3).where(
+            ChatConnectionV3.disconnected_at.is_(None), ChatConnectionV3.expires_at <= now_v3(),
+        ).values(disconnected_at=ChatConnectionV3.expires_at, disconnect_reason='expired'))
+
+    def connection_history_v3(self, user, online_only=False, limit=50, offset=0):
+        self.admin_v3(user)
+        timestamp = now_v3()
+        query = select(ChatConnectionV3, ChatUserV3.id, UserV3.nickname).join(
+            ChatUserV3, ChatUserV3.id == ChatConnectionV3.user_id,
+        ).join(UserV3, UserV3.email == ChatUserV3.user_email)
+        if online_only:
+            query = query.where(ChatConnectionV3.disconnected_at.is_(None),
+                                ChatConnectionV3.expires_at > timestamp)
+        rows = self.session.execute(query.order_by(
+            ChatConnectionV3.connected_at.desc(), ChatConnectionV3.id.desc(),
+        ).limit(limit).offset(offset))
+        return [{'id': str(row.id), 'user': {'id': str(user_id), 'nickname': nickname or '플레이어'},
+                 'connected_at': row.connected_at, 'last_seen_at': row.last_seen_at,
+                 'expires_at': row.expires_at, 'disconnected_at': row.disconnected_at,
+                 'disconnect_reason': row.disconnect_reason,
+                 'online': row.disconnected_at is None and row.expires_at > timestamp}
+                for row, user_id, nickname in rows]
+
+    def online_users_v3(self):
+        from .store import get_chat_store_v3
+        store = self.limiter if self.limiter is not None else get_chat_store_v3()
+        try:
+            ids = [UUID(value) for value in store.online_user_ids_v3()]
+        except RedisError:
+            raise HTTPException(503, 'CHAT_PRESENCE_UNAVAILABLE') from None
+        if not ids:
+            return []
+        rows = self.session.execute(select(ChatUserV3.id, UserV3.nickname).join(
+            UserV3, UserV3.email == ChatUserV3.user_email,
+        ).where(ChatUserV3.id.in_(ids)))
+        users = [{'id': str(user_id), 'nickname': nickname or '플레이어'}
+                 for user_id, nickname in rows]
+        return sorted(users, key=lambda row: (row['nickname'], row['id']))
+
     def snapshot_v3(self, user):
         invitations = self.invitations_v3(user) if user is not None else []
         room_id = self.current_room_v3(user) if user is not None else None
@@ -498,7 +559,7 @@ class ChatServiceV3:
         return {'user': self.public_user_v3(user.id) if user is not None else None, 'lobby': lobby['messages'], 'party': party['messages'],
                 'lobby_next_before': lobby['next_before'], 'party_next_before': party['next_before'],
                 'party_room_id': str(room_id) if room_id else None,
-                'party_invitations': invitations, 'notifications': self.notifications_v3(user),
+                'online_users': self.online_users_v3(), 'party_invitations': invitations, 'notifications': self.notifications_v3(user),
                 'moderation': self.moderation_state_v3(user), 'heartbeat_interval_seconds': 30}
 
     def cleanup_v3(self, limit=500):

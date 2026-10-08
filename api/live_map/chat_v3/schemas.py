@@ -150,3 +150,14 @@ class ChatUserActionsV3(BaseModel):
     invite_disabled_reason: str | None
     member_id: UUID | None
     can_unkick: bool
+
+
+class ChatConnectionResponseV3(BaseModel):
+    id: UUID
+    user: ChatUserResponseV3
+    connected_at: datetime
+    last_seen_at: datetime
+    expires_at: datetime
+    disconnected_at: datetime | None
+    disconnect_reason: Literal['closed', 'expired'] | None
+    online: bool

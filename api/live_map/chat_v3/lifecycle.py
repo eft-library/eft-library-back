@@ -18,6 +18,7 @@ async def chat_cleanup_loop_v3():
             def cleanup_v3():
                 with V3Database.SessionLocal.begin() as session:
                     service = ChatServiceV3(session)
+                    service.expire_sessions_v3()
                     next_id = service.reconcile_batch_v3(after_id)
                     if ticks % 30 == 0:
                         service.cleanup_v3()

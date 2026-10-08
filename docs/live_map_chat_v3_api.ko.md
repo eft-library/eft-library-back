@@ -122,7 +122,7 @@ URL: `/api/live-map/v3/chat/ws`. 기존 파티 WS와 별개다. query string에 
 {"type":"guest"}
 ```
 
-게스트는 모집 메시지 및 모집 메시지 삭제 이벤트만 수신한다. snapshot은 `user=null`, `party=[]`, `party_room_id=null`, `party_next_before=null`, `party_invitations=[]`이며 모집 최근 메시지와 cursor는 제공한다. 게스트 계정이나 공개 UUID를 DB에 만들지 않는다. 게스트가 메시지를 전송하면 401 `LOGIN_REQUIRED` 오류만 반환하고 읽기 연결은 유지한다.
+게스트는 모집 메시지, 모집 메시지 삭제 이벤트 및 공개 접속자 목록 갱신 이벤트를 수신한다. snapshot은 `user=null`, `party=[]`, `party_room_id=null`, `party_next_before=null`, `party_invitations=[]`이며 모집 최근 메시지와 cursor는 제공한다. 게스트 계정이나 공개 UUID를 DB에 만들지 않는다. 게스트가 메시지를 전송하면 401 `LOGIN_REQUIRED` 오류만 반환하고 읽기 연결은 유지한다.
 
 REST 비로그인 조회는 `GET /api/live-map/v3/chat/messages?channel=lobby`에 Authorization 헤더를 **생략**한다. 파티 조회는 401이다. 토큰을 보냈지만 잘못되었거나 미등록 계정이면 게스트로 전환하지 않고 기존 인증 오류를 반환한다. WebSocket도 잘못된 auth를 게스트로 전환하지 않는다. 계정 차단 목록은 로그인 조회에만 적용된다. 메시지 조회 응답에는 `Cache-Control: private, no-store`를 설정한다.
 
@@ -232,3 +232,25 @@ REST 비로그인 조회는 `GET /api/live-map/v3/chat/messages?channel=lobby`�
 
 추가 REST API와 WebSocket 필드·이벤트, 닉네임 메뉴 및 재초대 안내 문구는
 [live_map_moderation_party_v3_api.ko.md](live_map_moderation_party_v3_api.ko.md)를 참고한다.
+
+
+## 모집 채팅 접속자 닉네임 목록 (2026-10-09)
+
+프론트 화면 연동은 [접속자 목록 연동 안내](live_map_chat_online_users_v3_frontend.ko.md)를 참고한다.
+
+`GET /api/live-map/v3/chat/online-users`는 `{status:200, msg:"OK", data:[{id, nickname}]}`를 반환한다. 비로그인 조회도 가능하며 캐시하지 않는다. Redis 장애 시 `CHAT_PRESENCE_UNAVAILABLE`(503)을 반환한다.
+
+채팅 WebSocket에 연결된 로그인 사용자를 표시한다. 메시지를 보내지 않아도 포함하며 여러 탭/서버 연결은 공개 사용자 ID 기준으로 한 명으로 합친다. 비로그인 사용자는 제외하고 이메일은 반환하지 않는다. 닉네임은 `user_info.nickname`에서 조회하며 닉네임, ID 순으로 정렬한다. 차단은 메시지 필터이므로 이 접속자 목록에는 적용하지 않는다.
+
+기존 WS `snapshot.data.online_users`에 동일한 배열이 추가된다. 목록 변경 시 `online_users_updated` 이벤트의 `data`로 전체 배열을 전달하므로 프론트는 현재 목록을 교체한다. 약 2초 간격으로 변경을 확인하며 heartbeat snapshot으로도 복구할 수 있다. 정상 종료 시 해당 연결을 제거하고 다른 탭이 남아 있으면 사용자를 유지한다. 비정상 종료는 마지막 30초 주기 연결 갱신 후 최대 90초 내 만료되며 다음 목록 확인 때 제외한다. 재인증에 따른 재접속 과정에서 목록이 잠시 바뀔 수 있다. DB 마이그레이션은 필요 없다.
+
+
+## 모집 채팅 접속 이력 (2026-10-09)
+
+배포 전에 V3 DB에 `sql/migrations/20261009_chat_connections_v3.sql`을 적용한다. 신규 `live_map_chat_connections`와 인덱스만 생성하며 반복 실행할 수 있다. 기존 전체 스키마를 재실행하지 않는다.
+
+인증된 채팅 WS 연결마다 한 행을 기록한다. 비로그인 연결과 인증/구독 실패는 기록하지 않는다. 여러 탭과 15분 재인증 후 재접속은 각각 다른 접속 이력이다. 유효한 heartbeat 또는 메시지 전송에 성공하면 `last_seen_at`과 90초 뒤 `expires_at`을 갱신한다. `last_seen_at`은 채팅 클라이언트의 최근 확인 시각이며 키보드 입력이나 실제 화면 열람 시각을 의미하지 않는다. 정상적으로 서버 연결 정리를 실행하면 `disconnected_at`과 `disconnect_reason=closed`를 기록한다. 서버 중단/DB 장애로 종료 기록을 남기지 못하면 만료 후 `online=false`로 판정하고, 정리 작업이 `disconnect_reason=expired`, `disconnected_at=expires_at`을 기록한다. 만료 시각은 추정 종료 시각이다.
+
+관리자 전용 `GET /api/live-map/v3/chat/admin/connections?online_only=true&limit=50&offset=0`으로 현재 연결을 조회한다. `online_only=false`(기본)는 접속 이력도 포함한다. 응답 `data`는 `[{id, user:{id,nickname}, connected_at, last_seen_at, expires_at, disconnected_at, disconnect_reason, online}]`이며 접속 시각/연결 ID 내림차순이다. limit은 1~100, offset은 0~10000이다. 일반 사용자는 403을 받는다. 이메일/토큰은 반환하거나 기록하지 않으며 사용자 참조는 기존 공개 사용자 ID의 FK다. 닉네임은 조회 시점 계정 닉네임이다. 접속 이력은 자동 삭제하지 않고 계정 삭제 시 FK cascade로 삭제된다.
+
+기존 공개 닉네임 목록은 Redis 접속 상태를 계속 사용하며, 이 테이블은 DB에서 접속 상태와 이력을 확인하기 위한 관리자 기능이다. 최근 활동에 따른 DB 만료 판정과 Redis 연결 갱신 시점이 달라 장애/타임아웃 중에는 잠시 차이가 있을 수 있다. 사이트 전체 로그인 사용자 추적은 포함하지 않는다. 기존 프론트의 30초 heartbeat를 그대로 사용하므로 추가 프론트 요청은 필요 없다.

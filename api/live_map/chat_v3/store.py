@@ -9,6 +9,7 @@ from api.live_map.party_v3.realtime_store import party_redis_url_v3
 
 
 class ChatStoreV3:
+    presence_key_v3 = 'live-map:chat:v3:presence'
     channel_v3 = 'live-map:chat:v3:events'
     # Sliding windows are atomic across workers and do not permit fixed-window bursts.
     rate_script_v3 = """
@@ -46,16 +47,34 @@ class ChatStoreV3:
         end
         redis.call('ZADD', KEYS[1], now + 90, ARGV[1])
         redis.call('EXPIRE', KEYS[1], 90)
+        if ARGV[2] ~= '' then
+            redis.call('ZADD', KEYS[2], now + 90, ARGV[2])
+            redis.call('EXPIRE', KEYS[2], 90)
+        end
         return 1
     """
 
     def lease_v3(self, user_id, connection_id):
-        if not self.client.eval(self.lease_script_v3, 1,
-                                f'live-map:chat:v3:connections:{user_id}', connection_id):
+        if not self.client.eval(self.lease_script_v3, 2,
+                                f'live-map:chat:v3:connections:{user_id}', self.presence_key_v3,
+                                connection_id, '' if str(user_id).startswith('guest:') else f'{user_id}/{connection_id}'):
             raise HTTPException(429, 'CHAT_CONNECTION_LIMIT', headers={'Retry-After': '90'})
 
     def disconnect_v3(self, user_id, connection_id):
-        self.client.zrem(f'live-map:chat:v3:connections:{user_id}', connection_id)
+        with self.client.pipeline(transaction=True) as pipeline:
+            pipeline.zrem(f'live-map:chat:v3:connections:{user_id}', connection_id)
+            pipeline.zrem(self.presence_key_v3, f'{user_id}/{connection_id}')
+            pipeline.execute()
+
+    presence_script_v3 = """
+        local now = tonumber(redis.call('TIME')[1])
+        redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', now)
+        return redis.call('ZRANGE', KEYS[1], 0, -1)
+    """
+
+    def online_user_ids_v3(self):
+        connections = self.client.eval(self.presence_script_v3, 1, self.presence_key_v3)
+        return sorted({connection.split('/', 1)[0] for connection in connections})
 
     def publish_v3(self, events):
         for event in events:

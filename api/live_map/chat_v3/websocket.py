@@ -6,6 +6,7 @@ import time
 from contextlib import suppress
 from uuid import uuid4
 
+from anyio import CancelScope
 from fastapi import HTTPException, WebSocketDisconnect
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import ValidationError
@@ -61,6 +62,7 @@ async def chat_socket_v3(websocket):
     await websocket.accept()
     tasks = set()
     leased_user_id = None
+    recorded_connection = False
     connection_id = str(uuid4())
     try:
         try:
@@ -89,8 +91,13 @@ async def chat_socket_v3(websocket):
         client = create_party_subscriber_v3()
         async with client, client.pubsub() as pubsub:
             await asyncio.wait_for(subscribe_ready_v3(pubsub, ChatStoreV3.channel_v3), 5)
+            if not guest:
+                await transaction_v3(email, lambda s, u: s.connect_session_v3(u, connection_id))
+                recorded_connection = True
             snapshot, _ = await transaction_v3(email, lambda s, u: s.snapshot_v3(u))
             await send_packet_v3(websocket, event_v3('snapshot', snapshot))
+            online_users = snapshot['online_users']
+            last_presence = time.monotonic()
             known = {row['id']: row for row in snapshot['party_invitations']}
             room_id = snapshot['party_room_id']
             notifications, moderation = snapshot['notifications'], snapshot['moderation']
@@ -123,14 +130,21 @@ async def chat_socket_v3(websocket):
                                 await run_in_threadpool(get_chat_store_v3().consume_v3,
                                     'guest:' + connection_id, 'heartbeat', 4)
                             else:
-                                await transaction_v3(email, lambda s, u: s.rate_v3(u, 'heartbeat', 4))
+                                def heartbeat_session_v3(service, user):
+                                    service.rate_v3(user, 'heartbeat', 4)
+                                    service.touch_session_v3(user, connection_id)
+                                await transaction_v3(email, heartbeat_session_v3)
                             snapshot, _ = await transaction_v3(email, lambda s, u: s.snapshot_v3(u))
                             await send_packet_v3(websocket, event_v3('snapshot', snapshot))
                             room_id = snapshot['party_room_id']
                         else:
                             data = ChatSendV3.model_validate(packet)
                             request_id = str(data.request_id)
-                            ack, available = await transaction_v3(email, lambda s, u: s.send_v3(u, data))
+                            def send_session_v3(service, user):
+                                result = service.send_v3(user, data)
+                                service.touch_session_v3(user, connection_id)
+                                return result
+                            ack, available = await transaction_v3(email, send_session_v3)
                             ack['realtime_available'] = available
                             await send_packet_v3(websocket, event_v3('message_ack', ack))
                         last_received = time.monotonic()
@@ -157,6 +171,12 @@ async def chat_socket_v3(websocket):
                     tasks.remove(published)
                     published = asyncio.create_task(pubsub.get_message(ignore_subscribe_messages=True, timeout=1))
                     tasks.add(published)
+                if now - last_presence >= 2:
+                    current_users, _ = await transaction_v3(email, lambda s, u: s.online_users_v3())
+                    if current_users != online_users:
+                        online_users = current_users
+                        await send_packet_v3(websocket, event_v3('online_users_updated', online_users))
+                    last_presence = now
                 # Read party state independently: old party endpoints and automatic
                 # cleanup need no dependency on chat tables or the chat event bus.
                 if not guest and now - last_state >= 2:
@@ -192,9 +212,15 @@ async def chat_socket_v3(websocket):
             await chat_error_v3(websocket, 503, 'CHAT_UNAVAILABLE')
             await websocket.close(code=1013)
     finally:
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
-        if leased_user_id is not None:
-            with suppress(RedisError, HTTPException):
-                await run_in_threadpool(get_chat_store_v3().disconnect_v3, leased_user_id, connection_id)
+        with CancelScope(shield=True):
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            if leased_user_id is not None:
+                with suppress(RedisError, HTTPException):
+                    await run_in_threadpool(get_chat_store_v3().disconnect_v3, leased_user_id, connection_id)
+            if recorded_connection:
+                try:
+                    await transaction_v3(None, lambda s, u: s.disconnect_session_v3(connection_id))
+                except (SQLAlchemyError, HTTPException):
+                    logging.getLogger('api.live_map.chat_v3').warning('Chat connection close deferred to expiry')

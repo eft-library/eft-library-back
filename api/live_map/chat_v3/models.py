@@ -63,3 +63,14 @@ class PartyInvitationV3(V3Database.Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     create_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     update_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ChatConnectionV3(V3Database.Base):
+    __tablename__ = "live_map_chat_connections"
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    user_id: Mapped[UUID] = mapped_column(Uuid)
+    connected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    disconnected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    disconnect_reason: Mapped[str | None] = mapped_column(Text)

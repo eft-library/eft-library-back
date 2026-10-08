@@ -13,7 +13,7 @@ from fastapi import HTTPException, Request
 from redis.exceptions import ConnectionError as RedisConnectionError
 from sqlalchemy import func, select
 
-from api.live_map.chat_v3.models import ChatMessageV3, ChatUserV3, PartyInvitationV3
+from api.live_map.chat_v3.models import ChatConnectionV3, ChatMessageV3, ChatUserV3, PartyInvitationV3
 from api.live_map.chat_v3.router import router_v3
 from api.live_map.chat_v3.schemas import ChatSendV3
 from api.live_map.chat_v3.security import optional_chat_user_v3
@@ -646,6 +646,93 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
             self.chat_request_v3('DELETE', path)
             self.assertFalse(self.receive_v3(websocket, lambda e: e['type'] == 'chat_moderation_updated')['data']['restricted'])
 
+    def test_online_users_deduplicate_expire_and_preserve_privacy_v3(self):
+        user_id = str(self.ids_v3['owner'])
+        store = self.chat_store_v3
+        store.lease_v3(user_id, 'tab-a')
+        store.lease_v3(user_id, 'tab-b')
+        store.lease_v3('guest:anonymous', 'guest-tab')
+        response = self.chat_request_v3('GET', '/chat/online-users', user=None)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['Cache-Control'], 'private, no-store')
+        users = response.json()['data']
+        self.assertEqual(len(users), 1)
+        self.assertEqual(users[0]['id'], user_id)
+        self.assertEqual(set(users[0]), {'id', 'nickname'})
+        store.disconnect_v3(user_id, 'tab-a')
+        self.assertEqual(store.online_user_ids_v3(), [user_id])
+        store.disconnect_v3(user_id, 'tab-b')
+        self.assertEqual(store.online_user_ids_v3(), [])
+        store.lease_v3(user_id, 'crashed-tab')
+        self.redis_v3.zadd(store.presence_key_v3, {user_id + '/crashed-tab': 0})
+        self.assertEqual(self.chat_request_v3('GET', '/chat/online-users').json()['data'], [])
+        with patch.object(self.redis_v3, 'eval', side_effect=RedisConnectionError):
+            self.assertEqual(self.chat_request_v3('GET', '/chat/online-users').status_code, 503)
+
+    def test_online_users_socket_snapshot_and_updates_v3(self):
+        with self.client_v3.websocket_connect('/live-map/v3/chat/ws') as guest:
+            guest.send_json({'type': 'guest'})
+            self.assertEqual(self.snapshot_v3(guest)['data']['online_users'], [])
+            with self.chat_socket_v3() as owner:
+                users = self.snapshot_v3(owner)['data']['online_users']
+                self.assertEqual([row['id'] for row in users], [str(self.ids_v3['owner'])])
+                while True:
+                    event = guest.receive_json()
+                    if event['type'] == 'online_users_updated':
+                        self.assertEqual(event['data'], users)
+                        break
+            while True:
+                event = guest.receive_json()
+                if event['type'] == 'online_users_updated':
+                    self.assertEqual(event['data'], [])
+                    break
+
+
+    def test_connection_history_tracks_heartbeat_tabs_and_close_v3(self):
+        path = '/chat/admin/connections'
+        self.assertEqual(self.chat_request_v3('GET', path, user='member').status_code, 403)
+        with self.chat_socket_v3() as first, self.chat_socket_v3() as second:
+            self.snapshot_v3(first)
+            self.snapshot_v3(second)
+            active = self.chat_request_v3('GET', path, params={'online_only': True}).json()['data']
+            self.assertEqual(len(active), 2)
+            self.assertEqual({row['user']['id'] for row in active}, {str(self.ids_v3['owner'])})
+            self.assertNotIn('email', str(active))
+            self.assertTrue(all(row['online'] for row in active))
+            previous = {row['id']: row['last_seen_at'] for row in active}
+            first.send_json({'type': 'heartbeat'})
+            self.snapshot_v3(first)
+        history = self.chat_request_v3('GET', path).json()['data']
+        self.assertEqual(len(history), 2)
+        self.assertTrue(all(not row['online'] and row['disconnect_reason'] == 'closed' for row in history))
+        self.assertTrue(any(row['last_seen_at'] > previous[row['id']] for row in history))
+        self.assertEqual(self.chat_request_v3('GET', path, params={'online_only': True}).json()['data'], [])
+        self.assertEqual(len(self.chat_request_v3('GET', path, params={'limit': 1}).json()['data']), 1)
+
+    def test_connection_expiry_and_migration_idempotency_v3(self):
+        connection_id = str(uuid4())
+        with self.sessions_v3.begin() as session:
+            service = ChatServiceV3(session)
+            service.connect_session_v3(service.identity_v3('member@example.test'), connection_id)
+        with self.sessions_v3.begin() as session:
+            row = session.get(ChatConnectionV3, UUID(connection_id))
+            row.connected_at = now_v3() - timedelta(minutes=3)
+            row.last_seen_at = now_v3() - timedelta(minutes=2)
+            row.expires_at = now_v3() - timedelta(seconds=30)
+        self.assertEqual(self.chat_request_v3('GET', '/chat/admin/connections?online_only=true').json()['data'], [])
+        with self.sessions_v3.begin() as session:
+            service = ChatServiceV3(session)
+            service.touch_session_v3(service.identity_v3('member@example.test'), connection_id)
+            service.expire_sessions_v3()
+        history = self.chat_request_v3('GET', '/chat/admin/connections').json()['data']
+        self.assertEqual(history[0]['disconnect_reason'], 'expired')
+        self.assertFalse(history[0]['online'])
+        migration = (Path(__file__).parents[1] / 'sql/migrations/20261009_chat_connections_v3.sql').read_text()
+        with self.engine_v3.connect() as connection:
+            for _ in range(2):
+                connection.exec_driver_sql(migration)
+                connection.commit()
+        self.assertEqual(len(self.chat_request_v3('GET', '/chat/admin/connections').json()['data']), 1)
 
 
 class ChatLifecycleTestV3(unittest.IsolatedAsyncioTestCase):

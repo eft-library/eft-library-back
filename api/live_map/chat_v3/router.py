@@ -15,7 +15,7 @@ from api.live_map.party_v3.router import publish_party_change_v3
 from api.live_map.party_v3.security import authenticate_party_user_v3
 from api.live_map.party_v3.schemas import PartyResponseV3, PartySnapshotV3
 from .schemas import (
-    ChatHistoryResponseV3, ChatUserResponseV3, ChatBlockResponseV3, ChatIdResponseV3,
+    ChatConnectionResponseV3, ChatHistoryResponseV3, ChatUserResponseV3, ChatBlockResponseV3, ChatIdResponseV3,
     ChatRestrictionDetailV3, ChatModerationStateV3, PartyNotificationsV3, ChatUserActionsV3,
     ChatDeletedResponseV3, ChatRestrictionResponseV3, ChatReportResponseV3, InvitationResponseV3,
 )
@@ -191,3 +191,22 @@ def invitation_notifications_v3(email: EmailV3, service: ServiceV3):
 @router_v3.get('/chat/users/{user_id}/actions', response_model=PartyResponseV3[ChatUserActionsV3])
 def user_actions_v3(user_id: UUID, email: EmailV3, service: ServiceV3, room_id: UUID | None = None):
     return response_v3(service.user_actions_v3(service.identity_v3(email), user_id, room_id))
+
+
+@router_v3.get('/chat/online-users', response_model=PartyResponseV3[list[ChatUserResponseV3]],
+               openapi_extra={'security': [{'HTTPBearer': []}, {}]})
+def online_users_v3(email: OptionalEmailV3, service: ServiceV3, response: Response):
+    response.headers['Cache-Control'] = 'private, no-store'
+    if email is not None:
+        service.identity_v3(email)
+    return response_v3(service.online_users_v3())
+
+
+@router_v3.get('/chat/admin/connections', response_model=PartyResponseV3[list[ChatConnectionResponseV3]])
+def connection_history_v3(email: EmailV3, service: ServiceV3, response: Response,
+                          online_only: bool = False,
+                          limit: int = Query(default=50, ge=1, le=100),
+                          offset: int = Query(default=0, ge=0, le=10000)):
+    response.headers['Cache-Control'] = 'private, no-store'
+    return response_v3(service.connection_history_v3(
+        service.identity_v3(email), online_only, limit, offset))
