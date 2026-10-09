@@ -9,6 +9,7 @@ from fastapi import FastAPI, WebSocket, Query
 from util.middleware import KafkaProducerMiddleware
 from api.user.util import UserUtil
 from util.websocket import websocket_handler
+from util.access_log_v3 import configure_access_logging_v3
 import logging
 
 logging.basicConfig(
@@ -18,6 +19,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger("api.access")  # 커스텀 로거 사용
+configure_access_logging_v3()
 
 logging.getLogger("uvicorn.access").disabled = True
 
