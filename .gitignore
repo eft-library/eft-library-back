@@ -185,3 +185,4 @@ document_coordinate/
 # Runtime logs and rotated backups
 log.out
 log.out.*
+logs/
