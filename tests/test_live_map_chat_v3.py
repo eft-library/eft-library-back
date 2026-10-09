@@ -175,6 +175,10 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
         self.assertEqual(self.chat_request_v3('POST', path + '/accept', user='member').json()['msg'], 'PARTY_INVITATION_EXPIRED')
         invitation = self.invite_v3(room_id).json()['data']['id']
         self.assertEqual(self.chat_request_v3('POST', '/party-invitations/' + invitation + '/reject', user='member').status_code, 200)
+        self.assertEqual(self.invite_v3(room_id).json()['msg'], 'PARTY_INVITATION_REJECT_COOLDOWN')
+        with self.sessions_v3.begin() as session:
+            rejected = session.get(PartyInvitationV3, UUID(invitation))
+            rejected.update_time = rejected.create_time = now_v3() - timedelta(minutes=11)
         invitation = self.invite_v3(room_id).json()['data']['id']
         self.assertEqual(self.chat_request_v3('DELETE', '/party-invitations/' + invitation, user='outsider').status_code, 403)
         revoked = self.chat_request_v3('DELETE', '/party-invitations/' + invitation)
@@ -198,8 +202,9 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
         self.assertEqual(sorted(results), [200, 409])
         # A separate recipient cannot concurrently accept invitations to two rooms.
         first = self.create_v3()['room']['id']
-        second = self.create_v3()['room']['id']
-        invitations = [self.invite_v3(room, target='outsider').json()['data']['id'] for room in (first, second)]
+        second = self.create_v3(user='other')['room']['id']
+        invitations = [self.invite_v3(first, target='outsider').json()['data']['id'],
+                       self.invite_v3(second, target='outsider', user='other').json()['data']['id']]
         ready = threading.Barrier(2)
         def accept_other_v3(invitation):
             ready.wait(5)
@@ -733,6 +738,219 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
                 connection.exec_driver_sql(migration)
                 connection.commit()
         self.assertEqual(len(self.chat_request_v3('GET', '/chat/admin/connections').json()['data']), 1)
+
+
+    def test_invite_preferences_default_validation_cancel_and_reenable_v3(self):
+        path = '/chat/me/party-invite-preferences'
+        self.assertEqual(self.chat_request_v3('GET', path, user=None).status_code, 401)
+        self.assertEqual(self.chat_request_v3('PUT', path, user=None, json={'allow_party_invites': False}).status_code, 401)
+        self.assertEqual(self.chat_request_v3('GET', path, user='member').json()['data'], {'allow_party_invites': True})
+        for body in ({}, {'allow_party_invites': 'false'}, {'allow_party_invites': 0},
+                     {'allow_party_invites': False, 'user_id': str(self.ids_v3['owner'])}):
+            self.assertEqual(self.chat_request_v3('PUT', path, user='member', json=body).status_code, 422)
+        first = self.create_v3()['room']['id']
+        second = self.create_v3(user='other')['room']['id']
+        ids = [self.invite_v3(first).json()['data']['id'],
+               self.invite_v3(second, user='other').json()['data']['id']]
+        self.assertEqual(self.chat_request_v3('GET', '/party-invitations/notifications', user='member').json()['data']['party_invitation_count'], 2)
+        self.chat_store_v3.lease_v3(str(self.ids_v3['member']), 'online-tab')
+        response = self.chat_request_v3('PUT', path, user='member', json={'allow_party_invites': False})
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()['data'], {'allow_party_invites': False})
+        with self.sessions_v3() as session:
+            for invitation_id in ids:
+                row = session.get(PartyInvitationV3, UUID(invitation_id))
+                self.assertEqual((row.status, row.status_reason), ('revoked', 'receiver_unavailable'))
+        self.assertEqual(self.chat_request_v3('GET', '/party-invitations/notifications', user='member').json()['data']['party_invitation_count'], 0)
+        self.assertEqual([u['id'] for u in self.chat_request_v3('GET', '/chat/online-users', user=None).json()['data']], [str(self.ids_v3['member'])])
+        actions = self.chat_request_v3('GET', '/chat/users/' + str(self.ids_v3['member']) + '/actions', params={'room_id': first}).json()['data']
+        self.assertFalse(actions['can_invite'])
+        self.assertEqual(actions['invite_disabled_reason'], 'PARTY_INVITATIONS_UNAVAILABLE')
+        self.assertEqual(self.invite_v3(first).json()['msg'], 'PARTY_INVITATIONS_UNAVAILABLE')
+        self.chat_request_v3('PUT', path, user='member', json={'allow_party_invites': True})
+        self.assertEqual(self.chat_request_v3('GET', '/party-invitations', user='member').json()['data'], [])
+        self.assertEqual(self.invite_v3(first).status_code, 201)
+
+    def test_invite_reverse_block_is_private_and_sender_block_is_directional_v3(self):
+        room_id = self.create_v3()['room']['id']
+        path = '/chat/users/' + str(self.ids_v3['member']) + '/actions'
+        self.chat_request_v3('POST', '/chat/blocks/' + str(self.ids_v3['owner']), user='member')
+        denied = self.invite_v3(room_id)
+        self.assertEqual((denied.status_code, denied.json()['msg']), (403, 'PARTY_INVITATIONS_UNAVAILABLE'))
+        actions = self.chat_request_v3('GET', path, params={'room_id': room_id}).json()['data']
+        self.assertFalse(actions['blocked'])  # Only the caller's own block relationship is exposed.
+        self.assertFalse(actions['can_invite'])
+        self.assertEqual(actions['invite_disabled_reason'], denied.json()['msg'])
+        self.chat_request_v3('DELETE', '/chat/blocks/' + str(self.ids_v3['owner']), user='member')
+        self.chat_request_v3('PUT', '/chat/me/party-invite-preferences', user='member', json={'allow_party_invites': False})
+        self.assertEqual(self.invite_v3(room_id).json(), denied.json())
+        self.chat_request_v3('PUT', '/chat/me/party-invite-preferences', user='member', json={'allow_party_invites': True})
+        self.chat_request_v3('POST', '/chat/blocks/' + str(self.ids_v3['member']))
+        self.assertEqual(self.invite_v3(room_id).status_code, 201)
+
+    def test_invite_rejection_cooldown_shared_across_rooms_and_senders_v3(self):
+        first = self.create_v3()['room']['id']
+        second = self.create_v3()['room']['id']
+        invitation_id = self.invite_v3(first).json()['data']['id']
+        self.chat_request_v3('POST', '/party-invitations/' + invitation_id + '/reject', user='member')
+        denied = self.invite_v3(second)
+        self.assertEqual((denied.status_code, denied.json()['msg']), (429, 'PARTY_INVITATION_REJECT_COOLDOWN'))
+        retry = denied.json()['data']['retry_after']
+        self.assertTrue(1 <= retry <= 600)
+        self.assertEqual(int(denied.headers['Retry-After']), retry)
+        actions = self.chat_request_v3('GET', '/chat/users/' + str(self.ids_v3['member']) + '/actions', params={'room_id': second}).json()['data']
+        self.assertFalse(actions['can_invite'])
+        self.assertEqual(actions['invite_disabled_reason'], 'PARTY_INVITATION_REJECT_COOLDOWN')
+        self.assertTrue(1 <= actions['retry_after'] <= 600)
+        other = self.create_v3(user='other')['room']['id']
+        self.assertEqual(self.invite_v3(other, user='other').status_code, 201)
+        with self.sessions_v3.begin() as session:
+            session.get(PartyInvitationV3, UUID(invitation_id)).update_time = now_v3() - timedelta(seconds=601)
+        self.assertEqual(self.invite_v3(second).status_code, 201)
+
+    def test_invite_sender_sliding_limit_and_failed_attempts_v3(self):
+        room_id = self.create_v3()['room']['id']
+        ids = []
+        for target in ('member', 'other', 'outsider'):
+            result = self.invite_v3(room_id, target=target)
+            self.assertEqual(result.status_code, 201, result.text)
+            ids.append(result.json()['data']['id'])
+        self.chat_request_v3('DELETE', '/party-invitations/' + ids[0])
+        denied = self.invite_v3(room_id)
+        self.assertEqual((denied.status_code, denied.json()['msg']), (429, 'PARTY_INVITATION_RATE_LIMITED'))
+        self.assertTrue(1 <= denied.json()['data']['retry_after'] <= 60)
+        actions = self.chat_request_v3('GET', '/chat/users/' + str(self.ids_v3['member']) + '/actions', params={'room_id': room_id}).json()['data']
+        self.assertEqual(actions['invite_disabled_reason'], 'PARTY_INVITATION_RATE_LIMITED')
+        with self.sessions_v3.begin() as session:
+            session.get(PartyInvitationV3, UUID(ids[0])).create_time = now_v3() - timedelta(seconds=61)
+        self.assertEqual(self.invite_v3(room_id).status_code, 201)
+
+    def test_concurrent_invites_use_sender_lock_across_rooms_v3(self):
+        # Four distinct targets and rooms; room locks alone cannot enforce sender quota.
+        names = ['target-' + str(index) for index in range(4)]
+        with self.sessions_v3.begin() as session:
+            for name in names:
+                session.add(UserV3(email=name + '@example.test', nickname=name, is_admin=False))
+        for name in names:
+            with self.sessions_v3.begin() as session:
+                self.ids_v3[name] = ChatServiceV3(session).identity_v3(name + '@example.test').id
+        rooms = [self.create_v3()['room']['id'] for _ in names]
+        ready = threading.Barrier(4)
+        def invite_concurrent_v3(index):
+            ready.wait(5)
+            response = self.invite_v3(rooms[index], target=names[index])
+            return response.status_code, response.json()['msg']
+        with ThreadPoolExecutor(4) as pool:
+            results = list(pool.map(invite_concurrent_v3, range(4)))
+        self.assertEqual(sorted(status for status, _ in results), [201, 201, 201, 429])
+        self.assertEqual([msg for status, msg in results if status == 429], ['PARTY_INVITATION_RATE_LIMITED'])
+        with self.sessions_v3() as session:
+            self.assertEqual(session.scalar(select(func.count()).select_from(PartyInvitationV3)), 3)
+
+    def test_concurrent_duplicate_invites_and_settings_disable_v3(self):
+        rooms = [self.create_v3()['room']['id'] for _ in range(2)]
+        ready = threading.Barrier(2)
+        def invite_concurrent_v3(room_id):
+            ready.wait(5)
+            return self.invite_v3(room_id).status_code
+        with ThreadPoolExecutor(2) as pool:
+            self.assertEqual(sorted(pool.map(invite_concurrent_v3, rooms)), [201, 409])
+        # Concurrent disable either rejects creation or revokes the just-created invite.
+        ready = threading.Barrier(2)
+        def race_v3(operation):
+            ready.wait(5)
+            if operation == 'disable':
+                return self.chat_request_v3('PUT', '/chat/me/party-invite-preferences', user='other', json={'allow_party_invites': False}).status_code
+            return self.invite_v3(rooms[0], target='other').status_code
+        with ThreadPoolExecutor(2) as pool:
+            results = list(pool.map(race_v3, ['disable', 'invite']))
+        self.assertEqual(results[0], 200)
+        self.assertIn(results[1], [201, 403])
+        with self.sessions_v3() as session:
+            pending = session.scalar(select(func.count()).select_from(PartyInvitationV3).where(
+                PartyInvitationV3.invitee_id == self.ids_v3['other'], PartyInvitationV3.status == 'pending'))
+            self.assertEqual(pending, 0)
+
+    def test_invite_preferences_other_tabs_events_and_privacy_v3(self):
+        room_id = self.create_v3()['room']['id']
+        with self.chat_socket_v3('member') as first, self.chat_socket_v3('member') as second, self.chat_socket_v3() as owner:
+            self.assertEqual(self.snapshot_v3(first)['data']['party_invite_preferences'], {'allow_party_invites': True})
+            self.snapshot_v3(second)
+            self.snapshot_v3(owner)
+            invitation_id = self.invite_v3(room_id).json()['data']['id']
+            self.receive_v3(first, lambda e: e['type'] == 'party_invitation_created')
+            self.receive_v3(second, lambda e: e['type'] == 'party_invitation_created')
+            self.chat_request_v3('PUT', '/chat/me/party-invite-preferences', user='member', json={'allow_party_invites': False})
+            for socket in (first, second):
+                received = {}
+                while len(received) < 3:
+                    event = self.receive_v3(socket, lambda e: e['type'] in (
+                        'party_invite_preferences_updated', 'party_invitation_updated', 'party_notifications_updated'))
+                    if event['type'] == 'party_notifications_updated' and event['data']['party_invitation_count'] != 0:
+                        continue
+                    received[event['type']] = event['data']
+                self.assertEqual(received['party_invite_preferences_updated'], {'allow_party_invites': False})
+                revoked = received['party_invitation_updated']
+                self.assertEqual(revoked['id'], invitation_id)
+                self.assertEqual((revoked['status'], revoked['status_reason']), ('revoked', 'receiver_unavailable'))
+            with self.sessions_v3.begin() as session:
+                service = ChatServiceV3(session)
+                event = event_v3('party_invite_preferences_updated', {'user_id': str(self.ids_v3['member'])})
+                self.assertIsNone(service.forward_v3(None, event))
+                self.assertIsNone(service.forward_v3(service.identity_v3('owner@example.test'), event))
+
+    def test_invite_preferences_migration_is_repeatable_v3(self):
+        self.chat_request_v3('PUT', '/chat/me/party-invite-preferences', user='member', json={'allow_party_invites': False})
+        migration = (Path(__file__).parents[1] / 'sql/migrations/20261009_party_invite_preferences_v3.sql').read_text()
+        with self.engine_v3.connect() as connection:
+            for _ in range(2):
+                connection.exec_driver_sql(migration)
+                connection.commit()
+        self.assertEqual(self.chat_request_v3('GET', '/chat/me/party-invite-preferences', user='member').json()['data'], {'allow_party_invites': False})
+
+
+    def test_invite_creation_waits_for_concurrent_rejection_v3(self):
+        first = self.create_v3()['room']['id']
+        second = self.create_v3()['room']['id']
+        invitation_id = self.invite_v3(first).json()['data']['id']
+        started = threading.Event()
+        finished = threading.Event()
+        def create_while_rejecting_v3():
+            started.set()
+            response = self.invite_v3(second)
+            finished.set()
+            return response
+        with ThreadPoolExecutor(1) as pool:
+            with self.sessions_v3.begin() as session:
+                service = ChatServiceV3(session)
+                service.handle_invitation_v3(service.identity_v3('member@example.test'), UUID(invitation_id), 'reject')
+                future = pool.submit(create_while_rejecting_v3)
+                self.assertTrue(started.wait(2))
+                self.assertFalse(finished.wait(0.1))
+            response = future.result(timeout=5)
+        self.assertEqual((response.status_code, response.json()['msg']), (429, 'PARTY_INVITATION_REJECT_COOLDOWN'))
+
+    def test_invite_policy_configuration_and_failed_requests_do_not_consume_quota_v3(self):
+        room_id = self.create_v3()['room']['id']
+        with patch.dict('os.environ', {'V3_PARTY_INVITE_SENDER_LIMIT': '1',
+                                     'V3_PARTY_INVITE_WINDOW_SECONDS': '5',
+                                     'V3_PARTY_INVITE_REJECTION_COOLDOWN_SECONDS': '10'}):
+            self.chat_request_v3('PUT', '/chat/me/party-invite-preferences', user='member', json={'allow_party_invites': False})
+            for _ in range(4):
+                self.assertEqual(self.invite_v3(room_id).status_code, 403)
+            self.chat_request_v3('PUT', '/chat/me/party-invite-preferences', user='member', json={'allow_party_invites': True})
+            invitation_id = self.invite_v3(room_id).json()['data']['id']
+            self.chat_request_v3('DELETE', '/party-invitations/' + invitation_id)
+            response = self.invite_v3(room_id, target='other')
+            self.assertEqual(response.json()['msg'], 'PARTY_INVITATION_RATE_LIMITED')
+            self.assertTrue(1 <= response.json()['data']['retry_after'] <= 5)
+            with self.sessions_v3.begin() as session:
+                session.get(PartyInvitationV3, UUID(invitation_id)).create_time = now_v3() - timedelta(seconds=6)
+            invitation_id = self.invite_v3(room_id, target='other').json()['data']['id']
+            self.chat_request_v3('POST', '/party-invitations/' + invitation_id + '/reject', user='other')
+            response = self.invite_v3(room_id, target='other')
+            self.assertEqual(response.json()['msg'], 'PARTY_INVITATION_REJECT_COOLDOWN')
+            self.assertTrue(1 <= response.json()['data']['retry_after'] <= 10)
 
 
 class ChatLifecycleTestV3(unittest.IsolatedAsyncioTestCase):

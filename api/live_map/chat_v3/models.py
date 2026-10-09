@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import DateTime, String, Text, Uuid
+from sqlalchemy import Boolean, DateTime, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database import V3Database
@@ -74,3 +74,10 @@ class ChatConnectionV3(V3Database.Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     disconnected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     disconnect_reason: Mapped[str | None] = mapped_column(Text)
+
+
+class ChatInvitePreferencesV3(V3Database.Base):
+    __tablename__ = "live_map_chat_invite_preferences"
+    user_id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    allow_party_invites: Mapped[bool] = mapped_column(Boolean)
+    update_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))

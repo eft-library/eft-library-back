@@ -78,8 +78,8 @@ class ChatStoreV3:
 
     def publish_v3(self, events):
         for event in events:
-            # Only message IDs travel on the shared bus. Each recipient is authorized
-            # against PostgreSQL immediately before receiving the actual message.
+            # Only resource/user IDs travel on the shared bus. Each recipient is
+            # authorized against PostgreSQL before receiving current public data.
             self.client.publish(self.channel_v3, json.dumps(event))
 
 

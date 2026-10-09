@@ -41,7 +41,7 @@ DB 관리 도구에서는 해당 파일 전체를 열어 V3 DB에서 실행해�
 
 ## REST 공통
 
-성공: `{status: HTTP 상태 코드, msg: "OK", data: ...}`. 초대 생성의 msg는 `PARTY_INVITATION_CREATED`다. 실패: `{status, msg: 오류 코드, data: null}`. 입력 검증 오류만 `data.errors: [{loc, msg, type}]`를 포함한다. 검증 오류에 토큰·본문·비밀번호 입력값을 되돌려 보내지 않는다.
+성공: `{status: HTTP 상태 코드, msg: "OK", data: ...}`. 초대 생성의 msg는 `PARTY_INVITATION_CREATED`다. 실패: `{status, msg: 오류 코드, data: null}`. `Retry-After`가 있는 시간 제한 오류는 `data: {retry_after: 정수 초}`를 반환한다. 입력 검증 오류만 `data.errors: [{loc, msg, type}]`를 포함한다. 검증 오류에 토큰·본문·비밀번호 입력값을 되돌려 보내지 않는다.
 
 REST 요청 및 성공 응답 모델은 OpenAPI에 등록된다. WebSocket 명령과 이벤트는 이 문서를 기준으로 한다.
 
@@ -254,3 +254,8 @@ REST 비로그인 조회는 `GET /api/live-map/v3/chat/messages?channel=lobby`�
 관리자 전용 `GET /api/live-map/v3/chat/admin/connections?online_only=true&limit=50&offset=0`으로 현재 연결을 조회한다. `online_only=false`(기본)는 접속 이력도 포함한다. 응답 `data`는 `[{id, user:{id,nickname}, connected_at, last_seen_at, expires_at, disconnected_at, disconnect_reason, online}]`이며 접속 시각/연결 ID 내림차순이다. limit은 1~100, offset은 0~10000이다. 일반 사용자는 403을 받는다. 이메일/토큰은 반환하거나 기록하지 않으며 사용자 참조는 기존 공개 사용자 ID의 FK다. 닉네임은 조회 시점 계정 닉네임이다. 접속 이력은 자동 삭제하지 않고 계정 삭제 시 FK cascade로 삭제된다.
 
 기존 공개 닉네임 목록은 Redis 접속 상태를 계속 사용하며, 이 테이블은 DB에서 접속 상태와 이력을 확인하기 위한 관리자 기능이다. 최근 활동에 따른 DB 만료 판정과 Redis 연결 갱신 시점이 달라 장애/타임아웃 중에는 잠시 차이가 있을 수 있다. 사이트 전체 로그인 사용자 추적은 포함하지 않는다. 기존 프론트의 30초 heartbeat를 그대로 사용하므로 추가 프론트 요청은 필요 없다.
+
+
+## 초대 수신 설정 및 남용 방지
+
+본인 초대 수신 설정 API, `can_invite` 및 `retry_after`, 거절 후 10분 제한, 발신자 1분당 3건 제한, 수신자 차단 처리와 실시간 설정 이벤트는 [프론트 연동 안내](live_map_party_invite_preferences_v3_frontend.ko.md)를 참고한다. 배포 전에 `sql/migrations/20261009_party_invite_preferences_v3.sql`을 적용한다.

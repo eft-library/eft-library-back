@@ -2,13 +2,13 @@ from datetime import datetime, timezone
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import BaseModel, ConfigDict, StrictBool, Field, StringConstraints, model_validator
 
 
 TextV3 = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=300)]
 ChannelV3 = Literal['lobby', 'party']
 StatusV3 = Literal['pending', 'accepted', 'rejected', 'revoked', 'expired']
-StatusReasonV3 = Literal['cancelled', 'room_closed', 'room_full', 'already_joined', 'member_kicked']
+StatusReasonV3 = Literal['cancelled', 'room_closed', 'room_full', 'already_joined', 'member_kicked', 'receiver_unavailable']
 
 
 class ChatRequestV3(BaseModel):
@@ -148,6 +148,7 @@ class ChatUserActionsV3(BaseModel):
     can_restrict: bool
     can_invite: bool
     invite_disabled_reason: str | None
+    retry_after: int | None = None
     member_id: UUID | None
     can_unkick: bool
 
@@ -161,3 +162,11 @@ class ChatConnectionResponseV3(BaseModel):
     disconnected_at: datetime | None
     disconnect_reason: Literal['closed', 'expired'] | None
     online: bool
+
+
+class ChatInvitePreferencesUpdateV3(ChatRequestV3):
+    allow_party_invites: StrictBool
+
+
+class ChatInvitePreferencesResponseV3(BaseModel):
+    allow_party_invites: bool

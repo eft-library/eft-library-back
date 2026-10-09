@@ -2006,7 +2006,7 @@ create table if not exists live_map_party_invitations (
     invitee_id uuid not null references live_map_chat_users(id) on delete cascade,
     status text not null check (status in ('pending', 'accepted', 'rejected', 'revoked', 'expired')),
     status_reason text constraint ck_party_invitations_status_reason check (status_reason in (
-        'cancelled', 'room_closed', 'room_full', 'already_joined', 'member_kicked'
+        'cancelled', 'room_closed', 'room_full', 'already_joined', 'member_kicked', 'receiver_unavailable'
     )),
     expires_at timestamptz not null,
     create_time timestamptz not null default now(),
@@ -2038,3 +2038,12 @@ create index if not exists idx_chat_connections_history
     on live_map_chat_connections(connected_at desc, id desc);
 create index if not exists idx_chat_connections_active
     on live_map_chat_connections(expires_at, user_id) where disconnected_at is null;
+
+-- V3 per-user party invitation preferences. Missing row means allow=true.
+create table if not exists live_map_chat_invite_preferences (
+    user_id uuid primary key references live_map_chat_users(id) on delete cascade,
+    allow_party_invites boolean not null default true,
+    update_time timestamptz not null default now()
+);
+create index if not exists idx_party_invitations_pair_history
+    on live_map_party_invitations(inviter_id, invitee_id, update_time desc);

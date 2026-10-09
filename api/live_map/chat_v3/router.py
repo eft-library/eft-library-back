@@ -15,7 +15,7 @@ from api.live_map.party_v3.router import publish_party_change_v3
 from api.live_map.party_v3.security import authenticate_party_user_v3
 from api.live_map.party_v3.schemas import PartyResponseV3, PartySnapshotV3
 from .schemas import (
-    ChatConnectionResponseV3, ChatHistoryResponseV3, ChatUserResponseV3, ChatBlockResponseV3, ChatIdResponseV3,
+    ChatInvitePreferencesResponseV3, ChatInvitePreferencesUpdateV3, ChatConnectionResponseV3, ChatHistoryResponseV3, ChatUserResponseV3, ChatBlockResponseV3, ChatIdResponseV3,
     ChatRestrictionDetailV3, ChatModerationStateV3, PartyNotificationsV3, ChatUserActionsV3,
     ChatDeletedResponseV3, ChatRestrictionResponseV3, ChatReportResponseV3, InvitationResponseV3,
 )
@@ -61,8 +61,10 @@ class ChatRouteV3(APIRoute):
                 return JSONResponse(status_code=422, content={'status': 422, 'msg': 'INVALID_REQUEST', 'data': {
                     'errors': [{'loc': e['loc'], 'msg': e['msg'], 'type': e['type']} for e in exc.errors()]}})
             except HTTPException as exc:
+                retry = (exc.headers or {}).get('Retry-After')
+                data = {'retry_after': int(retry)} if retry else None
                 return JSONResponse(status_code=exc.status_code, headers=exc.headers,
-                                    content={'status': exc.status_code, 'msg': exc.detail, 'data': None})
+                                    content={'status': exc.status_code, 'msg': exc.detail, 'data': data})
             except IntegrityError:
                 return JSONResponse(status_code=409, content={'status': 409, 'msg': 'CHAT_STATE_CONFLICT', 'data': None})
             except SQLAlchemyError as exc:
@@ -210,3 +212,16 @@ def connection_history_v3(email: EmailV3, service: ServiceV3, response: Response
     response.headers['Cache-Control'] = 'private, no-store'
     return response_v3(service.connection_history_v3(
         service.identity_v3(email), online_only, limit, offset))
+
+
+@router_v3.get('/chat/me/party-invite-preferences', response_model=PartyResponseV3[ChatInvitePreferencesResponseV3])
+def invite_preferences_v3(email: EmailV3, service: ServiceV3, response: Response):
+    response.headers['Cache-Control'] = 'private, no-store'
+    return response_v3(service.invite_preferences_v3(service.identity_v3(email)))
+
+
+@router_v3.put('/chat/me/party-invite-preferences', response_model=PartyResponseV3[ChatInvitePreferencesResponseV3])
+def set_invite_preferences_v3(data: ChatInvitePreferencesUpdateV3, email: EmailV3,
+                              service: ServiceV3, response: Response):
+    response.headers['Cache-Control'] = 'private, no-store'
+    return response_v3(service.set_invite_preferences_v3(service.identity_v3(email), data.allow_party_invites))

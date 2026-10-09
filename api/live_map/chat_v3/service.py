@@ -1,6 +1,7 @@
 """PostgreSQL owns history and authorization; Redis is never an authority for membership."""
 import base64
 import json
+import math
 from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
 
@@ -12,8 +13,9 @@ from sqlalchemy.dialects.postgresql import insert
 from api.live_map.party_v3.models import PartyMemberV3, PartyRoomV3
 from api.live_map.party_v3.service import PartyServiceV3
 from api.user.user_res_models import UserV3
+from .invite_policy import get_invite_policy_v3
 from .models import (
-    ChatConnectionV3, ChatBlockV3, ChatMessageV3, ChatReportV3, ChatRestrictionV3, ChatUserV3, PartyInvitationV3,
+    ChatInvitePreferencesV3, ChatConnectionV3, ChatBlockV3, ChatMessageV3, ChatReportV3, ChatRestrictionV3, ChatUserV3, PartyInvitationV3,
 )
 
 
@@ -174,6 +176,19 @@ class ChatServiceV3:
         self.session.info.setdefault('chat_events_v3', []).append(event_v3(kind, data))
 
     def forward_v3(self, user, event):
+        if event['type'] == 'party_notifications_updated':
+            if user is not None and event['data']['user_id'] == str(user.id):
+                return {**event, 'data': self.notifications_v3(user)}
+            return None
+        if event['type'] == 'party_invite_preferences_updated':
+            if user is not None and event['data']['user_id'] == str(user.id):
+                return {**event, 'data': self.invite_preferences_v3(user)}
+            return None
+        if event['type'] in ('party_invitation_created', 'party_invitation_updated'):
+            invitation = self.session.get(PartyInvitationV3, UUID(event['data']['invitation_id']))
+            if user is None or invitation is None or user.id not in (invitation.inviter_id, invitation.invitee_id):
+                return None
+            return {**event, 'data': self.invitation_data_v3(invitation)}
         if event['type'] not in ('chat_message', 'message_deleted'):
             return None
         message = self.session.get(ChatMessageV3, UUID(event['data']['message_id']))
@@ -282,13 +297,79 @@ class ChatServiceV3:
         count = sum(self.invitation_data_v3(row)['status'] == 'pending' for row in rows)
         return {'party_invitation_count': count, 'notification_tab': 'party'}
 
+    def invite_preferences_v3(self, user):
+        allowed = self.session.scalar(select(ChatInvitePreferencesV3.allow_party_invites).where(
+            ChatInvitePreferencesV3.user_id == user.id))
+        return {'allow_party_invites': True if allowed is None else allowed}
+
+    def set_invite_preferences_v3(self, user, allowed):
+        # Recipient lock serializes settings, blocks and new invitations.
+        self.lock_user_v3(user)
+        timestamp = self.session.scalar(select(func.clock_timestamp()))
+        self.session.execute(insert(ChatInvitePreferencesV3).values(
+            user_id=user.id, allow_party_invites=allowed, update_time=timestamp,
+        ).on_conflict_do_update(index_elements=['user_id'], set_={
+            'allow_party_invites': allowed, 'update_time': timestamp,
+        }))
+        if not allowed:
+            ids = self.session.scalars(update(PartyInvitationV3).where(
+                PartyInvitationV3.invitee_id == user.id, PartyInvitationV3.status == 'pending',
+            ).values(status='revoked', status_reason='receiver_unavailable', update_time=timestamp)
+                .returning(PartyInvitationV3.id)).all()
+            for invitation_id in ids:
+                self.queue_v3('party_invitation_updated', {'invitation_id': str(invitation_id)})
+        self.queue_v3('party_invite_preferences_updated', {'user_id': str(user.id)})
+        self.queue_v3('party_notifications_updated', {'user_id': str(user.id)})
+        return self.invite_preferences_v3(user)
+
+    def lock_invite_users_v3(self, inviter_id, invitee_id):
+        # All invitation paths lock the room first, then account UUIDs in order.
+        # Preference changes lock only the recipient and never acquire a room lock.
+        list(self.session.scalars(select(ChatUserV3).where(
+            ChatUserV3.id.in_([inviter_id, invitee_id]),
+        ).order_by(ChatUserV3.id).with_for_update()))
+
+    def invite_receiver_checks_v3(self, sender, target):
+        if not self.invite_preferences_v3(target)['allow_party_invites'] or self.blocked_v3(target, sender.id):
+            # Same response for opt-out and a private reverse block.
+            raise HTTPException(403, 'PARTY_INVITATIONS_UNAVAILABLE')
+
+    def invite_abuse_checks_v3(self, sender, target):
+        self.invite_receiver_checks_v3(sender, target)
+        policy = get_invite_policy_v3()
+        timestamp = self.session.scalar(select(func.clock_timestamp()))
+        rejected_at = self.session.scalar(select(func.max(PartyInvitationV3.update_time)).where(
+            PartyInvitationV3.inviter_id == sender.id, PartyInvitationV3.invitee_id == target.id,
+            PartyInvitationV3.status == 'rejected'))
+        if rejected_at is not None:
+            retry = math.ceil((rejected_at + timedelta(seconds=policy.rejection_cooldown_seconds) - timestamp).total_seconds())
+            if retry > 0:
+                raise HTTPException(429, 'PARTY_INVITATION_REJECT_COOLDOWN', headers={'Retry-After': str(retry)})
+        pending = self.session.scalars(select(PartyInvitationV3).where(
+            PartyInvitationV3.inviter_id == sender.id, PartyInvitationV3.invitee_id == target.id,
+            PartyInvitationV3.status == 'pending', PartyInvitationV3.expires_at > timestamp))
+        if any(self.invitation_data_v3(row)['status'] == 'pending' for row in pending):
+            raise HTTPException(409, 'PARTY_INVITATION_DUPLICATED')
+        active = self.session.scalar(select(func.count()).select_from(PartyInvitationV3).where(
+            PartyInvitationV3.invitee_id == target.id, PartyInvitationV3.status == 'pending',
+            PartyInvitationV3.expires_at > timestamp))
+        if active >= 50:
+            raise HTTPException(429, 'PARTY_INVITATION_LIMIT', headers={'Retry-After': '60'})
+        recent = list(self.session.scalars(select(PartyInvitationV3.create_time).where(
+            PartyInvitationV3.inviter_id == sender.id,
+            PartyInvitationV3.create_time > timestamp - timedelta(seconds=policy.sender_window_seconds),
+        ).order_by(PartyInvitationV3.create_time.desc()).limit(policy.sender_limit)))
+        if len(recent) >= policy.sender_limit:
+            retry = max(1, math.ceil((recent[-1] + timedelta(seconds=policy.sender_window_seconds) - timestamp).total_seconds()))
+            raise HTTPException(429, 'PARTY_INVITATION_RATE_LIMITED', headers={'Retry-After': str(retry)})
+
     def user_actions_v3(self, user, target_id, room_id=None):
         target = self.target_v3(target_id)
         is_self = user.id == target.id
         result = {'user': self.public_user_v3(target.id), 'blocked': self.blocked_v3(user, target.id),
                   'can_block': not is_self, 'can_restrict': not is_self and
                   bool(self.party._account_v3(user.user_email).is_admin), 'can_invite': False,
-                  'invite_disabled_reason': 'PARTY_ROOM_REQUIRED', 'member_id': None, 'can_unkick': False}
+                  'invite_disabled_reason': 'PARTY_ROOM_REQUIRED', 'retry_after': None, 'member_id': None, 'can_unkick': False}
         if room_id is None:
             return result
         room = self.party._room_v3(room_id)
@@ -302,6 +383,7 @@ class ChatServiceV3:
             if is_self:
                 raise HTTPException(422, 'PARTY_CANNOT_INVITE_SELF')
             self.invite_checks_v3(room, target)
+            self.invite_abuse_checks_v3(user, target)
             pending = self.session.scalars(select(PartyInvitationV3).where(
                 PartyInvitationV3.room_id == room.id, PartyInvitationV3.invitee_id == target.id,
                 PartyInvitationV3.status == 'pending'))
@@ -309,6 +391,8 @@ class ChatServiceV3:
                 raise HTTPException(409, 'PARTY_INVITATION_DUPLICATED')
         except HTTPException as exc:
             result['invite_disabled_reason'] = exc.detail
+            retry = (exc.headers or {}).get('Retry-After')
+            result['retry_after'] = int(retry) if retry else None
         else:
             result['can_invite'], result['invite_disabled_reason'] = True, None
         return result
@@ -416,13 +500,14 @@ class ChatServiceV3:
     def create_invitation_v3(self, user, data):
         if user.id == data.invitee_user_id:
             raise HTTPException(422, 'PARTY_CANNOT_INVITE_SELF')
-        self.rate_v3(user, 'invite', 10)
         target = self.target_v3(data.invitee_user_id)
         room = self.session.scalar(select(PartyRoomV3).where(PartyRoomV3.id == data.room_id).with_for_update())
         if room is None:
             raise HTTPException(404, 'ROOM_NOT_FOUND')
         self.party._owner_v3(room.id, user.user_email)
+        self.lock_invite_users_v3(user.id, target.id)
         self.invite_checks_v3(room, target)
+        self.invite_abuse_checks_v3(user, target)
         self.reconcile_room_v3(room)
         duplicate = self.session.scalar(select(PartyInvitationV3.id).where(
             PartyInvitationV3.room_id == room.id, PartyInvitationV3.invitee_id == target.id,
@@ -430,19 +515,20 @@ class ChatServiceV3:
         if duplicate:
             raise HTTPException(409, 'PARTY_INVITATION_DUPLICATED')
         # Bounded active inbox makes reconnect and room-state reconciliation bounded.
-        self.lock_user_v3(target)
         active = self.session.scalar(select(func.count()).select_from(PartyInvitationV3).where(
             PartyInvitationV3.invitee_id == target.id, PartyInvitationV3.status == 'pending',
             PartyInvitationV3.expires_at > now_v3()))
         if active >= 50:
             raise HTTPException(429, 'PARTY_INVITATION_LIMIT', headers={'Retry-After': '60'})
-        now = now_v3()
+        now = self.session.scalar(select(func.clock_timestamp()))
         invitation = PartyInvitationV3(id=uuid4(), room_id=room.id, inviter_id=user.id,
             invitee_id=target.id, status='pending', status_reason=None,
             expires_at=now + timedelta(minutes=10),
             create_time=now, update_time=now)
         self.session.add(invitation)
         self.session.flush()
+        self.queue_v3('party_invitation_created', {'invitation_id': str(invitation.id)})
+        self.queue_v3('party_notifications_updated', {'user_id': str(target.id)})
         return self.invitation_data_v3(invitation)
 
     def handle_invitation_v3(self, user, invitation_id, action):
@@ -454,6 +540,7 @@ class ChatServiceV3:
             raise HTTPException(403, 'PARTY_INVITATION_FORBIDDEN')
         room = self.session.scalar(select(PartyRoomV3).where(
             PartyRoomV3.id == invitation.room_id).with_for_update())
+        self.lock_invite_users_v3(invitation.inviter_id, invitation.invitee_id)
         self.session.refresh(invitation)
         if action == 'revoke' and invitation.inviter_id != user.id:
             try:
@@ -465,7 +552,7 @@ class ChatServiceV3:
         if invitation.status != 'pending':
             raise HTTPException(409, 'PARTY_INVITATION_ALREADY_HANDLED')
         if action == 'accept':
-            self.lock_user_v3(user)  # concurrent acceptance into different rooms
+            self.invite_receiver_checks_v3(self.target_v3(invitation.inviter_id), user)
             member = self.invite_checks_v3(room, user)
             if member is not None and member.joined_at > invitation.create_time:
                 raise HTTPException(409, 'PARTY_INVITATION_ALREADY_HANDLED')
@@ -484,11 +571,15 @@ class ChatServiceV3:
             self.session.info['chat_party_room_v3'] = room.id
             snapshot = self.party._snapshot_v3(room, member)
             self.reconcile_room_v3(room)
+            self.queue_v3('party_invitation_updated', {'invitation_id': str(invitation.id)})
+            self.queue_v3('party_notifications_updated', {'user_id': str(invitation.invitee_id)})
             return snapshot.model_dump(mode='json')
         invitation.status = 'rejected' if action == 'reject' else 'revoked'
         invitation.status_reason = None if action == 'reject' else 'cancelled'
-        invitation.update_time = now_v3()
+        invitation.update_time = self.session.scalar(select(func.clock_timestamp()))
         self.session.flush()
+        self.queue_v3('party_invitation_updated', {'invitation_id': str(invitation.id)})
+        self.queue_v3('party_notifications_updated', {'user_id': str(invitation.invitee_id)})
         return self.invitation_data_v3(invitation)
 
     def connect_session_v3(self, user, connection_id):
@@ -559,6 +650,7 @@ class ChatServiceV3:
         return {'user': self.public_user_v3(user.id) if user is not None else None, 'lobby': lobby['messages'], 'party': party['messages'],
                 'lobby_next_before': lobby['next_before'], 'party_next_before': party['next_before'],
                 'party_room_id': str(room_id) if room_id else None,
+                'party_invite_preferences': self.invite_preferences_v3(user) if user is not None else None,
                 'online_users': self.online_users_v3(), 'party_invitations': invitations, 'notifications': self.notifications_v3(user),
                 'moderation': self.moderation_state_v3(user), 'heartbeat_interval_seconds': 30}
 
@@ -569,8 +661,11 @@ class ChatServiceV3:
             ChatMessageV3.room_id.in_(old_rooms),
         )).limit(limit)
         self.session.execute(delete(ChatMessageV3).where(ChatMessageV3.id.in_(ids)))
+        policy = get_invite_policy_v3()
+        retention = timedelta(seconds=max(7 * 86400, policy.sender_window_seconds, policy.rejection_cooldown_seconds))
         invitations = select(PartyInvitationV3.id).where(
-            PartyInvitationV3.expires_at <= now_v3() - timedelta(days=7)).limit(limit)
+            PartyInvitationV3.expires_at <= now_v3() - retention,
+            PartyInvitationV3.update_time <= now_v3() - retention).limit(limit)
         self.session.execute(delete(PartyInvitationV3).where(PartyInvitationV3.id.in_(invitations)))
 
     def reconcile_batch_v3(self, after_id=None, limit=100):
