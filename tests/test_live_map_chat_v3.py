@@ -953,6 +953,72 @@ class ChatPostgresTestV3(postgres_tests_v3.PartyPostgresTestV3):
             self.assertTrue(1 <= response.json()['data']['retry_after'] <= 10)
 
 
+    def test_guest_session_isolation_validation_and_reuse_v3(self):
+        import hashlib
+        first = self.chat_request_v3('POST', '/chat/guest-session', user=None, json={})
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(first.headers['cache-control'], 'no-store')
+        token = first.json()['data']['guest_token']
+        reused = self.chat_request_v3('POST', '/chat/guest-session', user=None,
+                                     json={'guest_token': token}).json()['data']['guest_token']
+        self.assertEqual(token, reused)
+        identity = self.chat_store_v3.guest_identity_v3(token)
+        for _ in range(20):
+            self.chat_store_v3.consume_v3(identity, 'connect', 20)
+        second = self.chat_request_v3('POST', '/chat/guest-session', user=None, json={}).json()['data']['guest_token']
+        with self.client_v3.websocket_connect('/live-map/v3/chat/ws') as ws:
+            ws.send_json({'type': 'guest', 'guest_token': second})
+            self.assertEqual(self.snapshot_v3(ws)['type'], 'snapshot')
+        with self.client_v3.websocket_connect('/live-map/v3/chat/ws') as ws:
+            ws.send_json({'type': 'guest', 'guest_token': token})
+            self.assertEqual(ws.receive_json()['msg'], 'CHAT_CONNECT_RATE_LIMITED')
+        with self.client_v3.websocket_connect('/live-map/v3/chat/ws') as ws:
+            ws.send_json({'type': 'guest', 'guest_token': 'invented'})
+            self.assertEqual(ws.receive_json()['msg'], 'CHAT_GUEST_SESSION_INVALID')
+        self.redis_v3.delete('live-map:chat:v3:guest-session:' + hashlib.sha256(second.encode()).hexdigest())
+        with self.assertRaises(HTTPException) as expired:
+            self.chat_store_v3.guest_identity_v3(second)
+        self.assertEqual(expired.exception.status_code, 401)
+
+    def test_guest_cookie_session_reuse_and_websocket_v3(self):
+        from api.live_map.chat_v3.security import GUEST_COOKIE_NAME_V3
+        first = self.chat_request_v3('POST', '/chat/guest-session', user=None, json={})
+        token = first.json()['data']['guest_token']
+        cookie = first.headers['set-cookie']
+        self.assertIn('HttpOnly', cookie)
+        self.assertIn('Secure', cookie)
+        self.assertIn('SameSite=lax', cookie)
+        self.assertIn('Path=/', cookie)
+        self.assertNotIn('Domain=', cookie)
+        headers = {'cookie': f'{GUEST_COOKIE_NAME_V3}={token}'}
+        reused = self.client_v3.post('/live-map/v3/chat/guest-session', json={}, headers=headers)
+        self.assertEqual(reused.json()['data']['guest_token'], token)
+        with self.client_v3.websocket_connect('/live-map/v3/chat/ws', headers=headers) as ws:
+            ws.send_json({'type': 'guest', 'session': 'cookie'})
+            self.assertEqual(self.snapshot_v3(ws)['type'], 'snapshot')
+        with self.client_v3.websocket_connect('/live-map/v3/chat/ws') as ws:
+            ws.send_json({'type': 'guest', 'session': 'cookie'})
+            self.assertEqual(ws.receive_json()['msg'], 'CHAT_GUEST_SESSION_INVALID')
+        with self.client_v3.websocket_connect('/live-map/v3/chat/ws',
+                headers={'cookie': f'{GUEST_COOKIE_NAME_V3}=invalid'}) as ws:
+            ws.send_json({'type': 'guest', 'session': 'cookie'})
+            self.assertEqual(ws.receive_json()['msg'], 'CHAT_GUEST_SESSION_INVALID')
+
+    def test_guest_and_user_connection_rate_limit_has_distinct_code_v3(self):
+        import hashlib
+        guest_id = 'guest:' + hashlib.sha256(b'testclient').hexdigest()
+        for identity in (guest_id, str(self.ids_v3['owner'])):
+            for _ in range(20):
+                self.chat_store_v3.consume_v3(identity, 'connect', 20)
+        for auth in ({'type': 'guest'}, {'type': 'auth', 'token': 'owner'}):
+            with self.client_v3.websocket_connect('/live-map/v3/chat/ws') as websocket:
+                websocket.send_json(auth)
+                error = websocket.receive_json()
+                self.assertEqual((error['status'], error['msg']), (429, 'CHAT_CONNECT_RATE_LIMITED'))
+                self.assertTrue(1 <= error['retry_after'] <= 60)
+                self.assertEqual(websocket.receive()['code'], 4429)
+
+
 class ChatLifecycleTestV3(unittest.IsolatedAsyncioTestCase):
     async def test_cleanup_starts_and_stops_with_application_v3(self):
         from api.live_map.chat_v3.lifecycle import chat_lifespan_v3

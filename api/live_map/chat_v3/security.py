@@ -3,6 +3,8 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 from api.live_map.party_v3.security import authenticate_party_user_v3, bearer_v3
 
+GUEST_COOKIE_NAME_V3 = '__Host-chat_guest_v3'
+
 
 def optional_chat_user_v3(
     request: Request,

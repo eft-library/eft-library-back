@@ -21,6 +21,7 @@ from api.live_map.party_v3.websocket import (
     create_party_subscriber_v3, receive_packet_v3, send_packet_v3, subscribe_ready_v3,
 )
 from .schemas import ChatSendV3
+from .security import GUEST_COOKIE_NAME_V3
 from .service import ChatServiceV3, event_v3
 from .store import ChatStoreV3, get_chat_store_v3
 
@@ -71,7 +72,10 @@ async def chat_socket_v3(websocket):
         except TimeoutError:
             raise HTTPException(408, 'AUTH_TIMEOUT') from None
         try:
-            guest = json.loads(raw) == {'type': 'guest'}
+            packet_v3 = json.loads(raw)
+            guest = (isinstance(packet_v3, dict) and packet_v3.get('type') == 'guest'
+                     and set(packet_v3) <= {'type', 'guest_token', 'session'}
+                     and packet_v3.get('session', 'cookie') == 'cookie')
             auth = None if guest else PartySocketAuthV3.model_validate_json(raw)
         except (ValidationError, ValueError):
             raise HTTPException(401, 'AUTH_MESSAGE_REQUIRED') from None
@@ -79,7 +83,15 @@ async def chat_socket_v3(websocket):
         if guest:
             # Use only the ASGI peer (configured trusted proxy handling), not arbitrary headers.
             peer = websocket.client.host if websocket.client else 'unknown'
-            leased_user_id = 'guest:' + hashlib.sha256(peer.encode()).hexdigest()
+            if 'guest_token' in packet_v3:
+                leased_user_id = await run_in_threadpool(
+                    get_chat_store_v3().guest_identity_v3, packet_v3['guest_token'])
+            elif 'session' in packet_v3 or GUEST_COOKIE_NAME_V3 in websocket.cookies:
+                leased_user_id = await run_in_threadpool(
+                    get_chat_store_v3().guest_identity_v3, websocket.cookies.get(GUEST_COOKIE_NAME_V3))
+            else:
+                # Compatibility for clients that have not adopted guest sessions yet.
+                leased_user_id = 'guest:' + hashlib.sha256(peer.encode()).hexdigest()
             await run_in_threadpool(get_chat_store_v3().consume_v3, leased_user_id, 'connect', 20)
         else:
             email = await run_in_threadpool(authenticate_party_user_v3,

@@ -116,10 +116,10 @@ URL: `/api/live-map/v3/chat/ws`. 기존 파티 WS와 별개다. query string에 
 {"type":"auth","token":"Google access token"}
 ```
 
-비로그인 사용자는 다음 메시지를 보낸다.
+비로그인 사용자는 먼저 `POST /api/live-map/v3/chat/guest-session`에 `{}`를 보내 서버 발급 쿠키를 저장한 뒤 다음 메시지를 보낸다. 쿠키 요청·도메인·오류 처리 규격은 [익명 쿠키 연동 문서](live_map_chat_guest_session_v3_frontend.ko.md)를 참고한다.
 
 ```json
-{"type":"guest"}
+{"type":"guest","session":"cookie"}
 ```
 
 게스트는 모집 메시지, 모집 메시지 삭제 이벤트 및 공개 접속자 목록 갱신 이벤트를 수신한다. snapshot은 `user=null`, `party=[]`, `party_room_id=null`, `party_next_before=null`, `party_invitations=[]`이며 모집 최근 메시지와 cursor는 제공한다. 게스트 계정이나 공개 UUID를 DB에 만들지 않는다. 게스트가 메시지를 전송하면 401 `LOGIN_REQUIRED` 오류만 반환하고 읽기 연결은 유지한다.
@@ -160,7 +160,7 @@ REST 비로그인 조회는 `GET /api/live-map/v3/chat/messages?channel=lobby`�
 
 | 방향 / type | data 또는 요청 필드 |
 |---|---|
-| 클라이언트 `guest` | 추가 필드 없음, 비로그인 읽기 전용 연결의 최초 메시지 |
+| 클라이언트 `guest` | `session: "cookie"`, 서버 발급 쿠키를 검증하는 비로그인 읽기 전용 연결의 최초 메시지 |
 | 클라이언트 `auth` | `token` (최초 한 번) |
 | 클라이언트 `send_message` | `channel`, `room_id?`, `message`, `request_id` |
 | 클라이언트 `heartbeat` | 추가 필드 없음, 30초마다 전송 |
@@ -191,7 +191,7 @@ REST 비로그인 조회는 `GET /api/live-map/v3/chat/messages?channel=lobby`�
 - Redis Pub/Sub는 durable replay가 아니다. 재접속/heartbeat snapshot은 최근 DB 상태를 복구한다. 50개보다 많은 누락은 snapshot의 `*_next_before`와 REST를 사용하여 마지막으로 본 메시지 ID까지 과거 페이지를 가져온다. retention 밖 메시지는 복원되지 않는다.
 - snapshot은 최근 구간의 권위 있는 목록이다. 삭제·차단으로 빠진 메시지를 최근 UI 구간에서 제거한다. 오래된 로컬 페이지를 재사용할 때에는 REST로 다시 조회한다. 권한을 잃거나 방이 바뀌면 이전 파티의 UI 메시지를 비운다.
 - 4401 인증, 4403 등록/권한, 4408 인증/heartbeat timeout, 4429 연결 속도 제한, 1009 패킷 크기 초과, 1008 잘못된 프로토콜, 1013 DB/Redis/전송 timeout, 1012 세션 재인증.
-- 텍스트 JSON만 허용한다. 패킷 최대 8192 UTF-8 바이트. 잘못된 명령 3회 시 종료한다. 느린 수신자는 서버 전송 5초 timeout 적용. 연결 시도는 사용자당 1분 20회, 동시 연결은 5개 제한이다. 게스트는 서버가 인식한 접속 IP별로 동일한 연결 제한을 적용하며 Redis 키에는 IP 해시만 저장한다. 프록시를 쓰면 ASGI 서버의 신뢰 프록시 설정에 따라 실제 클라이언트 IP를 전달해야 한다. Redis 연결 lease는 90초 후 만료하며 정상 종료 시 즉시 해제한다.
+- 텍스트 JSON만 허용한다. 패킷 최대 8192 UTF-8 바이트. 잘못된 명령 3회 시 종료한다. 느린 수신자는 서버 전송 5초 timeout 적용. 연결 시도는 사용자당 1분 20회, 동시 연결은 5개 제한이다. 쿠키 모드의 게스트는 서버 발급 익명 세션별로 동일한 연결 제한을 적용한다. 쿠키 없는 구형 연결은 IP 기준을 유지한다. Redis 연결 lease는 90초 후 만료하며 정상 종료 시 즉시 해제한다.
 
 ## 보관·정리
 
@@ -206,14 +206,14 @@ REST 비로그인 조회는 `GET /api/live-map/v3/chat/messages?channel=lobby`�
 
 | HTTP | 코드 |
 |---|---|
-| 401 | `LOGIN_REQUIRED`, `INVALID_TOKEN`, `AUTH_MESSAGE_REQUIRED`, `SESSION_REFRESH_REQUIRED` |
+| 401 | `LOGIN_REQUIRED`, `INVALID_TOKEN`, `AUTH_MESSAGE_REQUIRED`, `SESSION_REFRESH_REQUIRED`, `CHAT_GUEST_SESSION_INVALID` |
 | 403 | `REGISTERED_USER_REQUIRED`, `PARTY_MEMBERSHIP_REQUIRED`, `PARTY_OWNER_REQUIRED`, `CHAT_ADMIN_REQUIRED`, `CHAT_RESTRICTED`, `PARTY_INVITATION_FORBIDDEN`, `PARTY_ROOM_LOCKED`, `PARTY_MEMBER_KICKED` |
 | 404 | `CHAT_USER_NOT_FOUND`, `CHAT_MESSAGE_NOT_FOUND`, `PARTY_INVITATION_NOT_FOUND`, `ROOM_NOT_FOUND` |
 | 409 | `CHAT_REQUEST_ID_CONFLICT`, `CHAT_ALREADY_REPORTED`, `CHAT_STATE_CONFLICT`, `PARTY_ALREADY_JOINED`, `PARTY_ROOM_FULL`, `PARTY_INVITATION_DUPLICATED`, `PARTY_INVITATION_ALREADY_HANDLED` |
 | 410 | `ROOM_CLOSED`, `PARTY_ROOM_CLOSED`, `PARTY_INVITATION_EXPIRED` |
 | 422 | `INVALID_REQUEST`, `INVALID_MESSAGE`, `CHAT_INVALID_CHANNEL`, `CHAT_INVALID_CURSOR`, `CHAT_CANNOT_BLOCK_SELF`, `PARTY_CANNOT_INVITE_SELF`, `TEXT_JSON_REQUIRED` |
-| 429 | `CHAT_RATE_LIMITED`, `CHAT_REPEATED_MESSAGE`, `CHAT_CONNECTION_LIMIT`, `PARTY_INVITATION_LIMIT` |
-| 503 | `AUTH_UNAVAILABLE`, `CHAT_DATABASE_UNAVAILABLE`, `CHAT_RATE_LIMIT_UNAVAILABLE`, `CHAT_UNAVAILABLE`, `PARTY_REALTIME_UNAVAILABLE` |
+| 429 | `CHAT_CONNECT_RATE_LIMITED`, `CHAT_RATE_LIMITED`, `CHAT_REPEATED_MESSAGE`, `CHAT_CONNECTION_LIMIT`, `PARTY_INVITATION_LIMIT` |
+| 503 | `AUTH_UNAVAILABLE`, `CHAT_DATABASE_UNAVAILABLE`, `CHAT_RATE_LIMIT_UNAVAILABLE`, `CHAT_UNAVAILABLE`, `PARTY_REALTIME_UNAVAILABLE`, `CHAT_GUEST_SESSION_UNAVAILABLE` |
 | 기타 | 408 `AUTH_TIMEOUT`/`HEARTBEAT_TIMEOUT`, 413 `MESSAGE_TOO_LARGE`, 400 `TOO_MANY_INVALID_MESSAGES` |
 
 ## 검증
@@ -259,3 +259,8 @@ REST 비로그인 조회는 `GET /api/live-map/v3/chat/messages?channel=lobby`�
 ## 초대 수신 설정 및 남용 방지
 
 본인 초대 수신 설정 API, `can_invite` 및 `retry_after`, 거절 후 10분 제한, 발신자 1분당 3건 제한, 수신자 차단 처리와 실시간 설정 이벤트는 [프론트 연동 안내](live_map_party_invite_preferences_v3_frontend.ko.md)를 참고한다. 배포 전에 `sql/migrations/20261009_party_invite_preferences_v3.sql`을 적용한다.
+
+
+## 게스트 연결 제한 및 익명 쿠키
+
+로그인/게스트의 분당 연결 시도 제한(20회)은 `CHAT_CONNECT_RATE_LIMITED`(429)로 구분한다. 기존 일반 명령 제한은 `CHAT_RATE_LIMITED`를 유지한다. 신규 게스트 연결은 서버 발급 HttpOnly 쿠키를 사용해 익명 세션별로 연결 시도와 동시 연결(5개)을 제한한다. [프론트 익명 쿠키 연동 규격](live_map_chat_guest_session_v3_frontend.ko.md)을 참고한다.

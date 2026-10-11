@@ -1,4 +1,7 @@
 import json
+import hashlib
+import secrets
+import re
 from functools import lru_cache
 
 from fastapi import HTTPException
@@ -29,6 +32,34 @@ class ChatStoreV3:
     def __init__(self, client):
         self.client = client
 
+    def guest_identity_v3(self, token):
+        if not isinstance(token, str) or not re.fullmatch(r'[A-Za-z0-9_-]{43}', token):
+            raise HTTPException(401, 'CHAT_GUEST_SESSION_INVALID')
+        digest = hashlib.sha256(token.encode()).hexdigest()
+        try:
+            valid = self.client.exists(f'live-map:chat:v3:guest-session:{digest}')
+        except RedisError:
+            raise HTTPException(503, 'CHAT_GUEST_SESSION_UNAVAILABLE') from None
+        if not valid:
+            raise HTTPException(401, 'CHAT_GUEST_SESSION_INVALID')
+        return 'guest:session:' + digest
+
+    def guest_session_v3(self, token=None):
+        if token:
+            try:
+                self.guest_identity_v3(token)
+                return token
+            except HTTPException as exc:
+                if exc.status_code != 401:
+                    raise
+        token = secrets.token_urlsafe(32)
+        digest = hashlib.sha256(token.encode()).hexdigest()
+        try:
+            self.client.set(f'live-map:chat:v3:guest-session:{digest}', '1', ex=86400)
+        except RedisError:
+            raise HTTPException(503, 'CHAT_GUEST_SESSION_UNAVAILABLE') from None
+        return token
+
     def consume_v3(self, user_id, action, limit, seconds=60):
         from uuid import uuid4
         try:
@@ -37,7 +68,8 @@ class ChatStoreV3:
         except RedisError:
             raise HTTPException(503, 'CHAT_RATE_LIMIT_UNAVAILABLE') from None
         if int(retry):
-            raise HTTPException(429, 'CHAT_RATE_LIMITED', headers={'Retry-After': str(retry)})
+            code_v3 = 'CHAT_CONNECT_RATE_LIMITED' if action == 'connect' else 'CHAT_RATE_LIMITED'
+            raise HTTPException(429, code_v3, headers={'Retry-After': str(retry)})
 
     lease_script_v3 = """
         local now = tonumber(redis.call('TIME')[1])

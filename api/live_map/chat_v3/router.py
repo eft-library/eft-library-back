@@ -7,6 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from redis.exceptions import RedisError
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from starlette.concurrency import run_in_threadpool
 
@@ -21,7 +22,7 @@ from .schemas import (
 )
 from .lifecycle import chat_lifespan_v3
 from .schemas import ChannelV3, ChatReportCreateV3, ChatRestrictionCreateV3, InvitationCreateV3, StatusV3
-from .security import optional_chat_user_v3
+from .security import GUEST_COOKIE_NAME_V3, optional_chat_user_v3
 from .service import ChatServiceV3
 from .store import get_chat_store_v3
 
@@ -89,6 +90,22 @@ OptionalEmailV3 = Annotated[str | None, Depends(optional_chat_user_v3)]
 
 def response_v3(data, status=200, msg='OK'):
     return {'status': status, 'msg': msg, 'data': data}
+
+
+class ChatGuestSessionRequestV3(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    guest_token: str | None = Field(default=None, max_length=128, strict=True)
+
+
+@router_v3.post('/chat/guest-session')
+def guest_session_v3(body: ChatGuestSessionRequestV3, request: Request, response: Response):
+    response.headers['Cache-Control'] = 'no-store'
+    token_v3 = get_chat_store_v3().guest_session_v3(
+        request.cookies.get(GUEST_COOKIE_NAME_V3) or body.guest_token)
+    response.set_cookie(GUEST_COOKIE_NAME_V3, token_v3, max_age=86400,
+                        secure=True, httponly=True, samesite='lax', path='/')
+    # Keep the explicit-token response for clients introduced before cookie mode.
+    return response_v3({'guest_token': token_v3})
 
 
 @router_v3.websocket('/chat/ws')
