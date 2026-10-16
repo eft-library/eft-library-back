@@ -12,7 +12,14 @@ class NormalizedEmailRequestV3(BaseModel):
         if isinstance(value, str):
             # Desktop input may include surrounding brackets or trailing punctuation.
             # Only remove known boundary artifacts; never extract an email from text.
-            return re.sub(r"^[\s\[\]]+|[\s.\[\]]+$", "", value.replace("\\", ""))
+            normalized_v3 = re.sub(r"^[\s\[\]]+|[\s.\[\]]+$", "", value.replace("\\", ""))
+            # Repair observed desktop suffix artifacts only after the complete Gmail
+            # domain. Preserve local-part tags and other domains such as .com.au.
+            match_v3 = re.fullmatch(
+                r"([A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@gmail\.com)[\s\[\].,'\"+0-9]+",
+                normalized_v3, flags=re.IGNORECASE,
+            )
+            return match_v3.group(1) if match_v3 else normalized_v3
         return value
 
 
