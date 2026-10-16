@@ -1,5 +1,6 @@
 from pydantic import BaseModel, field_validator
 from datetime import datetime
+import re
 
 
 class NormalizedEmailRequestV3(BaseModel):
@@ -9,7 +10,9 @@ class NormalizedEmailRequestV3(BaseModel):
     @classmethod
     def normalize_email_v3(cls, value):
         if isinstance(value, str):
-            return value.replace("\\", "").strip().rstrip(".")
+            # Desktop input may include surrounding brackets or trailing punctuation.
+            # Only remove known boundary artifacts; never extract an email from text.
+            return re.sub(r"^[\s\[\]]+|[\s.\[\]]+$", "", value.replace("\\", ""))
         return value
 
 
