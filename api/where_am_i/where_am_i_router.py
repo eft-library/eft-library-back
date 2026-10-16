@@ -9,8 +9,10 @@ from api.where_am_i.req_models import (
     ReqWhereAmI,
 )
 from api.where_am_i.service import WhereAmIServiceV3
+from api.where_am_i.path_reports_v3 import router_v3 as path_reports_router_v3
 
 router = APIRouter(tags=["WhereAmI"])
+router.include_router(path_reports_router_v3)
 
 
 @router.post(
