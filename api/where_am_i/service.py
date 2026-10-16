@@ -2,7 +2,11 @@ from api.where_am_i.res_models import UserLocationRequestV3
 from database import V3Database
 from sqlalchemy import text
 from api.where_am_i.req_models import LogLocationRequestV3, RaidStateRequestV3, ReqWhereAmI
-from util.websocket import send_wpf_location, send_wpf_log_location, send_wpf_raid_state
+from util.location_socket_v3 import (
+    send_wpf_location_v3 as send_wpf_location,
+    send_wpf_log_location_v3 as send_wpf_log_location,
+    send_wpf_raid_state_v3 as send_wpf_raid_state,
+)
 import logging
 
 logger = logging.getLogger("api.where_am_i")
@@ -37,8 +41,12 @@ class WhereAmIServiceV3:
                     )
 
                     s.add(user_location)
+                    s.flush()
+                    request_id_v3 = user_location.id
                     s.commit()
-                    await send_wpf_location(user_email=req.email, location=req.location)
+                    logger.info('location_stored request_id=%s', request_id_v3)
+                    await send_wpf_location(user_email=req.email, location=req.location,
+                                            request_id=request_id_v3)
                     return True
             else:
                 logger.warning(

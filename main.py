@@ -8,7 +8,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi import FastAPI, WebSocket, Query
 from util.middleware import KafkaProducerMiddleware
 from api.user.util import UserUtil
-from util.websocket import websocket_handler
+from util.location_socket_v3 import websocket_handler_v3 as websocket_handler
 from util.access_log_v3 import configure_access_logging_v3
 import logging
 
