@@ -114,14 +114,20 @@ def write_analytics_v3(endpoint_v3, payload_v3, response_v3, status_v3, fields_v
             map_slug_v3 = resolved_map_v3 if map_resolved_v3 else report_v3.map if report_v3.map in MAP_SLUGS_V3 else None
             state_v3['map'] = map_slug_v3
             state_hash_v3 = hashlib.sha256(json.dumps(state_v3, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
-            rows_v3.append(RaidStateEventV3(
-                user_key=identity_v3, email=report_v3.email,
-                session_id=report_v3.session_id, map_slug=map_slug_v3,
-                requested_map=requested_map_v3,
-                started_at=report_v3.started_at, timer_observed_at=report_v3.timer_observed_at,
-                raid_ends_at=report_v3.raid_ends_at, is_active=report_v3.is_active,
-                transit_count=report_v3.transit_count, state_hash=state_hash_v3,
-                event_id=UUID(event_id_v3) if event_id_v3 else None, **common_v3))
+            # Empty inactive snapshots still reach clients, but add no raid analytics.
+            empty_inactive_v3 = (not report_v3.is_active and not report_v3.map
+                                 and report_v3.started_at is None
+                                 and report_v3.timer_observed_at is None
+                                 and report_v3.raid_ends_at is None)
+            if not empty_inactive_v3:
+                rows_v3.append(RaidStateEventV3(
+                    user_key=identity_v3, email=report_v3.email,
+                    session_id=report_v3.session_id, map_slug=map_slug_v3,
+                    requested_map=requested_map_v3,
+                    started_at=report_v3.started_at, timer_observed_at=report_v3.timer_observed_at,
+                    raid_ends_at=report_v3.raid_ends_at, is_active=report_v3.is_active,
+                    transit_count=report_v3.transit_count, state_hash=state_hash_v3,
+                    event_id=UUID(event_id_v3) if event_id_v3 else None, **common_v3))
         if endpoint_v3 == 'check-version' and status_v3 != 422:
             result_v3 = data_v3 if isinstance(data_v3, dict) else {}
             rows_v3.append(VersionCheckEventV3(

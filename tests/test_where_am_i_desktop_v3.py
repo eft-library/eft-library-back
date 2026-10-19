@@ -320,6 +320,20 @@ class DesktopContractTestV3(unittest.TestCase):
         self.assertEqual(cached_v3['payload']['session_id'], 'b'*64)
         self.assertIsNone(cached_v3['payload']['raid_ends_at'])
 
+    def test_empty_inactive_state_is_published_without_raid_analytics_v3(self):
+        body_v3 = {'email': 'owner@example.test', 'map': None, 'is_active': False,
+                   'started_at': None, 'timer_observed_at': None, 'raid_ends_at': None}
+        self.assertEqual(self.post_v3('send-raid-state', body_v3).status_code, 200)
+        cached_v3 = json.loads(self.redis_server_v3.get(latest_key_v3('owner@example.test') + ':raid'))
+        self.assertFalse(cached_v3['payload']['is_active'])
+        self.assertIsNone(cached_v3['payload']['map'])
+        with self.sessions_v3() as session_v3:
+            self.assertEqual(list(session_v3.scalars(select(RaidStateEventV3))), [])
+        # A map-bearing loading state remains useful for analysis.
+        self.assertEqual(self.post_v3('send-raid-state', dict(body_v3, map='woods')).status_code, 200)
+        with self.sessions_v3() as session_v3:
+            self.assertEqual(session_v3.scalars(select(RaidStateEventV3)).one().requested_map, 'woods')
+
     def test_raid_analytics_event_id_retry_hash_and_rejected_state_v3(self):
         self.assertEqual(self.post_v3('send-raid-state', self.raid_v3).status_code, 200)
         self.assertEqual(self.post_v3('send-raid-state', self.raid_v3).status_code, 200)
