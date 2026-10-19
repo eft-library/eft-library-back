@@ -1,6 +1,8 @@
 from api.where_am_i.res_models import UserLocationRequestV3
 from database import V3Database
 from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from .map_resolution_v3 import resolve_map_slug_v3
 from fastapi import HTTPException
 from redis.exceptions import RedisError
 from starlette.concurrency import run_in_threadpool
@@ -72,9 +74,20 @@ class WhereAmIServiceV3:
         if not exists_v3:
             raise HTTPException(404, 'USER_NOT_FOUND')
         try:
+            map_slug_v3 = await run_in_threadpool(resolve_map_slug_v3, req.map)
+        except SQLAlchemyError as error_v3:
+            logger.warning('Raid map resolution unavailable (%s)', type(error_v3).__name__)
+            raise HTTPException(503, 'RAID_MAP_LOOKUP_UNAVAILABLE') from None
+        if analytics_context_v3 is not None:
+            analytics_context_v3.update(map_resolved=True, map_slug=map_slug_v3)
+        if req.raid_ends_at is not None and map_slug_v3 is None:
+            raise HTTPException(422, 'RAID_MAP_UNRESOLVED')
+        state_v3 = req.model_dump(mode='json', exclude={'email'})
+        state_v3['map'] = map_slug_v3
+        try:
             event_id_v3 = await send_wpf_raid_state(
                 user_email=req.email,
-                state=req.model_dump(mode="json", exclude={"email"}),
+                state=state_v3,
             )
             if analytics_context_v3 is not None:
                 analytics_context_v3['event_id'] = event_id_v3

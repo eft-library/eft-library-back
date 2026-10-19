@@ -145,3 +145,7 @@ Redis Lua 한 번으로 검증 → 상태 교체 → 캐시 TTL → 발행을 �
 ## 7. 분석 이력
 
 레이드 상태·버전 확인·선택한 데스크톱 API 실패를 응답 전송 후 별도 트랜잭션에 기록한다. 요청·응답 계약과 클라이언트 필수 필드는 바꾸지 않는다. 적용 SQL은 `sql/migrations/20261019_where_am_i_analytics.sql`이며, 수집 범위·장애 시 유실·집계 쿼리는 [분석 이력 문서](where_am_i_analytics_v3.ko.md)를 따른다.
+
+## 8. 수신 맵 별칭 변환
+
+레이드 상태 수신에서 정식 slug는 그대로 사용하고, 그 밖의 원본 map은 활성 where_am_i_map_aliases로 변환한다. 원문은 requested_map, 확인된 slug는 map_slug에 기록하며 웹소켓 map은 확인된 slug 또는 null이다. 타이머가 있는 미매핑 요청은 422 RAID_MAP_UNRESOLVED이며 실패 이력에 원문을 보관한다. 타이머 없는 미매핑 상태는 정상 수집·전달하되 map은 null이다. 상세 정책과 기본 별칭 등록 SQL은 [분석 이력 문서](where_am_i_analytics_v3.ko.md)의 백엔드 별칭 매핑 절을 참고한다. 요청 필드명은 기존 map이며 requested_map을 프로그램에서 추가할 필요는 없다.

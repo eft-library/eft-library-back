@@ -395,7 +395,7 @@ class DesktopContractTestV3(unittest.TestCase):
             self.assertEqual(state_v3.requested_map, 'woods')
             failure_v3 = session_v3.scalars(select(DesktopApiFailureV3)).one()
             self.assertEqual(failure_v3.requested_map, 'NEW_Map_preset')
-            self.assertEqual(failure_v3.result_code, 'REQUEST_VALIDATION_ERROR')
+            self.assertEqual(failure_v3.result_code, 'RAID_MAP_UNRESOLVED')
         upgrade_v3 = (Path(__file__).parents[1] / 'sql/migrations/20261019_where_am_i_requested_map.sql').read_text()
         with self.engine_v3.connect() as conn_v3:
             conn_v3.exec_driver_sql(upgrade_v3)
@@ -417,3 +417,69 @@ class DesktopContractTestV3(unittest.TestCase):
             columns_v3 = list(session_v3.scalars(text("select column_name from information_schema.columns where table_name='where_am_i_raid_state_events' order by ordinal_position")))
             self.assertEqual(columns_v3[columns_v3.index('map_slug')+1], 'requested_map')
         self.assertEqual(self.post_v3('send-raid-state', self.raid_v3).status_code, 200)
+
+    def test_alias_resolution_preserves_original_and_forwards_canonical_map_v3(self):
+        with self.sessions_v3.begin() as session_v3:
+            session_v3.add(MapAliasV3(alias='new_woods', map_slug='woods'))
+        raw_v3 = ' NEW_WOODS_preset '
+        with self.client_v3.websocket_connect('/ws') as socket_v3:
+            self.until_v3(socket_v3, 'location_connection_status')
+            self.assertEqual(self.post_v3('send-raid-state', dict(self.raid_v3, map=raw_v3)).status_code, 200)
+            event_v3 = self.until_v3(socket_v3, 'wpf_raid_state')
+            self.assertEqual(event_v3['payload']['map'], 'woods')
+            self.assertEqual(event_v3['payload']['raid_ends_at'], self.raid_v3['raid_ends_at'].replace('+00:00','Z'))
+        with self.sessions_v3() as session_v3:
+            row_v3 = session_v3.scalars(select(RaidStateEventV3)).one()
+            self.assertEqual(row_v3.requested_map, raw_v3)
+            self.assertEqual(row_v3.map_slug, 'woods')
+
+    def test_unresolved_loading_is_collected_and_active_alias_updates_take_effect_v3(self):
+        loading_v3 = {'email':'owner@example.test', 'map':'future_factory_preset', 'started_at':None,
+                       'is_active':False, 'timer_observed_at':None, 'raid_ends_at':None}
+        self.assertEqual(self.post_v3('send-raid-state', loading_v3).status_code, 200)
+        key_v3 = latest_key_v3('owner@example.test') + ':raid'
+        self.assertIsNone(json.loads(self.redis_server_v3.get(key_v3))['payload']['map'])
+        with self.sessions_v3() as session_v3:
+            row_v3 = session_v3.scalars(select(RaidStateEventV3)).one()
+            self.assertEqual(row_v3.requested_map, 'future_factory_preset')
+            self.assertIsNone(row_v3.map_slug)
+        with self.sessions_v3.begin() as session_v3:
+            session_v3.add(MapAliasV3(alias='future_factory', map_slug='factory', is_active=False))
+        self.assertEqual(self.post_v3('send-raid-state', loading_v3).status_code, 200)
+        self.assertIsNone(json.loads(self.redis_server_v3.get(key_v3))['payload']['map'])
+        with self.sessions_v3.begin() as session_v3:
+            session_v3.get(MapAliasV3, 'future_factory').is_active = True
+        self.assertEqual(self.post_v3('send-raid-state', loading_v3).status_code, 200)
+        payload_v3 = json.loads(self.redis_server_v3.get(key_v3))['payload']
+        self.assertEqual(payload_v3['map'], 'factory')
+        self.assertFalse(payload_v3['is_active'])
+        self.assertIsNone(payload_v3['raid_ends_at'])
+
+    def test_alias_defaults_preserve_operator_changes_and_canonical_request_v3(self):
+        with self.sessions_v3.begin() as session_v3:
+            session_v3.add(MapAliasV3(alias='factory4_day', map_slug='woods', is_active=False))
+        seed_v3 = (Path(__file__).parents[1] / 'sql/migrations/20261019_where_am_i_default_aliases.sql').read_text()
+        with self.engine_v3.connect() as conn_v3:
+            conn_v3.exec_driver_sql(seed_v3)
+            conn_v3.exec_driver_sql(seed_v3)
+            conn_v3.commit()
+        with self.sessions_v3() as session_v3:
+            self.assertFalse(session_v3.get(MapAliasV3, 'factory4_day').is_active)
+            self.assertEqual(session_v3.get(MapAliasV3, 'factory4_night').map_slug, 'factory')
+        loading_v3 = {'email':'owner@example.test', 'map':'factory4_night', 'is_active':False}
+        self.assertEqual(self.post_v3('send-raid-state', loading_v3).status_code, 200)
+        payload_v3 = json.loads(self.redis_server_v3.get(latest_key_v3('owner@example.test') + ':raid'))['payload']
+        self.assertEqual(payload_v3['map'], 'factory')
+
+    def test_alias_lookup_failure_is_not_success_and_keeps_raw_input_v3(self):
+        request_v3 = dict(self.raid_v3, map='new_alias')
+        with patch('api.where_am_i.service.resolve_map_slug_v3', side_effect=OperationalError('offline', None, Exception())):
+            response_v3 = self.post_v3('send-raid-state', request_v3)
+        self.assertEqual(response_v3.status_code, 503)
+        self.assertEqual(response_v3.json()['detail'], 'RAID_MAP_LOOKUP_UNAVAILABLE')
+        self.assertIsNone(self.redis_server_v3.get(latest_key_v3('owner@example.test') + ':raid'))
+        with self.sessions_v3() as session_v3:
+            row_v3 = session_v3.scalars(select(RaidStateEventV3)).one()
+            self.assertEqual(row_v3.requested_map, 'new_alias')
+            self.assertIsNone(row_v3.map_slug)
+            self.assertFalse(row_v3.is_success)

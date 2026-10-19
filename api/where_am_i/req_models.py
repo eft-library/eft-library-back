@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field, field_validator, model_validator
 from datetime import datetime, timezone
 import re
-from .desktop_contract_v3 import MAP_SLUGS_V3
 
 
 class NormalizedEmailRequestV3(BaseModel):
@@ -65,8 +64,8 @@ class RaidStateRequestV3(NormalizedEmailRequestV3):
         if self.raid_ends_at is not None:
             if self.raid_ends_at <= self.timer_observed_at:
                 raise ValueError('Raid end must be after timer observation')
-            if not self.is_active or self.map not in MAP_SLUGS_V3 or self.started_at is None or self.session_id is None:
-                raise ValueError('Timer requires an active known map, start time and session ID')
+            if not self.is_active or not self.map or self.started_at is None or self.session_id is None:
+                raise ValueError('Timer requires an active map, start time and session ID')
         return self
 
 

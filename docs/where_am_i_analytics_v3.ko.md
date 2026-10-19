@@ -104,7 +104,7 @@ ORDER BY attempts DESC;
 
 ## 수신 맵 원문
 
-레이드 상태·API 실패 테이블에 requested_map을 추가했다. 요청 map의 대소문자·공백·접미사를 변환하지 않고 저장한다. 현재 map_slug도 검증을 통과한 모델의 map 값이며, DB 지도 목록에 매핑됐다는 보증은 아니다. requested_map은 앞으로 정규화가 추가되어도 원문을 구분하기 위한 필드다.
+레이드 상태·API 실패 테이블에 requested_map을 추가했다. 요청 map의 대소문자·공백·접미사를 변환하지 않고 저장한다. map_slug는 백엔드에서 확인한 정식 slug이며, 매핑에 실패하면 null이다. requested_map은 원문을 보존한다. 이 매핑 도입 이전 기록의 map_slug에는 원본 값이 저장됐을 수 있으며 과거 데이터를 자동 변경하지 않는다.
 
 알 수 없는 맵의 타이머 요청이 422로 거부돼도 where_am_i_api_failures.requested_map에서 확인할 수 있다. 새 맵을 수집한다고 API 지원 검증을 해제하지는 않는다. 문자열이 아닌 값·4096자 초과·PostgreSQL text가 받을 수 없는 NUL 포함 문자열은 null로 기록하고, 잘못된 JSON에는 추출할 맵이 없으므로 null이다. 전체 요청 본문과 다른 잘못된 입력값은 저장하지 않는다.
 
@@ -117,3 +117,13 @@ WHERE endpoint = 'send-raid-state' AND requested_map IS NOT NULL
 GROUP BY requested_map, http_status, result_code
 ORDER BY count(*) DESC;
 ```
+
+## 백엔드 별칭 매핑
+
+send-raid-state의 map은 정식 slug 또는 게임 로그의 별칭으로 보낼 수 있다. 요청 필드명은 바꾸지 않는다. 기존 정식 slug는 그대로 유지하고 trim·소문자·_preset 제거로 확인한 정식 slug도 허용한다. 그 외 입력은 where_am_i_map_aliases의 활성 행을 같은 정규화 기준으로 조회한다. 별칭 매핑 대상도 현재 지원하는 정식 slug여야 한다.
+
+웹소켓에는 변환된 map만 전달한다. 알 수 없는 이름에 타이머가 없으면 map:null로 상태를 전달하고 requested_map에 원문을 기록한다. 알 수 없는 이름에 타이머가 있으면 HTTP 422 RAID_MAP_UNRESOLVED로 거부하며 실패 이력의 requested_map에 원문을 남긴다. 별칭 DB 조회 장애는 503 RAID_MAP_LOOKUP_UNAVAILABLE이다. 매핑 결과를 캐시하지 않으므로 활성 별칭 수정은 다음 요청에 반영된다.
+
+확인된 데스크톱 기본 별칭은 sql/migrations/20261019_where_am_i_default_aliases.sql로 등록한다. 기존 운영자 수정·비활성 행은 덮어쓰지 않는다. 새 테이블·컬럼은 필요 없다. 요청 map이 null이면 서버가 원본 게임 이름을 복원할 수 없으므로 프로그램이 원문을 map에 넣어 보내야 한다.
+
+is_active:false의 로딩 상태도 정식 map을 전달하지만, 웹의 자동 지도 전환이 활성 상태만 처리한다면 프론트 조건 수정은 별도로 필요하다. 백엔드는 지도 전환을 위해 is_active를 true로 바꾸지 않는다.
