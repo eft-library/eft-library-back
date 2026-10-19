@@ -142,6 +142,30 @@ class DesktopContractTestV3(unittest.TestCase):
             session_v3.query(DesktopReleaseV3).update({'min_supported_version':'2.0'})
         self.assertEqual(self.post_v3('check-version', self.version_body_v3).status_code, 503)
 
+    def test_official_github_release_and_asset_urls_v3(self):
+        urls_v3 = (
+            'https://github.com/eft-library/eft-library-where-am-i/releases/tag/live-map-v2',
+            'https://github.com/eft-library/eft-library-where-am-i/releases/download/live-map-v2/where-am-i.exe',
+            'https://github.com/eft-library/eft-library-where-am-i/releases/latest',
+        )
+        self.release_v3(download_url=urls_v3[0])
+        for url_v3 in urls_v3:
+            with self.sessions_v3.begin() as session_v3:
+                session_v3.query(DesktopReleaseV3).update({'download_url':url_v3})
+            response_v3 = self.post_v3('check-version', self.version_body_v3)
+            self.assertEqual(response_v3.status_code, 200)
+            self.assertEqual(response_v3.json()['data']['download_url'], url_v3)
+        for url_v3 in (
+            'https://github.com/other/repository/releases/tag/v1',
+            'https://github.com/eft-library/eft-library-where-am-i/issues',
+            'https://github.com/eft-library/eft-library-where-am-i/releases/../../issues',
+            'https://github.com/eft-library/eft-library-where-am-i/releases/%2e%2e/issues',
+            'https://github.com.evil.test/eft-library/eft-library-where-am-i/releases/tag/v1',
+        ):
+            with self.sessions_v3.begin() as session_v3:
+                session_v3.query(DesktopReleaseV3).update({'download_url':url_v3})
+            self.assertEqual(self.post_v3('check-version', self.version_body_v3).status_code, 503)
+
     def test_alias_snapshot_normalization_version_change_and_constraints_v3(self):
         with self.sessions_v3.begin() as session_v3:
             session_v3.add_all([MapAliasV3(alias=' BIGMAP_preset ', map_slug='customs'),

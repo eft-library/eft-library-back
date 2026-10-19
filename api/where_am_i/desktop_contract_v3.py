@@ -1,6 +1,6 @@
 """Shared desktop contract values, independent of web-map database identities."""
 import re
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 MAP_SLUGS_V3 = (
     'customs', 'woods', 'shoreline', 'factory', 'interchange', 'the-lab',
@@ -31,8 +31,17 @@ def validate_download_url_v3(value):
                    for character_v3 in value)):
         raise ValueError('Invalid download URL')
     parsed_v3 = urlsplit(value)
-    if (parsed_v3.scheme != 'https' or parsed_v3.hostname not in ('eftlibrary.com', 'www.eftlibrary.com')
+    if (parsed_v3.scheme != 'https'
             or parsed_v3.port not in (None, 443) or parsed_v3.username is not None
             or parsed_v3.password is not None or '\\' in value):
+        raise ValueError('Unsupported download URL')
+    if parsed_v3.hostname in ('eftlibrary.com', 'www.eftlibrary.com'):
+        return value
+    path_v3 = unquote(parsed_v3.path)
+    release_path_v3 = '/eft-library/eft-library-where-am-i/releases'
+    if (parsed_v3.hostname != 'github.com'
+            or not (path_v3.lower() == release_path_v3 or path_v3.lower().startswith(release_path_v3 + '/'))
+            or any(part_v3 in ('.', '..') for part_v3 in path_v3.split('/'))
+            or '\\' in path_v3 or any(ord(character_v3) < 32 for character_v3 in path_v3)):
         raise ValueError('Unsupported download URL')
     return value

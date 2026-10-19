@@ -75,7 +75,7 @@ Redis Lua 한 번으로 검증 → 상태 교체 → 캐시 TTL → 발행을 �
   "min_supported_version":"1.0.0.0",
   "update_available":true,
   "update_required":false,
-  "download_url":"https://eftlibrary.com/downloads/where-am-i",
+  "download_url":"https://github.com/eft-library/eft-library-where-am-i/releases/tag/live-map-v2",
   "release_notes":"설명용 변경 내용"
 }
 ```
@@ -86,7 +86,7 @@ Redis Lua 한 번으로 검증 → 상태 교체 → 캐시 TTL → 발행을 �
 - 문자열이 아닌 숫자 구성으로 최신 버전을 선택한다. 같은 숫자 의미의 버전은 published_at·id 순으로 결정한다.
 - update_available은 current < latest, update_required는 current < min_supported이며 min_supported <= latest를 검증한다.
 - 현재 버전이 최신보다 높아도 두 플래그는 false다. 업데이트 없음에 다운로드 URL null·빈 문자열을 허용한다.
-- 업데이트가 있으면 HTTPS, 기본/443 포트, 사용자 정보 없는 eftlibrary.com 또는 www.eftlibrary.com URL이 필요하다. 다른 호스트·잘못된 URL은 저장 데이터 오류로 503이다.
+- 업데이트가 있으면 HTTPS, 기본/443 포트, 사용자 정보 없는 공식 다운로드 URL이 필요하다. GitHub는 github.com/eft-library/eft-library-where-am-i/releases 및 그 하위 릴리스·asset 주소만 허용한다. 다른 저장소·issues·위장 호스트는 거부한다. 기존 eftlibrary.com·www.eftlibrary.com URL도 호환성을 위해 유지한다. 잘못된 URL은 저장 데이터 오류로 503이다. exe의 VersionCheckService 허용 목록도 함께 수정했으므로 수정된 exe를 빌드·배포해야 한다. 백엔드만 재배포하면 예전 exe는 GitHub 링크를 여전히 거부할 수 있다.
 - release_notes는 nullable 일반 텍스트 최대 4000자다. HTML 렌더링을 지시하지 않는다.
 - 공개된 대상이 없으면 404 DESKTOP_RELEASE_NOT_FOUND, DB 실패·잘못된 저장 메타데이터는 503 DESKTOP_METADATA_UNAVAILABLE이다. 최신 버전을 만들어 반환하지 않는다.
 - 필수 업데이트는 정보 제공이다. 기존 감지·위치 API를 이 응답으로 차단하거나 실행 파일을 설치하지 않는다.
