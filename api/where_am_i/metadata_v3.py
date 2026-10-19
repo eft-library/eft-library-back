@@ -111,7 +111,11 @@ class DesktopMetadataServiceV3:
 
 
 def metadata_error_v3(error_v3):
-    logger_v3.warning('Desktop metadata unavailable (%s)', type(error_v3).__name__)
+    if isinstance(error_v3, ValueError):
+        logger_v3.warning('Desktop metadata unavailable (ValueError): %s', str(error_v3))
+    else:
+        # SQL errors can contain bound parameters; keep those out of logs.
+        logger_v3.warning('Desktop metadata unavailable (%s)', type(error_v3).__name__)
     raise HTTPException(503, 'DESKTOP_METADATA_UNAVAILABLE') from None
 
 
