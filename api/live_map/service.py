@@ -1,8 +1,6 @@
 from copy import deepcopy
-from datetime import datetime, timedelta, timezone
-
-import requests
 from sqlalchemy import inspect, nullslast, text
+from sqlalchemy.exc import SQLAlchemyError
 
 from api.live_map.models import (
     LiveMapFloorV3,
@@ -31,33 +29,29 @@ class LiveMapServiceV3:
         "live_map_btr_route_points",
         "live_map_btr_route_stops",
     )
-    _raid_durations_v3: dict[str, int] = {}
-    _raid_durations_fetched_at_v3: datetime | None = None
-
     @staticmethod
     def get_raid_duration_v3(normalized_name: str):
-        now = datetime.now(timezone.utc)
-        fetched_at = LiveMapServiceV3._raid_durations_fetched_at_v3
-        if fetched_at is None or now - fetched_at > timedelta(minutes=15):
-            try:
-                response = requests.post(
-                    "https://api.tarkov.dev/graphql",
-                    json={"query": "{ maps { normalizedName raidDuration } }"},
-                    timeout=8,
-                )
-                response.raise_for_status()
-                maps = response.json().get("data", {}).get("maps", [])
-                LiveMapServiceV3._raid_durations_v3 = {
-                    row["normalizedName"]: row["raidDuration"]
-                    for row in maps
-                    if row.get("normalizedName") and row.get("raidDuration")
-                }
-                LiveMapServiceV3._raid_durations_fetched_at_v3 = now
-            except (requests.RequestException, ValueError, TypeError) as e:
-                logger.warning(f"get_raid_duration_v3 refresh failed: {e}")
-
-        duration = LiveMapServiceV3._raid_durations_v3.get(normalized_name)
-        return {"normalized_name": normalized_name, "minutes": duration} if duration else None
+        """Return an unambiguous internal BTR baseline, never a personal timer."""
+        try:
+            with V3Database.SessionLocal() as session_v3:
+                map_v3 = (session_v3.query(MapV3.id)
+                          .filter(MapV3.normalized_name == normalized_name)
+                          .order_by(nullslast(MapV3.is_use.desc()), nullslast(MapV3.sort_order),
+                                    MapV3.name_en, MapV3.id).first())
+                if map_v3 is None:
+                    return None
+                row_v3 = session_v3.execute(text(LiveMapQueryV3.raid_duration_by_map_sql_v3()),
+                                             {'map_id': map_v3.id}).mappings().one()
+                # Different route baselines or invalid configuration must not be
+                # presented as one authoritative raid duration.
+                if (not row_v3['route_count'] or row_v3['minimum_seconds'] is None
+                        or row_v3['minimum_seconds'] <= 0
+                        or row_v3['minimum_seconds'] != row_v3['maximum_seconds']):
+                    return None
+                return {'normalized_name': normalized_name, 'minutes': row_v3['minimum_seconds'] / 60}
+        except SQLAlchemyError as error_v3:
+            logger.warning('get_raid_duration_v3 internal lookup failed (%s)', type(error_v3).__name__)
+            return None
 
     @staticmethod
     def _starts_with_hangul_v3(value: str | None):

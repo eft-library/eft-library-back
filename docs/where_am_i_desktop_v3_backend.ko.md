@@ -133,3 +133,11 @@ Redis Lua 한 번으로 검증 → 상태 교체 → 캐시 TTL → 발행을 �
 ## 5. 경로 수집 문서 정책 갱신
 
 경로 수집 API·테이블·중복 허용 정책은 그대로다. 클라이언트 최신 정책인 기존 저장 경로 최초 수집, 종류별 경로 해시로 성공 기록, 실패 항목 다음 실행 재시도를 기존 문서에 반영했다. 이메일·collection_source·새 endpoint는 추가하지 않는다. 서버 설정 조회·복원 기능이 아니다.
+
+## 6. 외부 GraphQL 제한시간 조회 제거
+
+`GET /api/live-map/v3/raid-duration/{normalized_name}`는 더 이상 tarkov.dev GraphQL에 요청하지 않는다. 기존 `{status,msg,data}` 및 data의 `{normalized_name,minutes}` 형식은 유지한다.
+
+내부 `maps`에서 기존 BTR 조회와 같은 우선순위로 지도를 선택하고, 해당 지도의 활성 `live_map_btr_routes.raid_duration_seconds`가 모두 양수이며 한 값으로 일치할 때만 분 단위 기준값을 제공한다. 운행표가 없거나 기준이 다르거나 DB 조회가 실패하면 기존 실패 envelope인 `{status:200,msg:"FAIL",data:null}`을 반환한다. 비활성 운행표는 제외하며 기본 시간을 추측하거나 외부 조회로 보충하지 않는다. DB 변경은 다음 조회에 반영한다.
+
+이 값은 BTR 운행표의 내부 기본 기준이며 실제 플레이 중인 레이드의 종료 시각을 보장하지 않는다. 새 exe의 자동 타이머는 계속 개인 이벤트의 raid_ends_at을 사용하고, 타이머가 없으면 수동 입력을 유지한다. 모든 지도에 임의의 35분 기준을 넣지 않는다. 이번 제거에는 추가 DB 마이그레이션이 필요 없다.

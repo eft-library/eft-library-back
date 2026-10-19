@@ -1,5 +1,15 @@
 class LiveMapQueryV3:
     @staticmethod
+    def raid_duration_by_map_sql_v3():
+        return """
+            select count(*) as route_count,
+                   min(raid_duration_seconds) as minimum_seconds,
+                   max(raid_duration_seconds) as maximum_seconds
+            from live_map_btr_routes
+            where map_id = :map_id and is_use is true;
+        """
+
+    @staticmethod
     def map_selector_sql():
         return """
             select selector.id,
