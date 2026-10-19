@@ -1,6 +1,9 @@
 from api.where_am_i.res_models import UserLocationRequestV3
 from database import V3Database
 from sqlalchemy import text
+from fastapi import HTTPException
+from redis.exceptions import RedisError
+from starlette.concurrency import run_in_threadpool
 from api.where_am_i.req_models import LogLocationRequestV3, RaidStateRequestV3, ReqWhereAmI
 from util.location_socket_v3 import (
     send_wpf_location_v3 as send_wpf_location,
@@ -63,25 +66,20 @@ class WhereAmIServiceV3:
 
     @staticmethod
     async def send_raid_state_v3(req: RaidStateRequestV3):
+        exists_v3 = await run_in_threadpool(WhereAmIServiceV3.check_wpf_user_v3, req.email)
+        if exists_v3 is None:
+            raise HTTPException(503, 'RAID_STATE_DATABASE_UNAVAILABLE')
+        if not exists_v3:
+            raise HTTPException(404, 'USER_NOT_FOUND')
         try:
-            if not WhereAmIServiceV3.check_wpf_user_v3(req.email):
-                logger.warning(
-                    "send_raid_state_v3 존재하지 않는 사용자: email=%r",
-                    req.email,
-                )
-                return None
-
             await send_wpf_raid_state(
                 user_email=req.email,
                 state=req.model_dump(mode="json", exclude={"email"}),
             )
             return True
-        except Exception as e:
-            logger.error(
-                f"send_raid_state_v3: {req.model_dump()}, error: {e}",
-                exc_info=True,
-            )
-            return None
+        except RedisError as error_v3:
+            logger.warning('Raid state publish unavailable (%s)', type(error_v3).__name__)
+            raise HTTPException(503, 'RAID_STATE_PUBLISH_UNAVAILABLE') from None
 
     @staticmethod
     async def send_log_location_v3(req: LogLocationRequestV3):

@@ -4,13 +4,14 @@ import hashlib
 import json
 import logging
 import os
+from datetime import datetime, timezone
 from collections import deque
 from contextlib import suppress
 from functools import lru_cache
 from uuid import uuid4
 
 from anyio import CancelScope
-from fastapi import WebSocketDisconnect
+from fastapi import HTTPException, WebSocketDisconnect
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
 
@@ -31,7 +32,44 @@ def latest_key_v3(email):
 PUBLISH_SCRIPT_V3 = """
 local event = cjson.decode(ARGV[1])
 local tm = redis.call('TIME')
+local now = tonumber(tm[1]) + tonumber(tm[2]) / 1000000
 event.received_at_unix_us = tonumber(tm[1]) * 1000000 + tonumber(tm[2])
+local ttl = 60
+if event.type == 'wpf_raid_state' then
+    local ends = tonumber(ARGV[2])
+    local started = tonumber(ARGV[3])
+    local observed = tonumber(ARGV[4])
+    if ends > 0 and ends <= now then return -1 end
+    if ends > 0 then ttl = math.ceil(ends - now) + 60 end
+    local sid = event.payload.session_id
+    if type(sid) ~= 'string' then sid = '' end
+    redis.call('ZREMRANGEBYSCORE', KEYS[5], '-inf', now - 86400)
+    local previous = redis.call('GET', KEYS[4])
+    if previous then
+        previous = cjson.decode(previous)
+        previous.started = tonumber(previous.started) or 0
+        previous.observed = tonumber(previous.observed) or 0
+        if started > 0 and previous.started > 0 and started < previous.started then return -2 end
+        if sid ~= '' and sid == previous.sid and observed > 0 and previous.observed > 0
+            and observed < previous.observed then return -2 end
+        if sid ~= '' and sid ~= previous.sid and redis.call('ZSCORE', KEYS[5], sid) then return -2 end
+        if sid ~= '' and previous.sid ~= '' and sid ~= previous.sid then
+            redis.call('ZADD', KEYS[5], now, previous.sid)
+            redis.call('ZREMRANGEBYRANK', KEYS[5], 0, -129)
+            redis.call('EXPIRE', KEYS[5], 86400)
+        end
+        if sid ~= previous.sid or event.payload.map ~= previous.map or
+            (started > 0 and previous.started > 0 and started ~= previous.started) then
+            redis.call('DEL', KEYS[1])
+        end
+    elseif sid ~= '' and redis.call('ZSCORE', KEYS[5], sid) then
+        return -2
+    end
+    -- Keep timestamp text: cjson's default number precision can otherwise make
+    -- an identical retry appear a few microseconds older than its stored state.
+    redis.call('SET', KEYS[4], cjson.encode({sid=sid, started=ARGV[3], observed=ARGV[4],
+        map=event.payload.map}), 'EX', math.max(86400, ttl))
+end
 local encoded = cjson.encode(event)
 if event.type == 'wpf_location' or event.type == 'wpf_log_location' then
     redis.call('SET', KEYS[1], encoded, 'EX', 60)
@@ -39,7 +77,7 @@ elseif event.type == 'wpf_raid_state' and event.payload.is_active == false then
     redis.call('DEL', KEYS[1])
 end
 if event.type == 'wpf_raid_state' then
-    redis.call('SET', KEYS[3], encoded, 'EX', 60)
+    redis.call('SET', KEYS[3], encoded, 'EX', ttl)
 end
 return redis.call('PUBLISH', KEYS[2], encoded)
 """
@@ -47,11 +85,21 @@ return redis.call('PUBLISH', KEYS[2], encoded)
 
 async def publish_location_v3(email, kind, payload, request_id=None):
     event_id_v3 = str(uuid4())
+    def timestamp_v3(value_v3):
+        return datetime.fromisoformat(value_v3.replace('Z', '+00:00')).timestamp() if value_v3 else 0
+    ends_v3 = timestamp_v3(payload.get('raid_ends_at')) if kind == 'wpf_raid_state' else 0
+    started_v3 = timestamp_v3(payload.get('started_at')) if kind == 'wpf_raid_state' else 0
+    observed_v3 = timestamp_v3(payload.get('timer_observed_at')) if kind == 'wpf_raid_state' else 0
     subscribers_v3 = await get_location_redis_v3().eval(
-        PUBLISH_SCRIPT_V3, 3, latest_key_v3(email), f'notifications_channel:{email}',
-        latest_key_v3(email) + ':raid',
+        PUBLISH_SCRIPT_V3, 5, latest_key_v3(email), f'notifications_channel:{email}',
+        latest_key_v3(email) + ':raid', latest_key_v3(email) + ':raid-order',
+        latest_key_v3(email) + ':superseded-sessions',
         json.dumps({'type': kind, 'payload': payload, 'event_id': event_id_v3,
-                    'request_id': request_id}))
+                    'request_id': request_id}), ends_v3, started_v3, observed_v3)
+    if subscribers_v3 == -1:
+        raise HTTPException(409, 'RAID_TIMER_EXPIRED')
+    if subscribers_v3 == -2:
+        raise HTTPException(409, 'RAID_STATE_STALE')
     logger_v3.info('location_published event_id=%s request_id=%s type=%s subscribers=%s pid=%s',
                    event_id_v3, request_id, kind, subscribers_v3, os.getpid())
     return event_id_v3
@@ -85,6 +133,12 @@ async def websocket_handler_v3(websocket, user_email):
 
     async def forward_v3(event_v3, replayed_v3=False):
         nonlocal last_location_v3
+        if event_v3.get('type') == 'wpf_raid_state':
+            ends_v3 = event_v3.get('payload', {}).get('raid_ends_at')
+            if ends_v3 and datetime.fromisoformat(ends_v3.replace('Z', '+00:00')) <= datetime.now(timezone.utc):
+                # Keep session context, but never replay an expired automatic timer.
+                event_v3 = dict(event_v3, payload=dict(event_v3['payload'],
+                                timer_observed_at=None, raid_ends_at=None))
         event_id_v3 = event_v3.get('event_id')
         dedup_key_v3 = event_id_v3
         if event_v3.get('type') not in LOCATION_TYPES_V3 | {'wpf_raid_state'}:
