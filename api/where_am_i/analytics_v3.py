@@ -30,6 +30,7 @@ class RaidStateEventV3(V3Database.Base):
     user_key = Column(String(64), nullable=False)
     session_id = Column(String(64))
     map_slug = Column(Text)
+    requested_map = Column(Text)
     started_at = Column(DateTime(timezone=True))
     timer_observed_at = Column(DateTime(timezone=True))
     raid_ends_at = Column(DateTime(timezone=True))
@@ -73,6 +74,7 @@ class DesktopApiFailureV3(V3Database.Base):
     result_code = Column(String(80), nullable=False)
     app_version = Column(String(64))
     user_key = Column(String(64))
+    requested_map = Column(Text)
     error_fields = Column(JSONB, nullable=False)
     elapsed_ms = Column(Integer, nullable=False)
     received_at = Column(DateTime(timezone=True), nullable=False)
@@ -86,6 +88,10 @@ def user_key_v3(email_v3):
 def write_analytics_v3(endpoint_v3, payload_v3, response_v3, status_v3, fields_v3,
                        received_v3, elapsed_v3, event_id_v3):
     try:
+        requested_map_v3 = payload_v3.get('map') if endpoint_v3 == 'send-raid-state' else None
+        if (not isinstance(requested_map_v3, str) or len(requested_map_v3) > 4096
+                or '\x00' in requested_map_v3):
+            requested_map_v3 = None
         data_v3 = response_v3.get('data')
         success_v3 = (200 <= status_v3 < 300 and response_v3.get('msg') == 'OK'
                       and data_v3 is not None and data_v3 is not False)
@@ -105,6 +111,7 @@ def write_analytics_v3(endpoint_v3, payload_v3, response_v3, status_v3, fields_v
             state_hash_v3 = hashlib.sha256(json.dumps(state_v3, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
             rows_v3.append(RaidStateEventV3(
                 user_key=identity_v3, session_id=report_v3.session_id, map_slug=report_v3.map,
+                requested_map=requested_map_v3,
                 started_at=report_v3.started_at, timer_observed_at=report_v3.timer_observed_at,
                 raid_ends_at=report_v3.raid_ends_at, is_active=report_v3.is_active,
                 transit_count=report_v3.transit_count, state_hash=state_hash_v3,
@@ -124,6 +131,7 @@ def write_analytics_v3(endpoint_v3, payload_v3, response_v3, status_v3, fields_v
             rows_v3.append(DesktopApiFailureV3(
                 endpoint=endpoint_v3, http_status=status_v3, result_code=code_v3,
                 app_version=version_v3, user_key=identity_v3, error_fields=fields_v3,
+                requested_map=requested_map_v3,
                 elapsed_ms=elapsed_v3, received_at=received_v3))
         if rows_v3:
             # Separate transaction, after the HTTP body has been sent. Never shares
@@ -160,7 +168,15 @@ class DesktopAnalyticsRouteV3(APIRoute):
                 response_v3 = await http_exception_handler(request_v3, error_v3)
             # Collection failures must not replace a completed operational response.
             try:
-                payload_v3 = {} if response_v3.status_code == 422 else await request_v3.json() if request_v3.method == 'POST' else {}
+                try:
+                    payload_v3 = await request_v3.json() if request_v3.method == 'POST' else {}
+                except (ValueError, UnicodeDecodeError):
+                    payload_v3 = {}
+                if not isinstance(payload_v3, dict):
+                    payload_v3 = {}
+                if response_v3.status_code == 422:
+                    # Only the specifically requested raw map field survives validation failure.
+                    payload_v3 = {'map': payload_v3.get('map')} if endpoint_v3 == 'send-raid-state' else {}
                 result_v3 = json.loads(response_v3.body)
                 task_v3 = BackgroundTask(write_analytics_v3, endpoint_v3, payload_v3, result_v3,
                     response_v3.status_code, fields_v3, received_v3,

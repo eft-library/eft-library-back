@@ -386,3 +386,34 @@ class DesktopContractTestV3(unittest.TestCase):
         self.release_v3()
         with patch.object(self.sessions_v3, 'begin', side_effect=OperationalError('offline', None, Exception())):
             self.assertEqual(self.post_v3('check-version', self.version_body_v3).status_code, 200)
+
+    def test_requested_map_is_preserved_on_success_and_unknown_map_rejection_v3(self):
+        self.assertEqual(self.post_v3('send-raid-state', self.raid_v3).status_code, 200)
+        self.assertEqual(self.post_v3('send-raid-state', dict(self.raid_v3, map='NEW_Map_preset')).status_code, 422)
+        with self.sessions_v3() as session_v3:
+            state_v3 = session_v3.scalars(select(RaidStateEventV3)).one()
+            self.assertEqual(state_v3.requested_map, 'woods')
+            failure_v3 = session_v3.scalars(select(DesktopApiFailureV3)).one()
+            self.assertEqual(failure_v3.requested_map, 'NEW_Map_preset')
+            self.assertEqual(failure_v3.result_code, 'REQUEST_VALIDATION_ERROR')
+        upgrade_v3 = (Path(__file__).parents[1] / 'sql/migrations/20261019_where_am_i_requested_map.sql').read_text()
+        with self.engine_v3.connect() as conn_v3:
+            conn_v3.exec_driver_sql(upgrade_v3)
+            conn_v3.exec_driver_sql(upgrade_v3)
+            conn_v3.commit()
+
+    def test_recreate_map_analytics_preserves_version_history_v3(self):
+        self.assertEqual(self.post_v3('send-raid-state', self.raid_v3).status_code, 200)
+        self.assertEqual(self.post_v3('check-version', self.version_body_v3).status_code, 404)
+        script_v3 = (Path(__file__).parents[1] / 'sql/migrations/20261019_recreate_where_am_i_map_analytics.sql').read_text()
+        with self.engine_v3.connect() as conn_v3:
+            conn_v3.exec_driver_sql(script_v3)
+            conn_v3.exec_driver_sql(script_v3)
+            conn_v3.commit()
+        with self.sessions_v3() as session_v3:
+            self.assertEqual(list(session_v3.scalars(select(RaidStateEventV3))), [])
+            self.assertEqual(list(session_v3.scalars(select(DesktopApiFailureV3))), [])
+            self.assertEqual(len(list(session_v3.scalars(select(VersionCheckEventV3)))), 1)
+            columns_v3 = list(session_v3.scalars(text("select column_name from information_schema.columns where table_name='where_am_i_raid_state_events' order by ordinal_position")))
+            self.assertEqual(columns_v3[columns_v3.index('map_slug')+1], 'requested_map')
+        self.assertEqual(self.post_v3('send-raid-state', self.raid_v3).status_code, 200)

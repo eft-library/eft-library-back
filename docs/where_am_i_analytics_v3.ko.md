@@ -19,7 +19,7 @@
 - HTTP 상태와 is_success를 구분한다. 2xx + msg=OK + 유효한 data가 있을 때 성공으로 기록한다. 기존 API의 HTTP 200 + msg=FAIL도 실패 이력에 들어간다.
 - 실패한 정상 구조의 레이드 요청(404·409·503 등)도 상태 이력에 기록한다. WebSocket 발행에 성공하지 않았다면 event_id는 null이다.
 - 버전 조회의 대상 없음(404), 메타데이터 오류(503)도 버전 확인 이력과 API 실패 이력에 기록한다. 조회 결과가 없으면 latest_version과 업데이트 플래그는 null이며 false로 성공을 가장하지 않는다.
-- 422는 잘못된 상태를 정상 이력에 섞지 않도록 API 실패 테이블에만 기록한다. REQUEST_VALIDATION_ERROR와 body.session_id 등 필드명만 저장하고 입력값·원본 JSON·상세 오류 본문을 저장하지 않는다. 알 수 없는 추가 필드명은 `<extra>`로 치환한다.
+- 422는 잘못된 상태를 정상 이력에 섞지 않도록 API 실패 테이블에만 기록한다. REQUEST_VALIDATION_ERROR와 body.session_id 등 필드명만 저장하고 원본 JSON·상세 오류 본문을 저장하지 않는다. 단, 레이드 요청의 map 문자열은 신규 맵·별칭 분석을 위해 requested_map에 별도로 보관한다. 알 수 없는 추가 필드명은 `<extra>`로 치환한다.
 - 재시도는 모두 별도 행으로 남긴다. 같은 정상화 레이드 상태는 같은 user_key·state_hash로 묶을 수 있다. 요청이 다시 발행되면 event_id는 새 값일 수 있다. 고유 사용자 수·레이드 수를 단순 행 수로 계산하지 않는다.
 - received_at은 서버 요청 처리 시작 시각, created_at은 분석 저장 트랜잭션 시각이다. elapsed_ms는 분석 저장 이전의 API 처리 소요 시간이며, 실제 지도 렌더링 시간이나 게임 촬영 시각이 아니다.
 
@@ -100,4 +100,20 @@ FROM where_am_i_raid_state_events
 GROUP BY user_key, session_id, state_hash
 HAVING count(*) > 1
 ORDER BY attempts DESC;
+```
+
+## 수신 맵 원문
+
+레이드 상태·API 실패 테이블에 requested_map을 추가했다. 요청 map의 대소문자·공백·접미사를 변환하지 않고 저장한다. 현재 map_slug도 검증을 통과한 모델의 map 값이며, DB 지도 목록에 매핑됐다는 보증은 아니다. requested_map은 앞으로 정규화가 추가되어도 원문을 구분하기 위한 필드다.
+
+알 수 없는 맵의 타이머 요청이 422로 거부돼도 where_am_i_api_failures.requested_map에서 확인할 수 있다. 새 맵을 수집한다고 API 지원 검증을 해제하지는 않는다. 문자열이 아닌 값·4096자 초과·PostgreSQL text가 받을 수 없는 NUL 포함 문자열은 null로 기록하고, 잘못된 JSON에는 추출할 맵이 없으므로 null이다. 전체 요청 본문과 다른 잘못된 입력값은 저장하지 않는다.
+
+기존 운영 DB에는 sql/migrations/20261019_where_am_i_requested_map.sql을 분석 테이블 마이그레이션 다음에 적용한다. 신규 생성용 platform_db.sql과 원래 분석 마이그레이션에도 필드를 반영했다. 기존 행은 null이며 역추적해서 채우지 않는다.
+
+```sql
+SELECT requested_map, http_status, result_code, count(*)
+FROM where_am_i_api_failures
+WHERE endpoint = 'send-raid-state' AND requested_map IS NOT NULL
+GROUP BY requested_map, http_status, result_code
+ORDER BY count(*) DESC;
 ```
