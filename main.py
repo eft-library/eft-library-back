@@ -9,6 +9,7 @@ from fastapi import FastAPI, WebSocket, Query
 from util.middleware import KafkaProducerMiddleware
 from api.user.util import UserUtil
 from util.location_socket_v3 import websocket_handler_v3 as websocket_handler
+from util.location_auth_v3 import authenticate_location_socket_v3
 from util.access_log_v3 import configure_access_logging_v3
 import logging
 
@@ -45,9 +46,8 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
     로그인한 사용자만 WebSocket 연결
     토큰은 query param으로 전달
     """
-    user_email = UserUtil.verify_google_token(token)
+    user_email = await authenticate_location_socket_v3(websocket, token)
     if not user_email:
-        await websocket.close(code=1008)  # 정책 위반
         return
 
     await websocket_handler(websocket, user_email)
