@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
+from api.where_am_i.analytics_v3 import DesktopAnalyticsRouteV3
 from api.response import CustomResponse
 from util.constants import HTTPCode
 from api.constants import Message
@@ -12,7 +13,7 @@ from api.where_am_i.service import WhereAmIServiceV3
 from api.where_am_i.path_reports_v3 import router_v3 as path_reports_router_v3
 from api.where_am_i.metadata_v3 import router_v3 as metadata_router_v3
 
-router = APIRouter(tags=["WhereAmI"])
+router = APIRouter(tags=["WhereAmI"], route_class=DesktopAnalyticsRouteV3)
 router.include_router(path_reports_router_v3)
 router.include_router(metadata_router_v3)
 
@@ -37,8 +38,9 @@ async def send_location_v3(where_am_i: ReqWhereAmI):
 
 
 @router.post("/v3/send-raid-state")
-async def send_raid_state_v3(raid_state: RaidStateRequestV3):
-    result = await WhereAmIServiceV3.send_raid_state_v3(raid_state)
+async def send_raid_state_v3(raid_state: RaidStateRequestV3, request: Request):
+    result = await WhereAmIServiceV3.send_raid_state_v3(
+        raid_state, analytics_context_v3=request.state.desktop_analytics_v3)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

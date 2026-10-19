@@ -11,9 +11,10 @@ from api.constants import Message
 from api.response import CustomResponse
 from database import V3Database
 from util.constants import HTTPCode
+from .analytics_v3 import DesktopAnalyticsRouteV3
 
 logger_v3 = logging.getLogger('api.where_am_i.path_reports_v3')
-router_v3 = APIRouter()
+router_v3 = APIRouter(route_class=DesktopAnalyticsRouteV3)
 
 
 class PathReportRequestV3(BaseModel):

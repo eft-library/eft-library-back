@@ -65,17 +65,19 @@ class WhereAmIServiceV3:
             return None
 
     @staticmethod
-    async def send_raid_state_v3(req: RaidStateRequestV3):
+    async def send_raid_state_v3(req: RaidStateRequestV3, analytics_context_v3=None):
         exists_v3 = await run_in_threadpool(WhereAmIServiceV3.check_wpf_user_v3, req.email)
         if exists_v3 is None:
             raise HTTPException(503, 'RAID_STATE_DATABASE_UNAVAILABLE')
         if not exists_v3:
             raise HTTPException(404, 'USER_NOT_FOUND')
         try:
-            await send_wpf_raid_state(
+            event_id_v3 = await send_wpf_raid_state(
                 user_email=req.email,
                 state=req.model_dump(mode="json", exclude={"email"}),
             )
+            if analytics_context_v3 is not None:
+                analytics_context_v3['event_id'] = event_id_v3
             return True
         except RedisError as error_v3:
             logger.warning('Raid state publish unavailable (%s)', type(error_v3).__name__)

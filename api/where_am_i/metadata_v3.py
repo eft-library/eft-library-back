@@ -14,9 +14,10 @@ from api.response import CustomResponse
 from database import V3Database
 from util.constants import HTTPCode
 from .desktop_contract_v3 import MAP_SLUGS_V3, normalize_alias_v3, validate_download_url_v3, version_parts_v3
+from .analytics_v3 import DesktopAnalyticsRouteV3
 
 logger_v3 = logging.getLogger('api.where_am_i.metadata_v3')
-router_v3 = APIRouter()
+router_v3 = APIRouter(route_class=DesktopAnalyticsRouteV3)
 
 
 class DesktopReleaseV3(V3Database.Base):

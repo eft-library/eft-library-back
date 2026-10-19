@@ -13,11 +13,12 @@ from fastapi import FastAPI, WebSocket
 from fastapi.testclient import TestClient
 from redis.asyncio import Redis
 from redis.exceptions import ConnectionError as RedisConnectionError
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, select
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import sessionmaker
 
 from api.where_am_i.metadata_v3 import DesktopReleaseV3, MapAliasV3
+from api.where_am_i.analytics_v3 import RaidStateEventV3, VersionCheckEventV3, DesktopApiFailureV3
 from api.where_am_i.where_am_i_router import router
 from database import V3Database
 from util.location_socket_v3 import latest_key_v3, websocket_handler_v3
@@ -51,13 +52,18 @@ class DesktopContractTestV3(unittest.TestCase):
             conn_v3.exec_driver_sql(user_ddl_v3)
             conn_v3.exec_driver_sql(migration_v3)
             conn_v3.exec_driver_sql(migration_v3)
+            analytics_ddl_v3 = (root_v3 / 'sql/migrations/20261019_where_am_i_analytics.sql').read_text()
+            for table_v3 in ('where_am_i_raid_state_events', 'where_am_i_version_checks', 'where_am_i_api_failures'):
+                assert re.search(rf'create table if not exists {table_v3} \(.*?\n\);', source_v3, re.S).group() in analytics_ddl_v3
+            conn_v3.exec_driver_sql(analytics_ddl_v3)
+            conn_v3.exec_driver_sql(analytics_ddl_v3)
             conn_v3.commit()
         cls.sessions_v3 = sessionmaker(cls.engine_v3)
 
     def setUp(self):
         self.redis_server_v3.flushdb()
         with self.engine_v3.begin() as conn_v3:
-            conn_v3.execute(text('truncate where_am_i_releases, where_am_i_map_aliases, user_info restart identity'))
+            conn_v3.execute(text('truncate where_am_i_releases, where_am_i_map_aliases, user_info, where_am_i_raid_state_events, where_am_i_version_checks, where_am_i_api_failures restart identity'))
             conn_v3.execute(text("insert into user_info(email) values ('owner@example.test'), ('other@example.test')"))
         patcher_v3 = patch.object(V3Database, 'SessionLocal', self.sessions_v3)
         patcher_v3.start()
@@ -313,3 +319,70 @@ class DesktopContractTestV3(unittest.TestCase):
         cached_v3 = json.loads(self.redis_server_v3.get(latest_key_v3('owner@example.test') + ':raid'))
         self.assertEqual(cached_v3['payload']['session_id'], 'b'*64)
         self.assertIsNone(cached_v3['payload']['raid_ends_at'])
+
+    def test_raid_analytics_event_id_retry_hash_and_rejected_state_v3(self):
+        self.assertEqual(self.post_v3('send-raid-state', self.raid_v3).status_code, 200)
+        self.assertEqual(self.post_v3('send-raid-state', self.raid_v3).status_code, 200)
+        with self.sessions_v3() as session_v3:
+            rows_v3 = list(session_v3.scalars(select(RaidStateEventV3).order_by(RaidStateEventV3.id)))
+            self.assertEqual(len(rows_v3), 2)
+            self.assertTrue(all(row_v3.is_success for row_v3 in rows_v3))
+            self.assertEqual(rows_v3[0].state_hash, rows_v3[1].state_hash)
+            self.assertEqual(rows_v3[0].user_key, rows_v3[1].user_key)
+            self.assertNotEqual(rows_v3[0].event_id, rows_v3[1].event_id)
+            self.assertEqual(rows_v3[0].session_id, 'a'*64)
+            self.assertFalse(hasattr(rows_v3[0], 'email'))
+            self.assertIsNotNone(rows_v3[0].received_at.tzinfo)
+            cached_v3 = json.loads(self.redis_server_v3.get(latest_key_v3('owner@example.test') + ':raid'))
+            self.assertEqual(str(rows_v3[1].event_id), cached_v3['event_id'])
+        expired_v3 = dict(self.raid_v3, timer_observed_at=(datetime.now(timezone.utc)-timedelta(minutes=2)).isoformat(),
+                          raid_ends_at=(datetime.now(timezone.utc)-timedelta(seconds=1)).isoformat())
+        self.assertEqual(self.post_v3('send-raid-state', expired_v3).status_code, 409)
+        with self.sessions_v3() as session_v3:
+            event_v3 = session_v3.scalars(select(RaidStateEventV3).order_by(RaidStateEventV3.id.desc())).first()
+            failure_v3 = session_v3.scalars(select(DesktopApiFailureV3)).one()
+            self.assertFalse(event_v3.is_success)
+            self.assertIsNone(event_v3.event_id)
+            self.assertEqual(failure_v3.result_code, 'RAID_TIMER_EXPIRED')
+            self.assertEqual(failure_v3.user_key, event_v3.user_key)
+
+    def test_version_analytics_success_and_not_found_v3(self):
+        self.assertEqual(self.post_v3('check-version', self.version_body_v3).status_code, 404)
+        self.release_v3()
+        self.assertEqual(self.post_v3('check-version', self.version_body_v3).status_code, 200)
+        with self.sessions_v3() as session_v3:
+            rows_v3 = list(session_v3.scalars(select(VersionCheckEventV3).order_by(VersionCheckEventV3.id)))
+            self.assertEqual(len(rows_v3), 2)
+            self.assertFalse(rows_v3[0].is_success)
+            self.assertIsNone(rows_v3[0].latest_version)
+            self.assertEqual(rows_v3[1].latest_version, '1.10')
+            self.assertTrue(rows_v3[1].update_available)
+            self.assertTrue(rows_v3[1].is_success)
+            self.assertFalse(hasattr(rows_v3[1], 'user_key'))
+            failure_v3 = session_v3.scalars(select(DesktopApiFailureV3)).one()
+            self.assertEqual(failure_v3.app_version, '1.0.0.0')
+
+    def test_invalid_requests_only_log_safe_field_names_v3(self):
+        self.assertEqual(self.post_v3('send-raid-state', dict(self.raid_v3, session_id='bad-private-value')).status_code, 422)
+        self.assertEqual(self.post_v3('check-version', dict(self.version_body_v3, **{'private-secret-name':'private-secret-value'})).status_code, 422)
+        response_v3 = self.client_v3.post('/api/where-am-i/v3/check-version', content='not-json', headers={'content-type':'application/json'})
+        self.assertEqual(response_v3.status_code, 422)
+        with self.sessions_v3() as session_v3:
+            rows_v3 = list(session_v3.scalars(select(DesktopApiFailureV3)))
+            self.assertEqual(len(rows_v3), 3)
+            self.assertEqual(rows_v3[0].error_fields, ['body.session_id'])
+            self.assertNotIn('private-secret', str([row_v3.error_fields for row_v3 in rows_v3]))
+            self.assertEqual(list(session_v3.scalars(select(RaidStateEventV3))), [])
+            self.assertEqual(list(session_v3.scalars(select(VersionCheckEventV3))), [])
+
+    def test_analytics_failure_does_not_change_publication_or_http_result_v3(self):
+        # Fail only the post-response transaction, not the operational DB check.
+        with patch.object(self.sessions_v3, 'begin', side_effect=OperationalError('private-bound-value', None, Exception())):
+            with self.assertLogs('api.where_am_i.analytics_v3', level='WARNING') as logs_v3:
+                response_v3 = self.post_v3('send-raid-state', self.raid_v3)
+        self.assertEqual(response_v3.json(), {'status':200,'msg':'OK','data':True})
+        self.assertNotIn('private-bound-value', str(logs_v3.output))
+        self.assertIsNotNone(self.redis_server_v3.get(latest_key_v3('owner@example.test') + ':raid'))
+        self.release_v3()
+        with patch.object(self.sessions_v3, 'begin', side_effect=OperationalError('offline', None, Exception())):
+            self.assertEqual(self.post_v3('check-version', self.version_body_v3).status_code, 200)

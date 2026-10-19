@@ -37,12 +37,14 @@ class PathReportsTestV3(unittest.TestCase):
         with cls.engine_v3.connect() as conn_v3:
             conn_v3.exec_driver_sql(migration_v3)
             conn_v3.exec_driver_sql(migration_v3)
+            conn_v3.exec_driver_sql((root_v3 / 'sql/migrations/20261019_where_am_i_analytics.sql').read_text())
             conn_v3.commit()
         cls.sessions_v3 = sessionmaker(cls.engine_v3)
 
     def setUp(self):
         with self.engine_v3.begin() as conn_v3:
             conn_v3.execute(text('truncate where_am_i_path_reports restart identity'))
+            conn_v3.execute(text('truncate where_am_i_api_failures restart identity'))
         patcher_v3 = patch.object(V3Database, 'SessionLocal', self.sessions_v3)
         patcher_v3.start()
         self.addCleanup(patcher_v3.stop)
@@ -84,6 +86,10 @@ class PathReportsTestV3(unittest.TestCase):
         self.assertEqual(self.post_v3(dict(self.body_v3, path='x'*4096, app_version='v'*64)).status_code, 200)
         with self.sessions_v3() as session_v3:
             self.assertEqual(len(list(session_v3.scalars(select(PathReportV3)))), 1)
+            failures_v3 = session_v3.execute(text('select result_code, error_fields from where_am_i_api_failures')).mappings().all()
+            self.assertEqual(len(failures_v3), len(invalid_v3) + len(self.body_v3))
+            self.assertTrue(all(row_v3['result_code'] == 'REQUEST_VALIDATION_ERROR' for row_v3 in failures_v3))
+            self.assertNotIn('should-not-be-stored@example.test', str(failures_v3))
 
     def test_storage_failure_is_not_success_and_does_not_log_path_v3(self):
         with patch.object(self.sessions_v3, 'begin', side_effect=OperationalError('secret path', None, Exception('offline'))):
