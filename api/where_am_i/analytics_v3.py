@@ -29,6 +29,7 @@ class RaidStateEventV3(V3Database.Base):
     __tablename__ = 'where_am_i_raid_state_events'
     id = Column(BigInteger, Identity(), primary_key=True)
     user_key = Column(String(64), nullable=False)
+    email = Column(Text)
     session_id = Column(String(64))
     map_slug = Column(Text)
     requested_map = Column(Text)
@@ -114,7 +115,8 @@ def write_analytics_v3(endpoint_v3, payload_v3, response_v3, status_v3, fields_v
             state_v3['map'] = map_slug_v3
             state_hash_v3 = hashlib.sha256(json.dumps(state_v3, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
             rows_v3.append(RaidStateEventV3(
-                user_key=identity_v3, session_id=report_v3.session_id, map_slug=map_slug_v3,
+                user_key=identity_v3, email=report_v3.email,
+                session_id=report_v3.session_id, map_slug=map_slug_v3,
                 requested_map=requested_map_v3,
                 started_at=report_v3.started_at, timer_observed_at=report_v3.timer_observed_at,
                 raid_ends_at=report_v3.raid_ends_at, is_active=report_v3.is_active,

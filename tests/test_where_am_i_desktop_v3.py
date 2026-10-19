@@ -331,7 +331,7 @@ class DesktopContractTestV3(unittest.TestCase):
             self.assertEqual(rows_v3[0].user_key, rows_v3[1].user_key)
             self.assertNotEqual(rows_v3[0].event_id, rows_v3[1].event_id)
             self.assertEqual(rows_v3[0].session_id, 'a'*64)
-            self.assertFalse(hasattr(rows_v3[0], 'email'))
+            self.assertEqual(rows_v3[0].email, 'owner@example.test')
             self.assertIsNotNone(rows_v3[0].received_at.tzinfo)
             cached_v3 = json.loads(self.redis_server_v3.get(latest_key_v3('owner@example.test') + ':raid'))
             self.assertEqual(str(rows_v3[1].event_id), cached_v3['event_id'])
@@ -483,3 +483,16 @@ class DesktopContractTestV3(unittest.TestCase):
             self.assertEqual(row_v3.requested_map, 'new_alias')
             self.assertIsNone(row_v3.map_slug)
             self.assertFalse(row_v3.is_success)
+
+    def test_raid_event_email_normalization_and_additive_migration_v3(self):
+        upgrade_v3 = (Path(__file__).parents[1] / 'sql/migrations/20261019_where_am_i_raid_event_email.sql').read_text()
+        with self.engine_v3.connect() as conn_v3:
+            conn_v3.exec_driver_sql(upgrade_v3)
+            conn_v3.exec_driver_sql(upgrade_v3)
+            conn_v3.commit()
+        self.assertEqual(self.post_v3('send-raid-state', dict(self.raid_v3, email='owner@example.test]')).status_code, 200)
+        with self.sessions_v3() as session_v3:
+            row_v3 = session_v3.scalars(select(RaidStateEventV3)).one()
+            self.assertEqual(row_v3.email, 'owner@example.test')
+        cached_v3 = json.loads(self.redis_server_v3.get(latest_key_v3('owner@example.test') + ':raid'))
+        self.assertNotIn('email', cached_v3['payload'])
