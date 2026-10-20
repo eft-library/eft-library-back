@@ -2,10 +2,6 @@
 import re
 from urllib.parse import unquote, urlsplit
 
-MAP_SLUGS_V3 = (
-    'customs', 'woods', 'shoreline', 'factory', 'interchange', 'the-lab',
-    'the-labyrinth', 'lighthouse', 'reserve', 'streets-of-tarkov', 'terminal', 'ground-zero',
-)
 VERSION_PATTERN_V3 = r'[0-9]+(?:\.[0-9]+){1,3}'
 
 

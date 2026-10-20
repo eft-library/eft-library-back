@@ -13,7 +13,7 @@ from api.constants import Message
 from api.response import CustomResponse
 from database import V3Database
 from util.constants import HTTPCode
-from .desktop_contract_v3 import MAP_SLUGS_V3, normalize_alias_v3, validate_download_url_v3, version_parts_v3
+from .desktop_contract_v3 import normalize_alias_v3, validate_download_url_v3, version_parts_v3
 from .analytics_v3 import DesktopAnalyticsRouteV3
 
 logger_v3 = logging.getLogger('api.where_am_i.metadata_v3')
@@ -102,8 +102,8 @@ class DesktopMetadataServiceV3:
             seen_v3 = set()
             for row_v3 in rows_v3:
                 alias_v3 = normalize_alias_v3(row_v3.alias)
-                if row_v3.map_slug not in MAP_SLUGS_V3 or alias_v3 in seen_v3:
-                    raise ValueError('Invalid or duplicate map alias')
+                if alias_v3 in seen_v3:
+                    raise ValueError('Duplicate map alias')
                 seen_v3.add(alias_v3)
                 aliases_v3.append({'alias': alias_v3, 'map': row_v3.map_slug})
             aliases_v3.sort(key=lambda entry_v3: entry_v3['alias'])

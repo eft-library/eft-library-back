@@ -16,7 +16,6 @@ from starlette.background import BackgroundTask, BackgroundTasks
 
 from database import V3Database
 from .req_models import RaidStateRequestV3
-from .desktop_contract_v3 import MAP_SLUGS_V3
 
 logger_v3 = logging.getLogger('api.where_am_i.analytics_v3')
 ENDPOINTS_V3 = {'send-raid-state', 'send-log-location', 'check-version', 'map-aliases', 'path-reports'}
@@ -111,7 +110,7 @@ def write_analytics_v3(endpoint_v3, payload_v3, response_v3, status_v3, fields_v
             report_v3 = RaidStateRequestV3.model_validate(payload_v3)
             identity_v3 = user_key_v3(report_v3.email)
             state_v3 = report_v3.model_dump(mode='json', exclude={'email'})
-            map_slug_v3 = resolved_map_v3 if map_resolved_v3 else report_v3.map if report_v3.map in MAP_SLUGS_V3 else None
+            map_slug_v3 = resolved_map_v3 if map_resolved_v3 else None
             state_v3['map'] = map_slug_v3
             state_hash_v3 = hashlib.sha256(json.dumps(state_v3, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
             # Empty inactive snapshots still reach clients, but add no raid analytics.

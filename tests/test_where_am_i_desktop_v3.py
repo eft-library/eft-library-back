@@ -64,6 +64,7 @@ class DesktopContractTestV3(unittest.TestCase):
         self.redis_server_v3.flushdb()
         with self.engine_v3.begin() as conn_v3:
             conn_v3.execute(text('truncate where_am_i_releases, where_am_i_map_aliases, user_info, where_am_i_raid_state_events, where_am_i_version_checks, where_am_i_api_failures restart identity'))
+            conn_v3.execute(text("insert into where_am_i_map_aliases(alias, map_slug) values ('woods', 'woods')"))
             conn_v3.execute(text("insert into user_info(email) values ('owner@example.test'), ('other@example.test')"))
         patcher_v3 = patch.object(V3Database, 'SessionLocal', self.sessions_v3)
         patcher_v3.start()
@@ -175,7 +176,6 @@ class DesktopContractTestV3(unittest.TestCase):
     def test_alias_snapshot_normalization_version_change_and_constraints_v3(self):
         with self.sessions_v3.begin() as session_v3:
             session_v3.add_all([MapAliasV3(alias=' BIGMAP_preset ', map_slug='customs'),
-                                MapAliasV3(alias='woods', map_slug='woods'),
                                 MapAliasV3(alias='hidden', map_slug='woods', is_active=False)])
         first_v3 = self.client_v3.get('/api/where-am-i/v3/map-aliases').json()
         self.assertEqual(first_v3['status'], 200)
@@ -198,12 +198,13 @@ class DesktopContractTestV3(unittest.TestCase):
             conn_v3.commit()
         with self.sessions_v3.begin() as session_v3:
             session_v3.add(MapAliasV3(alias='future_alias', map_slug='future-map'))
-        # The prepared client rejects unknown slugs for the entire snapshot, so the
-        # API continues to fail closed until client support is expanded separately.
         response_v3 = self.client_v3.get('/api/where-am-i/v3/map-aliases')
-        self.assertEqual(response_v3.status_code, 503)
+        self.assertEqual(response_v3.status_code, 200)
+        self.assertIn({'alias':'future_alias', 'map':'future-map'}, response_v3.json()['data']['aliases'])
 
     def test_alias_snapshot_limits_empty_and_database_failure_v3(self):
+        with self.engine_v3.begin() as conn_v3:
+            conn_v3.execute(text('delete from where_am_i_map_aliases'))
         endpoint_v3 = '/api/where-am-i/v3/map-aliases'
         self.assertEqual(self.client_v3.get(endpoint_v3).status_code, 404)
         with self.sessions_v3.begin() as session_v3:
@@ -446,6 +447,24 @@ class DesktopContractTestV3(unittest.TestCase):
             row_v3 = session_v3.scalars(select(RaidStateEventV3)).one()
             self.assertEqual(row_v3.requested_map, raw_v3)
             self.assertEqual(row_v3.map_slug, 'woods')
+
+    def test_new_db_slug_is_available_without_restart_v3(self):
+        request_v3 = dict(self.raid_v3, map='Icebreaker')
+        self.assertEqual(self.post_v3('send-raid-state', request_v3).status_code, 422)
+        with self.sessions_v3.begin() as session_v3:
+            session_v3.add(MapAliasV3(alias='Icebreaker', map_slug='icebreaker'))
+        with self.client_v3.websocket_connect('/ws') as socket_v3:
+            self.until_v3(socket_v3, 'location_connection_status')
+            self.assertEqual(self.post_v3('send-raid-state', request_v3).status_code, 200)
+            self.assertEqual(self.until_v3(socket_v3, 'wpf_raid_state')['payload']['map'], 'icebreaker')
+        with self.sessions_v3() as session_v3:
+            event_v3 = session_v3.scalars(select(RaidStateEventV3)).one()
+            self.assertEqual(event_v3.requested_map, 'Icebreaker')
+            self.assertEqual(event_v3.map_slug, 'icebreaker')
+        self.assertEqual(self.post_v3('send-raid-state', dict(request_v3, map='icebreaker')).status_code, 200)
+        with self.sessions_v3.begin() as session_v3:
+            session_v3.get(MapAliasV3, 'Icebreaker').is_active = False
+        self.assertEqual(self.post_v3('send-raid-state', request_v3).status_code, 422)
 
     def test_unresolved_loading_is_collected_and_active_alias_updates_take_effect_v3(self):
         loading_v3 = {'email':'owner@example.test', 'map':'future_factory_preset', 'started_at':None,
