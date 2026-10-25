@@ -15,6 +15,7 @@ start_server() {
 
   echo "FastAPI 서버 실행 (포트 $PORT)"
   nohup uvicorn main:app \
+    --ws websockets-sansio \
     --workers 9 \
     --host=0.0.0.0 \
     --port=$PORT \
