@@ -51,9 +51,9 @@ class CommunityServiceV3:
         object_name = f"{folder_name}/{timestamp}_{filename_wo_ext}.webp"
         try:
             image = Image.open(file.file)
-            image.thumbnail((1200, 1200))
+            image.thumbnail((2400, 2400), Image.Resampling.LANCZOS)
             buffer = io.BytesIO()
-            image.save(buffer, format="WEBP", quality=80, method=6)
+            image.save(buffer, format="WEBP", quality=90, method=6)
             buffer.seek(0)
             minio_client.put_object(
                 bucket_name,
