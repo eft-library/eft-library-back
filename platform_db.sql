@@ -33,7 +33,7 @@ create table if not exists boss_spawn (
     spawn_chance numeric,
     primary key (boss_id, map_id)
 );
-create index idx_boss_spawn_map_id on boss_spawn (map_id);
+create index if not exists idx_boss_spawn_map_id on boss_spawn (map_id);
 
 create table if not exists boss_item (
     boss_id text,
@@ -42,7 +42,7 @@ create table if not exists boss_item (
     sort_order integer,
     primary key (boss_id, item_id)
 );
-create index idx_boss_item_item_id on boss_item (item_id);
+create index if not exists idx_boss_item_item_id on boss_item (item_id);
 
 create table if not exists map_points
 (
@@ -65,7 +65,7 @@ create table if not exists map_points
     sort_order integer,
     update_time timestamptz default now()
 );
-create index idx_map_points_map_id on map_points(map_id);
+create index if not exists idx_map_points_map_id on map_points(map_id);
 
 create table if not exists main_contents
 (
@@ -100,7 +100,7 @@ create table if not exists menu_sub_groups
     sort_order integer,
     update_time timestamptz default now()
 );
-create index idx_menu_sub_group_parent_group_id on menu_sub_groups(parent_group_id);
+create index if not exists idx_menu_sub_group_parent_group_id on menu_sub_groups(parent_group_id);
 
 create table if not exists maps
 (
@@ -155,8 +155,8 @@ create table if not exists quest_relations (
     sort_order integer,
     primary key (quest_id, related_quest_id, relation_type)
 );
-create index idx_quest_relations_quest_id on quest_relations (quest_id);
-create index idx_quest_relations_relation_type on quest_relations (relation_type);
+create index if not exists idx_quest_relations_quest_id on quest_relations (quest_id);
+create index if not exists idx_quest_relations_relation_type on quest_relations (relation_type);
 
 -- 퀘스트 목표(Objectives)
 create table if not exists quest_objectives (
@@ -174,8 +174,8 @@ create table if not exists quest_objectives (
     update_time timestamptz default now(),
     primary key (objective_id, quest_id)
 );
-create index idx_quest_objectives_quest_id on quest_objectives (quest_id);
-create index idx_quest_objectives_type on quest_objectives (type);
+create index if not exists idx_quest_objectives_quest_id on quest_objectives (quest_id);
+create index if not exists idx_quest_objectives_type on quest_objectives (type);
 create index if not exists idx_quest_objectives_quest_sort on quest_objectives(quest_id, sort_order, objective_id);
 
 -- 목표에 필요한 아이템
@@ -186,8 +186,8 @@ create table if not exists quest_objective_items (
     sort_order integer,
     primary key (objective_id, item_id, item_type)
 );
-create index idx_quest_objective_items_objective_id on quest_objective_items (objective_id);
-create index idx_quest_objective_items_item_id on quest_objective_items (item_id);
+create index if not exists idx_quest_objective_items_objective_id on quest_objective_items (objective_id);
+create index if not exists idx_quest_objective_items_item_id on quest_objective_items (item_id);
 
 -- 목표에 필요한 키(OR 그룹 지원)
 create table if not exists quest_objective_required_keys (
@@ -195,7 +195,7 @@ create table if not exists quest_objective_required_keys (
     key_id text,
     primary key (objective_id, key_id)
 );
-create index idx_quest_objective_required_keys_objective_id on quest_objective_required_keys (objective_id);
+create index if not exists idx_quest_objective_required_keys_objective_id on quest_objective_required_keys (objective_id);
 
 -- 목표와 맵의 연관
 create table if not exists quest_objective_maps (
@@ -204,8 +204,8 @@ create table if not exists quest_objective_maps (
     sort_order integer,
     primary key (objective_id, map_id)
 );
-create index idx_quest_objective_maps_objective_id on quest_objective_maps (objective_id);
-create index idx_quest_objective_maps_map_id on quest_objective_maps (map_id);
+create index if not exists idx_quest_objective_maps_objective_id on quest_objective_maps (objective_id);
+create index if not exists idx_quest_objective_maps_map_id on quest_objective_maps (map_id);
 
 
 -- 퀘스트 완료 보상(스킬)
@@ -218,7 +218,7 @@ create table if not exists quest_finish_reward_skills (
     sort_order integer,
     primary key (quest_id, name_en, name_ko, name_ja)
 );
-create index idx_quest_finish_reward_skills_quest_id on quest_finish_reward_skills (quest_id);
+create index if not exists idx_quest_finish_reward_skills_quest_id on quest_finish_reward_skills (quest_id);
 
 -- 퀘스트 완료 보상(트레이더 평판)
 create table if not exists quest_finish_reward_trader_standing (
@@ -228,7 +228,7 @@ create table if not exists quest_finish_reward_trader_standing (
     sort_order integer,
     primary key (quest_id, trader_id)
 );
-create index idx_quest_finish_reward_trader_standing_quest_id on quest_finish_reward_trader_standing (quest_id);
+create index if not exists idx_quest_finish_reward_trader_standing_quest_id on quest_finish_reward_trader_standing (quest_id);
 
 -- 퀘스트 완료 보상(오퍼 해금)
 create table if not exists quest_finish_reward_offer_unlock (
@@ -240,7 +240,7 @@ create table if not exists quest_finish_reward_offer_unlock (
     sort_order integer,
     primary key (quest_id, offer_id, item_id)
 );
-create index idx_quest_finish_reward_offer_unlock_quest_id on quest_finish_reward_offer_unlock (quest_id);
+create index if not exists idx_quest_finish_reward_offer_unlock_quest_id on quest_finish_reward_offer_unlock (quest_id);
 
 -- 퀘스트 완료 보상(아이템)
 create table if not exists quest_finish_reward_items (
@@ -250,8 +250,8 @@ create table if not exists quest_finish_reward_items (
     sort_order integer,
     primary key (quest_id, item_id)
 );
-create index idx_quest_finish_reward_items_quest_id on quest_finish_reward_items (quest_id);
-create index idx_quest_finish_reward_items_item_id on quest_finish_reward_items (item_id);
+create index if not exists idx_quest_finish_reward_items_quest_id on quest_finish_reward_items (quest_id);
+create index if not exists idx_quest_finish_reward_items_item_id on quest_finish_reward_items (item_id);
 
 -- 퀘스트 완료 보상(제작 해금)
 create table if not exists quest_finish_reward_craft_unlocks (
@@ -261,8 +261,8 @@ create table if not exists quest_finish_reward_craft_unlocks (
     sort_order integer,
     primary key (quest_id, craft_id)
 );
-create index idx_quest_finish_reward_craft_unlocks_quest_id on quest_finish_reward_craft_unlocks (quest_id);
-create index idx_quest_finish_reward_craft_unlocks_craft_id on quest_finish_reward_craft_unlocks (craft_id);
+create index if not exists idx_quest_finish_reward_craft_unlocks_quest_id on quest_finish_reward_craft_unlocks (quest_id);
+create index if not exists idx_quest_finish_reward_craft_unlocks_craft_id on quest_finish_reward_craft_unlocks (craft_id);
 
 create table if not exists traders
 (
@@ -284,8 +284,8 @@ create table if not exists trader_barters
     trader_level integer
 );
 
-create index idx_trader_barters_trader_id on trader_barters(trader_id);
-create index idx_trader_barters_trader_id_level on trader_barters(trader_id, trader_level);
+create index if not exists idx_trader_barters_trader_id on trader_barters(trader_id);
+create index if not exists idx_trader_barters_trader_id_level on trader_barters(trader_id, trader_level);
 
 create table if not exists barter_required_items
 (
@@ -294,8 +294,8 @@ create table if not exists barter_required_items
     item_id text,
     quantity integer
 );
-create index idx_barter_required_items_barter_id on barter_required_items(barter_id);
-create index idx_barter_required_items_item_id on barter_required_items(item_id);
+create index if not exists idx_barter_required_items_barter_id on barter_required_items(barter_id);
+create index if not exists idx_barter_required_items_item_id on barter_required_items(item_id);
 
 create table if not exists barter_reward_items
 (
@@ -304,8 +304,8 @@ create table if not exists barter_reward_items
     item_id text,
     quantity integer
 );
-create index idx_barter_reward_items_barter_id on barter_reward_items(barter_id);
-create index idx_barter_reward_items_item_id on barter_reward_items(item_id);
+create index if not exists idx_barter_reward_items_barter_id on barter_reward_items(barter_id);
+create index if not exists idx_barter_reward_items_item_id on barter_reward_items(item_id);
 
 create table if not exists autocomplete_items
 (
@@ -332,7 +332,7 @@ create table if not exists news_items
     sort_order integer,
     update_time timestamptz default now()
 );
-create index idx_news_items_sort_order on news_items(sort_order);
+create index if not exists idx_news_items_sort_order on news_items(sort_order);
 
 create table if not exists hideout_master
 (
@@ -351,8 +351,8 @@ create table if not exists hideout_levels
     hideout_level integer,
     construction_time integer
 );
-create index idx_hideout_levels_hideout_id on hideout_levels(master_id);
-create index idx_hideout_levels_hideout_id_level on hideout_levels(master_id, hideout_level);
+create index if not exists idx_hideout_levels_hideout_id on hideout_levels(master_id);
+create index if not exists idx_hideout_levels_hideout_id_level on hideout_levels(master_id, hideout_level);
 
 create table if not exists hideout_item_require
 (
@@ -362,8 +362,8 @@ create table if not exists hideout_item_require
     quantity integer,
     in_raid boolean
 );
-create index idx_hideout_item_require_level on hideout_item_require(hideout_level_id);
-create index idx_hideout_item_require_item on hideout_item_require(item_id);
+create index if not exists idx_hideout_item_require_level on hideout_item_require(hideout_level_id);
+create index if not exists idx_hideout_item_require_item on hideout_item_require(item_id);
 
 create table if not exists hideout_trader_require
 (
@@ -372,8 +372,8 @@ create table if not exists hideout_trader_require
     trader_id text,
     trader_level integer
 );
-create index idx_hideout_trader_require_level on hideout_trader_require(hideout_level_id);
-create index idx_hideout_trader_require_trader on hideout_trader_require(trader_id);
+create index if not exists idx_hideout_trader_require_level on hideout_trader_require(hideout_level_id);
+create index if not exists idx_hideout_trader_require_trader on hideout_trader_require(trader_id);
 
 create table if not exists hideout_station_require
 (
@@ -382,8 +382,8 @@ create table if not exists hideout_station_require
     require_master_id text,
     station_level integer
 );
-create index idx_hideout_station_require_level on hideout_station_require(hideout_level_id);
-create index idx_hideout_station_require_station on hideout_station_require(require_master_id);
+create index if not exists idx_hideout_station_require_level on hideout_station_require(hideout_level_id);
+create index if not exists idx_hideout_station_require_station on hideout_station_require(require_master_id);
 
 create table if not exists hideout_crafts
 (
@@ -393,9 +393,9 @@ create table if not exists hideout_crafts
     duration numeric,
     reward_quantity numeric
 );
-create index idx_hideout_crafts_hideout_level_id on hideout_crafts(hideout_level_id);
-create index idx_hideout_crafts_reward_item_id on hideout_crafts(reward_item_id);
-create index idx_hideout_crafts_hideout_level_reward_item on hideout_crafts(hideout_level_id, reward_item_id);
+create index if not exists idx_hideout_crafts_hideout_level_id on hideout_crafts(hideout_level_id);
+create index if not exists idx_hideout_crafts_reward_item_id on hideout_crafts(reward_item_id);
+create index if not exists idx_hideout_crafts_hideout_level_reward_item on hideout_crafts(hideout_level_id, reward_item_id);
 
 create table if not exists hideout_craft_require_items
 (
@@ -404,9 +404,9 @@ create table if not exists hideout_craft_require_items
     item_id text,
     quantity numeric
 );
-create index idx_craft_require_items_craft on hideout_craft_require_items(craft_id);
-create index idx_craft_require_items_item on hideout_craft_require_items(item_id);
-create index idx_craft_require_items_craft_item on hideout_craft_require_items(craft_id, item_id);
+create index if not exists idx_craft_require_items_craft on hideout_craft_require_items(craft_id);
+create index if not exists idx_craft_require_items_item on hideout_craft_require_items(item_id);
+create index if not exists idx_craft_require_items_craft_item on hideout_craft_require_items(craft_id, item_id);
 
 create table if not exists hideout_skill_require
 (
@@ -418,7 +418,7 @@ create table if not exists hideout_skill_require
     name_ja text,
     image text
 );
-create index idx_hideout_skill_require_level on hideout_skill_require(hideout_level_id);
+create index if not exists idx_hideout_skill_require_level on hideout_skill_require(hideout_level_id);
 
 create table if not exists hideout_bonus
 (
@@ -433,7 +433,7 @@ create table if not exists hideout_bonus
     skill_name_ja text,
     bonus_value numeric(10, 4)
 );
-create index idx_hideout_bonus_level on hideout_bonus(hideout_level_id);
+create index if not exists idx_hideout_bonus_level on hideout_bonus(hideout_level_id);
 
 -- 여기서 부터 인덱스 걸기
 create table if not exists user_info
@@ -542,9 +542,9 @@ create table if not exists item_trader_prices
         or (game_mode <> 'pvp-season' and season_id is null)
     )
 );
-create index idx_item_trader_prices_item_id on item_trader_prices(item_id);
-create index idx_item_trader_prices_trader_id on item_trader_prices(trader_id);
-create index idx_item_trader_prices_item_mode on item_trader_prices(item_id, game_mode, season_id);
+create index if not exists idx_item_trader_prices_item_id on item_trader_prices(item_id);
+create index if not exists idx_item_trader_prices_trader_id on item_trader_prices(trader_id);
+create index if not exists idx_item_trader_prices_item_mode on item_trader_prices(item_id, game_mode, season_id);
 
 -- 아이템 시세 조회 별도 테이블 말고 조회 쿼리로 수정
 select
@@ -569,7 +569,7 @@ create table if not exists item_price_history
         or (game_mode <> 'pvp-season' and season_id is null)
     )
 );
-create index idx_item_price_history_time on item_price_history(price_time desc);
+create index if not exists idx_item_price_history_time on item_price_history(price_time desc);
 create index if not exists idx_item_price_history_item_mode_season_time
     on item_price_history(item_id, game_mode, season_id, price_time);
 
@@ -746,8 +746,8 @@ create table if not exists consumable_items (
 create index if not exists idx_consumable_items_consumable_type
     on consumable_items(consumable_type);
 
-create table if not exists 
- (
+create table if not exists consumable_cures
+(
     item_id text,
     cure text,
     primary key (item_id, cure)
@@ -782,7 +782,7 @@ create table if not exists user_footprint
   request_time timestamptz default now(),
   execute_time timestamptz default now()
 );
-create index idx_user_footprint_request_time on user_footprint (request_time desc);
+create index if not exists idx_user_footprint_request_time on user_footprint (request_time desc);
 
 create table if not exists sitemap
 (
@@ -961,7 +961,7 @@ create table if not exists progress_item (
     progress_type text,
     update_time timestamptz default now()
 );
-CREATE INDEX idx_progress_item_type ON progress_item (progress_type);
+CREATE INDEX if not exists idx_progress_item_type ON progress_item (progress_type);
 
 create table if not exists kord_breach_modifier (
     id text primary key,
@@ -1214,17 +1214,17 @@ create table if not exists community_posts_reactions (
 COMMENT ON COLUMN community_posts_reactions.post_id IS '게시글 snoflake 아이디';
 COMMENT ON COLUMN community_posts_reactions.user_email IS '리액션 누른 사용자 이메일';
 COMMENT ON COLUMN community_posts_reactions.reaction_type IS '리액션 종류 (1: 좋아요, 2: 싫어요)';
-COMMENT ON COLUMN community_posts_reactions.update_time IS '게시글 snoflake 아이디';
+COMMENT ON COLUMN community_posts_reactions.update_time IS '리액션 갱신 시간';
 
 -- 조회 성능을 위한 인덱스
-CREATE INDEX idx_post_reactions_post ON community_posts_reactions(post_id);
+CREATE INDEX if not exists idx_post_reactions_post ON community_posts_reactions(post_id);
 
 create table if not exists COMMUNITY_POSTS_HOT_ISSUE (
     post_id bigint PRIMARY KEY,
     issue_time timestamptz default now()
 );
 COMMENT ON COLUMN COMMUNITY_POSTS_HOT_ISSUE.post_id IS '게시글 snoflake 아이디';
-COMMENT ON COLUMN COMMUNITY_POSTS_HOT_ISSUE.post_id IS '게시글 핫이슈 시간';
+COMMENT ON COLUMN COMMUNITY_POSTS_HOT_ISSUE.issue_time IS '게시글 핫이슈 시간';
 create index if not exists idx_community_posts_hot_issue_time
     on community_posts_hot_issue(issue_time desc);
 
@@ -1246,7 +1246,6 @@ create table if not exists community_posts_bookmark (
 );
 
 -- 댓글
-CREATE EXTENSION IF NOT EXISTS ltree;
 
 create table if not exists community_comments (
     id text PRIMARY KEY,                  -- nanoid
@@ -1262,14 +1261,13 @@ create table if not exists community_comments (
 );
 
 -- 성능 인덱스
-CREATE INDEX idx_comments_path ON community_comments USING GIST (path);
-CREATE INDEX idx_comments_post_id ON community_comments (post_id);
+CREATE INDEX if not exists idx_comments_path ON community_comments USING GIST (path);
+CREATE INDEX if not exists idx_comments_post_id ON community_comments (post_id);
 
 -- ilike 검색 인덱스
-create extension if not exists pg_trgm;
-create index idx_posts_title_trgm on community_posts using gin (title gin_trgm_ops);
-create index idx_posts_contents_trgm on community_posts using gin (contents gin_trgm_ops);
-create index idx_comments_contents_trgm on community_comments using gin (contents gin_trgm_ops);
+create index if not exists idx_posts_title_trgm on community_posts using gin (title gin_trgm_ops);
+create index if not exists idx_posts_contents_trgm on community_posts using gin (contents gin_trgm_ops);
+create index if not exists idx_comments_contents_trgm on community_comments using gin (contents gin_trgm_ops);
 
 create table if not exists community_comments_reactions (
     comment_id text,
@@ -1351,8 +1349,8 @@ create table if not exists live_map_floors
     sort_order integer,
     update_time timestamptz default now()
 );
-create index idx_live_map_floors_map_id on live_map_floors(map_id);
-create unique index idx_live_map_floors_map_floor on live_map_floors(map_id, floor_no);
+create index if not exists idx_live_map_floors_map_id on live_map_floors(map_id);
+create unique index if not exists idx_live_map_floors_map_floor on live_map_floors(map_id, floor_no);
 
 create table if not exists live_map_floor_zones
 (
@@ -1383,13 +1381,13 @@ create table if not exists live_map_points
     z numeric,
     update_time timestamptz default now()
 );
-create index idx_live_map_points_objective_id
+create index if not exists idx_live_map_points_objective_id
     on live_map_points(objective_id)
     where objective_id is not null;
-create index idx_live_map_points_map_id on live_map_points(map_id);
-create index idx_live_map_points_quest_id on live_map_points(quest_id);
-create index idx_live_map_points_floor_id on live_map_points(floor_id);
-create index idx_live_map_points_map_floor on live_map_points(map_id, floor_id);
+create index if not exists idx_live_map_points_map_id on live_map_points(map_id);
+create index if not exists idx_live_map_points_quest_id on live_map_points(quest_id);
+create index if not exists idx_live_map_points_floor_id on live_map_points(floor_id);
+create index if not exists idx_live_map_points_map_floor on live_map_points(map_id, floor_id);
 create index if not exists idx_live_map_points_map_floor_id on live_map_points(map_id, floor_id, id);
 create index if not exists idx_live_map_points_quest_floor_id on live_map_points(quest_id, floor_id, id);
 
@@ -1404,7 +1402,7 @@ create table if not exists live_map_point_details
     sort_order integer,
     update_time timestamptz default now()
 );
-create index idx_live_map_point_details_point_id on live_map_point_details(point_id);
+create index if not exists idx_live_map_point_details_point_id on live_map_point_details(point_id);
 
 create table if not exists live_map_static_points
 (
@@ -1426,10 +1424,10 @@ create table if not exists live_map_static_points
     sort_order integer,
     update_time timestamptz default now()
 );
-create index idx_live_map_static_points_map_id on live_map_static_points(map_id);
-create index idx_live_map_static_points_category on live_map_static_points(category);
-create index idx_live_map_static_points_map_category on live_map_static_points(map_id, category);
-create index idx_live_map_static_points_floor_id on live_map_static_points(floor_id);
+create index if not exists idx_live_map_static_points_map_id on live_map_static_points(map_id);
+create index if not exists idx_live_map_static_points_category on live_map_static_points(category);
+create index if not exists idx_live_map_static_points_map_category on live_map_static_points(map_id, category);
+create index if not exists idx_live_map_static_points_floor_id on live_map_static_points(floor_id);
 create index if not exists idx_live_map_static_points_is_use on live_map_static_points(is_use);
 create index if not exists idx_live_map_static_points_map_sort on live_map_static_points(map_id, floor_id, category, sort_order, name_en);
 
