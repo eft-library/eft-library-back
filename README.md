@@ -8,7 +8,7 @@
 
 ## 전체 서비스에서 맡은 역할
 
-<img width="1141" height="955" alt="타르코프 도서관 전체 서비스 구성도" src="https://github.com/user-attachments/assets/e7ed7864-3732-4825-b836-5b6cf2f5ed55" />
+<img width="1170" height="960" alt="261027_arch" src="https://github.com/user-attachments/assets/49d7ab62-f53b-4898-b4fc-8c180b9b3689" />
 
 Cloudflare는 **DNS Only**로 사용합니다. 도메인 해석 이후 HTTPS·WSS 트래픽은 원본 서버의 Nginx Proxy Manager로 직접 연결됩니다. 웹 화면은 Next.js·React가 제공하며, 동적 데이터와 WebSocket 연결은 이 백엔드에서 처리합니다.
 
@@ -148,19 +148,19 @@ python -m pip install 'fastapi[all]' sqlalchemy psycopg2-binary python-dotenv \
 
 프로젝트 루트의 `.env`에 다음 설정을 준비합니다. DB 스키마와 연결할 PostgreSQL·Redis·Kafka·RustFS도 별도로 준비해야 합니다. `.env`의 실제 접속 정보와 인증키는 저장소에 커밋하지 않습니다.
 
-| 설정                                                     | 용도                                                                          |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `API_PREFIX`                                             | 기능 API 접두사. 예: `/api`                                                   |
-| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`           | PostgreSQL 접속 정보                                                          |
-| `V3_DB_NAME`                                             | 정규화된 V3 데이터베이스 이름                                                 |
-| `DB_NAME`                                                | 남아 있는 레거시 경로용 데이터베이스 이름                                     |
-| `GOOGLE_TOKEN_INFO_URL`                                  | Google access token 검증 URL                                                  |
-| `REDIS_HOST`                                             | 위치·알림 연결에 사용. `host:port` 형식으로 설정하면 코드가 `redis://`를 붙임 |
-| `REDIS_URL`                                              | 파티·채팅 Redis URL. 미설정 시 해당 기능은 `REDIS_HOST`를 사용                |
-| `BOOTSTRAP_SERVER`                                       | Kafka broker 주소                                                             |
-| `LOG_TOPIC`, `NOTIFICATION_TOPIC`                        | 접근 기록·사용자 알림 topic                                                   |
-| `RUSTFS_ENDPOINT`, `RUSTFS_ACCESS_KEY`, `RUSTFS_SECRET_KEY` | RustFS 이미지 업로드 저장소 연결                                                     |
-| `API_RATE_LIMIT_PER_MINUTE`                              | 요청 제한 기준. 기본값 `1000`, 현재 프로세스 메모리에서 집계                  |
+| 설정                                                        | 용도                                                                          |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `API_PREFIX`                                                | 기능 API 접두사. 예: `/api`                                                   |
+| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`              | PostgreSQL 접속 정보                                                          |
+| `V3_DB_NAME`                                                | 정규화된 V3 데이터베이스 이름                                                 |
+| `DB_NAME`                                                   | 남아 있는 레거시 경로용 데이터베이스 이름                                     |
+| `GOOGLE_TOKEN_INFO_URL`                                     | Google access token 검증 URL                                                  |
+| `REDIS_HOST`                                                | 위치·알림 연결에 사용. `host:port` 형식으로 설정하면 코드가 `redis://`를 붙임 |
+| `REDIS_URL`                                                 | 파티·채팅 Redis URL. 미설정 시 해당 기능은 `REDIS_HOST`를 사용                |
+| `BOOTSTRAP_SERVER`                                          | Kafka broker 주소                                                             |
+| `LOG_TOPIC`, `NOTIFICATION_TOPIC`                           | 접근 기록·사용자 알림 topic                                                   |
+| `RUSTFS_ENDPOINT`, `RUSTFS_ACCESS_KEY`, `RUSTFS_SECRET_KEY` | RustFS 이미지 업로드 저장소 연결                                              |
+| `API_RATE_LIMIT_PER_MINUTE`                                 | 요청 제한 기준. 기본값 `1000`, 현재 프로세스 메모리에서 집계                  |
 
 파티·채팅 정책에는 `PARTY_CLEANUP_ENABLED`와 `V3_PARTY_INVITE_*` 등의 추가 설정이 있습니다. 사용 범위와 정책은 아래 기능별 문서를 참고합니다. `REDIS_URL`만으로는 위치·알림의 `REDIS_HOST` 설정을 대체하지 못합니다.
 
@@ -183,7 +183,6 @@ uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 구현 과정과 시행착오는 [백엔드 개발 기록](https://velog.io/@poeynus/series/%EB%B0%B1%EC%97%94%EB%93%9C-%EA%B0%9C%EB%B0%9C)에 정리하고 있습니다.
 
 많이 놀러 와주세용!
-
 
 ### RustFS 이미지 저장소 전환
 
