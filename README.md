@@ -20,7 +20,7 @@ flowchart LR
     Desktop[WPF 데스크톱] -->|HTTPS| Proxy
     API --> DB[(PostgreSQL)]
     API <-->|최신 상태 · Pub/Sub| Redis[(Redis)]
-    API -->|이미지 업로드| MinIO[MinIO]
+    API -->|이미지 업로드| ObjectStorage[RustFS / S3]
     API -->|접근 기록 · 알림 이벤트| Kafka[Kafka]
     Kafka --> Consumer[Python Consumers]
     Consumer --> DB
@@ -59,7 +59,7 @@ flowchart LR
     API -->|사용자별 · 동적 요청| Web
 ```
 
-Airflow는 게임 정보를 갱신하고, 백엔드 API 또는 DB에서 읽은 데이터로 화면용 JSON을 생성합니다. 출력 경로는 Airflow 환경의 `/opt/airflow/next-public`입니다. 이 파일을 웹에서 제공하려면 프런트엔드의 public 경로와 연결되어 있어야 합니다. 이미지·업로드 저장소인 MinIO와는 역할이 다릅니다.
+Airflow는 게임 정보를 갱신하고, 백엔드 API 또는 DB에서 읽은 데이터로 화면용 JSON을 생성합니다. 출력 경로는 Airflow 환경의 `/opt/airflow/next-public`입니다. 이 파일을 웹에서 제공하려면 프런트엔드의 public 경로와 연결되어 있어야 합니다. 이미지·업로드 저장소인 RustFS와는 역할이 다릅니다.
 
 시즌 가격은 수집·검증·DB 커밋 이후 정적 JSON을 생성합니다. 현재 시즌 외의 가격은 백엔드에서 시즌을 선택해 조회할 수 있습니다.
 
@@ -135,7 +135,7 @@ sequenceDiagram
 
 ## 실행 환경과 설정
 
-주요 패키지는 FastAPI·Uvicorn, SQLAlchemy·psycopg2-binary, Redis, confluent-kafka, python-dotenv, requests·httpx입니다. 커뮤니티 이미지 처리에는 MinIO·Pillow, 식별자·문자열 처리에는 nanoid·python-slugify 등을 사용합니다.
+주요 패키지는 FastAPI·Uvicorn, SQLAlchemy·psycopg2-binary, Redis, confluent-kafka, python-dotenv, requests·httpx입니다. 커뮤니티 이미지 처리에는 MinIO S3 SDK·Pillow, 식별자·문자열 처리에는 nanoid·python-slugify 등을 사용합니다.
 
 현재 저장소에는 의존성 버전을 고정한 requirements 또는 lock 파일이 없습니다. 아래는 개발 환경 구성 예시이며 운영 환경과 동일한 버전을 보장하지 않습니다.
 
@@ -146,7 +146,7 @@ python -m pip install 'fastapi[all]' sqlalchemy psycopg2-binary python-dotenv \
   redis confluent-kafka requests httpx pytz tzdata minio pillow nanoid python-slugify setuptools
 ```
 
-프로젝트 루트의 `.env`에 다음 설정을 준비합니다. DB 스키마와 연결할 PostgreSQL·Redis·Kafka·MinIO도 별도로 준비해야 합니다. `.env`의 실제 접속 정보와 인증키는 저장소에 커밋하지 않습니다.
+프로젝트 루트의 `.env`에 다음 설정을 준비합니다. DB 스키마와 연결할 PostgreSQL·Redis·Kafka·RustFS도 별도로 준비해야 합니다. `.env`의 실제 접속 정보와 인증키는 저장소에 커밋하지 않습니다.
 
 | 설정                                                     | 용도                                                                          |
 | -------------------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -159,7 +159,7 @@ python -m pip install 'fastapi[all]' sqlalchemy psycopg2-binary python-dotenv \
 | `REDIS_URL`                                              | 파티·채팅 Redis URL. 미설정 시 해당 기능은 `REDIS_HOST`를 사용                |
 | `BOOTSTRAP_SERVER`                                       | Kafka broker 주소                                                             |
 | `LOG_TOPIC`, `NOTIFICATION_TOPIC`                        | 접근 기록·사용자 알림 topic                                                   |
-| `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY` | 이미지 업로드 저장소 연결                                                     |
+| `RUSTFS_ENDPOINT`, `RUSTFS_ACCESS_KEY`, `RUSTFS_SECRET_KEY` | RustFS 이미지 업로드 저장소 연결                                                     |
 | `API_RATE_LIMIT_PER_MINUTE`                              | 요청 제한 기준. 기본값 `1000`, 현재 프로세스 메모리에서 집계                  |
 
 파티·채팅 정책에는 `PARTY_CLEANUP_ENABLED`와 `V3_PARTY_INVITE_*` 등의 추가 설정이 있습니다. 사용 범위와 정책은 아래 기능별 문서를 참고합니다. `REDIS_URL`만으로는 위치·알림의 `REDIS_HOST` 설정을 대체하지 못합니다.
@@ -183,3 +183,25 @@ uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 구현 과정과 시행착오는 [백엔드 개발 기록](https://velog.io/@poeynus/series/%EB%B0%B1%EC%97%94%EB%93%9C-%EA%B0%9C%EB%B0%9C)에 정리하고 있습니다.
 
 많이 놀러 와주세용!
+
+
+### RustFS 이미지 저장소 전환
+
+RustFS의 S3 호환 API에 기존 `minio` Python SDK로 연결합니다. 추가 패키지는 필요하지 않습니다.
+다음 세 환경변수를 모두 지정합니다. 기존 API 주소와 포트는 그대로 사용할 수 있습니다.
+
+```dotenv
+RUSTFS_ENDPOINT=http://rustfs:9000
+RUSTFS_ACCESS_KEY=<RustFS access key>
+RUSTFS_SECRET_KEY=<RustFS secret key>
+```
+
+예시 주소는 실제 S3 API 주소와 기존 사용 포트로 바꿉니다. 콘솔 포트는 사용하지 않습니다.
+`https://`이면 TLS를 사용하며 스킴이 없으면 기존처럼 HTTP로 연결합니다.
+설정 변경 후 백엔드를 재시작합니다.
+
+백엔드는 `eftlibrary` 버킷의 `tkl_community/posts_image/`에 업로드하고
+`https://image.eftlibrary.com/eftlibrary/...` URL을 반환합니다.
+운영 전환 시 기존 객체를 같은 버킷·경로로 이전하고, 업로드 계정의 쓰기 권한 및
+이미지 도메인의 RustFS 연결·읽기 정책을 확인해야 합니다.
+이 코드 변경은 객체 이전, 버킷 생성, 프록시 변경을 수행하지 않습니다.

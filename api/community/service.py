@@ -6,7 +6,7 @@ import os
 from typing import Optional
 
 from fastapi import File, HTTPException, UploadFile
-from minio import Minio
+from util.object_storage_v3 import create_object_storage_client_v3
 from minio.error import S3Error
 from PIL import Image
 from slugify import slugify
@@ -35,12 +35,7 @@ snowflake = SnowflakeGenerator(datacenter_id=1, worker_id=1)
 bucket_name = "eftlibrary"
 folder_name = "tkl_community/posts_image"
 
-minio_client = Minio(
-    os.getenv("MINIO_ENDPOINT").replace("http://", "").replace("https://", ""),
-    access_key=os.getenv("MINIO_ACCESS_KEY"),
-    secret_key=os.getenv("MINIO_SECRET_KEY"),
-    secure=False,
-)
+object_storage_client_v3 = create_object_storage_client_v3()
 
 
 class CommunityServiceV3:
@@ -55,7 +50,7 @@ class CommunityServiceV3:
             buffer = io.BytesIO()
             image.save(buffer, format="WEBP", quality=90, method=6)
             buffer.seek(0)
-            minio_client.put_object(
+            object_storage_client_v3.put_object(
                 bucket_name,
                 object_name,
                 data=buffer,
@@ -63,7 +58,7 @@ class CommunityServiceV3:
                 content_type="image/webp",
             )
         except S3Error as e:
-            raise HTTPException(status_code=500, detail=f"MinIO 업로드 실패: {e}")
+            raise HTTPException(status_code=500, detail=f"이미지 저장소 업로드 실패: {e}")
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"이미지 처리 실패: {e}")
 
