@@ -186,3 +186,5 @@ document_coordinate/
 log.out
 log.out.*
 logs/
+# V3 daily runtime logs
+log_history/

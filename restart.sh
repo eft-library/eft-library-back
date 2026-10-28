@@ -13,14 +13,16 @@ start_server() {
     exit 1
   fi
 
-  echo "FastAPI 서버 실행 (포트 $PORT)"
-  nohup uvicorn main:app \
+  mkdir -p log_history || exit 1
+
+  echo "FastAPI 서버 실행 (포트 $PORT, 로그: log_history/YYYY-MM-DD.out)"
+  PYTHONUNBUFFERED=1 nohup uvicorn main:app \
     --ws websockets-sansio \
     --workers 9 \
     --host=0.0.0.0 \
     --port=$PORT \
     --no-access-log \
-    > log.out 2>&1 &
+    > >(nohup python -u util/daily_log_v3.py log_history 2>> log_history/collector-error.out) 2>&1 &
 
   echo $! > $PID_FILE
 }
