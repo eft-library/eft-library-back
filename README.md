@@ -8,7 +8,7 @@
 
 ## 전체 서비스에서 맡은 역할
 
-<img width="1351" height="1167" alt="261029_detail_arch" src="https://github.com/user-attachments/assets/14993361-38d8-4a79-9d8b-15eba8ed009e" />
+<img width="1344" height="1178" alt="261029_detail_arch" src="https://github.com/user-attachments/assets/b995e80f-8827-49a1-9d35-13d3db581014" />
 
 Cloudflare는 **DNS Only**로 사용합니다. 도메인 해석 이후 HTTPS·WSS 트래픽은 원본 서버의 Nginx Proxy Manager로 직접 연결됩니다. 웹 화면은 Next.js·React가 제공하며, 동적 데이터와 WebSocket 연결은 이 백엔드에서 처리합니다.
 
