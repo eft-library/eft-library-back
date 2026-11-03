@@ -16,7 +16,7 @@ class MenuGroup(Database.Base):
     sub_menus = relationship(
         "MenuSubGroup",
         backref="main_menu",
-        order_by="MenuSubGroupV3.sort_order",
+        order_by=lambda: MenuSubGroup.sort_order,
     )
 
 
