@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi import HTTPException
 from sqlalchemy import select
 
 from database import Database
@@ -12,6 +11,8 @@ from .realtime_schemas import PartyHeartbeat, PartyPing, PartyPosition, PartyVie
 from .realtime_store import PartyRealtimeStore, get_party_realtime_store, membership_epoch
 from .security import PartyRateLimiter
 from .service import PartyService
+
+from util.http_exceptions import HttpError
 
 
 @dataclass(frozen=True)
@@ -31,7 +32,7 @@ class PartyRealtimeService:
         room = service._room(connection.room_id)
         member = service._member(room.id, connection.email)
         if member.id != connection.member_id or membership_epoch(member.joined_at) != connection.epoch:
-            raise HTTPException(403, "PARTY_MEMBERSHIP_CHANGED")
+            raise HttpError.PARTY_MEMBERSHIP_CHANGED.exception()
         return room, member
 
     def _snapshot(self, service: PartyService, room, member, reason: str) -> dict:

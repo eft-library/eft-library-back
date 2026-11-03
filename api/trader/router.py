@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -10,6 +10,8 @@ from api.response import CustomResponse
 from api.trader.service import TraderService
 from database import Database
 from util.constants import HTTPCode
+
+from util.http_exceptions import HttpError
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Trader"])
@@ -22,7 +24,7 @@ def get_session():
             yield session
     except SQLAlchemyError:
         logger.exception("Trader lookup failed")
-        raise HTTPException(500, "Trader lookup failed") from None
+        raise HttpError.TRADER_LOOKUP_FAILED.exception() from None
 
 
 SessionDependency = Annotated[Session, Depends(get_session)]
@@ -64,5 +66,5 @@ def get_trader_offer(
     season_id = TraderService.resolve_season(session, game_mode, season_id)
     result = TraderService.get_offers(session, game_mode, season_id, offer_id=offer_id)
     if not result["offers"]:
-        raise HTTPException(404, "Offer not found")
+        raise HttpError.OFFER_NOT_FOUND.exception()
     return success(result["offers"][0])

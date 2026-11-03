@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi.security import OAuth2PasswordBearer
 
 from api.community.community_req_models import (
@@ -21,6 +21,8 @@ from api.response import CustomResponse
 from api.user.util import UserUtil
 from util.constants import HTTPCode
 
+from util.http_exceptions import HttpError
+
 router = APIRouter(tags=["Community"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
@@ -30,7 +32,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 async def upload_image(file: UploadFile = File(...)):
     result = CommunityService.upload_image(file)
     if result is None:
-        raise HTTPException(status_code=500, detail="이미지 처리 실패")
+        raise HttpError.IMAGE_PROCESSING_FAILED.exception()
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 

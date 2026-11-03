@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from api.news.service import NewsService
 from api.response import CustomResponse
 from util.constants import HTTPCode
 from api.constants import Message
+
+from util.http_exceptions import HttpError
 
 router = APIRouter(tags=["News"])
 
@@ -31,9 +33,9 @@ def get_event_quest(page: int, page_size: int, info_type: str):
 @router.get("/v3/information/{info_type}/detail/{information_id}")
 def get_information_by_id(info_type: str, information_id: str):
     if info_type not in ["PATCH-NOTES", "NOTICE", "EVENT"]:
-        raise HTTPException(status_code=400, detail="Invalid information type")
+        raise HttpError.INVALID_INFORMATION_TYPE.exception()
 
     information = NewsService.get_information_by_id(information_id, info_type)
     if information is None:
-        raise HTTPException(status_code=410, detail="Removed")
+        raise HttpError.RESOURCE_REMOVED.exception()
     return CustomResponse.response(information, HTTPCode.OK, Message.SUCCESS)

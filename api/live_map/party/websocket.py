@@ -18,6 +18,8 @@ from .realtime_service import PartyRealtimeService
 from .realtime_store import party_redis_url
 from .security import authenticate_party_user
 
+from util.http_exceptions import HttpError
+
 
 logger = logging.getLogger("api.live_map.party")
 
@@ -35,9 +37,9 @@ async def receive_packet(websocket: WebSocket) -> str:
         raise WebSocketDisconnect(packet.get("code", 1000))
     text = packet.get("text")
     if text is None:
-        raise HTTPException(422, "TEXT_JSON_REQUIRED")
+        raise HttpError.TEXT_JSON_REQUIRED.exception()
     if len(text.encode("utf-8")) > 8192:
-        raise HTTPException(413, "MESSAGE_TOO_LARGE")
+        raise HttpError.MESSAGE_TOO_LARGE.exception()
     return text
 
 
@@ -70,11 +72,11 @@ async def party_socket_handler(websocket: WebSocket, room_id: UUID):
         try:
             raw = await asyncio.wait_for(receive_packet(websocket), timeout=10)
         except TimeoutError:
-            raise HTTPException(408, "AUTH_TIMEOUT") from None
+            raise HttpError.AUTH_TIMEOUT.exception() from None
         try:
             auth = PartySocketAuth.model_validate_json(raw)
         except ValidationError:
-            raise HTTPException(401, "AUTH_MESSAGE_REQUIRED") from None
+            raise HttpError.AUTH_MESSAGE_REQUIRED.exception() from None
         email = await run_in_threadpool(
             authenticate_party_user,
             HTTPAuthorizationCredentials(scheme="Bearer", credentials=auth.token.get_secret_value()),
@@ -96,7 +98,7 @@ async def party_socket_handler(websocket: WebSocket, room_id: UUID):
                     done, _ = await asyncio.wait(tasks, timeout=1, return_when=asyncio.FIRST_COMPLETED)
                     now = time.monotonic()
                     if now - last_received >= service.store.lease_seconds:
-                        raise HTTPException(408, "HEARTBEAT_TIMEOUT")
+                        raise HttpError.HEARTBEAT_TIMEOUT.exception()
                     if now - started >= 900:
                         await socket_error(websocket, 401, "SESSION_REFRESH_REQUIRED")
                         await websocket.close(code=1012)
@@ -112,7 +114,7 @@ async def party_socket_handler(websocket: WebSocket, room_id: UUID):
                         except ValidationError:
                             invalid_messages += 1
                             if invalid_messages >= 3:
-                                raise HTTPException(400, "TOO_MANY_INVALID_MESSAGES") from None
+                                raise HttpError.TOO_MANY_INVALID_MESSAGES.exception() from None
                             await socket_error(websocket, 422, "INVALID_MESSAGE")
                         except HTTPException as exc:
                             if exc.status_code not in (422, 429):

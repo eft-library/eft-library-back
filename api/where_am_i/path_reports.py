@@ -2,7 +2,7 @@
 import logging
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import BigInteger, CheckConstraint, Column, DateTime, Identity, String, Text, func
 from sqlalchemy.exc import SQLAlchemyError
@@ -12,6 +12,8 @@ from api.response import CustomResponse
 from database import Database
 from util.constants import HTTPCode
 from .analytics import DesktopAnalyticsRoute
+
+from util.http_exceptions import HttpError
 
 logger = logging.getLogger('api.where_am_i.path_reports')
 router = APIRouter(route_class=DesktopAnalyticsRoute)
@@ -64,5 +66,5 @@ def create_path_report(report: PathReportRequest):
     except SQLAlchemyError as error:
         # Database exceptions may embed bound parameters (including private paths).
         logger.warning('Path report storage unavailable (%s)', type(error).__name__)
-        raise HTTPException(status_code=503, detail='PATH_REPORT_STORAGE_UNAVAILABLE') from None
+        raise HttpError.PATH_REPORT_STORAGE_UNAVAILABLE.exception() from None
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

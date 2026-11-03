@@ -18,6 +18,8 @@ from .models import (
     ChatInvitePreferences, ChatConnection, ChatBlock, ChatMessage, ChatReport, ChatRestriction, ChatUser, PartyInvitation,
 )
 
+from util.http_exceptions import HttpError
+
 
 def utc_now():
     return datetime.now(timezone.utc)
@@ -51,7 +53,7 @@ class ChatService:
     def target(self, user_id):
         user = self.session.get(ChatUser, user_id)
         if user is None:
-            raise HTTPException(404, 'CHAT_USER_NOT_FOUND')
+            raise HttpError.CHAT_USER_NOT_FOUND.exception()
         return user
 
     def public_user(self, user_id):
@@ -61,7 +63,7 @@ class ChatService:
 
     def admin(self, user):
         if not self.party._account(user.user_email).is_admin:
-            raise HTTPException(403, 'CHAT_ADMIN_REQUIRED')
+            raise HttpError.CHAT_ADMIN_REQUIRED.exception()
 
     def lock_user(self, user):
         self.session.scalar(select(ChatUser).where(ChatUser.id == user.id).with_for_update())
@@ -74,10 +76,10 @@ class ChatService:
 
     def channel(self, user, channel, room_id):
         if (channel == 'party') != (room_id is not None):
-            raise HTTPException(422, 'CHAT_INVALID_CHANNEL')
+            raise HttpError.CHAT_INVALID_CHANNEL.exception()
         if channel == 'party':
             if user is None:
-                raise HTTPException(401, 'LOGIN_REQUIRED')
+                raise HttpError.LOGIN_REQUIRED.exception()
             self.party._room(room_id)
             self.party._member(room_id, user.user_email)
 
@@ -130,7 +132,7 @@ class ChatService:
                     raise ValueError
                 filters.append(tuple_(ChatMessage.create_time, ChatMessage.id) < tuple_(stamp, UUID(message_id)))
             except (ValueError, TypeError, KeyError):
-                raise HTTPException(422, 'CHAT_INVALID_CURSOR') from None
+                raise HttpError.CHAT_INVALID_CURSOR.exception() from None
         rows = list(self.session.scalars(select(ChatMessage).where(*filters).order_by(
             ChatMessage.create_time.desc(), ChatMessage.id.desc(),
         ).limit(limit + 1)))
@@ -139,7 +141,7 @@ class ChatService:
 
     def send(self, user, data):
         if user is None:
-            raise HTTPException(401, 'LOGIN_REQUIRED')
+            raise HttpError.LOGIN_REQUIRED.exception()
         self.channel(user, data.channel, data.room_id)
         self.lock_user(user)  # serializes idempotency, repetition and moderation per sender
         existing = self.session.scalar(select(ChatMessage).where(
@@ -149,11 +151,11 @@ class ChatService:
             if existing.channel != data.channel or existing.room_id != data.room_id or (
                 existing.deleted_at is None and existing.message != data.message
             ):
-                raise HTTPException(409, 'CHAT_REQUEST_ID_CONFLICT')
+                raise HttpError.CHAT_REQUEST_ID_CONFLICT.exception()
             return {'message_id': str(existing.id), 'request_id': str(data.request_id), 'duplicate': True}
         restriction = self.session.get(ChatRestriction, user.id)
         if restriction and (restriction.expires_at is None or restriction.expires_at > utc_now()):
-            raise HTTPException(403, 'CHAT_RESTRICTED')
+            raise HttpError.CHAT_RESTRICTED.exception()
         self.rate(user, 'send-short', 5, 5)
         self.rate(user, 'send-minute', 30)
         if data.channel == 'lobby':
@@ -163,7 +165,7 @@ class ChatService:
                 ChatMessage.create_time > utc_now() - timedelta(seconds=30),
             ).limit(1))
             if repeated:
-                raise HTTPException(429, 'CHAT_REPEATED_MESSAGE', headers={'Retry-After': '30'})
+                raise HttpError.CHAT_REPEATED_MESSAGE.exception(headers={'Retry-After': '30'})
         message = ChatMessage(id=uuid4(), user_id=user.id, channel=data.channel,
                                 room_id=data.room_id, request_id=data.request_id,
                                 message=data.message, create_time=utc_now())
@@ -214,7 +216,7 @@ class ChatService:
     def block(self, user, target_id, remove=False):
         self.target(target_id)
         if user.id == target_id:
-            raise HTTPException(422, 'CHAT_CANNOT_BLOCK_SELF')
+            raise HttpError.CHAT_CANNOT_BLOCK_SELF.exception()
         self.lock_user(user)
         block = self.session.get(ChatBlock, (user.id, target_id))
         if remove and block:
@@ -230,14 +232,14 @@ class ChatService:
     def report(self, user, message_id, data):
         message = self.session.get(ChatMessage, message_id)
         if message is None or message.deleted_at or not self.retained(message):
-            raise HTTPException(404, 'CHAT_MESSAGE_NOT_FOUND')
+            raise HttpError.CHAT_MESSAGE_NOT_FOUND.exception()
         self.channel(user, message.channel, message.room_id)
         self.lock_user(user)
         existing = self.session.scalar(select(ChatReport).where(
             ChatReport.user_id == user.id, ChatReport.message_id == message_id,
         ))
         if existing:
-            raise HTTPException(409, 'CHAT_ALREADY_REPORTED')
+            raise HttpError.CHAT_ALREADY_REPORTED.exception()
         self.rate(user, 'report', 10)
         report = ChatReport(id=uuid4(), user_id=user.id, message_id=message_id,
                               **data.model_dump(), create_time=utc_now())
@@ -248,7 +250,7 @@ class ChatService:
         self.admin(user)
         message = self.session.scalar(select(ChatMessage).where(ChatMessage.id == message_id).with_for_update())
         if message is None:
-            raise HTTPException(404, 'CHAT_MESSAGE_NOT_FOUND')
+            raise HttpError.CHAT_MESSAGE_NOT_FOUND.exception()
         if message.deleted_at is None:
             message.deleted_at, message.message = utc_now(), ''
             self.queue('message_deleted', {'message_id': str(message.id)})
@@ -332,7 +334,7 @@ class ChatService:
     def invite_receiver_checks(self, sender, target):
         if not self.invite_preferences(target)['allow_party_invites'] or self.blocked(target, sender.id):
             # Same response for opt-out and a private reverse block.
-            raise HTTPException(403, 'PARTY_INVITATIONS_UNAVAILABLE')
+            raise HttpError.PARTY_INVITATIONS_UNAVAILABLE.exception()
 
     def invite_abuse_checks(self, sender, target):
         self.invite_receiver_checks(sender, target)
@@ -344,24 +346,24 @@ class ChatService:
         if rejected_at is not None:
             retry = math.ceil((rejected_at + timedelta(seconds=policy.rejection_cooldown_seconds) - timestamp).total_seconds())
             if retry > 0:
-                raise HTTPException(429, 'PARTY_INVITATION_REJECT_COOLDOWN', headers={'Retry-After': str(retry)})
+                raise HttpError.PARTY_INVITATION_REJECT_COOLDOWN.exception(headers={'Retry-After': str(retry)})
         pending = self.session.scalars(select(PartyInvitation).where(
             PartyInvitation.inviter_id == sender.id, PartyInvitation.invitee_id == target.id,
             PartyInvitation.status == 'pending', PartyInvitation.expires_at > timestamp))
         if any(self.invitation_data(row)['status'] == 'pending' for row in pending):
-            raise HTTPException(409, 'PARTY_INVITATION_DUPLICATED')
+            raise HttpError.PARTY_INVITATION_DUPLICATED.exception()
         active = self.session.scalar(select(func.count()).select_from(PartyInvitation).where(
             PartyInvitation.invitee_id == target.id, PartyInvitation.status == 'pending',
             PartyInvitation.expires_at > timestamp))
         if active >= 50:
-            raise HTTPException(429, 'PARTY_INVITATION_LIMIT', headers={'Retry-After': '60'})
+            raise HttpError.PARTY_INVITATION_LIMIT.exception(headers={'Retry-After': '60'})
         recent = list(self.session.scalars(select(PartyInvitation.create_time).where(
             PartyInvitation.inviter_id == sender.id,
             PartyInvitation.create_time > timestamp - timedelta(seconds=policy.sender_window_seconds),
         ).order_by(PartyInvitation.create_time.desc()).limit(policy.sender_limit)))
         if len(recent) >= policy.sender_limit:
             retry = max(1, math.ceil((recent[-1] + timedelta(seconds=policy.sender_window_seconds) - timestamp).total_seconds()))
-            raise HTTPException(429, 'PARTY_INVITATION_RATE_LIMITED', headers={'Retry-After': str(retry)})
+            raise HttpError.PARTY_INVITATION_RATE_LIMITED.exception(headers={'Retry-After': str(retry)})
 
     def user_actions(self, user, target_id, room_id=None):
         target = self.target(target_id)
@@ -381,14 +383,14 @@ class ChatService:
         result['can_unkick'] = member is not None and member.status == 'kicked'
         try:
             if is_self:
-                raise HTTPException(422, 'PARTY_CANNOT_INVITE_SELF')
+                raise HttpError.PARTY_CANNOT_INVITE_SELF.exception()
             self.invite_checks(room, target)
             self.invite_abuse_checks(user, target)
             pending = self.session.scalars(select(PartyInvitation).where(
                 PartyInvitation.room_id == room.id, PartyInvitation.invitee_id == target.id,
                 PartyInvitation.status == 'pending'))
             if any(self.invitation_data(row)['status'] == 'pending' for row in pending):
-                raise HTTPException(409, 'PARTY_INVITATION_DUPLICATED')
+                raise HttpError.PARTY_INVITATION_DUPLICATED.exception()
         except HTTPException as exc:
             result['invite_disabled_reason'] = exc.detail
             retry = (exc.headers or {}).get('Retry-After')
@@ -484,26 +486,26 @@ class ChatService:
 
     def invite_checks(self, room, target):
         if room.closed_at is not None:
-            raise HTTPException(410, 'PARTY_ROOM_CLOSED')
+            raise HttpError.PARTY_ROOM_CLOSED.exception()
         if room.is_locked:
-            raise HTTPException(403, 'PARTY_ROOM_LOCKED')
+            raise HttpError.PARTY_ROOM_LOCKED.exception()
         member = self.session.scalar(select(PartyMember).where(
             PartyMember.room_id == room.id, PartyMember.user_email == target.user_email))
         if member and member.status == 'kicked':
-            raise HTTPException(403, 'PARTY_MEMBER_KICKED')
+            raise HttpError.PARTY_MEMBER_KICKED.exception()
         if self.current_room(target) is not None:
-            raise HTTPException(409, 'PARTY_ALREADY_JOINED')
+            raise HttpError.PARTY_ALREADY_JOINED.exception()
         if len(self.party._joined(room.id)) >= room.max_members:
-            raise HTTPException(409, 'PARTY_ROOM_FULL')
+            raise HttpError.PARTY_ROOM_FULL.exception()
         return member
 
     def create_invitation(self, user, data):
         if user.id == data.invitee_user_id:
-            raise HTTPException(422, 'PARTY_CANNOT_INVITE_SELF')
+            raise HttpError.PARTY_CANNOT_INVITE_SELF.exception()
         target = self.target(data.invitee_user_id)
         room = self.session.scalar(select(PartyRoom).where(PartyRoom.id == data.room_id).with_for_update())
         if room is None:
-            raise HTTPException(404, 'ROOM_NOT_FOUND')
+            raise HttpError.ROOM_NOT_FOUND.exception()
         self.party._owner(room.id, user.user_email)
         self.lock_invite_users(user.id, target.id)
         self.invite_checks(room, target)
@@ -513,13 +515,13 @@ class ChatService:
             PartyInvitation.room_id == room.id, PartyInvitation.invitee_id == target.id,
             PartyInvitation.status == 'pending'))
         if duplicate:
-            raise HTTPException(409, 'PARTY_INVITATION_DUPLICATED')
+            raise HttpError.PARTY_INVITATION_DUPLICATED.exception()
         # Bounded active inbox makes reconnect and room-state reconciliation bounded.
         active = self.session.scalar(select(func.count()).select_from(PartyInvitation).where(
             PartyInvitation.invitee_id == target.id, PartyInvitation.status == 'pending',
             PartyInvitation.expires_at > utc_now()))
         if active >= 50:
-            raise HTTPException(429, 'PARTY_INVITATION_LIMIT', headers={'Retry-After': '60'})
+            raise HttpError.PARTY_INVITATION_LIMIT.exception(headers={'Retry-After': '60'})
         now = self.session.scalar(select(func.clock_timestamp()))
         invitation = PartyInvitation(id=uuid4(), room_id=room.id, inviter_id=user.id,
             invitee_id=target.id, status='pending', status_reason=None,
@@ -534,10 +536,10 @@ class ChatService:
     def handle_invitation(self, user, invitation_id, action):
         invitation = self.session.get(PartyInvitation, invitation_id)
         if invitation is None:
-            raise HTTPException(404, 'PARTY_INVITATION_NOT_FOUND')
+            raise HttpError.PARTY_INVITATION_NOT_FOUND.exception()
         # Never expose another recipient's invitation, even if the UUID is known.
         if action != 'revoke' and invitation.invitee_id != user.id:
-            raise HTTPException(403, 'PARTY_INVITATION_FORBIDDEN')
+            raise HttpError.PARTY_INVITATION_FORBIDDEN.exception()
         room = self.session.scalar(select(PartyRoom).where(
             PartyRoom.id == invitation.room_id).with_for_update())
         self.lock_invite_users(invitation.inviter_id, invitation.invitee_id)
@@ -546,16 +548,16 @@ class ChatService:
             try:
                 self.party._owner(room.id, user.user_email)
             except HTTPException:
-                raise HTTPException(403, 'PARTY_INVITATION_FORBIDDEN') from None
+                raise HttpError.PARTY_INVITATION_FORBIDDEN.exception() from None
         if invitation.expires_at <= utc_now() or invitation.status == 'expired':
-            raise HTTPException(410, 'PARTY_INVITATION_EXPIRED')
+            raise HttpError.PARTY_INVITATION_EXPIRED.exception()
         if invitation.status != 'pending':
-            raise HTTPException(409, 'PARTY_INVITATION_ALREADY_HANDLED')
+            raise HttpError.PARTY_INVITATION_ALREADY_HANDLED.exception()
         if action == 'accept':
             self.invite_receiver_checks(self.target(invitation.inviter_id), user)
             member = self.invite_checks(room, user)
             if member is not None and member.joined_at > invitation.create_time:
-                raise HTTPException(409, 'PARTY_INVITATION_ALREADY_HANDLED')
+                raise HttpError.PARTY_INVITATION_ALREADY_HANDLED.exception()
             joined = self.party._joined(room.id)
             now = utc_now()
             if member is None:
@@ -632,7 +634,7 @@ class ChatService:
         try:
             ids = [UUID(value) for value in store.online_user_ids()]
         except RedisError:
-            raise HTTPException(503, 'CHAT_PRESENCE_UNAVAILABLE') from None
+            raise HttpError.CHAT_PRESENCE_UNAVAILABLE.exception() from None
         if not ids:
             return []
         rows = self.session.execute(select(ChatUser.id, User.nickname).join(

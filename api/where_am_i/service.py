@@ -3,7 +3,6 @@ from database import Database
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from .map_resolution import resolve_map_slug
-from fastapi import HTTPException
 from redis.exceptions import RedisError
 from starlette.concurrency import run_in_threadpool
 from api.where_am_i.req_models import LogLocationRequest, RaidStateRequest, ReqWhereAmI
@@ -13,6 +12,8 @@ from util.location_socket import (
     send_wpf_raid_state as send_wpf_raid_state,
 )
 import logging
+
+from util.http_exceptions import HttpError
 
 logger = logging.getLogger("api.where_am_i")
 
@@ -70,18 +71,18 @@ class WhereAmIService:
     async def send_raid_state(req: RaidStateRequest, analytics_context=None):
         exists = await run_in_threadpool(WhereAmIService.check_wpf_user, req.email)
         if exists is None:
-            raise HTTPException(503, 'RAID_STATE_DATABASE_UNAVAILABLE')
+            raise HttpError.RAID_STATE_DATABASE_UNAVAILABLE.exception()
         if not exists:
-            raise HTTPException(404, 'USER_NOT_FOUND')
+            raise HttpError.USER_NOT_FOUND.exception()
         try:
             map_slug = await run_in_threadpool(resolve_map_slug, req.map)
         except SQLAlchemyError as error:
             logger.warning('Raid map resolution unavailable (%s)', type(error).__name__)
-            raise HTTPException(503, 'RAID_MAP_LOOKUP_UNAVAILABLE') from None
+            raise HttpError.RAID_MAP_LOOKUP_UNAVAILABLE.exception() from None
         if analytics_context is not None:
             analytics_context.update(map_resolved=True, map_slug=map_slug)
         if req.raid_ends_at is not None and map_slug is None:
-            raise HTTPException(422, 'RAID_MAP_UNRESOLVED')
+            raise HttpError.RAID_MAP_UNRESOLVED.exception()
         connection_state = req.model_dump(mode='json', exclude={'email'})
         connection_state['map'] = map_slug
         try:
@@ -94,7 +95,7 @@ class WhereAmIService:
             return True
         except RedisError as error:
             logger.warning('Raid state publish unavailable (%s)', type(error).__name__)
-            raise HTTPException(503, 'RAID_STATE_PUBLISH_UNAVAILABLE') from None
+            raise HttpError.RAID_STATE_PUBLISH_UNAVAILABLE.exception() from None
 
     @staticmethod
     async def send_log_location(req: LogLocationRequest):

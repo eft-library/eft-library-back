@@ -9,17 +9,18 @@ import time
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-from fastapi import HTTPException
 from redis import Redis
 
 from .security import get_party_rate_limiter
+
+from util.http_exceptions import HttpError
 
 
 def party_redis_url() -> str:
     url = os.getenv("REDIS_URL")
     host = os.getenv("REDIS_HOST")
     if not url and not host:
-        raise HTTPException(503, "PARTY_REALTIME_UNAVAILABLE")
+        raise HttpError.PARTY_REALTIME_UNAVAILABLE.exception()
     return url or f"redis://{host}"
 
 
@@ -71,7 +72,7 @@ class PartyRealtimeStore:
         connection = prefix + connection_id
         active = [item for item in self.active(room_id, now) if item.startswith(prefix)]
         if connection not in active and len(active) >= self.max_connections:
-            raise HTTPException(429, "TOO_MANY_PARTY_CONNECTIONS")
+            raise HttpError.TOO_MANY_PARTY_CONNECTIONS.exception()
         key = self.key(room_id, "connections")
         seen = self.key(room_id, "last-seen")
         pipe = self.client.pipeline(transaction=True)

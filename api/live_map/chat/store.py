@@ -10,6 +10,8 @@ from redis.exceptions import RedisError
 
 from api.live_map.party.realtime_store import party_redis_url
 
+from util.http_exceptions import HttpError
+
 
 class ChatStore:
     presence_key = 'live-map:chat:v3:presence'
@@ -34,14 +36,14 @@ class ChatStore:
 
     def guest_identity(self, token):
         if not isinstance(token, str) or not re.fullmatch(r'[A-Za-z0-9_-]{43}', token):
-            raise HTTPException(401, 'CHAT_GUEST_SESSION_INVALID')
+            raise HttpError.CHAT_GUEST_SESSION_INVALID.exception()
         digest = hashlib.sha256(token.encode()).hexdigest()
         try:
             valid = self.client.exists(f'live-map:chat:v3:guest-session:{digest}')
         except RedisError:
-            raise HTTPException(503, 'CHAT_GUEST_SESSION_UNAVAILABLE') from None
+            raise HttpError.CHAT_GUEST_SESSION_UNAVAILABLE.exception() from None
         if not valid:
-            raise HTTPException(401, 'CHAT_GUEST_SESSION_INVALID')
+            raise HttpError.CHAT_GUEST_SESSION_INVALID.exception()
         return 'guest:session:' + digest
 
     def guest_session(self, token=None):
@@ -57,7 +59,7 @@ class ChatStore:
         try:
             self.client.set(f'live-map:chat:v3:guest-session:{digest}', '1', ex=86400)
         except RedisError:
-            raise HTTPException(503, 'CHAT_GUEST_SESSION_UNAVAILABLE') from None
+            raise HttpError.CHAT_GUEST_SESSION_UNAVAILABLE.exception() from None
         return token
 
     def consume(self, user_id, action, limit, seconds=60):
@@ -66,10 +68,10 @@ class ChatStore:
             retry = self.client.eval(self.rate_script, 1,
                 f'live-map:chat:v3:rate:{action}:{user_id}', limit, seconds, str(uuid4()))
         except RedisError:
-            raise HTTPException(503, 'CHAT_RATE_LIMIT_UNAVAILABLE') from None
+            raise HttpError.CHAT_RATE_LIMIT_UNAVAILABLE.exception() from None
         if int(retry):
-            code = 'CHAT_CONNECT_RATE_LIMITED' if action == 'connect' else 'CHAT_RATE_LIMITED'
-            raise HTTPException(429, code, headers={'Retry-After': str(retry)})
+            code = HttpError.CHAT_CONNECT_RATE_LIMITED if action == 'connect' else HttpError.CHAT_RATE_LIMITED
+            raise code.exception(headers={'Retry-After': str(retry)})
 
     lease_script = """
         local now = tonumber(redis.call('TIME')[1])
@@ -90,7 +92,7 @@ class ChatStore:
         if not self.client.eval(self.lease_script, 2,
                                 f'live-map:chat:v3:connections:{user_id}', self.presence_key,
                                 connection_id, '' if str(user_id).startswith('guest:') else f'{user_id}/{connection_id}'):
-            raise HTTPException(429, 'CHAT_CONNECTION_LIMIT', headers={'Retry-After': '90'})
+            raise HttpError.CHAT_CONNECTION_LIMIT.exception(headers={'Retry-After': '90'})
 
     def disconnect(self, user_id, connection_id):
         with self.client.pipeline(transaction=True) as pipeline:

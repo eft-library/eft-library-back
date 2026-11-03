@@ -25,6 +25,8 @@ from .security import GUEST_COOKIE_NAME
 from .service import ChatService, build_event
 from .store import ChatStore, get_chat_store
 
+from util.http_exceptions import HttpError
+
 
 async def chat_error(websocket, status, message, retry_after=None, request_id=None):
     await send_packet(websocket, {
@@ -70,7 +72,7 @@ async def chat_socket(websocket):
         try:
             raw = await asyncio.wait_for(receive_packet(websocket), 10)
         except TimeoutError:
-            raise HTTPException(408, 'AUTH_TIMEOUT') from None
+            raise HttpError.AUTH_TIMEOUT.exception() from None
         try:
             socket_packet = json.loads(raw)
             guest = (isinstance(socket_packet, dict) and socket_packet.get('type') == 'guest'
@@ -78,7 +80,7 @@ async def chat_socket(websocket):
                      and socket_packet.get('session', 'cookie') == 'cookie')
             auth = None if guest else PartySocketAuth.model_validate_json(raw)
         except (ValidationError, ValueError):
-            raise HTTPException(401, 'AUTH_MESSAGE_REQUIRED') from None
+            raise HttpError.AUTH_MESSAGE_REQUIRED.exception() from None
         email = None
         if guest:
             # Use only the ASGI peer (configured trusted proxy handling), not arbitrary headers.
@@ -124,7 +126,7 @@ async def chat_socket(websocket):
                 done, _ = await asyncio.wait(tasks, timeout=1, return_when=asyncio.FIRST_COMPLETED)
                 now = time.monotonic()
                 if now - last_received >= 75:
-                    raise HTTPException(408, 'HEARTBEAT_TIMEOUT')
+                    raise HttpError.HEARTBEAT_TIMEOUT.exception()
                 if now - started >= 900:
                     await chat_error(websocket, 401, 'SESSION_REFRESH_REQUIRED')
                     await websocket.close(code=1012)
@@ -165,7 +167,7 @@ async def chat_socket(websocket):
                     except (ValidationError, ValueError):
                         invalid += 1
                         if invalid >= 3:
-                            raise HTTPException(400, 'TOO_MANY_INVALID_MESSAGES') from None
+                            raise HttpError.TOO_MANY_INVALID_MESSAGES.exception() from None
                         await chat_error(websocket, 422, 'INVALID_MESSAGE')
                     except HTTPException as exc:
                         if exc.status_code == 503 or (exc.status_code == 401 and not guest):

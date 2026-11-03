@@ -5,10 +5,12 @@ import secrets
 from functools import lru_cache
 
 import requests
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from redis import Redis
 from redis.exceptions import RedisError
+
+from util.http_exceptions import HttpError
 
 
 bearer = HTTPBearer(auto_error=False)
@@ -18,25 +20,25 @@ def authenticate_party_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
 ) -> str:
     if credentials is None:
-        raise HTTPException(401, "LOGIN_REQUIRED", headers={"WWW-Authenticate": "Bearer"})
+        raise HttpError.LOGIN_REQUIRED.exception(headers={"WWW-Authenticate": "Bearer"})
     url = os.getenv("GOOGLE_TOKEN_INFO_URL")
     if not url:
-        raise HTTPException(503, "AUTH_UNAVAILABLE")
+        raise HttpError.AUTH_UNAVAILABLE.exception()
     try:
         response = requests.get(url, params={"access_token": credentials.credentials}, timeout=5)
         if response.status_code >= 500 or response.status_code == 429:
-            raise HTTPException(503, "AUTH_UNAVAILABLE")
+            raise HttpError.AUTH_UNAVAILABLE.exception()
         if response.status_code != 200:
-            raise HTTPException(401, "INVALID_TOKEN", headers={"WWW-Authenticate": "Bearer"})
+            raise HttpError.INVALID_TOKEN.exception(headers={"WWW-Authenticate": "Bearer"})
         payload = response.json()
     except (requests.RequestException, ValueError):
-        raise HTTPException(503, "AUTH_UNAVAILABLE") from None
+        raise HttpError.AUTH_UNAVAILABLE.exception() from None
     if not isinstance(payload, dict):
-        raise HTTPException(503, "AUTH_UNAVAILABLE")
+        raise HttpError.AUTH_UNAVAILABLE.exception()
     email = payload.get("email")
     verified = payload.get("verified_email", payload.get("email_verified", True))
     if not isinstance(email, str) or not email.strip() or verified in (False, "false"):
-        raise HTTPException(401, "INVALID_TOKEN", headers={"WWW-Authenticate": "Bearer"})
+        raise HttpError.INVALID_TOKEN.exception(headers={"WWW-Authenticate": "Bearer"})
     return email
 
 
@@ -84,9 +86,9 @@ class PartyRateLimiter:
                 self.script, 1, f"live-map:party:v3:rate:{action}:{identity}", seconds,
             )
         except RedisError:
-            raise HTTPException(503, "PARTY_RATE_LIMIT_UNAVAILABLE") from None
+            raise HttpError.PARTY_RATE_LIMIT_UNAVAILABLE.exception() from None
         if int(count) > limit:
-            raise HTTPException(429, "TOO_MANY_ATTEMPTS", headers={"Retry-After": str(max(1, int(ttl)))})
+            raise HttpError.TOO_MANY_ATTEMPTS.exception(headers={"Retry-After": str(max(1, int(ttl)))})
 
 
 @lru_cache(maxsize=1)
@@ -94,7 +96,7 @@ def get_party_rate_limiter() -> PartyRateLimiter:
     url = os.getenv("REDIS_URL")
     host = os.getenv("REDIS_HOST")
     if not url and not host:
-        raise HTTPException(503, "PARTY_RATE_LIMIT_UNAVAILABLE")
+        raise HttpError.PARTY_RATE_LIMIT_UNAVAILABLE.exception()
     return PartyRateLimiter(Redis.from_url(
         url or f"redis://{host}", decode_responses=True,
         socket_connect_timeout=2, socket_timeout=2,

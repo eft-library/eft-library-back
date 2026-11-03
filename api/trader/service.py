@@ -1,5 +1,6 @@
-from fastapi import HTTPException
 from sqlalchemy import bindparam, text
+
+from util.http_exceptions import HttpError
 
 
 class TraderService:
@@ -7,7 +8,7 @@ class TraderService:
     def resolve_season(session, game_mode, season_id):
         if game_mode != "pvp-season":
             if season_id is not None:
-                raise HTTPException(422, "season_id is only supported for pvp-season")
+                raise HttpError.SEASON_MODE_REQUIRED.exception()
             return None
         if season_id is None:
             season_id = session.execute(text(
@@ -16,7 +17,7 @@ class TraderService:
         if season_id is None or session.execute(text(
             "select id from price_seasons where id = :id"
         ), {"id": season_id}).scalar_one_or_none() is None:
-            raise HTTPException(404, "Season not found")
+            raise HttpError.SEASON_NOT_FOUND.exception()
         return season_id
 
     @staticmethod
@@ -39,7 +40,7 @@ class TraderService:
         if session.execute(text(
             "select id from traders where id = :id and is_use is true"
         ), {"id": trader_id}).scalar_one_or_none() is None:
-            raise HTTPException(404, "Trader not found")
+            raise HttpError.TRADER_NOT_FOUND.exception()
 
     @staticmethod
     def get_offers(session, game_mode, season_id, trader_id=None,

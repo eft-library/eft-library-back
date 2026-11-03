@@ -8,25 +8,27 @@ import requests
 from fastapi import HTTPException, WebSocketDisconnect
 from starlette.concurrency import run_in_threadpool
 
+from util.http_exceptions import HttpError
+
 logger = logging.getLogger('ws.location.auth.v3')
 
 
 def verify_location_token(token):
     url = os.getenv('GOOGLE_TOKEN_INFO_URL')
     if not url:
-        raise HTTPException(503, 'AUTH_SERVICE_UNAVAILABLE')
+        raise HttpError.AUTH_SERVICE_UNAVAILABLE.exception()
     try:
         api_response = requests.get(url, params={'access_token':token}, timeout=5)
         if api_response.status_code in (400, 401):
-            raise HTTPException(401, 'AUTH_REQUIRED')
+            raise HttpError.AUTH_REQUIRED.exception()
         if api_response.status_code != 200:
-            raise HTTPException(503, 'AUTH_SERVICE_UNAVAILABLE')
+            raise HttpError.AUTH_SERVICE_UNAVAILABLE.exception()
         data = api_response.json()
         if not isinstance(data, dict) or not isinstance(data.get('email'), str) or not data['email']:
-            raise HTTPException(503, 'AUTH_SERVICE_UNAVAILABLE')
+            raise HttpError.AUTH_SERVICE_UNAVAILABLE.exception()
         return data['email']
     except (requests.RequestException, ValueError):
-        raise HTTPException(503, 'AUTH_SERVICE_UNAVAILABLE') from None
+        raise HttpError.AUTH_SERVICE_UNAVAILABLE.exception() from None
 
 
 async def authenticate_location_socket(websocket, token):

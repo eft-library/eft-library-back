@@ -4,7 +4,7 @@ import json
 import logging
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import BigInteger, Boolean, Column, DateTime, Identity, String, Text, func, select
 from sqlalchemy.exc import SQLAlchemyError
@@ -15,6 +15,8 @@ from database import Database
 from util.constants import HTTPCode
 from .desktop_contract import normalize_alias, validate_download_url, version_parts
 from .analytics import DesktopAnalyticsRoute
+
+from util.http_exceptions import HttpError
 
 logger = logging.getLogger('api.where_am_i.metadata')
 router = APIRouter(route_class=DesktopAnalyticsRoute)
@@ -70,7 +72,7 @@ class DesktopMetadataService:
                 DesktopRelease.is_active.is_(True), DesktopRelease.published_at <= func.now(),
             )))
             if not releases:
-                raise HTTPException(404, 'DESKTOP_RELEASE_NOT_FOUND')
+                raise HttpError.DESKTOP_RELEASE_NOT_FOUND.exception()
             latest = max(releases, key=lambda release: (
                 version_parts(release.version), release.published_at, release.id))
             latest_parts = version_parts(latest.version)
@@ -95,7 +97,7 @@ class DesktopMetadataService:
         with Database.SessionLocal() as session:
             rows = list(session.scalars(select(MapAlias).where(MapAlias.is_active.is_(True)).limit(1025)))
             if not rows:
-                raise HTTPException(404, 'MAP_ALIASES_NOT_FOUND')
+                raise HttpError.MAP_ALIASES_NOT_FOUND.exception()
             if len(rows) > 1024:
                 raise ValueError('Too many active aliases')
             aliases = []
@@ -117,7 +119,7 @@ def metadata_error(error):
     else:
         # SQL errors can contain bound parameters; keep those out of logs.
         logger.warning('Desktop metadata unavailable (%s)', type(error).__name__)
-    raise HTTPException(503, 'DESKTOP_METADATA_UNAVAILABLE') from None
+    raise HttpError.DESKTOP_METADATA_UNAVAILABLE.exception() from None
 
 
 @router.post('/v3/check-version')

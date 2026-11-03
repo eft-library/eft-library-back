@@ -5,7 +5,7 @@ import logging
 import os
 from typing import Optional
 
-from fastapi import File, HTTPException, UploadFile
+from fastapi import File, UploadFile
 from util.object_storage import create_object_storage_client
 from minio.error import S3Error
 from PIL import Image
@@ -27,6 +27,8 @@ from database import Database
 from dotenv import load_dotenv
 from util.kafka_producer import produce_notification
 from util.snowflake_id import SnowflakeGenerator
+
+from util.http_exceptions import HttpError
 
 logger = logging.getLogger("api.community")
 
@@ -58,9 +60,9 @@ class CommunityService:
                 content_type="image/webp",
             )
         except S3Error as e:
-            raise HTTPException(status_code=500, detail=f"이미지 저장소 업로드 실패: {e}")
+            raise HttpError.IMAGE_STORAGE_UPLOAD_FAILED.exception(error=e)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"이미지 처리 실패: {e}")
+            raise HttpError.IMAGE_PROCESSING_FAILED_WITH_REASON.exception(error=e)
 
         return {"image_url": f"https://image.eftlibrary.com/{bucket_name}/{object_name}"}
 

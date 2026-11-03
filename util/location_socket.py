@@ -11,9 +11,11 @@ from functools import lru_cache
 from uuid import uuid4
 
 from anyio import CancelScope
-from fastapi import HTTPException, WebSocketDisconnect
+from fastapi import WebSocketDisconnect
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
+
+from util.http_exceptions import HttpError
 
 logger = logging.getLogger('ws.location.v3')
 LOCATION_TYPES = {'wpf_location', 'wpf_log_location'}
@@ -97,9 +99,9 @@ async def publish_location(email, kind, payload, request_id=None):
         json.dumps({'type': kind, 'payload': payload, 'event_id': event_id,
                     'request_id': request_id}), ends, started, observed)
     if subscribers == -1:
-        raise HTTPException(409, 'RAID_TIMER_EXPIRED')
+        raise HttpError.RAID_TIMER_EXPIRED.exception()
     if subscribers == -2:
-        raise HTTPException(409, 'RAID_STATE_STALE')
+        raise HttpError.RAID_STATE_STALE.exception()
     logger.info('location_published event_id=%s request_id=%s type=%s subscribers=%s pid=%s',
                    event_id, request_id, kind, subscribers, os.getpid())
     return event_id
