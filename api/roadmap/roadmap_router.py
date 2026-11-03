@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from api.response import CustomResponse
 from api.roadmap.roadmap_req_models import SaveRoadmap
-from fastapi.security import OAuth2PasswordBearer
+from util.auth import BearerToken
 from util.constants import HTTPCode
 from api.constants import Message
 from api.user.util import UserUtil
@@ -12,7 +12,7 @@ from api.roadmap.roadmap_service import RoadmapService
 router = APIRouter(tags=["Roadmap"])
 
 # JWT를 헤더에서 추출하는 의존성 함수
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
+oauth2_scheme = BearerToken(tokenUrl="token", auto_error=False)
 
 
 @router.get("/v3/get-roadmap")

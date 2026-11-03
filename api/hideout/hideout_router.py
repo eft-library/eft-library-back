@@ -10,12 +10,12 @@ from api.hideout.hideout_req_models import (
 from api.hideout.service import HideoutService
 from api.response import CustomResponse
 from api.user.util import UserUtil
-from fastapi.security import OAuth2PasswordBearer
+from util.auth import BearerToken
 from util.constants import HTTPCode
 
 router = APIRouter(tags=["Hideout"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
+oauth2_scheme = BearerToken(tokenUrl="token", auto_error=False)
 
 
 @router.get("/v3/all-item-requirements")

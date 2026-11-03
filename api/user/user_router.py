@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordBearer
+from util.auth import BearerToken
 
 from api.constants import Message
 from api.response import CustomResponse
@@ -13,10 +13,11 @@ from api.user.user_req_models import (
 )
 from api.user.util import UserUtil
 from util.constants import HTTPCode
+from util.http_exceptions import HttpError
 
 router = APIRouter(tags=["User"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = BearerToken(tokenUrl="token")
 
 
 @router.post("/v3/add", include_in_schema=False)
@@ -33,7 +34,7 @@ def get_user(token: str = Depends(oauth2_scheme)):
     if user_email:
         user = UserService.get_user(user_email)
         if user is None:
-            return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
+            raise HttpError.USER_NOT_FOUND.exception()
         return CustomResponse.response(user, HTTPCode.OK, Message.SUCCESS)
     return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
 

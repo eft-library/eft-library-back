@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from api.response import CustomResponse
-from fastapi.security import OAuth2PasswordBearer
+from util.auth import BearerToken
 from api.user.util import UserUtil
 from util.constants import HTTPCode
 from api.constants import Message
@@ -11,7 +11,7 @@ from typing import Optional
 
 router = APIRouter(tags=["Progress"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
+oauth2_scheme = BearerToken(tokenUrl="token", auto_error=False)
 
 
 @router.get("/v3/progress-item")

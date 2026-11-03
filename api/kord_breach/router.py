@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordBearer
+from util.auth import BearerToken
 
 from api.constants import Message
 from api.kord_breach.req_models import (
@@ -15,7 +15,7 @@ from util.constants import HTTPCode
 
 router = APIRouter(tags=["KORD BREACH"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
+oauth2_scheme = BearerToken(tokenUrl="token", auto_error=False)
 
 
 @router.get("/v3/modifiers")

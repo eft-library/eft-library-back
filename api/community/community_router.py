@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, UploadFile
-from fastapi.security import OAuth2PasswordBearer
+from util.auth import BearerToken
 
 from api.community.community_req_models import (
     CheckFollow,
@@ -25,7 +25,7 @@ from util.http_exceptions import HttpError
 
 router = APIRouter(tags=["Community"])
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
+oauth2_scheme = BearerToken(tokenUrl="token", auto_error=False)
 
 
 @router.post("/v3/upload-image", include_in_schema=False)

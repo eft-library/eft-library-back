@@ -1,6 +1,4 @@
-import os
-
-import requests
+from util.auth import verify_google_access_token
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,12 +7,7 @@ load_dotenv()
 class UserUtil:
     @staticmethod
     def verify_google_token(access_token: str):
-        response = requests.get(
-            f"{os.getenv('GOOGLE_TOKEN_INFO_URL')}?access_token={access_token}"
-        )
-        if response.status_code != 200:
-            return None
-        return response.json()["email"]
+        return verify_google_access_token(access_token)
 
 
 class PlatformUserUtil:

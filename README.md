@@ -204,3 +204,18 @@ RUSTFS_SECRET_KEY=<RustFS secret key>
 운영 전환 시 기존 객체를 같은 버킷·경로로 이전하고, 업로드 계정의 쓰기 권한 및
 이미지 도메인의 RustFS 연결·읽기 정책을 확인해야 합니다.
 이 코드 변경은 객체 이전, 버킷 생성, 프록시 변경을 수행하지 않습니다.
+
+## HTTP 인증 오류
+
+HTTP API는 `util/auth.py`의 `BearerToken`과 `verify_google_access_token`을 사용합니다.
+기존 `UserUtil.verify_google_token`도 이 검증 함수를 호출합니다.
+공통 예외 정의는 `util/http_exceptions.py`에 있습니다.
+
+- 토큰이 필요한 요청에 토큰이 없거나, 전송한 토큰이 만료·무효이면 HTTP **401**과 `WWW-Authenticate: Bearer`를 반환합니다.
+- 인증 서버 장애·요청 제한·5초 타임아웃·잘못된 응답·설정 누락은 HTTP **503**(`AUTH_SERVICE_UNAVAILABLE`)입니다. 프런트는 이를 확정된 로그아웃으로 해석하지 않습니다.
+- 비로그인 조회를 허용하는 API는 `Authorization` 헤더가 없을 때만 익명으로 처리합니다. 잘못된 헤더나 무효한 토큰을 보내면 익명 데이터로 대체하지 않습니다.
+- `/api/user/v3/user-info`의 사용자 미등록은 **404**(`USER_NOT_FOUND`), 사용자 조회 장애는 **503**(`USER_LOOKUP_UNAVAILABLE`)입니다.
+- 인증 성공 시의 응답 형식과 기존 API 주소는 유지합니다. 업무 처리의 기존 `200 / FAIL`을 인증 만료로 해석하지 않습니다.
+- 인증 오류 후 저장 요청을 서버에서 자동 재실행하지 않습니다.
+
+검증: `.venv/bin/python -m unittest tests.test_http_auth -v`

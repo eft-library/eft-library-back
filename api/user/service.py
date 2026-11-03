@@ -8,6 +8,7 @@ from api.user.user_function import UserFunction
 from api.user.user_req_models import AddUserReq, ReqUserBlock, ReqUserPenalty, ReqUserReport
 from api.user.user_res_models import UserBlock, UserPenalty, UserReport
 from util.kafka_producer import produce_notification
+from util.http_exceptions import HttpError
 
 logger = logging.getLogger("api.user")
 
@@ -34,7 +35,7 @@ class UserService:
                 return UserFunction._get_user_data(s, user_email)
         except Exception as e:
             logger.error(f"get_user_v3 error: {e}", exc_info=True)
-            return None
+            raise HttpError.USER_LOOKUP_UNAVAILABLE.exception() from None
 
     @staticmethod
     def user_delete(user_email: str):
