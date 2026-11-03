@@ -1,8 +1,8 @@
 from sqlalchemy import Column, INTEGER, TIMESTAMP, TEXT
-from database import V3Database
+from database import Database
 
 
-class WipeV3(V3Database.Base):
+class Wipe(Database.Base):
     __tablename__ = "wipe"
 
     id = Column(INTEGER, primary_key=True)
@@ -12,7 +12,7 @@ class WipeV3(V3Database.Base):
     create_time = Column(TIMESTAMP)
 
 
-class InformationV3(V3Database.Base):
+class Information(Database.Base):
     __tablename__ = "information"
 
     id = Column(TEXT, primary_key=True)

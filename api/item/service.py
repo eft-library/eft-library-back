@@ -1,29 +1,29 @@
 from api.item.models import (
-    AmmoEfficiencyV3,
-    AmmoItemV3,
-    ConsumableCureV3,
-    ConsumableItemV3,
-    ConsumableStimEffectV3,
-    ItemPenaltyV3,
-    ItemV3,
-    MeleeItemV3,
-    ProtectionItemV3,
-    StorageGridV3,
-    StorageItemV3,
-    ThrowableItemV3,
-    UsageItemV3,
-    WeaponAllowedAmmoV3,
-    WeaponItemV3,
+    AmmoEfficiency,
+    AmmoItem,
+    ConsumableCure,
+    ConsumableItem,
+    ConsumableStimEffect,
+    ItemPenalty,
+    Item,
+    MeleeItem,
+    ProtectionItem,
+    StorageGrid,
+    StorageItem,
+    ThrowableItem,
+    UsageItem,
+    WeaponAllowedAmmo,
+    WeaponItem,
 )
-from database import V3Database
+from database import Database
 from sqlalchemy import or_, not_, text
 import logging
 
 logger = logging.getLogger("api.item")
 
 
-class ItemServiceV3:
-    ITEM_TYPE_RULES_V3 = {
+class ItemService:
+    ITEM_TYPE_RULES = {
         "weapon": [
             ("Weapon", None),
             ("Item", "Throwable weapon"),
@@ -74,14 +74,14 @@ class ItemServiceV3:
         ],
     }
 
-    ITEM_TYPE_EXCLUDED_RULES_V3 = [
+    ITEM_TYPE_EXCLUDED_RULES = [
         ("Searchable item", "Random Loot Container"),
         ("Ammo", "Rocket"),
         ("Stackable item", "Ammo container"),
     ]
 
     @staticmethod
-    def _serialize_item_base_v3(item: ItemV3):
+    def _serialize_item_base(item: Item):
         return {
             "id": item.id,
             "parent_category": item.parent_category,
@@ -97,7 +97,7 @@ class ItemServiceV3:
         }
 
     @staticmethod
-    def _serialize_item_list_row_v3(item: ItemV3):
+    def _serialize_item_list_row(item: Item):
         return {
             "id": item.id,
             "normalized_name": item.normalized_name,
@@ -110,9 +110,9 @@ class ItemServiceV3:
         }
 
     @staticmethod
-    def _serialize_ammo_info_v3(
-        ammo_info: AmmoItemV3 | None,
-        ammo_efficiency: AmmoEfficiencyV3 | None = None,
+    def _serialize_ammo_info(
+        ammo_info: AmmoItem | None,
+        ammo_efficiency: AmmoEfficiency | None = None,
     ):
         if ammo_info is None:
             return None
@@ -156,7 +156,7 @@ class ItemServiceV3:
         return result
 
     @staticmethod
-    def _serialize_related_item_v3(item: ItemV3 | None):
+    def _serialize_related_item(item: Item | None):
         if item is None:
             return None
 
@@ -170,11 +170,11 @@ class ItemServiceV3:
         }
 
     @staticmethod
-    def _to_float_v3(value):
+    def _to_float(value):
         return float(value) if value is not None else None
 
     @staticmethod
-    def _serialize_quest_ref_v3(row):
+    def _serialize_quest_ref(row):
         return {
             "id": row["quest_id"],
             "normalized_name": row["quest_normalized_name"],
@@ -184,7 +184,7 @@ class ItemServiceV3:
         }
 
     @staticmethod
-    def _serialize_trader_ref_v3(row):
+    def _serialize_trader_ref(row):
         if row["trader_id"] is None:
             return None
         return {
@@ -197,7 +197,7 @@ class ItemServiceV3:
         }
 
     @staticmethod
-    def _serialize_hideout_ref_v3(row):
+    def _serialize_hideout_ref(row):
         return {
             "id": row["hideout_id"],
             "normalized_name": row["hideout_normalized_name"],
@@ -209,7 +209,7 @@ class ItemServiceV3:
         }
 
     @staticmethod
-    def _serialize_row_item_ref_v3(row):
+    def _serialize_row_item_ref(row):
         return {
             "id": row["item_id"],
             "normalized_name": row["item_normalized_name"],
@@ -222,7 +222,7 @@ class ItemServiceV3:
         }
 
     @staticmethod
-    def _serialize_weapon_ref_v3(row):
+    def _serialize_weapon_ref(row):
         return {
             "id": row["weapon_id"],
             "normalized_name": row["weapon_normalized_name"],
@@ -235,7 +235,7 @@ class ItemServiceV3:
         }
 
     @staticmethod
-    def _group_item_detail_rows_v3(rows, key):
+    def _group_item_detail_rows(rows, key):
         grouped = {}
         for row in rows:
             row_dict = dict(row)
@@ -243,7 +243,7 @@ class ItemServiceV3:
         return grouped
 
     @staticmethod
-    def _get_item_detail_references_v3(s, item_id: str):
+    def _get_item_detail_references(s, item_id: str):
         quest_requirement_rows = (
             s.execute(
                 text(
@@ -637,7 +637,7 @@ class ItemServiceV3:
         )
 
         barters = []
-        for barter_id, rows in ItemServiceV3._group_item_detail_rows_v3(
+        for barter_id, rows in ItemService._group_item_detail_rows(
             barter_rows, "barter_id"
         ).items():
             first = rows[0]
@@ -646,12 +646,12 @@ class ItemServiceV3:
                     "barter_id": barter_id,
                     "reward_quantity": first["reward_quantity"],
                     "trader_level": first["trader_level"],
-                    "trader": ItemServiceV3._serialize_trader_ref_v3(first),
+                    "trader": ItemService._serialize_trader_ref(first),
                     "require_items": [
                         {
                             "id": row["require_id"],
                             "quantity": row["require_quantity"],
-                            "item": ItemServiceV3._serialize_row_item_ref_v3(row),
+                            "item": ItemService._serialize_row_item_ref(row),
                         }
                         for row in rows
                         if row["item_id"] is not None
@@ -660,7 +660,7 @@ class ItemServiceV3:
             )
 
         used_in_barters = []
-        for barter_id, rows in ItemServiceV3._group_item_detail_rows_v3(
+        for barter_id, rows in ItemService._group_item_detail_rows(
             used_in_barter_rows, "barter_id"
         ).items():
             first = rows[0]
@@ -669,12 +669,12 @@ class ItemServiceV3:
                     "barter_id": barter_id,
                     "require_quantity": first["target_quantity"],
                     "trader_level": first["trader_level"],
-                    "trader": ItemServiceV3._serialize_trader_ref_v3(first),
+                    "trader": ItemService._serialize_trader_ref(first),
                     "reward_items": [
                         {
                             "id": row["reward_id"],
                             "quantity": row["reward_quantity"],
-                            "item": ItemServiceV3._serialize_row_item_ref_v3(row),
+                            "item": ItemService._serialize_row_item_ref(row),
                         }
                         for row in rows
                         if row["item_id"] is not None
@@ -683,7 +683,7 @@ class ItemServiceV3:
             )
 
         hideout_crafts = []
-        for craft_id, rows in ItemServiceV3._group_item_detail_rows_v3(
+        for craft_id, rows in ItemService._group_item_detail_rows(
             hideout_craft_rows, "craft_id"
         ).items():
             first = rows[0]
@@ -698,17 +698,17 @@ class ItemServiceV3:
             hideout_crafts.append(
                 {
                     "craft_id": craft_id,
-                    "duration": ItemServiceV3._to_float_v3(first["duration"]),
-                    "reward_quantity": ItemServiceV3._to_float_v3(
+                    "duration": ItemService._to_float(first["duration"]),
+                    "reward_quantity": ItemService._to_float(
                         first["reward_quantity"]
                     ),
                     "role": role,
-                    "hideout": ItemServiceV3._serialize_hideout_ref_v3(first),
+                    "hideout": ItemService._serialize_hideout_ref(first),
                     "require_items": [
                         {
                             "id": row["require_id"],
                             "quantity": row["require_quantity"],
-                            "item": ItemServiceV3._serialize_row_item_ref_v3(row),
+                            "item": ItemService._serialize_row_item_ref(row),
                         }
                         for row in rows
                         if row["item_id"] is not None
@@ -719,8 +719,8 @@ class ItemServiceV3:
         return {
             "quest_requirements": [
                 {
-                    "quest": ItemServiceV3._serialize_quest_ref_v3(row),
-                    "trader": ItemServiceV3._serialize_trader_ref_v3(row),
+                    "quest": ItemService._serialize_quest_ref(row),
+                    "trader": ItemService._serialize_trader_ref(row),
                     "objective": {
                         "objective_id": row["objective_id"],
                         "type": row["objective_type"],
@@ -739,8 +739,8 @@ class ItemServiceV3:
             "hideout_crafts": hideout_crafts,
             "quest_rewards": [
                 {
-                    "quest": ItemServiceV3._serialize_quest_ref_v3(row),
-                    "trader": ItemServiceV3._serialize_trader_ref_v3(row),
+                    "quest": ItemService._serialize_quest_ref(row),
+                    "trader": ItemService._serialize_trader_ref(row),
                     "reward_type": row["reward_type"],
                     "quantity": row["quantity"],
                     "offer_id": row["offer_id"],
@@ -754,20 +754,20 @@ class ItemServiceV3:
                     "quantity": row["quantity"],
                     "in_raid": row["in_raid"],
                     "construction_time": row["construction_time"],
-                    "hideout": ItemServiceV3._serialize_hideout_ref_v3(row),
+                    "hideout": ItemService._serialize_hideout_ref(row),
                 }
                 for row in hideout_construction_rows
             ],
             "quest_craft_unlock_rewards": [
                 {
-                    "quest": ItemServiceV3._serialize_quest_ref_v3(row),
+                    "quest": ItemService._serialize_quest_ref(row),
                     "craft_id": row["craft_id"],
                     "station_level": row["station_level"],
-                    "duration": ItemServiceV3._to_float_v3(row["duration"]),
-                    "reward_quantity": ItemServiceV3._to_float_v3(
+                    "duration": ItemService._to_float(row["duration"]),
+                    "reward_quantity": ItemService._to_float(
                         row["reward_quantity"]
                     ),
-                    "hideout": ItemServiceV3._serialize_hideout_ref_v3(row),
+                    "hideout": ItemService._serialize_hideout_ref(row),
                 }
                 for row in quest_craft_unlock_rows
             ],
@@ -788,36 +788,36 @@ class ItemServiceV3:
                 for row in boss_drop_rows
             ],
             "compatible_weapons": [
-                ItemServiceV3._serialize_weapon_ref_v3(row)
+                ItemService._serialize_weapon_ref(row)
                 for row in compatible_weapon_rows
             ],
             "default_for_weapons": [
-                ItemServiceV3._serialize_weapon_ref_v3(row)
+                ItemService._serialize_weapon_ref(row)
                 for row in default_weapon_rows
             ],
         }
 
     @staticmethod
-    def get_item_detail_v3(normalized_name: str):
+    def get_item_detail(normalized_name: str):
         """
         v3 item 상세 조회
         """
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 item = (
-                    s.query(ItemV3)
-                    .filter(ItemV3.normalized_name == normalized_name)
+                    s.query(Item)
+                    .filter(Item.normalized_name == normalized_name)
                     .first()
                 )
 
                 if item is None:
                     return None
 
-                result = ItemServiceV3._serialize_item_base_v3(item)
+                result = ItemService._serialize_item_base(item)
 
                 penalties = (
-                    s.query(ItemPenaltyV3)
-                    .filter(ItemPenaltyV3.item_id == item.id)
+                    s.query(ItemPenalty)
+                    .filter(ItemPenalty.item_id == item.id)
                     .first()
                 )
                 if penalties is not None:
@@ -845,27 +845,27 @@ class ItemServiceV3:
                     }
 
                 weapon_info = (
-                    s.query(WeaponItemV3)
-                    .filter(WeaponItemV3.item_id == item.id)
+                    s.query(WeaponItem)
+                    .filter(WeaponItem.item_id == item.id)
                     .first()
                 )
                 if weapon_info is not None:
                     default_ammo = None
                     if weapon_info.default_ammo_item_id:
                         default_ammo = (
-                            s.query(ItemV3)
-                            .filter(ItemV3.id == weapon_info.default_ammo_item_id)
+                            s.query(Item)
+                            .filter(Item.id == weapon_info.default_ammo_item_id)
                             .first()
                         )
 
                     allowed_ammo_rows = (
-                        s.query(ItemV3)
+                        s.query(Item)
                         .join(
-                            WeaponAllowedAmmoV3,
-                            WeaponAllowedAmmoV3.ammo_item_id == ItemV3.id,
+                            WeaponAllowedAmmo,
+                            WeaponAllowedAmmo.ammo_item_id == Item.id,
                         )
-                        .filter(WeaponAllowedAmmoV3.item_id == item.id)
-                        .order_by(ItemV3.name_en)
+                        .filter(WeaponAllowedAmmo.item_id == item.id)
+                        .order_by(Item.name_en)
                         .all()
                     )
 
@@ -875,7 +875,7 @@ class ItemServiceV3:
                         "ergonomics": weapon_info.ergonomics,
                         "recoil_horizontal": weapon_info.recoil_horizontal,
                         "recoil_vertical": weapon_info.recoil_vertical,
-                        "default_ammo": ItemServiceV3._serialize_related_item_v3(
+                        "default_ammo": ItemService._serialize_related_item(
                             default_ammo
                         ),
                         "fire_modes": {
@@ -887,28 +887,28 @@ class ItemServiceV3:
                             "semi_auto": weapon_info.is_semi_auto,
                         },
                         "allowed_ammo": [
-                            ItemServiceV3._serialize_related_item_v3(ammo)
+                            ItemService._serialize_related_item(ammo)
                             for ammo in allowed_ammo_rows
                         ],
                     }
 
                 ammo_info = (
-                    s.query(AmmoItemV3).filter(AmmoItemV3.item_id == item.id).first()
+                    s.query(AmmoItem).filter(AmmoItem.item_id == item.id).first()
                 )
                 if ammo_info is not None:
                     ammo_efficiency = (
-                        s.query(AmmoEfficiencyV3)
-                        .filter(AmmoEfficiencyV3.ammo_item_id == item.id)
+                        s.query(AmmoEfficiency)
+                        .filter(AmmoEfficiency.ammo_item_id == item.id)
                         .first()
                     )
 
-                    result["ammo_info"] = ItemServiceV3._serialize_ammo_info_v3(
+                    result["ammo_info"] = ItemService._serialize_ammo_info(
                         ammo_info,
                         ammo_efficiency,
                     )
 
                 melee_info = (
-                    s.query(MeleeItemV3).filter(MeleeItemV3.item_id == item.id).first()
+                    s.query(MeleeItem).filter(MeleeItem.item_id == item.id).first()
                 )
                 if melee_info is not None:
                     result["melee_info"] = {
@@ -922,8 +922,8 @@ class ItemServiceV3:
                     }
 
                 throwable_info = (
-                    s.query(ThrowableItemV3)
-                    .filter(ThrowableItemV3.item_id == item.id)
+                    s.query(ThrowableItem)
+                    .filter(ThrowableItem.item_id == item.id)
                     .first()
                 )
                 if throwable_info is not None:
@@ -953,15 +953,15 @@ class ItemServiceV3:
                     }
 
                 storage_info = (
-                    s.query(StorageItemV3)
-                    .filter(StorageItemV3.item_id == item.id)
+                    s.query(StorageItem)
+                    .filter(StorageItem.item_id == item.id)
                     .first()
                 )
                 if storage_info is not None:
                     grids = (
-                        s.query(StorageGridV3)
-                        .filter(StorageGridV3.item_id == item.id)
-                        .order_by(StorageGridV3.grid_index)
+                        s.query(StorageGrid)
+                        .filter(StorageGrid.item_id == item.id)
+                        .order_by(StorageGrid.grid_index)
                         .all()
                     )
                     result["storage_info"] = {
@@ -978,8 +978,8 @@ class ItemServiceV3:
                     }
 
                 protection_info = (
-                    s.query(ProtectionItemV3)
-                    .filter(ProtectionItemV3.item_id == item.id)
+                    s.query(ProtectionItem)
+                    .filter(ProtectionItem.item_id == item.id)
                     .first()
                 )
                 if protection_info is not None:
@@ -1027,21 +1027,21 @@ class ItemServiceV3:
                     }
 
                 consumable_info = (
-                    s.query(ConsumableItemV3)
-                    .filter(ConsumableItemV3.item_id == item.id)
+                    s.query(ConsumableItem)
+                    .filter(ConsumableItem.item_id == item.id)
                     .first()
                 )
                 if consumable_info is not None:
                     cures = (
-                        s.query(ConsumableCureV3)
-                        .filter(ConsumableCureV3.item_id == item.id)
-                        .order_by(ConsumableCureV3.cure)
+                        s.query(ConsumableCure)
+                        .filter(ConsumableCure.item_id == item.id)
+                        .order_by(ConsumableCure.cure)
                         .all()
                     )
                     stim_effects = (
-                        s.query(ConsumableStimEffectV3)
-                        .filter(ConsumableStimEffectV3.item_id == item.id)
-                        .order_by(ConsumableStimEffectV3.effect_index)
+                        s.query(ConsumableStimEffect)
+                        .filter(ConsumableStimEffect.item_id == item.id)
+                        .order_by(ConsumableStimEffect.effect_index)
                         .all()
                     )
 
@@ -1078,13 +1078,13 @@ class ItemServiceV3:
                     }
 
                 usage_info = (
-                    s.query(UsageItemV3).filter(UsageItemV3.item_id == item.id).first()
+                    s.query(UsageItem).filter(UsageItem.item_id == item.id).first()
                 )
                 if usage_info is not None:
                     result["usage_info"] = {"max_uses": usage_info.max_uses}
 
                 result.update(
-                    ItemServiceV3._get_item_detail_references_v3(s, item.id)
+                    ItemService._get_item_detail_references(s, item.id)
                 )
 
                 return result
@@ -1096,45 +1096,45 @@ class ItemServiceV3:
             return None
 
     @staticmethod
-    def get_item_list_v3(item_type: str):
+    def get_item_list(item_type: str):
         """
         v3 item 목록 조회
         """
         try:
-            rules = ItemServiceV3.ITEM_TYPE_RULES_V3.get(item_type)
+            rules = ItemService.ITEM_TYPE_RULES.get(item_type)
             if rules is None:
                 return None
 
             include_conditions = []
             for parent_category, category in rules:
                 if category is None:
-                    include_conditions.append(ItemV3.parent_category == parent_category)
+                    include_conditions.append(Item.parent_category == parent_category)
                 else:
                     include_conditions.append(
-                        (ItemV3.parent_category == parent_category)
-                        & (ItemV3.category == category)
+                        (Item.parent_category == parent_category)
+                        & (Item.category == category)
                     )
 
             exclude_conditions = [
-                (ItemV3.parent_category == parent_category)
-                & (ItemV3.category == category)
-                for parent_category, category in ItemServiceV3.ITEM_TYPE_EXCLUDED_RULES_V3
+                (Item.parent_category == parent_category)
+                & (Item.category == category)
+                for parent_category, category in ItemService.ITEM_TYPE_EXCLUDED_RULES
             ]
 
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 query = (
                     s.query(
-                        ItemV3.id,
-                        ItemV3.normalized_name,
-                        ItemV3.name_en,
-                        ItemV3.name_ko,
-                        ItemV3.name_ja,
-                        ItemV3.image,
-                        ItemV3.width,
-                        ItemV3.height,
+                        Item.id,
+                        Item.normalized_name,
+                        Item.name_en,
+                        Item.name_ko,
+                        Item.name_ja,
+                        Item.image,
+                        Item.width,
+                        Item.height,
                     )
                     .filter(or_(*include_conditions))
-                    .order_by(ItemV3.name_en)
+                    .order_by(Item.name_en)
                 )
 
                 if exclude_conditions:
@@ -1163,8 +1163,8 @@ class ItemServiceV3:
 
                 if item_ids:
                     ammo_infos = (
-                        s.query(AmmoItemV3)
-                        .filter(AmmoItemV3.item_id.in_(item_ids))
+                        s.query(AmmoItem)
+                        .filter(AmmoItem.item_id.in_(item_ids))
                         .all()
                     )
                     ammo_info_by_item_id = {
@@ -1172,8 +1172,8 @@ class ItemServiceV3:
                     }
 
                     ammo_efficiencies = (
-                        s.query(AmmoEfficiencyV3)
-                        .filter(AmmoEfficiencyV3.ammo_item_id.in_(item_ids))
+                        s.query(AmmoEfficiency)
+                        .filter(AmmoEfficiency.ammo_item_id.in_(item_ids))
                         .all()
                     )
                     ammo_efficiency_by_item_id = {
@@ -1193,7 +1193,7 @@ class ItemServiceV3:
                         "width": item.width,
                         "height": item.height,
                     }
-                    item_data["ammo_info"] = ItemServiceV3._serialize_ammo_info_v3(
+                    item_data["ammo_info"] = ItemService._serialize_ammo_info(
                         ammo_info_by_item_id.get(item.id),
                         ammo_efficiency_by_item_id.get(item.id),
                     )

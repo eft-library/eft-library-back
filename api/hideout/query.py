@@ -1,4 +1,4 @@
-class HideoutQueryV3:
+class HideoutQuery:
     @staticmethod
     def all_item_requirements_sql():
         return """

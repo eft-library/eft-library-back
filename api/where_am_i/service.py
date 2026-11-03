@@ -1,27 +1,27 @@
-from api.where_am_i.res_models import UserLocationRequestV3
-from database import V3Database
+from api.where_am_i.res_models import UserLocationRequest
+from database import Database
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from .map_resolution_v3 import resolve_map_slug_v3
+from .map_resolution import resolve_map_slug
 from fastapi import HTTPException
 from redis.exceptions import RedisError
 from starlette.concurrency import run_in_threadpool
-from api.where_am_i.req_models import LogLocationRequestV3, RaidStateRequestV3, ReqWhereAmI
-from util.location_socket_v3 import (
-    send_wpf_location_v3 as send_wpf_location,
-    send_wpf_log_location_v3 as send_wpf_log_location,
-    send_wpf_raid_state_v3 as send_wpf_raid_state,
+from api.where_am_i.req_models import LogLocationRequest, RaidStateRequest, ReqWhereAmI
+from util.location_socket import (
+    send_wpf_location as send_wpf_location,
+    send_wpf_log_location as send_wpf_log_location,
+    send_wpf_raid_state as send_wpf_raid_state,
 )
 import logging
 
 logger = logging.getLogger("api.where_am_i")
 
 
-class WhereAmIServiceV3:
+class WhereAmIService:
     @staticmethod
-    def check_wpf_user_v3(user_email):
+    def check_wpf_user(user_email):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 result = s.execute(
                     text("select exists(select 1 from user_info where email = :email)"),
                     {"email": user_email},
@@ -35,23 +35,23 @@ class WhereAmIServiceV3:
             return None
 
     @staticmethod
-    async def send_location_v3(req: ReqWhereAmI):
-        exists_user = WhereAmIServiceV3.check_wpf_user_v3(req.email)
+    async def send_location(req: ReqWhereAmI):
+        exists_user = WhereAmIService.check_wpf_user(req.email)
         try:
             if exists_user:
-                with V3Database.SessionLocal() as s:
-                    user_location = UserLocationRequestV3(
+                with Database.SessionLocal() as s:
+                    user_location = UserLocationRequest(
                         email=req.email,
                         location=req.location,
                     )
 
                     s.add(user_location)
                     s.flush()
-                    request_id_v3 = user_location.id
+                    request_id = user_location.id
                     s.commit()
-                    logger.info('location_stored request_id=%s', request_id_v3)
+                    logger.info('location_stored request_id=%s', request_id)
                     await send_wpf_location(user_email=req.email, location=req.location,
-                                            request_id=request_id_v3)
+                                            request_id=request_id)
                     return True
             else:
                 logger.warning(
@@ -67,39 +67,39 @@ class WhereAmIServiceV3:
             return None
 
     @staticmethod
-    async def send_raid_state_v3(req: RaidStateRequestV3, analytics_context_v3=None):
-        exists_v3 = await run_in_threadpool(WhereAmIServiceV3.check_wpf_user_v3, req.email)
-        if exists_v3 is None:
+    async def send_raid_state(req: RaidStateRequest, analytics_context=None):
+        exists = await run_in_threadpool(WhereAmIService.check_wpf_user, req.email)
+        if exists is None:
             raise HTTPException(503, 'RAID_STATE_DATABASE_UNAVAILABLE')
-        if not exists_v3:
+        if not exists:
             raise HTTPException(404, 'USER_NOT_FOUND')
         try:
-            map_slug_v3 = await run_in_threadpool(resolve_map_slug_v3, req.map)
-        except SQLAlchemyError as error_v3:
-            logger.warning('Raid map resolution unavailable (%s)', type(error_v3).__name__)
+            map_slug = await run_in_threadpool(resolve_map_slug, req.map)
+        except SQLAlchemyError as error:
+            logger.warning('Raid map resolution unavailable (%s)', type(error).__name__)
             raise HTTPException(503, 'RAID_MAP_LOOKUP_UNAVAILABLE') from None
-        if analytics_context_v3 is not None:
-            analytics_context_v3.update(map_resolved=True, map_slug=map_slug_v3)
-        if req.raid_ends_at is not None and map_slug_v3 is None:
+        if analytics_context is not None:
+            analytics_context.update(map_resolved=True, map_slug=map_slug)
+        if req.raid_ends_at is not None and map_slug is None:
             raise HTTPException(422, 'RAID_MAP_UNRESOLVED')
-        state_v3 = req.model_dump(mode='json', exclude={'email'})
-        state_v3['map'] = map_slug_v3
+        connection_state = req.model_dump(mode='json', exclude={'email'})
+        connection_state['map'] = map_slug
         try:
-            event_id_v3 = await send_wpf_raid_state(
+            event_id = await send_wpf_raid_state(
                 user_email=req.email,
-                state=state_v3,
+                state=connection_state,
             )
-            if analytics_context_v3 is not None:
-                analytics_context_v3['event_id'] = event_id_v3
+            if analytics_context is not None:
+                analytics_context['event_id'] = event_id
             return True
-        except RedisError as error_v3:
-            logger.warning('Raid state publish unavailable (%s)', type(error_v3).__name__)
+        except RedisError as error:
+            logger.warning('Raid state publish unavailable (%s)', type(error).__name__)
             raise HTTPException(503, 'RAID_STATE_PUBLISH_UNAVAILABLE') from None
 
     @staticmethod
-    async def send_log_location_v3(req: LogLocationRequestV3):
+    async def send_log_location(req: LogLocationRequest):
         try:
-            if not WhereAmIServiceV3.check_wpf_user_v3(req.email):
+            if not WhereAmIService.check_wpf_user(req.email):
                 logger.warning(
                     "send_log_location_v3 존재하지 않는 사용자: email=%r",
                     req.email,

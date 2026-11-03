@@ -1,9 +1,9 @@
 from sqlalchemy import Boolean, Column, String, JSON, Integer, TIMESTAMP
 
-from database import V3Database
+from database import Database
 
 
-class MapV3(V3Database.Base):
+class Map(Database.Base):
     __tablename__ = "maps"
 
     id = Column(String, primary_key=True)

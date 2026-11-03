@@ -5,7 +5,7 @@ from typing import Any
 from psycopg2.extras import Json
 from sqlalchemy import text
 
-from database import DataBaseConnector, V3Database
+from database import DataBaseConnector, Database
 
 
 logging.basicConfig(level=logging.INFO)
@@ -1363,7 +1363,7 @@ def migrate_simple_table(
         logger.info("%s migration skipped: no source rows", migration_name)
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(upsert_sql, payloads)
         target_session.commit()
 
@@ -1385,7 +1385,7 @@ def migrate_map_points() -> int:
         logger.info("map_points migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_MAP_POINTS_SQL, payloads)
         target_session.commit()
 
@@ -1403,7 +1403,7 @@ def migrate_main_contents() -> int:
         logger.info("main_contents migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_MAIN_CONTENTS_SQL, payloads)
         target_session.commit()
 
@@ -1421,7 +1421,7 @@ def migrate_menu_groups() -> int:
         logger.info("menu_groups migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_MENU_GROUPS_SQL, payloads)
         target_session.commit()
 
@@ -1441,7 +1441,7 @@ def migrate_menu_sub_groups() -> int:
         logger.info("menu_sub_groups migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_MENU_SUB_GROUPS_SQL, payloads)
         target_session.commit()
 
@@ -1459,7 +1459,7 @@ def migrate_roadmap_node() -> int:
         logger.info("roadmap_node migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_ROADMAP_NODE_SQL, payloads)
         target_session.commit()
 
@@ -1477,7 +1477,7 @@ def migrate_roadmap_edge() -> int:
         logger.info("roadmap_edge migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_ROADMAP_EDGE_SQL, payloads)
         target_session.commit()
 
@@ -1495,7 +1495,7 @@ def migrate_progress_item() -> int:
         logger.info("progress_item migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_PROGRESS_ITEM_SQL, payloads)
         target_session.commit()
 
@@ -1513,7 +1513,7 @@ def migrate_information() -> int:
         logger.info("information migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_INFORMATION_SQL, payloads)
         target_session.commit()
 
@@ -1531,7 +1531,7 @@ def migrate_wipe() -> int:
         logger.info("wipe migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_WIPE_SQL, payloads)
         target_session.commit()
 
@@ -1549,7 +1549,7 @@ def migrate_quest_guide() -> int:
         logger.info("quest guide migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_QUEST_GUIDE_SQL, payloads)
         target_session.commit()
 
@@ -1583,7 +1583,7 @@ def migrate_quest_objectives_i18n() -> int:
         logger.info("quest objectives i18n migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_QUEST_OBJECTIVES_SQL, payloads)
         target_session.commit()
 
@@ -1601,7 +1601,7 @@ def migrate_story() -> int:
         logger.info("story migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_STORY_SQL, payloads)
         target_session.commit()
 
@@ -1619,7 +1619,7 @@ def migrate_story_roadmap() -> int:
         logger.info("story_roadmap migration skipped: no source rows")
         return 0
 
-    with V3Database.SessionLocal() as target_session:
+    with Database.SessionLocal() as target_session:
         target_session.execute(UPSERT_STORY_ROADMAP_SQL, payloads)
         target_session.commit()
 

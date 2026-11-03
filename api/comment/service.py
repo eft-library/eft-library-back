@@ -10,23 +10,23 @@ from api.comment.comment_req_models import (
     InsertParentComment,
     ReqCommentReport,
 )
-from api.comment.comment_res_models import CommentReactionV3, CommentReportV3
-from api.comment.util import CommentUtilV3
-from database import V3Database
+from api.comment.comment_res_models import CommentReaction, CommentReport
+from api.comment.util import CommentUtil
+from database import Database
 from util.kafka_producer import produce_notification
 
 logger = logging.getLogger("api.comment")
 
 
-class CommentServiceV3:
+class CommentService:
     @staticmethod
-    def insert_parent_comment_v3(request_info: InsertParentComment, user_email: str):
+    def insert_parent_comment(request_info: InsertParentComment, user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 new_id = generate(size=12)
                 bigint_post_id = int(request_info.post_id)
                 s.execute(
-                    text(CommentUtilV3.insert_parent_comment()),
+                    text(CommentUtil.insert_parent_comment()),
                     {
                         "comment_id": new_id,
                         "post_id": bigint_post_id,
@@ -59,13 +59,13 @@ class CommentServiceV3:
             return None
 
     @staticmethod
-    def insert_child_comment_v3(request_info: InsertChildComment, user_email: str):
+    def insert_child_comment(request_info: InsertChildComment, user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 new_id = generate(size=12)
                 bigint_post_id = int(request_info.post_id)
                 s.execute(
-                    text(CommentUtilV3.insert_child_comment()),
+                    text(CommentUtil.insert_child_comment()),
                     {
                         "comment_id": new_id,
                         "parent_comment_id": request_info.parent_comment_id,
@@ -100,22 +100,22 @@ class CommentServiceV3:
             return None
 
     @staticmethod
-    def get_comment_v3(
+    def get_comment(
         post_id: str, page_num: int, issue_comment_id: str, user_email: str
     ):
         try:
             limit = 20
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 bigint_post_id = int(post_id)
                 total = s.execute(
-                    text(CommentUtilV3.get_comment_total_count()),
+                    text(CommentUtil.get_comment_total_count()),
                     {"post_id": bigint_post_id},
                 ).scalar()
                 max_page_count = (total + limit - 1) // limit
 
                 if issue_comment_id:
                     current_page_num = s.execute(
-                        text(CommentUtilV3.get_issue_comment_page()),
+                        text(CommentUtil.get_issue_comment_page()),
                         {
                             "post_id": bigint_post_id,
                             "comment_id": issue_comment_id,
@@ -131,7 +131,7 @@ class CommentServiceV3:
                 rn_end = current_page_num * limit
 
                 comments = s.execute(
-                    text(CommentUtilV3.get_comment()),
+                    text(CommentUtil.get_comment()),
                     {
                         "post_id": bigint_post_id,
                         "user_email": user_email,
@@ -140,7 +140,7 @@ class CommentServiceV3:
                     },
                 )
                 issue_comments = s.execute(
-                    text(CommentUtilV3.get_issue_comment()),
+                    text(CommentUtil.get_issue_comment()),
                     {"post_id": bigint_post_id},
                 )
 
@@ -156,11 +156,11 @@ class CommentServiceV3:
             return None
 
     @staticmethod
-    def update_comment_v3(comment_id: str, contents: str):
+    def update_comment(comment_id: str, contents: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 s.execute(
-                    text(CommentUtilV3.update_comment()),
+                    text(CommentUtil.update_comment()),
                     {
                         "comment_id": comment_id,
                         "contents": contents,
@@ -177,21 +177,21 @@ class CommentServiceV3:
             return None
 
     @staticmethod
-    def delete_comment_by_user_v3(comment_id: str):
-        return CommentServiceV3._delete_comment_v3(
-            comment_id, CommentUtilV3.delete_comment_by_user(), "user"
+    def delete_comment_by_user(comment_id: str):
+        return CommentService._delete_comment(
+            comment_id, CommentUtil.delete_comment_by_user(), "user"
         )
 
     @staticmethod
-    def delete_comment_by_admin_v3(comment_id: str):
-        return CommentServiceV3._delete_comment_v3(
-            comment_id, CommentUtilV3.delete_comment_by_admin(), "admin"
+    def delete_comment_by_admin(comment_id: str):
+        return CommentService._delete_comment(
+            comment_id, CommentUtil.delete_comment_by_admin(), "admin"
         )
 
     @staticmethod
-    def _delete_comment_v3(comment_id: str, sql: str, delete_type: str):
+    def _delete_comment(comment_id: str, sql: str, delete_type: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 s.execute(
                     text(sql),
                     {"comment_id": comment_id, "update_time": datetime.now()},
@@ -206,17 +206,17 @@ class CommentServiceV3:
             return None
 
     @staticmethod
-    def like_comment_v3(comment_id: str, user_email: str):
-        return CommentServiceV3._toggle_reaction_v3(comment_id, user_email, 1)
+    def like_comment(comment_id: str, user_email: str):
+        return CommentService._toggle_reaction(comment_id, user_email, 1)
 
     @staticmethod
-    def dislike_comment_v3(comment_id: str, user_email: str):
-        return CommentServiceV3._toggle_reaction_v3(comment_id, user_email, 0)
+    def dislike_comment(comment_id: str, user_email: str):
+        return CommentService._toggle_reaction(comment_id, user_email, 0)
 
     @staticmethod
-    def _toggle_reaction_v3(comment_id: str, user_email: str, next_value: int):
+    def _toggle_reaction(comment_id: str, user_email: str, next_value: int):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 result = s.execute(
                     text(
                         """
@@ -261,11 +261,11 @@ class CommentServiceV3:
             return None
 
     @staticmethod
-    def report_comment_v3(request_info: ReqCommentReport, user_email: str):
+    def report_comment(request_info: ReqCommentReport, user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 s.add(
-                    CommentReportV3(
+                    CommentReport(
                         target_comment_id=request_info.comment_id,
                         request_email=user_email,
                         target_email=request_info.reported_email,

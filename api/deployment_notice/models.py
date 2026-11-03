@@ -1,9 +1,9 @@
 from sqlalchemy import BOOLEAN, TEXT, TIMESTAMP, Column
 
-from database import V3Database
+from database import Database
 
 
-class DeploymentNoticeV3(V3Database.Base):
+class DeploymentNotice(Database.Base):
     __tablename__ = "deployment_notice"
 
     id = Column(TEXT, primary_key=True)

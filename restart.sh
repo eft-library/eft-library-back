@@ -21,9 +21,9 @@ start_server() {
     --workers 9 \
     --host=0.0.0.0 \
     --port=$PORT \
-    --log-config uvicorn_logging_v3.json \
+    --log-config uvicorn_logging.json \
     --no-access-log \
-    > >(nohup python -u util/daily_log_v3.py log_history 2>> log_history/collector-error.out) 2>&1 &
+    > >(nohup python -u util/daily_log.py log_history 2>> log_history/collector-error.out) 2>&1 &
 
   echo $! > $PID_FILE
 }

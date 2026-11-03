@@ -38,8 +38,8 @@ DNS 조회는 위 요청 흐름에서 생략했습니다. 접근 기록·알림 
 | 사용자 데이터 | 사용자 정보·진행도·로드맵 등 저장 및 조회                        | `api/user`, `api/progress`, `api/roadmap`                                                         |
 | 커뮤니티      | 게시글·댓글·반응·이미지 업로드                                   | `api/community`, `api/comment`                                                                    |
 | 실시간 지도   | 지도 층·지점·경로 등 지도 데이터 조회                            | `api/live_map`                                                                                    |
-| 파티          | 방·멤버·마커 관리, 위치·핑·접속 상태 공유                        | `api/live_map/party_v3`                                                                           |
-| 채팅          | 메시지·접속자·초대·차단·신고·제재 관리                           | `api/live_map/chat_v3`                                                                            |
+| 파티          | 방·멤버·마커 관리, 위치·핑·접속 상태 공유                        | `api/live_map/party`                                                                           |
+| 채팅          | 메시지·접속자·초대·차단·신고·제재 관리                           | `api/live_map/chat`                                                                            |
 | 내 위치 찾기  | 데스크톱 위치·레이드 상태 수신, 버전·맵 별칭·경로 보고·분석 이력 | `api/where_am_i`                                                                                  |
 | 콘텐츠·운영   | 홈·검색·스토리·배틀패스·프레스티지·배포 공지 등                  | `api/home`, `api/search`, `api/story`, `api/battle_pass`, `api/prestige`, `api/deployment_notice` |
 
@@ -95,13 +95,13 @@ sequenceDiagram
 
 파티·채팅의 영속 데이터는 PostgreSQL에, 접속 상태와 실시간 위치·핑 등 일시 상태는 Redis에 저장합니다. 사용자 알림은 Kafka consumer가 DB 저장 후 Redis에 발행하며, 지도 실시간 이벤트 경로와 구분합니다.
 
-## DB 구조와 V3 개발 규칙
+## DB 구조와 개발 규칙
 
 현재 스키마의 기준은 **[platform_db.sql](platform_db.sql)**입니다. 아이템·퀘스트·지도 등의 관계를 정규화한 구조를 사용합니다.
 
-- 신규 DB 접근은 [database.py](database.py)의 `V3Database`를 사용합니다.
-- 신규 모델·함수·서비스·쿼리 이름에는 `V3` 또는 `_v3`를 붙입니다.
-- 기존 코드·경로는 유지하고 신규 V3 구현을 별도로 추가합니다. 기존 경로가 내부적으로 V3 구현을 호출하는 경우도 있으므로 URL만으로 구현 버전을 판단하지 않습니다.
+- 신규 DB 접근은 [database.py](database.py)의 `Database`를 사용합니다.
+- 코드 식별자와 파일·테이블·인덱스 이름에는 버전 접미사를 붙이지 않습니다.
+- 기존 API 주소(`/v3/...` 포함)는 유지합니다. 환경변수·Redis 키·쿠키와 기존 마이그레이션 파일명도 유지합니다. 레거시 구현은 정규화 스키마 구현과 분리합니다.
 - `DB.sql`과 `DataBaseConnector`는 레거시 영역입니다. `Vector.sql`은 과거 RAG 관련 정의이며 현재 플랫폼 스키마의 기준이 아닙니다.
 
 기존 DB 변경용 SQL은 [sql/migrations](sql/migrations)에 있습니다. 배포 전 기능별 문서에서 필요한 SQL과 적용 순서를 확인합니다. `platform_db.sql`은 현재 구조를 정의하는 파일이며, 전체 파일을 기존 DB에 재실행하는 방식으로 마이그레이션하지 않습니다.
@@ -113,12 +113,12 @@ sequenceDiagram
 ```text
 .
 ├── main.py                 # FastAPI 앱, 미들웨어, 루트 WebSocket·상태 확인
-├── database.py             # V3Database와 레거시 DB 연결
+├── database.py             # Database와 레거시 DB 연결
 ├── api/
 │   ├── router.py           # 기능별 라우터 등록
 │   ├── live_map/
-│   │   ├── party_v3/       # 파티 REST·WebSocket·상태 저장
-│   │   └── chat_v3/        # 채팅 REST·WebSocket·운영 기능
+│   │   ├── party/       # 파티 REST·WebSocket·상태 저장
+│   │   └── chat/        # 채팅 REST·WebSocket·운영 기능
 │   └── where_am_i/         # 데스크톱 연동·메타데이터·분석
 ├── util/                   # Kafka, 미들웨어, 위치 소켓·인증, 로그
 ├── docs/                   # API 계약·프런트엔드 연동·운영 문서
@@ -129,7 +129,7 @@ sequenceDiagram
 └── restart.sh              # 기존 운영 실행·중지 스크립트
 ```
 
-`api/chat`에는 과거 외부 Agent 스트림 연동 코드가 남아 있습니다. 현재 실시간 채팅은 `api/live_map/chat_v3`이며, 두 기능은 별개입니다.
+`api/chat`에는 과거 외부 Agent 스트림 연동 코드가 남아 있습니다. 현재 실시간 채팅은 `api/live_map/chat`이며, 두 기능은 별개입니다.
 
 > 지워야 하는데, 시기를 못잡고 있습니다...
 

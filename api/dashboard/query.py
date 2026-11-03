@@ -1,6 +1,6 @@
-class DashboardQueryV3:
+class DashboardQuery:
     @staticmethod
-    def get_psql_top_request_v3():
+    def get_psql_top_request():
         return """
             SELECT
               request_type,
@@ -16,7 +16,7 @@ class DashboardQueryV3:
         """
 
     @staticmethod
-    def get_psql_total_count_v3():
+    def get_psql_total_count():
         return """
             SELECT COUNT(*) AS current_requests
             FROM user_footprint
@@ -25,14 +25,14 @@ class DashboardQueryV3:
         """
 
     @staticmethod
-    def get_psql_user_total_count_v3():
+    def get_psql_user_total_count():
         return """
             SELECT COUNT(*) AS user_total_count
             FROM user_info
         """
 
     @staticmethod
-    def get_psql_active_user_count_v3():
+    def get_psql_active_user_count():
         return """
             SELECT COUNT(*) AS active_user
             FROM user_info
@@ -41,7 +41,7 @@ class DashboardQueryV3:
         """
 
     @staticmethod
-    def get_psql_time_distribution_v3():
+    def get_psql_time_distribution():
         return """
             SELECT
               TO_CHAR(
@@ -58,7 +58,7 @@ class DashboardQueryV3:
         """
 
     @staticmethod
-    def get_psql_health_check_v3():
+    def get_psql_health_check():
         return """
         SELECT
             service_name,
@@ -75,7 +75,7 @@ class DashboardQueryV3:
         """
 
     @staticmethod
-    def get_response_ms_v3():
+    def get_response_ms():
         return """
         SELECT
             service_name,

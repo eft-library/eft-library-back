@@ -1,4 +1,4 @@
-class CommentUtilV3:
+class CommentUtil:
     @staticmethod
     def insert_parent_comment():
         return """

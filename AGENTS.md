@@ -26,49 +26,16 @@ Do not treat `DB.sql` as the current database structure.
 
 ---
 
-## Versioning convention (V3)
+## Naming and compatibility
 
-* All new database access must use `V3Database`.
-* Newly created models, functions, services, and queries must use the `V3` prefix or suffix.
-
-### Examples
-
-* `UserModel` → `UserModelV3`
-* `get_user_list` → `get_user_list_v3`
-* `QuestService` → `QuestServiceV3`
-* `fetch_items` → `fetch_items_v3`
-
----
-
-## Migration strategy (non-destructive)
-
-* Do not modify or delete existing legacy code.
-* Always create new V3-based implementations instead of updating existing ones.
-* Keep legacy endpoints, services, and queries intact for backward compatibility.
-
-### Examples
-
-* `get_user_list` → keep as-is
-
-* create `get_user_list_v3`
-
-* `QuestService` → keep as-is
-
-* create `QuestServiceV3`
-
-* existing endpoint → keep
-
-* create `/v3/...` endpoint
-
----
-
-## Implementation rules for V3
-
-* All new logic must be implemented separately using V3 structure.
-* Do not overwrite legacy functions, models, or queries.
-* Do not refactor legacy code in-place.
-* If migration is needed, implement V3 first, then switch usage explicitly later.
-* Do not mix legacy (`DB.sql`) logic with V3 logic in the same function.
+* Do not add `V3` or `v3` to code identifiers, filenames, table names, or index names.
+* All new database access for `platform_db.sql` must use `Database` from `database.py`.
+* `DataBaseConnector` is the legacy database connection; keep it separate from `Database`.
+* Existing API URLs, including `/v3/...`, must remain unchanged unless explicitly requested.
+* Preserve existing environment variable names, Redis keys, cookies, and stored format identifiers.
+* Keep legacy behavior and implementations separate; do not overwrite them when names collide.
+* Use descriptive names such as `PlatformUserUtil` to distinguish normalized-schema implementations.
+* Historical migration filenames remain stable so applied migration references are preserved.
 
 ---
 
@@ -122,7 +89,7 @@ When generating or modifying code:
 
 * `platform_db.sql` = current schema (source of truth)
 * `DB.sql` = legacy reference only
-* All new work = V3
-* Never modify legacy code → always create new V3 code
-* Do not mix V2 and V3 logic
+* New code uses descriptive names without version suffixes
+* Keep legacy implementations separate
+* Do not mix legacy and normalized-schema logic
 * When unsure → do not guess

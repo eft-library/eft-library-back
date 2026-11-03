@@ -1,9 +1,9 @@
 from sqlalchemy import BOOLEAN, INTEGER, TEXT, TIMESTAMP, Column
 
-from database import V3Database
+from database import Database
 
 
-class UserV3(V3Database.Base):
+class User(Database.Base):
     __tablename__ = "user_info"
 
     email = Column(TEXT, primary_key=True)
@@ -16,7 +16,7 @@ class UserV3(V3Database.Base):
     attendance_time = Column(TIMESTAMP)
 
 
-class UserReportV3(V3Database.Base):
+class UserReport(Database.Base):
     __tablename__ = "user_report"
 
     id = Column(INTEGER, primary_key=True)
@@ -27,7 +27,7 @@ class UserReportV3(V3Database.Base):
     request_time = Column(TIMESTAMP)
 
 
-class UserBlockV3(V3Database.Base):
+class UserBlock(Database.Base):
     __tablename__ = "user_block"
 
     id = Column(INTEGER, primary_key=True)
@@ -37,7 +37,7 @@ class UserBlockV3(V3Database.Base):
     create_time = Column(TIMESTAMP)
 
 
-class UserPenaltyV3(V3Database.Base):
+class UserPenalty(Database.Base):
     __tablename__ = "user_penalty"
 
     id = Column(INTEGER, primary_key=True)

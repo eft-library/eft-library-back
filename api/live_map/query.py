@@ -1,6 +1,6 @@
-class LiveMapQueryV3:
+class LiveMapQuery:
     @staticmethod
-    def raid_duration_by_map_sql_v3():
+    def raid_duration_by_map_sql():
         return """
             select count(*) as route_count,
                    min(raid_duration_seconds) as minimum_seconds,

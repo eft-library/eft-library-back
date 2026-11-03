@@ -1,8 +1,8 @@
 from sqlalchemy import BOOLEAN, Column, INTEGER, NUMERIC, TEXT, TIMESTAMP
-from database import V3Database
+from database import Database
 
 
-class ItemV3(V3Database.Base):
+class Item(Database.Base):
     __tablename__ = "items"
 
     id = Column(TEXT, primary_key=True)
@@ -19,7 +19,7 @@ class ItemV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class ItemPenaltyV3(V3Database.Base):
+class ItemPenalty(Database.Base):
     __tablename__ = "item_penalties"
 
     item_id = Column(TEXT, primary_key=True)
@@ -29,7 +29,7 @@ class ItemPenaltyV3(V3Database.Base):
     distance_modifier = Column(NUMERIC)
 
 
-class WeaponItemV3(V3Database.Base):
+class WeaponItem(Database.Base):
     __tablename__ = "weapon_items"
 
     item_id = Column(TEXT, primary_key=True)
@@ -47,14 +47,14 @@ class WeaponItemV3(V3Database.Base):
     is_semi_auto = Column(BOOLEAN)
 
 
-class WeaponAllowedAmmoV3(V3Database.Base):
+class WeaponAllowedAmmo(Database.Base):
     __tablename__ = "weapon_allowed_ammo"
 
     item_id = Column(TEXT, primary_key=True)
     ammo_item_id = Column(TEXT, primary_key=True)
 
 
-class AmmoItemV3(V3Database.Base):
+class AmmoItem(Database.Base):
     __tablename__ = "ammo_items"
 
     item_id = Column(TEXT, primary_key=True)
@@ -67,7 +67,7 @@ class AmmoItemV3(V3Database.Base):
     light_bleed_modifier = Column(NUMERIC)
 
 
-class AmmoEfficiencyV3(V3Database.Base):
+class AmmoEfficiency(Database.Base):
     __tablename__ = "ammo_efficiency"
 
     ammo_item_id = Column(TEXT, primary_key=True)
@@ -79,7 +79,7 @@ class AmmoEfficiencyV3(V3Database.Base):
     value_6 = Column(INTEGER)
 
 
-class MeleeItemV3(V3Database.Base):
+class MeleeItem(Database.Base):
     __tablename__ = "melee_items"
 
     item_id = Column(TEXT, primary_key=True)
@@ -88,7 +88,7 @@ class MeleeItemV3(V3Database.Base):
     stab_damage = Column(INTEGER)
 
 
-class ThrowableItemV3(V3Database.Base):
+class ThrowableItem(Database.Base):
     __tablename__ = "throwable_items"
 
     item_id = Column(TEXT, primary_key=True)
@@ -100,7 +100,7 @@ class ThrowableItemV3(V3Database.Base):
     max_explosion_distance = Column(NUMERIC)
 
 
-class StorageItemV3(V3Database.Base):
+class StorageItem(Database.Base):
     __tablename__ = "storage_items"
 
     item_id = Column(TEXT, primary_key=True)
@@ -108,7 +108,7 @@ class StorageItemV3(V3Database.Base):
     capacity = Column(INTEGER)
 
 
-class StorageGridV3(V3Database.Base):
+class StorageGrid(Database.Base):
     __tablename__ = "storage_grids"
 
     item_id = Column(TEXT, primary_key=True)
@@ -117,7 +117,7 @@ class StorageGridV3(V3Database.Base):
     height = Column(INTEGER)
 
 
-class ProtectionItemV3(V3Database.Base):
+class ProtectionItem(Database.Base):
     __tablename__ = "protection_items"
 
     item_id = Column(TEXT, primary_key=True)
@@ -153,7 +153,7 @@ class ProtectionItemV3(V3Database.Base):
     is_side_plate = Column(BOOLEAN)
 
 
-class ConsumableItemV3(V3Database.Base):
+class ConsumableItem(Database.Base):
     __tablename__ = "consumable_items"
 
     item_id = Column(TEXT, primary_key=True)
@@ -168,14 +168,14 @@ class ConsumableItemV3(V3Database.Base):
     hydration_impact = Column(INTEGER)
 
 
-class ConsumableCureV3(V3Database.Base):
+class ConsumableCure(Database.Base):
     __tablename__ = "consumable_cures"
 
     item_id = Column(TEXT, primary_key=True)
     cure = Column(TEXT, primary_key=True)
 
 
-class ConsumableStimEffectV3(V3Database.Base):
+class ConsumableStimEffect(Database.Base):
     __tablename__ = "consumable_stim_effects"
 
     item_id = Column(TEXT, primary_key=True)
@@ -187,7 +187,7 @@ class ConsumableStimEffectV3(V3Database.Base):
     skill_name = Column(TEXT)
 
 
-class UsageItemV3(V3Database.Base):
+class UsageItem(Database.Base):
     __tablename__ = "usage_items"
 
     item_id = Column(TEXT, primary_key=True)

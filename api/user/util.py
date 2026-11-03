@@ -17,7 +17,7 @@ class UserUtil:
         return response.json()["email"]
 
 
-class UserUtilV3:
+class PlatformUserUtil:
     @staticmethod
     def get_user_info_with_penalty():
         return """

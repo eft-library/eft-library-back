@@ -1,8 +1,8 @@
-from database import V3Database
+from database import Database
 from sqlalchemy import Column, TIMESTAMP, ARRAY, TEXT
 
 
-class UserProgressItemV3(V3Database.Base):
+class UserProgressItem(Database.Base):
     __tablename__ = "user_progress_item"
 
     email = Column(TEXT, primary_key=True)
@@ -11,7 +11,7 @@ class UserProgressItemV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class ProgressItemV3(V3Database.Base):
+class ProgressItem(Database.Base):
     __tablename__ = "progress_item"
 
     id = Column(TEXT, primary_key=True)

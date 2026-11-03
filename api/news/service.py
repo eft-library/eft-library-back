@@ -2,19 +2,19 @@ import html
 import logging
 import re
 
-from api.news.models import InformationV3, WipeV3
-from database import V3Database
+from api.news.models import Information, Wipe
+from database import Database
 from sqlalchemy import func, desc
 
 logger = logging.getLogger("api.wipe")
 
 
-class NewsServiceV3:
+class NewsService:
     PREVIEW_LENGTH = 140
 
     # 미리보기도 프론트 말고 백에서 잘라 보내기
     @staticmethod
-    def _build_preview_text_v3(content: str | None):
+    def _build_preview_text(content: str | None):
         if content is None:
             return None
 
@@ -22,13 +22,13 @@ class NewsServiceV3:
         plain_text = html.unescape(plain_text)
         plain_text = re.sub(r"\s+", " ", plain_text).strip()
 
-        if len(plain_text) <= NewsServiceV3.PREVIEW_LENGTH:
+        if len(plain_text) <= NewsService.PREVIEW_LENGTH:
             return plain_text
 
-        return f"{plain_text[:NewsServiceV3.PREVIEW_LENGTH].rstrip()}..."
+        return f"{plain_text[:NewsService.PREVIEW_LENGTH].rstrip()}..."
 
     @staticmethod
-    def _serialize_information_v3(information: InformationV3):
+    def _serialize_information(information: Information):
         return {
             "id": information.id,
             "information_type": information.information_type,
@@ -42,24 +42,24 @@ class NewsServiceV3:
         }
 
     @staticmethod
-    def _serialize_information_preview_v3(information: InformationV3):
+    def _serialize_information_preview(information: Information):
         return {
             "id": information.id,
             "information_type": information.information_type,
             "title_en": information.title_en,
             "title_ko": information.title_ko,
             "title_ja": information.title_ja,
-            "content_en": NewsServiceV3._build_preview_text_v3(information.content_en),
-            "content_ko": NewsServiceV3._build_preview_text_v3(information.content_ko),
-            "content_ja": NewsServiceV3._build_preview_text_v3(information.content_ja),
+            "content_en": NewsService._build_preview_text(information.content_en),
+            "content_ko": NewsService._build_preview_text(information.content_ko),
+            "content_ja": NewsService._build_preview_text(information.content_ja),
             "update_time": information.update_time,
         }
 
     @staticmethod
-    def get_wipe_v3():
+    def get_wipe():
         try:
-            with V3Database.SessionLocal() as s:
-                wipe = s.query(WipeV3).order_by(desc(WipeV3.season_start)).all()
+            with Database.SessionLocal() as s:
+                wipe = s.query(Wipe).order_by(desc(Wipe.season_start)).all()
                 return wipe
         except Exception as e:
             logger.error(
@@ -69,13 +69,13 @@ class NewsServiceV3:
             return None
 
     @staticmethod
-    def get_information_list_v3(page: int, page_size: int, info_type: str):
+    def get_information_list(page: int, page_size: int, info_type: str):
         try:
             offset = (page - 1) * page_size
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 total_count = (
-                    s.query(func.count(InformationV3.id))
-                    .filter(InformationV3.information_type == info_type)
+                    s.query(func.count(Information.id))
+                    .filter(Information.information_type == info_type)
                     .scalar()
                 )
 
@@ -84,9 +84,9 @@ class NewsServiceV3:
                 )
 
                 information_list = (
-                    s.query(InformationV3)
-                    .filter(InformationV3.information_type == info_type)
-                    .order_by(desc(InformationV3.update_time))
+                    s.query(Information)
+                    .filter(Information.information_type == info_type)
+                    .order_by(desc(Information.update_time))
                     .limit(page_size)
                     .offset(offset)
                     .all()
@@ -94,7 +94,7 @@ class NewsServiceV3:
 
                 return {
                     "data": [
-                        NewsServiceV3._serialize_information_preview_v3(information)
+                        NewsService._serialize_information_preview(information)
                         for information in information_list
                     ],
                     "total_count": total_count,
@@ -106,14 +106,14 @@ class NewsServiceV3:
             return None
 
     @staticmethod
-    def get_information_by_id_v3(info_id: str, info_type: str):
+    def get_information_by_id(info_id: str, info_type: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 information = (
-                    s.query(InformationV3)
+                    s.query(Information)
                     .filter(
-                        InformationV3.id == info_id,
-                        InformationV3.information_type == info_type,
+                        Information.id == info_id,
+                        Information.information_type == info_type,
                     )
                     .first()
                 )
@@ -122,34 +122,34 @@ class NewsServiceV3:
                     return None
 
                 above_infos = (
-                    s.query(InformationV3)
+                    s.query(Information)
                     .filter(
-                        InformationV3.information_type == info_type,
-                        InformationV3.update_time > information.update_time,
+                        Information.information_type == info_type,
+                        Information.update_time > information.update_time,
                     )
-                    .order_by(InformationV3.update_time.asc())
+                    .order_by(Information.update_time.asc())
                     .limit(2)
                     .all()
                 )
                 below_infos = (
-                    s.query(InformationV3)
+                    s.query(Information)
                     .filter(
-                        InformationV3.information_type == info_type,
-                        InformationV3.update_time < information.update_time,
+                        Information.information_type == info_type,
+                        Information.update_time < information.update_time,
                     )
-                    .order_by(InformationV3.update_time.desc())
+                    .order_by(Information.update_time.desc())
                     .limit(2)
                     .all()
                 )
 
                 information_group = [
                     *[
-                        NewsServiceV3._serialize_information_preview_v3(group_info)
+                        NewsService._serialize_information_preview(group_info)
                         for group_info in above_infos
                     ],
-                    NewsServiceV3._serialize_information_preview_v3(information),
+                    NewsService._serialize_information_preview(information),
                     *[
-                        NewsServiceV3._serialize_information_preview_v3(group_info)
+                        NewsService._serialize_information_preview(group_info)
                         for group_info in below_infos
                     ],
                 ]
@@ -159,7 +159,7 @@ class NewsServiceV3:
                 )
 
                 return {
-                    "information": NewsServiceV3._serialize_information_v3(information),
+                    "information": NewsService._serialize_information(information),
                     "information_group": information_group,
                 }
         except Exception as e:

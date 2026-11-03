@@ -3,15 +3,15 @@ from collections import defaultdict
 
 from sqlalchemy import text
 
-from api.battle_pass.query import BattlePassQueryV3
-from database import V3Database
+from api.battle_pass.query import BattlePassQuery
+from database import Database
 
 logger = logging.getLogger("api.battle_pass")
 
 
-class BattlePassServiceV3:
+class BattlePassService:
     @staticmethod
-    def _serialize_season_v3(season: dict):
+    def _serialize_season(season: dict):
         return {
             "id": season["id"],
             "code": season["code"],
@@ -30,7 +30,7 @@ class BattlePassServiceV3:
         }
 
     @staticmethod
-    def _serialize_document_v3(document: dict):
+    def _serialize_document(document: dict):
         return {
             "id": document["id"],
             "name_en": document["name_en"],
@@ -42,31 +42,31 @@ class BattlePassServiceV3:
         }
 
     @staticmethod
-    def _build_detail_v3(session, season: dict):
+    def _build_detail(session, season: dict):
         season_id = season["id"]
         documents = [
             dict(row)
             for row in session.execute(
-                text(BattlePassQueryV3.documents_by_season_sql()),
+                text(BattlePassQuery.documents_by_season_sql()),
                 {"season_id": season_id},
             ).mappings()
         ]
         page_settings = [
             dict(row)
             for row in session.execute(
-                text(BattlePassQueryV3.pages_by_season_sql()),
+                text(BattlePassQuery.pages_by_season_sql()),
                 {"season_id": season_id},
             ).mappings()
         ]
         rewards = [
             dict(row)
             for row in session.execute(
-                text(BattlePassQueryV3.rewards_by_season_sql()),
+                text(BattlePassQuery.rewards_by_season_sql()),
                 {"season_id": season_id},
             ).mappings()
         ]
         requirements = session.execute(
-            text(BattlePassQueryV3.requirements_by_season_sql()),
+            text(BattlePassQuery.requirements_by_season_sql()),
             {"season_id": season_id},
         ).mappings()
 
@@ -130,24 +130,24 @@ class BattlePassServiceV3:
         ]
 
         return {
-            "season": BattlePassServiceV3._serialize_season_v3(season),
+            "season": BattlePassService._serialize_season(season),
             "documents": [
-                BattlePassServiceV3._serialize_document_v3(document)
+                BattlePassService._serialize_document(document)
                 for document in documents
             ],
             "pages": pages,
         }
 
     @staticmethod
-    def get_active_battle_pass_v3():
+    def get_active_battle_pass():
         try:
-            with V3Database.SessionLocal() as session:
+            with Database.SessionLocal() as session:
                 season = session.execute(
-                    text(BattlePassQueryV3.active_season_sql())
+                    text(BattlePassQuery.active_season_sql())
                 ).mappings().first()
                 if season is None:
                     return None
-                return BattlePassServiceV3._build_detail_v3(
+                return BattlePassService._build_detail(
                     session, dict(season)
                 )
         except Exception as error:
@@ -158,16 +158,16 @@ class BattlePassServiceV3:
             return None
 
     @staticmethod
-    def get_battle_pass_by_code_v3(season_code: str):
+    def get_battle_pass_by_code(season_code: str):
         try:
-            with V3Database.SessionLocal() as session:
+            with Database.SessionLocal() as session:
                 season = session.execute(
-                    text(BattlePassQueryV3.season_by_code_sql()),
+                    text(BattlePassQuery.season_by_code_sql()),
                     {"season_code": season_code},
                 ).mappings().first()
                 if season is None:
                     return None
-                return BattlePassServiceV3._build_detail_v3(
+                return BattlePassService._build_detail(
                     session, dict(season)
                 )
         except Exception as error:

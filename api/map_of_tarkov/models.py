@@ -7,10 +7,10 @@ from sqlalchemy import (
     TEXT,
 )
 
-from database import V3Database
+from database import Database
 
 
-class MapPointV3(V3Database.Base):
+class MapPoint(Database.Base):
     __tablename__ = "map_points"
 
     id = Column(String, primary_key=True)

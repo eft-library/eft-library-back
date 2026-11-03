@@ -1,6 +1,6 @@
-class RoadmapQueryV3:
+class RoadmapQuery:
     @staticmethod
-    def get_roadmap_node_v3():
+    def get_roadmap_node():
         return """
             WITH quest_based AS (
                 SELECT

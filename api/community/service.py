@@ -6,24 +6,24 @@ import os
 from typing import Optional
 
 from fastapi import File, HTTPException, UploadFile
-from util.object_storage_v3 import create_object_storage_client_v3
+from util.object_storage import create_object_storage_client
 from minio.error import S3Error
 from PIL import Image
 from slugify import slugify
 from sqlalchemy import text
 
-from api.community.community_function import CommunityFunctionV3
+from api.community.community_function import CommunityFunction
 from api.community.community_req_models import CreateCommunity, FollowUser, ReqPostReport
 from api.community.community_res_models import (
-    CommunityPostsBookmarkV3,
-    CommunityPostsReactionsV3,
-    CommunityPostsV3,
-    CommunityPostsViewV3,
-    PostReportV3,
-    UserFollowsV3,
+    CommunityPostsBookmark,
+    CommunityPostsReactions,
+    CommunityPosts,
+    CommunityPostsView,
+    PostReport,
+    UserFollows,
 )
-from api.community.util import CommunityUtilV3
-from database import V3Database
+from api.community.util import CommunityUtil
+from database import Database
 from dotenv import load_dotenv
 from util.kafka_producer import produce_notification
 from util.snowflake_id import SnowflakeGenerator
@@ -35,12 +35,12 @@ snowflake = SnowflakeGenerator(datacenter_id=1, worker_id=1)
 bucket_name = "eftlibrary"
 folder_name = "tkl_community/posts_image"
 
-object_storage_client_v3 = create_object_storage_client_v3()
+object_storage_client = create_object_storage_client()
 
 
-class CommunityServiceV3:
+class CommunityService:
     @staticmethod
-    def upload_image_v3(file: UploadFile = File(...)):
+    def upload_image(file: UploadFile = File(...)):
         timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
         filename_wo_ext = os.path.splitext(file.filename.replace(" ", "_"))[0]
         object_name = f"{folder_name}/{timestamp}_{filename_wo_ext}.webp"
@@ -50,7 +50,7 @@ class CommunityServiceV3:
             buffer = io.BytesIO()
             image.save(buffer, format="WEBP", quality=90, method=6)
             buffer.seek(0)
-            object_storage_client_v3.put_object(
+            object_storage_client.put_object(
                 bucket_name,
                 object_name,
                 data=buffer,
@@ -65,15 +65,15 @@ class CommunityServiceV3:
         return {"image_url": f"https://image.eftlibrary.com/{bucket_name}/{object_name}"}
 
     @staticmethod
-    def create_posts_v3(post_info: CreateCommunity, user_email: str):
+    def create_posts(post_info: CreateCommunity, user_email: str):
         try:
             new_id = snowflake.generate_id()
             slug = slugify(post_info.title)
-            thumbnail = CommunityFunctionV3.extract_thumbnail_img(post_info.contents)
+            thumbnail = CommunityFunction.extract_thumbnail_img(post_info.contents)
 
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 s.add(
-                    CommunityPostsV3(
+                    CommunityPosts(
                         id=new_id,
                         slug=slug,
                         user_email=user_email,
@@ -87,7 +87,7 @@ class CommunityServiceV3:
                         update_time=datetime.now(),
                     )
                 )
-                s.add(CommunityPostsViewV3(post_id=new_id, view_count=1))
+                s.add(CommunityPostsView(post_id=new_id, view_count=1))
                 s.commit()
 
             produce_notification(
@@ -110,19 +110,19 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def get_posts_v3(category: str, page_num: int, user_email: Optional[str] = None):
+    def get_posts(category: str, page_num: int, user_email: Optional[str] = None):
         try:
             limit, offset = 20, (page_num - 1) * 20
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 if category == "issue":
-                    posts_sql = text(CommunityUtilV3.get_posts_with_issue())
-                    count_sql = text(CommunityUtilV3.get_post_issue_count())
+                    posts_sql = text(CommunityUtil.get_posts_with_issue())
+                    count_sql = text(CommunityUtil.get_post_issue_count())
                 elif category == "all":
-                    posts_sql = text(CommunityUtilV3.get_posts_with_all())
-                    count_sql = text(CommunityUtilV3.get_post_all_count())
+                    posts_sql = text(CommunityUtil.get_posts_with_all())
+                    count_sql = text(CommunityUtil.get_post_all_count())
                 else:
-                    posts_sql = text(CommunityUtilV3.get_posts_with_category())
-                    count_sql = text(CommunityUtilV3.get_post_category_count())
+                    posts_sql = text(CommunityUtil.get_posts_with_category())
+                    count_sql = text(CommunityUtil.get_post_category_count())
                 params = {
                     "limit": limit,
                     "offset": offset,
@@ -141,18 +141,18 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def get_detail_post_v3(post_id_slug: str, user_email: str, page_category: str):
+    def get_detail_post(post_id_slug: str, user_email: str, page_category: str):
         try:
-            with V3Database.SessionLocal() as s:
-                post_id = CommunityFunctionV3.parse_id_and_slug(post_id_slug)
+            with Database.SessionLocal() as s:
+                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
                 return {
-                    "post_detail": CommunityFunctionV3.fetch_post_detail(
+                    "post_detail": CommunityFunction.fetch_post_detail(
                         s, post_id, user_email
                     ),
-                    "author_detail": CommunityFunctionV3.fetch_author_meta(
+                    "author_detail": CommunityFunction.fetch_author_meta(
                         s, post_id, user_email
                     ),
-                    "posts": CommunityFunctionV3.fetch_posts_with_paging(
+                    "posts": CommunityFunction.fetch_posts_with_paging(
                         s, post_id, page_category, user_email
                     ),
                 }
@@ -164,28 +164,28 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def get_side_info_v3(user_email: str):
+    def get_side_info(user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 issue_posts = s.execute(
-                    text(CommunityUtilV3.get_posts_with_issue()),
+                    text(CommunityUtil.get_posts_with_issue()),
                     {"limit": 5, "offset": 0, "user_email": user_email},
                 )
                 return {
                     "issue_posts": [dict(row) for row in issue_posts.mappings()],
-                    "notice_posts": CommunityFunctionV3.fetch_notice_posts(s),
+                    "notice_posts": CommunityFunction.fetch_notice_posts(s),
                 }
         except Exception as e:
             logger.error(f"get_side_info_v3 error: {e}", exc_info=True)
             return None
 
     @staticmethod
-    def get_detail_post_meta_data_v3(post_id_slug: str, user_email: str):
+    def get_detail_post_meta_data(post_id_slug: str, user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
-                post_id = CommunityFunctionV3.parse_id_and_slug(post_id_slug)
+            with Database.SessionLocal() as s:
+                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
                 result = s.execute(
-                    text(CommunityUtilV3.get_post_detail_meta_data()),
+                    text(CommunityUtil.get_post_detail_meta_data()),
                     {"post_id": post_id, "user_email": user_email},
                 )
                 return [dict(row) for row in result.mappings()][0]
@@ -197,17 +197,17 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def like_post_v3(post_id: str, user_email: str):
-        return CommunityServiceV3._toggle_post_reaction_v3(int(post_id), user_email, 1)
+    def like_post(post_id: str, user_email: str):
+        return CommunityService._toggle_post_reaction(int(post_id), user_email, 1)
 
     @staticmethod
-    def dislike_post_v3(post_id: str, user_email: str):
-        return CommunityServiceV3._toggle_post_reaction_v3(int(post_id), user_email, 0)
+    def dislike_post(post_id: str, user_email: str):
+        return CommunityService._toggle_post_reaction(int(post_id), user_email, 0)
 
     @staticmethod
-    def _toggle_post_reaction_v3(post_id: int, user_email: str, next_value: int):
+    def _toggle_post_reaction(post_id: int, user_email: str, next_value: int):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 result = s.execute(
                     text(
                         """
@@ -249,9 +249,9 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def bookmark_post_v3(post_id: str, user_email: str):
+    def bookmark_post(post_id: str, user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 bigint_post_id = int(post_id)
                 deleted = s.execute(
                     text(
@@ -287,9 +287,9 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def toggle_follow_v3(request_info: FollowUser, user_email: str):
+    def toggle_follow(request_info: FollowUser, user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 deleted = s.execute(
                     text(
                         """
@@ -346,11 +346,11 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def check_user_following_v3(author_email: str, user_email: str):
+    def check_user_following(author_email: str, user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 result = s.execute(
-                    text(CommunityUtilV3.check_follow()),
+                    text(CommunityUtil.check_follow()),
                     {"author_email": author_email, "user_email": user_email},
                 )
                 return [dict(row) for row in result.mappings()][0]
@@ -362,7 +362,7 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def update_post_v3(
+    def update_post(
         post_id: str,
         slug: str,
         page_category: str,
@@ -371,10 +371,10 @@ class CommunityServiceV3:
         user_email: str,
     ):
         new_slug = slugify(title)
-        thumbnail = CommunityFunctionV3.extract_thumbnail_img(contents)
+        thumbnail = CommunityFunction.extract_thumbnail_img(contents)
         try:
-            with V3Database.SessionLocal() as s:
-                post = s.query(CommunityPostsV3).filter(CommunityPostsV3.id == int(post_id)).first()
+            with Database.SessionLocal() as s:
+                post = s.query(CommunityPosts).filter(CommunityPosts.id == int(post_id)).first()
                 if post and post.user_email == user_email:
                     post.update_time = datetime.now()
                     post.title = title
@@ -390,10 +390,10 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def get_update_post_detail_v3(post_id: str, user_email: str):
+    def get_update_post_detail(post_id: str, user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
-                post = s.query(CommunityPostsV3).filter(CommunityPostsV3.id == int(post_id)).first()
+            with Database.SessionLocal() as s:
+                post = s.query(CommunityPosts).filter(CommunityPosts.id == int(post_id)).first()
                 if post and post.user_email == user_email:
                     post.id = str(post.id)
                     return post
@@ -406,18 +406,18 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def delete_post_by_admin_v3(post_id: str):
-        return CommunityServiceV3._delete_post_v3(post_id, "admin")
+    def delete_post_by_admin(post_id: str):
+        return CommunityService._delete_post(post_id, "admin")
 
     @staticmethod
-    def delete_post_by_user_v3(post_id: str):
-        return CommunityServiceV3._delete_post_v3(post_id, "user")
+    def delete_post_by_user(post_id: str):
+        return CommunityService._delete_post(post_id, "user")
 
     @staticmethod
-    def _delete_post_v3(post_id: str, delete_type: str):
+    def _delete_post(post_id: str, delete_type: str):
         try:
-            with V3Database.SessionLocal() as s:
-                post = s.query(CommunityPostsV3).filter(CommunityPostsV3.id == int(post_id)).first()
+            with Database.SessionLocal() as s:
+                post = s.query(CommunityPosts).filter(CommunityPosts.id == int(post_id)).first()
                 if post:
                     post.update_time = datetime.now()
                     if delete_type == "admin":
@@ -431,7 +431,7 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def get_search_v3(
+    def get_search(
         search_type: str, word: str, page_num: int, user_email: Optional[str] = None
     ):
         try:
@@ -442,13 +442,13 @@ class CommunityServiceV3:
                 "word": f"%{word}%",
                 "user_email": user_email,
             }
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 search_result = s.execute(
-                    text(CommunityFunctionV3.get_search_sql(search_type)),
+                    text(CommunityFunction.get_search_sql(search_type)),
                     params,
                 )
                 total = s.execute(
-                    text(CommunityFunctionV3.get_search_total_count_sql(search_type)),
+                    text(CommunityFunction.get_search_total_count_sql(search_type)),
                     params,
                 ).scalar()
                 return {
@@ -461,11 +461,11 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def report_post_v3(request_info: ReqPostReport, user_email: str):
+    def report_post(request_info: ReqPostReport, user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 s.add(
-                    PostReportV3(
+                    PostReport(
                         target_post_id=int(request_info.post_id),
                         request_email=user_email,
                         target_email=request_info.reported_email,
@@ -484,11 +484,11 @@ class CommunityServiceV3:
             return None
 
     @staticmethod
-    def increase_view_count_v3(post_id_slug: str):
+    def increase_view_count(post_id_slug: str):
         try:
-            with V3Database.SessionLocal() as s:
-                post_id = CommunityFunctionV3.parse_id_and_slug(post_id_slug)
-                s.execute(text(CommunityUtilV3.increase_view_count()), {"post_id": post_id})
+            with Database.SessionLocal() as s:
+                post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
+                s.execute(text(CommunityUtil.increase_view_count()), {"post_id": post_id})
                 s.commit()
                 return {"result": 1}
         except Exception as e:

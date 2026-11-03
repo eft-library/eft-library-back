@@ -1,4 +1,4 @@
-class BattlePassQueryV3:
+class BattlePassQuery:
     @staticmethod
     def active_season_sql():
         return """

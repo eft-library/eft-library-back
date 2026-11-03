@@ -1,8 +1,8 @@
 from sqlalchemy import Column, String, TIMESTAMP, INTEGER, NUMERIC
-from database import V3Database
+from database import Database
 
 
-class AutocompleteItemV3(V3Database.Base):
+class AutocompleteItem(Database.Base):
     __tablename__ = "autocomplete_items"
 
     url = Column(String, primary_key=True)
@@ -14,7 +14,7 @@ class AutocompleteItemV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class SitemapV3(V3Database.Base):
+class Sitemap(Database.Base):
     __tablename__ = "sitemap"
 
     id = Column(INTEGER, primary_key=True)

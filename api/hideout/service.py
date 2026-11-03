@@ -1,9 +1,9 @@
 from sqlalchemy import text
 
-from api.hideout.hideout_req_models import ItemTypeV3
-from api.hideout.hideout_res_models import UserHideoutV3
-from api.hideout.query import HideoutQueryV3
-from database import V3Database
+from api.hideout.hideout_req_models import ItemType
+from api.hideout.hideout_res_models import UserHideout
+from api.hideout.query import HideoutQuery
+from database import Database
 from datetime import datetime
 from typing import List, Optional
 import logging
@@ -12,7 +12,7 @@ import json
 logger = logging.getLogger("api.hideout")
 
 
-class HideoutServiceV3:
+class HideoutService:
     @staticmethod
     def _group_rows_by_key(rows, key):
         grouped = {}
@@ -22,11 +22,11 @@ class HideoutServiceV3:
         return grouped
 
     @staticmethod
-    def get_all_item_requirements_v3():
+    def get_all_item_requirements():
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 rows = (
-                    s.execute(text(HideoutQueryV3.all_item_requirements_sql()))
+                    s.execute(text(HideoutQuery.all_item_requirements_sql()))
                     .mappings()
                     .all()
                 )
@@ -77,9 +77,9 @@ class HideoutServiceV3:
             return None
 
     @staticmethod
-    def get_station_v3(user_email: Optional[str]):
+    def get_station(user_email: Optional[str]):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 result = {
                     "user_hideout": None,
                     "hideout_list": [],
@@ -87,8 +87,8 @@ class HideoutServiceV3:
 
                 if user_email:
                     user_hideout = (
-                        s.query(UserHideoutV3)
-                        .filter(UserHideoutV3.email == user_email)
+                        s.query(UserHideout)
+                        .filter(UserHideout.email == user_email)
                         .first()
                     )
                     if user_hideout:
@@ -107,7 +107,7 @@ class HideoutServiceV3:
                         }
 
                 hideout_master_rows = (
-                    s.execute(text(HideoutQueryV3.hideout_master_list_sql()))
+                    s.execute(text(HideoutQuery.hideout_master_list_sql()))
                     .mappings()
                     .all()
                 )
@@ -118,12 +118,12 @@ class HideoutServiceV3:
             return None
 
     @staticmethod
-    def get_station_by_normalized_name_v3(normalized_name: str):
+    def get_station_by_normalized_name(normalized_name: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 master = (
                     s.execute(
-                        text(HideoutQueryV3.hideout_master_sql()),
+                        text(HideoutQuery.hideout_master_sql()),
                         {"normalized_name": normalized_name},
                     )
                     .mappings()
@@ -134,7 +134,7 @@ class HideoutServiceV3:
 
                 level_rows = (
                     s.execute(
-                        text(HideoutQueryV3.hideout_levels_sql()),
+                        text(HideoutQuery.hideout_levels_sql()),
                         {"master_id": master["id"]},
                     )
                     .mappings()
@@ -148,7 +148,7 @@ class HideoutServiceV3:
 
                 trader_require_rows = (
                     s.execute(
-                        text(HideoutQueryV3.hideout_trader_require_sql()),
+                        text(HideoutQuery.hideout_trader_require_sql()),
                         {"level_ids": level_ids},
                     )
                     .mappings()
@@ -156,7 +156,7 @@ class HideoutServiceV3:
                 )
                 item_require_rows = (
                     s.execute(
-                        text(HideoutQueryV3.hideout_item_require_sql()),
+                        text(HideoutQuery.hideout_item_require_sql()),
                         {"level_ids": level_ids},
                     )
                     .mappings()
@@ -164,7 +164,7 @@ class HideoutServiceV3:
                 )
                 station_require_rows = (
                     s.execute(
-                        text(HideoutQueryV3.hideout_station_require_sql()),
+                        text(HideoutQuery.hideout_station_require_sql()),
                         {"level_ids": level_ids},
                     )
                     .mappings()
@@ -172,7 +172,7 @@ class HideoutServiceV3:
                 )
                 bonus_rows = (
                     s.execute(
-                        text(HideoutQueryV3.hideout_bonus_sql()),
+                        text(HideoutQuery.hideout_bonus_sql()),
                         {"level_ids": level_ids},
                     )
                     .mappings()
@@ -180,7 +180,7 @@ class HideoutServiceV3:
                 )
                 skill_require_rows = (
                     s.execute(
-                        text(HideoutQueryV3.hideout_skill_require_sql()),
+                        text(HideoutQuery.hideout_skill_require_sql()),
                         {"level_ids": level_ids},
                     )
                     .mappings()
@@ -188,7 +188,7 @@ class HideoutServiceV3:
                 )
                 craft_rows = (
                     s.execute(
-                        text(HideoutQueryV3.hideout_crafts_sql()),
+                        text(HideoutQuery.hideout_crafts_sql()),
                         {"level_ids": level_ids},
                     )
                     .mappings()
@@ -201,29 +201,29 @@ class HideoutServiceV3:
                 if craft_ids:
                     craft_require_rows = (
                         s.execute(
-                            text(HideoutQueryV3.hideout_craft_require_items_sql()),
+                            text(HideoutQuery.hideout_craft_require_items_sql()),
                             {"craft_ids": craft_ids},
                         )
                         .mappings()
                         .all()
                     )
 
-                trader_require_by_level = HideoutServiceV3._group_rows_by_key(
+                trader_require_by_level = HideoutService._group_rows_by_key(
                     trader_require_rows, "hideout_level_id"
                 )
-                item_require_by_level = HideoutServiceV3._group_rows_by_key(
+                item_require_by_level = HideoutService._group_rows_by_key(
                     item_require_rows, "hideout_level_id"
                 )
-                station_require_by_level = HideoutServiceV3._group_rows_by_key(
+                station_require_by_level = HideoutService._group_rows_by_key(
                     station_require_rows, "hideout_level_id"
                 )
-                bonus_by_level = HideoutServiceV3._group_rows_by_key(
+                bonus_by_level = HideoutService._group_rows_by_key(
                     bonus_rows, "hideout_level_id"
                 )
-                skill_require_by_level = HideoutServiceV3._group_rows_by_key(
+                skill_require_by_level = HideoutService._group_rows_by_key(
                     skill_require_rows, "hideout_level_id"
                 )
-                craft_require_by_craft = HideoutServiceV3._group_rows_by_key(
+                craft_require_by_craft = HideoutService._group_rows_by_key(
                     craft_require_rows, "craft_id"
                 )
 
@@ -267,11 +267,11 @@ class HideoutServiceV3:
             return None
 
     @staticmethod
-    def save_station_v3(complete_list: List[str], user_email: str):
+    def save_station(complete_list: List[str], user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 s.execute(
-                    text(HideoutQueryV3.upsert_user_hideout_complete_list_sql()),
+                    text(HideoutQuery.upsert_user_hideout_complete_list_sql()),
                     {
                         "email": user_email,
                         "complete_list": complete_list,
@@ -279,7 +279,7 @@ class HideoutServiceV3:
                     },
                 )
                 s.commit()
-                return HideoutServiceV3.get_station_v3(user_email)
+                return HideoutService.get_station(user_email)
         except Exception as e:
             logger.error(
                 f"save_station_v3: {complete_list}, error: {e}",
@@ -288,14 +288,14 @@ class HideoutServiceV3:
             return None
 
     @staticmethod
-    def save_station_item_v3(item_list: List[ItemTypeV3], user_email: str):
+    def save_station_item(item_list: List[ItemType], user_email: str):
         try:
             item_list_json = [item.model_dump() for item in item_list]
 
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 s.execute(
                     text(
-                        HideoutQueryV3.upsert_user_hideout_item_list_preserve_complete_sql()
+                        HideoutQuery.upsert_user_hideout_item_list_preserve_complete_sql()
                     ),
                     {
                         "email": user_email,
@@ -304,7 +304,7 @@ class HideoutServiceV3:
                     },
                 )
                 s.commit()
-                return HideoutServiceV3.get_station_v3(user_email)
+                return HideoutService.get_station(user_email)
         except Exception as e:
             logger.error(
                 f"save_station_item_v3: {item_list}, error: {e}",

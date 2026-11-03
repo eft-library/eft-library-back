@@ -1,54 +1,54 @@
 from fastapi import APIRouter, Request
-from api.where_am_i.analytics_v3 import DesktopAnalyticsRouteV3
+from api.where_am_i.analytics import DesktopAnalyticsRoute
 from api.response import CustomResponse
 from util.constants import HTTPCode
 from api.constants import Message
 from api.where_am_i.req_models import (
     CheckWpfUser,
-    LogLocationRequestV3,
-    RaidStateRequestV3,
+    LogLocationRequest,
+    RaidStateRequest,
     ReqWhereAmI,
 )
-from api.where_am_i.service import WhereAmIServiceV3
-from api.where_am_i.path_reports_v3 import router_v3 as path_reports_router_v3
-from api.where_am_i.metadata_v3 import router_v3 as metadata_router_v3
+from api.where_am_i.service import WhereAmIService
+from api.where_am_i.path_reports import router as path_reports_router
+from api.where_am_i.metadata import router as metadata_router
 
-router = APIRouter(tags=["WhereAmI"], route_class=DesktopAnalyticsRouteV3)
-router.include_router(path_reports_router_v3)
-router.include_router(metadata_router_v3)
+router = APIRouter(tags=["WhereAmI"], route_class=DesktopAnalyticsRoute)
+router.include_router(path_reports_router)
+router.include_router(metadata_router)
 
 
 @router.post(
     "/check-wpf-user",
     include_in_schema=False,
 )
-def check_wpf_user_v3(user: CheckWpfUser):
-    result = WhereAmIServiceV3.check_wpf_user_v3(user.email)
+def check_wpf_user(user: CheckWpfUser):
+    result = WhereAmIService.check_wpf_user(user.email)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
 @router.post("/send-location")
-async def send_location_v3(where_am_i: ReqWhereAmI):
-    result = await WhereAmIServiceV3.send_location_v3(where_am_i)
+async def send_location(where_am_i: ReqWhereAmI):
+    result = await WhereAmIService.send_location(where_am_i)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
 @router.post("/v3/send-raid-state")
-async def send_raid_state_v3(raid_state: RaidStateRequestV3, request: Request):
-    result = await WhereAmIServiceV3.send_raid_state_v3(
-        raid_state, analytics_context_v3=request.state.desktop_analytics_v3)
+async def send_raid_state(raid_state: RaidStateRequest, request: Request):
+    result = await WhereAmIService.send_raid_state(
+        raid_state, analytics_context=request.state.desktop_analytics)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
 
 
 @router.post("/v3/send-log-location")
-async def send_log_location_v3(location: LogLocationRequestV3):
-    result = await WhereAmIServiceV3.send_log_location_v3(location)
+async def send_log_location(location: LogLocationRequest):
+    result = await WhereAmIService.send_log_location(location)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

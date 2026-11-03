@@ -1,27 +1,27 @@
 from fastapi import APIRouter
 
-from api.price.service import PriceServiceV3
+from api.price.service import PriceService
 from api.response import CustomResponse
 from util.constants import HTTPCode
 from api.constants import Message
-from api.price.models import PriceRankReqV3
+from api.price.models import PriceRankReq
 
 router = APIRouter(tags=["Item Price"])
 
 
 @router.get("/v3/seasons")
-def get_price_seasons_v3():
-    seasons = PriceServiceV3.get_price_seasons_v3()
+def get_price_seasons():
+    seasons = PriceService.get_price_seasons()
     if seasons is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(seasons, HTTPCode.OK, Message.SUCCESS)
 
 
 @router.get("/v3/search")
-def get_item_price_v3(
+def get_item_price(
     page: int, page_size: int, word: str, season_id: str | None = None
 ):
-    price_list = PriceServiceV3.get_item_price_v3(
+    price_list = PriceService.get_item_price(
         page, page_size, word, season_id
     )
     if price_list is None:
@@ -30,8 +30,8 @@ def get_item_price_v3(
 
 
 @router.post("/v3/top")
-def get_item_top_price_v3(price_rank_req_v3: PriceRankReqV3):
-    top_list = PriceServiceV3.get_price_top_v3(price_rank_req_v3)
+def get_item_top_price(price_rank_req: PriceRankReq):
+    top_list = PriceService.get_price_top(price_rank_req)
     if top_list is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(top_list, HTTPCode.OK, Message.SUCCESS)

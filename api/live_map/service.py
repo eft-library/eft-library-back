@@ -3,58 +3,58 @@ from sqlalchemy import inspect, nullslast, text
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.live_map.models import (
-    LiveMapFloorV3,
-    LiveMapFloorZoneV3,
-    LiveMapStaticPointV3,
+    LiveMapFloor,
+    LiveMapFloorZone,
+    LiveMapStaticPoint,
 )
-from api.live_map.query import LiveMapQueryV3
+from api.live_map.query import LiveMapQuery
 from api.live_map.res_models import (
-    BtrRouteMapV3,
-    BtrRoutePointV3,
-    BtrRouteStopV3,
-    BtrRouteV3,
-    BtrRoutesResponseV3,
+    BtrRouteMap,
+    BtrRoutePoint,
+    BtrRouteStop,
+    BtrRoute,
+    BtrRoutesResponse,
 )
-from api.map.models import MapV3
-from api.quest.service import QuestServiceV3
-from database import V3Database
+from api.map.models import Map
+from api.quest.service import QuestService
+from database import Database
 import logging
 
 logger = logging.getLogger("api.live_map")
 
 
-class LiveMapServiceV3:
-    _BTR_TABLES_V3 = (
+class LiveMapService:
+    _BTR_TABLES = (
         "live_map_btr_routes",
         "live_map_btr_route_points",
         "live_map_btr_route_stops",
     )
     @staticmethod
-    def get_raid_duration_v3(normalized_name: str):
+    def get_raid_duration(normalized_name: str):
         """Return an unambiguous internal BTR baseline, never a personal timer."""
         try:
-            with V3Database.SessionLocal() as session_v3:
-                map_v3 = (session_v3.query(MapV3.id)
-                          .filter(MapV3.normalized_name == normalized_name)
-                          .order_by(nullslast(MapV3.is_use.desc()), nullslast(MapV3.sort_order),
-                                    MapV3.name_en, MapV3.id).first())
-                if map_v3 is None:
+            with Database.SessionLocal() as session:
+                map = (session.query(Map.id)
+                          .filter(Map.normalized_name == normalized_name)
+                          .order_by(nullslast(Map.is_use.desc()), nullslast(Map.sort_order),
+                                    Map.name_en, Map.id).first())
+                if map is None:
                     return None
-                row_v3 = session_v3.execute(text(LiveMapQueryV3.raid_duration_by_map_sql_v3()),
-                                             {'map_id': map_v3.id}).mappings().one()
+                row = session.execute(text(LiveMapQuery.raid_duration_by_map_sql()),
+                                             {'map_id': map.id}).mappings().one()
                 # Different route baselines or invalid configuration must not be
                 # presented as one authoritative raid duration.
-                if (not row_v3['route_count'] or row_v3['minimum_seconds'] is None
-                        or row_v3['minimum_seconds'] <= 0
-                        or row_v3['minimum_seconds'] != row_v3['maximum_seconds']):
+                if (not row['route_count'] or row['minimum_seconds'] is None
+                        or row['minimum_seconds'] <= 0
+                        or row['minimum_seconds'] != row['maximum_seconds']):
                     return None
-                return {'normalized_name': normalized_name, 'minutes': row_v3['minimum_seconds'] / 60}
-        except SQLAlchemyError as error_v3:
-            logger.warning('get_raid_duration_v3 internal lookup failed (%s)', type(error_v3).__name__)
+                return {'normalized_name': normalized_name, 'minutes': row['minimum_seconds'] / 60}
+        except SQLAlchemyError as error:
+            logger.warning('get_raid_duration_v3 internal lookup failed (%s)', type(error).__name__)
             return None
 
     @staticmethod
-    def _starts_with_hangul_v3(value: str | None):
+    def _starts_with_hangul(value: str | None):
         if not value:
             return False
         stripped_value = value.strip()
@@ -67,9 +67,9 @@ class LiveMapServiceV3:
         )
 
     @staticmethod
-    def _quest_name_sort_key_v3(row: dict):
+    def _quest_name_sort_key(row: dict):
         name_ko = row.get("quest_name_ko") or ""
-        starts_with_hangul = LiveMapServiceV3._starts_with_hangul_v3(name_ko)
+        starts_with_hangul = LiveMapService._starts_with_hangul(name_ko)
         name = name_ko or row.get("quest_name_en") or ""
         return (
             not starts_with_hangul,
@@ -83,7 +83,7 @@ class LiveMapServiceV3:
         )
 
     @staticmethod
-    def _serialize_map_selector_v3(row: dict):
+    def _serialize_map_selector(row: dict):
         return {
             "id": row["id"],
             "normalized_name": row["normalized_name"],
@@ -93,7 +93,7 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _serialize_floor_zone_v3(zone: LiveMapFloorZoneV3):
+    def _serialize_floor_zone(zone: LiveMapFloorZone):
         return {
             "id": zone.id,
             "floor_id": zone.floor_id,
@@ -107,7 +107,7 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _serialize_floor_v3(floor: LiveMapFloorV3, zones: list[dict] | None = None):
+    def _serialize_floor(floor: LiveMapFloor, zones: list[dict] | None = None):
         return {
             "id": floor.id,
             "map_id": floor.map_id,
@@ -125,7 +125,7 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _serialize_static_point_v3(point: LiveMapStaticPointV3):
+    def _serialize_static_point(point: LiveMapStaticPoint):
         return {
             "id": point.id,
             "map_id": point.map_id,
@@ -145,7 +145,7 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _serialize_live_map_point_v3(row: dict, details: list[dict]):
+    def _serialize_live_map_point(row: dict, details: list[dict]):
         live_map_point = {
             "id": row["id"],
             "map_id": row["map_id"],
@@ -165,7 +165,7 @@ class LiveMapServiceV3:
         return live_map_point
 
     @staticmethod
-    def _build_story_info_by_id_v3(
+    def _build_story_info_by_id(
         story_rows: list[dict],
         story_live_map_point_rows: list[dict],
         story_details_by_point_id: dict[str, list[dict]],
@@ -246,7 +246,7 @@ class LiveMapServiceV3:
             if requirement is None:
                 continue
             requirement["live_map_points"].append(
-                LiveMapServiceV3._serialize_live_map_point_v3(
+                LiveMapService._serialize_live_map_point(
                     row, requirement_point_details_by_point_id.get(row["id"], [])
                 )
             )
@@ -341,7 +341,7 @@ class LiveMapServiceV3:
             if objective is None:
                 continue
             objective["live_map_points"].append(
-                LiveMapServiceV3._serialize_live_map_point_v3(
+                LiveMapService._serialize_live_map_point(
                     row, story_details_by_point_id.get(row["id"], [])
                 )
             )
@@ -403,7 +403,7 @@ class LiveMapServiceV3:
         return story_info_by_id
 
     @staticmethod
-    def _serialize_story_point_v3(row: dict, story_info: dict | None):
+    def _serialize_story_point(row: dict, story_info: dict | None):
         return {
             "id": row["id"],
             "story_id": row["story_id"],
@@ -417,7 +417,7 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _build_event_info_by_id_v3(
+    def _build_event_info_by_id(
         event_point_rows: list[dict],
         event_live_map_point_rows: list[dict],
         event_details_by_point_id: dict[str, list[dict]],
@@ -510,7 +510,7 @@ class LiveMapServiceV3:
             if objective is None:
                 continue
             objective["live_map_points"].append(
-                LiveMapServiceV3._serialize_live_map_point_v3(
+                LiveMapService._serialize_live_map_point(
                     row, event_details_by_point_id.get(row["id"], [])
                 )
             )
@@ -586,7 +586,7 @@ class LiveMapServiceV3:
         return event_info_by_id
 
     @staticmethod
-    def _serialize_event_point_v3(row: dict, event_info: dict | None):
+    def _serialize_event_point(row: dict, event_info: dict | None):
         return {
             "id": row["id"],
             "event_id": row["event_id"],
@@ -610,7 +610,7 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _strip_quest_html_text_v3(quest_detail: dict | None):
+    def _strip_quest_html_text(quest_detail: dict | None):
         if quest_detail is None:
             return None
 
@@ -622,7 +622,7 @@ class LiveMapServiceV3:
         return quest_detail
 
     @staticmethod
-    def _attach_live_map_point_to_objective_v3(
+    def _attach_live_map_point_to_objective(
         row: dict,
         details: list[dict],
         quest_detail: dict | None,
@@ -660,7 +660,7 @@ class LiveMapServiceV3:
         return quest_info
 
     @staticmethod
-    def _build_quest_live_map_points_by_quest_id_v3(
+    def _build_quest_live_map_points_by_quest_id(
         quest_point_rows: list[dict],
         details_by_point_id: dict[str, list[dict]],
     ):
@@ -694,7 +694,7 @@ class LiveMapServiceV3:
         return quest_live_map_points_by_quest_id
 
     @staticmethod
-    def _serialize_quest_point_v3(row: dict, quest_info: dict | None):
+    def _serialize_quest_point(row: dict, quest_info: dict | None):
         return {
             "id": row["id"],
             "map_id": row["map_id"],
@@ -705,7 +705,7 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _serialize_quest_point_summary_v3(row: dict, details: list[dict]):
+    def _serialize_quest_point_summary(row: dict, details: list[dict]):
         return {
             "id": row["id"],
             "quest_id": row["quest_id"],
@@ -769,7 +769,7 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _serialize_story_point_summary_v3(row: dict):
+    def _serialize_story_point_summary(row: dict):
         return {
             "id": row["id"],
             "story_id": row["story_id"],
@@ -815,7 +815,7 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _serialize_event_point_summary_v3(row: dict):
+    def _serialize_event_point_summary(row: dict):
         return {
             "id": row["id"],
             "event_id": row["event_id"],
@@ -873,43 +873,43 @@ class LiveMapServiceV3:
         }
 
     @staticmethod
-    def _get_map_selector_v3(s):
+    def _get_map_selector(s):
         return [
-            LiveMapServiceV3._serialize_map_selector_v3(dict(row))
-            for row in s.execute(text(LiveMapQueryV3.map_selector_sql())).mappings()
+            LiveMapService._serialize_map_selector(dict(row))
+            for row in s.execute(text(LiveMapQuery.map_selector_sql())).mappings()
         ]
 
     @staticmethod
-    def _can_query_story_points_v3(s):
+    def _can_query_story_points(s):
         inspector = inspect(s.bind)
         return inspector.has_table("live_map_story_points")
 
     @staticmethod
-    def _can_query_event_points_v3(s):
+    def _can_query_event_points(s):
         inspector = inspect(s.bind)
         return inspector.has_table("live_map_event_points")
 
     @staticmethod
-    def _has_table_v3(s, table_name: str):
+    def _has_table(s, table_name: str):
         inspector = inspect(s.bind)
         return inspector.has_table(table_name)
 
     @staticmethod
-    def _can_query_btr_routes_v3(s):
+    def _can_query_btr_routes(s):
         inspector = inspect(s.bind)
         return all(
             inspector.has_table(table_name)
-            for table_name in LiveMapServiceV3._BTR_TABLES_V3
+            for table_name in LiveMapService._BTR_TABLES
         )
 
     @staticmethod
-    def _get_btr_routes_by_map_id_v3(s, map_id: str):
-        if not LiveMapServiceV3._can_query_btr_routes_v3(s):
+    def _get_btr_routes_by_map_id(s, map_id: str):
+        if not LiveMapService._can_query_btr_routes(s):
             return []
 
         route_rows = list(
             s.execute(
-                text(LiveMapQueryV3.btr_routes_by_map_sql()),
+                text(LiveMapQuery.btr_routes_by_map_sql()),
                 {"map_id": map_id},
             ).mappings()
         )
@@ -919,21 +919,21 @@ class LiveMapServiceV3:
         route_ids = [row["id"] for row in route_rows]
         point_rows = list(
             s.execute(
-                text(LiveMapQueryV3.btr_route_points_by_route_ids_sql()),
+                text(LiveMapQuery.btr_route_points_by_route_ids_sql()),
                 {"route_ids": route_ids},
             ).mappings()
         )
         stop_rows = list(
             s.execute(
-                text(LiveMapQueryV3.btr_route_stops_by_route_ids_sql()),
+                text(LiveMapQuery.btr_route_stops_by_route_ids_sql()),
                 {"route_ids": route_ids},
             ).mappings()
         )
 
-        points_by_route_id: dict[str, list[BtrRoutePointV3]] = {}
+        points_by_route_id: dict[str, list[BtrRoutePoint]] = {}
         for row in point_rows:
             points_by_route_id.setdefault(row["route_id"], []).append(
-                BtrRoutePointV3(
+                BtrRoutePoint(
                     id=row["id"],
                     x=float(row["x"]),
                     z=float(row["z"]),
@@ -941,10 +941,10 @@ class LiveMapServiceV3:
                 )
             )
 
-        stops_by_route_id: dict[str, list[BtrRouteStopV3]] = {}
+        stops_by_route_id: dict[str, list[BtrRouteStop]] = {}
         for row in stop_rows:
             stops_by_route_id.setdefault(row["route_id"], []).append(
-                BtrRouteStopV3(
+                BtrRouteStop(
                     id=row["id"],
                     static_point_id=row["static_point_id"],
                     route_point_id=row["route_point_id"],
@@ -963,7 +963,7 @@ class LiveMapServiceV3:
             )
 
         return [
-            BtrRouteV3(
+            BtrRoute(
                 id=row["id"],
                 name=row["name"],
                 spawn_type=row["spawn_type"],
@@ -978,28 +978,28 @@ class LiveMapServiceV3:
         ]
 
     @staticmethod
-    def get_btr_routes_v3(normalized_name: str):
+    def get_btr_routes(normalized_name: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 map_data = (
-                    s.query(MapV3)
-                    .filter(MapV3.normalized_name == normalized_name)
+                    s.query(Map)
+                    .filter(Map.normalized_name == normalized_name)
                     .order_by(
-                        nullslast(MapV3.is_use.desc()),
-                        nullslast(MapV3.sort_order),
-                        MapV3.name_en,
+                        nullslast(Map.is_use.desc()),
+                        nullslast(Map.sort_order),
+                        Map.name_en,
                     )
                     .first()
                 )
                 if map_data is None:
                     return None
 
-                response = BtrRoutesResponseV3(
-                    map=BtrRouteMapV3(
+                response = BtrRoutesResponse(
+                    map=BtrRouteMap(
                         id=map_data.id,
                         normalized_name=map_data.normalized_name,
                     ),
-                    routes=LiveMapServiceV3._get_btr_routes_by_map_id_v3(
+                    routes=LiveMapService._get_btr_routes_by_map_id(
                         s, map_data.id
                     ),
                 )
@@ -1012,7 +1012,7 @@ class LiveMapServiceV3:
             return None
 
     @staticmethod
-    def _build_details_by_point_id_v3(detail_rows: list[dict]):
+    def _build_details_by_point_id(detail_rows: list[dict]):
         details_by_point_id = {}
         for detail in detail_rows:
             details_by_point_id.setdefault(detail["point_id"], []).append(
@@ -1027,9 +1027,9 @@ class LiveMapServiceV3:
         return details_by_point_id
 
     @staticmethod
-    def get_quest_detail_v3(quest_id_or_normalized_name: str):
+    def get_quest_detail(quest_id_or_normalized_name: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 quest_row = s.execute(
                     text(
                         """
@@ -1046,8 +1046,8 @@ class LiveMapServiceV3:
                 if quest_row is None:
                     return None
 
-                quest_detail = LiveMapServiceV3._strip_quest_html_text_v3(
-                    QuestServiceV3.get_quest_by_normalized_name_v3(
+                quest_detail = LiveMapService._strip_quest_html_text(
+                    QuestService.get_quest_by_normalized_name(
                         quest_row["normalized_name"]
                     )
                 )
@@ -1057,22 +1057,22 @@ class LiveMapServiceV3:
                 quest_point_rows = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.quest_points_by_quest_ids_sql()),
+                        text(LiveMapQuery.quest_points_by_quest_ids_sql()),
                         {"quest_ids": [quest_row["id"]]},
                     ).mappings()
                 ]
                 detail_rows = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.point_details_by_quest_ids_sql()),
+                        text(LiveMapQuery.point_details_by_quest_ids_sql()),
                         {"quest_ids": [quest_row["id"]]},
                     ).mappings()
                 ]
-                details_by_point_id = LiveMapServiceV3._build_details_by_point_id_v3(
+                details_by_point_id = LiveMapService._build_details_by_point_id(
                     detail_rows
                 )
                 points_by_quest_id = (
-                    LiveMapServiceV3._build_quest_live_map_points_by_quest_id_v3(
+                    LiveMapService._build_quest_live_map_points_by_quest_id(
                         quest_point_rows, details_by_point_id
                     )
                 )
@@ -1093,14 +1093,14 @@ class LiveMapServiceV3:
             return None
 
     @staticmethod
-    def get_story_detail_v3(story_id: str):
+    def get_story_detail(story_id: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 story_ids = [story_id]
                 story_rows = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.stories_by_story_ids_sql()),
+                        text(LiveMapQuery.stories_by_story_ids_sql()),
                         {"story_ids": story_ids},
                     ).mappings()
                 ]
@@ -1110,7 +1110,7 @@ class LiveMapServiceV3:
                 story_point_rows = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.story_points_by_story_ids_sql()),
+                        text(LiveMapQuery.story_points_by_story_ids_sql()),
                         {"story_ids": story_ids},
                     ).mappings()
                 ]
@@ -1118,73 +1118,73 @@ class LiveMapServiceV3:
                 detail_rows = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.story_point_details_by_story_ids_sql()),
+                        text(LiveMapQuery.story_point_details_by_story_ids_sql()),
                         {"story_ids": story_ids},
                     ).mappings()
                 ]
-                details_by_point_id = LiveMapServiceV3._build_details_by_point_id_v3(
+                details_by_point_id = LiveMapService._build_details_by_point_id(
                     detail_rows
                 )
                 requirements = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.story_requirements_by_story_ids_sql()),
+                        text(LiveMapQuery.story_requirements_by_story_ids_sql()),
                         {"story_ids": story_ids},
                     ).mappings()
                 ]
                 requirement_items = []
                 requirement_point_rows = []
                 requirement_point_detail_rows = []
-                if LiveMapServiceV3._has_table_v3(s, "story_requirement_items"):
+                if LiveMapService._has_table(s, "story_requirement_items"):
                     requirement_items = [
                         dict(row)
                         for row in s.execute(
                             text(
-                                LiveMapQueryV3.story_requirement_items_by_story_ids_sql()
+                                LiveMapQuery.story_requirement_items_by_story_ids_sql()
                             ),
                             {"story_ids": story_ids},
                         ).mappings()
                     ]
-                if LiveMapServiceV3._has_table_v3(
+                if LiveMapService._has_table(
                     s, "live_map_story_requirement_points"
                 ):
                     requirement_point_rows = [
                         dict(row)
                         for row in s.execute(
                             text(
-                                LiveMapQueryV3.story_requirement_points_by_story_ids_sql()
+                                LiveMapQuery.story_requirement_points_by_story_ids_sql()
                             ),
                             {"story_ids": story_ids},
                         ).mappings()
                     ]
-                if LiveMapServiceV3._has_table_v3(
+                if LiveMapService._has_table(
                     s, "live_map_story_requirement_point_details"
                 ):
                     requirement_point_detail_rows = [
                         dict(row)
                         for row in s.execute(
                             text(
-                                LiveMapQueryV3.story_requirement_point_details_by_story_ids_sql()
+                                LiveMapQuery.story_requirement_point_details_by_story_ids_sql()
                             ),
                             {"story_ids": story_ids},
                         ).mappings()
                     ]
                 requirement_point_details_by_point_id = (
-                    LiveMapServiceV3._build_details_by_point_id_v3(
+                    LiveMapService._build_details_by_point_id(
                         requirement_point_detail_rows
                     )
                 )
                 objectives = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.story_objectives_by_story_ids_sql()),
+                        text(LiveMapQuery.story_objectives_by_story_ids_sql()),
                         {"story_ids": story_ids},
                     ).mappings()
                 ]
                 objective_items = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.story_objective_items_by_story_ids_sql()),
+                        text(LiveMapQuery.story_objective_items_by_story_ids_sql()),
                         {"story_ids": story_ids},
                     ).mappings()
                 ]
@@ -1192,46 +1192,46 @@ class LiveMapServiceV3:
                 objective_reward_texts = []
                 reward_trader_standing = []
                 reward_items = []
-                if LiveMapServiceV3._has_table_v3(s, "story_objective_reward_items"):
+                if LiveMapService._has_table(s, "story_objective_reward_items"):
                     objective_reward_items = [
                         dict(row)
                         for row in s.execute(
                             text(
-                                LiveMapQueryV3.story_objective_reward_items_by_story_ids_sql()
+                                LiveMapQuery.story_objective_reward_items_by_story_ids_sql()
                             ),
                             {"story_ids": story_ids},
                         ).mappings()
                     ]
-                if LiveMapServiceV3._has_table_v3(s, "story_objective_reward_texts"):
+                if LiveMapService._has_table(s, "story_objective_reward_texts"):
                     objective_reward_texts = [
                         dict(row)
                         for row in s.execute(
                             text(
-                                LiveMapQueryV3.story_objective_reward_texts_by_story_ids_sql()
+                                LiveMapQuery.story_objective_reward_texts_by_story_ids_sql()
                             ),
                             {"story_ids": story_ids},
                         ).mappings()
                     ]
-                if LiveMapServiceV3._has_table_v3(s, "story_reward_trader_standing"):
+                if LiveMapService._has_table(s, "story_reward_trader_standing"):
                     reward_trader_standing = [
                         dict(row)
                         for row in s.execute(
                             text(
-                                LiveMapQueryV3.story_reward_trader_standing_by_story_ids_sql()
+                                LiveMapQuery.story_reward_trader_standing_by_story_ids_sql()
                             ),
                             {"story_ids": story_ids},
                         ).mappings()
                     ]
-                if LiveMapServiceV3._has_table_v3(s, "story_reward_items"):
+                if LiveMapService._has_table(s, "story_reward_items"):
                     reward_items = [
                         dict(row)
                         for row in s.execute(
-                            text(LiveMapQueryV3.story_reward_items_by_story_ids_sql()),
+                            text(LiveMapQuery.story_reward_items_by_story_ids_sql()),
                             {"story_ids": story_ids},
                         ).mappings()
                     ]
 
-                story_info_by_id = LiveMapServiceV3._build_story_info_by_id_v3(
+                story_info_by_id = LiveMapService._build_story_info_by_id(
                     story_rows,
                     story_point_rows,
                     details_by_point_id,
@@ -1255,14 +1255,14 @@ class LiveMapServiceV3:
             return None
 
     @staticmethod
-    def get_event_detail_v3(event_id: str):
+    def get_event_detail(event_id: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 event_ids = [event_id]
                 event_point_rows = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.event_points_by_event_ids_sql()),
+                        text(LiveMapQuery.event_points_by_event_ids_sql()),
                         {"event_ids": event_ids},
                     ).mappings()
                 ]
@@ -1272,60 +1272,60 @@ class LiveMapServiceV3:
                 detail_rows = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.event_point_details_by_event_ids_sql()),
+                        text(LiveMapQuery.event_point_details_by_event_ids_sql()),
                         {"event_ids": event_ids},
                     ).mappings()
                 ]
-                details_by_point_id = LiveMapServiceV3._build_details_by_point_id_v3(
+                details_by_point_id = LiveMapService._build_details_by_point_id(
                     detail_rows
                 )
                 event_objectives = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.event_objectives_by_event_ids_sql()),
+                        text(LiveMapQuery.event_objectives_by_event_ids_sql()),
                         {"event_ids": event_ids},
                     ).mappings()
                 ]
                 event_objective_items = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.event_objective_items_by_event_ids_sql()),
+                        text(LiveMapQuery.event_objective_items_by_event_ids_sql()),
                         {"event_ids": event_ids},
                     ).mappings()
                 ]
                 event_reward_trader_standing = []
                 event_reward_items = []
                 event_reward_texts = []
-                if LiveMapServiceV3._has_table_v3(
+                if LiveMapService._has_table(
                     s, "live_map_event_reward_trader_standing"
                 ):
                     event_reward_trader_standing = [
                         dict(row)
                         for row in s.execute(
                             text(
-                                LiveMapQueryV3.event_reward_trader_standing_by_event_ids_sql()
+                                LiveMapQuery.event_reward_trader_standing_by_event_ids_sql()
                             ),
                             {"event_ids": event_ids},
                         ).mappings()
                     ]
-                if LiveMapServiceV3._has_table_v3(s, "live_map_event_reward_items"):
+                if LiveMapService._has_table(s, "live_map_event_reward_items"):
                     event_reward_items = [
                         dict(row)
                         for row in s.execute(
-                            text(LiveMapQueryV3.event_reward_items_by_event_ids_sql()),
+                            text(LiveMapQuery.event_reward_items_by_event_ids_sql()),
                             {"event_ids": event_ids},
                         ).mappings()
                     ]
-                if LiveMapServiceV3._has_table_v3(s, "live_map_event_reward_texts"):
+                if LiveMapService._has_table(s, "live_map_event_reward_texts"):
                     event_reward_texts = [
                         dict(row)
                         for row in s.execute(
-                            text(LiveMapQueryV3.event_reward_texts_by_event_ids_sql()),
+                            text(LiveMapQuery.event_reward_texts_by_event_ids_sql()),
                             {"event_ids": event_ids},
                         ).mappings()
                     ]
 
-                event_info_by_id = LiveMapServiceV3._build_event_info_by_id_v3(
+                event_info_by_id = LiveMapService._build_event_info_by_id(
                     event_point_rows,
                     event_point_rows,
                     details_by_point_id,
@@ -1344,19 +1344,19 @@ class LiveMapServiceV3:
             return None
 
     @staticmethod
-    def get_live_map_v3(normalized_name: str):
+    def get_live_map(normalized_name: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 map_data = (
-                    s.query(MapV3)
-                    .join(LiveMapFloorV3, LiveMapFloorV3.map_id == MapV3.id)
+                    s.query(Map)
+                    .join(LiveMapFloor, LiveMapFloor.map_id == Map.id)
                     .filter(
-                        MapV3.normalized_name == normalized_name,
+                        Map.normalized_name == normalized_name,
                     )
                     .order_by(
-                        nullslast(MapV3.is_use.desc()),
-                        nullslast(MapV3.sort_order),
-                        MapV3.name_en,
+                        nullslast(Map.is_use.desc()),
+                        nullslast(Map.sort_order),
+                        Map.name_en,
                     )
                     .first()
                 )
@@ -1364,53 +1364,53 @@ class LiveMapServiceV3:
                     return None
 
                 floors = (
-                    s.query(LiveMapFloorV3)
-                    .filter(LiveMapFloorV3.map_id == map_data.id)
+                    s.query(LiveMapFloor)
+                    .filter(LiveMapFloor.map_id == map_data.id)
                     .order_by(
-                        nullslast(LiveMapFloorV3.sort_order),
-                        LiveMapFloorV3.floor_no,
+                        nullslast(LiveMapFloor.sort_order),
+                        LiveMapFloor.floor_no,
                     )
                     .all()
                 )
                 zones_by_floor_id = {}
-                if LiveMapServiceV3._has_table_v3(s, "live_map_floor_zones"):
+                if LiveMapService._has_table(s, "live_map_floor_zones"):
                     floor_zones = (
-                        s.query(LiveMapFloorZoneV3)
-                        .filter(LiveMapFloorZoneV3.map_id == map_data.id)
+                        s.query(LiveMapFloorZone)
+                        .filter(LiveMapFloorZone.map_id == map_data.id)
                         .order_by(
-                            LiveMapFloorZoneV3.floor_id,
-                            nullslast(LiveMapFloorZoneV3.sort_order),
-                            LiveMapFloorZoneV3.id,
+                            LiveMapFloorZone.floor_id,
+                            nullslast(LiveMapFloorZone.sort_order),
+                            LiveMapFloorZone.id,
                         )
                         .all()
                     )
                     for zone in floor_zones:
                         zones_by_floor_id.setdefault(zone.floor_id, []).append(
-                            LiveMapServiceV3._serialize_floor_zone_v3(zone)
+                            LiveMapService._serialize_floor_zone(zone)
                         )
 
                 static_points = (
-                    s.query(LiveMapStaticPointV3)
+                    s.query(LiveMapStaticPoint)
                     .filter(
-                        LiveMapStaticPointV3.map_id == map_data.id,
-                        LiveMapStaticPointV3.is_use.is_(True),
+                        LiveMapStaticPoint.map_id == map_data.id,
+                        LiveMapStaticPoint.is_use.is_(True),
                     )
                     .order_by(
-                        LiveMapStaticPointV3.floor_id,
-                        LiveMapStaticPointV3.category,
-                        LiveMapStaticPointV3.sort_order,
-                        LiveMapStaticPointV3.name_en,
+                        LiveMapStaticPoint.floor_id,
+                        LiveMapStaticPoint.category,
+                        LiveMapStaticPoint.sort_order,
+                        LiveMapStaticPoint.name_en,
                     )
                     .all()
                 )
-                btr_routes = LiveMapServiceV3._get_btr_routes_by_map_id_v3(
+                btr_routes = LiveMapService._get_btr_routes_by_map_id(
                     s, map_data.id
                 )
 
                 detail_rows = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.point_details_by_map_sql()),
+                        text(LiveMapQuery.point_details_by_map_sql()),
                         {"map_id": map_data.id},
                     ).mappings()
                 ]
@@ -1429,32 +1429,32 @@ class LiveMapServiceV3:
                 quest_point_rows = [
                     dict(row)
                     for row in s.execute(
-                        text(LiveMapQueryV3.quest_points_by_map_sql()),
+                        text(LiveMapQuery.quest_points_by_map_sql()),
                         {"map_id": map_data.id},
                     ).mappings()
                 ]
-                quest_point_rows.sort(key=LiveMapServiceV3._quest_name_sort_key_v3)
+                quest_point_rows.sort(key=LiveMapService._quest_name_sort_key)
 
                 quest_points = [
-                    LiveMapServiceV3._serialize_quest_point_summary_v3(
+                    LiveMapService._serialize_quest_point_summary(
                         row, details_by_point_id.get(row["id"], [])
                     )
                     for row in quest_point_rows
                 ]
 
                 story_points = []
-                if LiveMapServiceV3._can_query_story_points_v3(s):
+                if LiveMapService._can_query_story_points(s):
                     story_point_rows = [
                         dict(row)
                         for row in s.execute(
-                            text(LiveMapQueryV3.story_points_by_map_sql()),
+                            text(LiveMapQuery.story_points_by_map_sql()),
                             {"map_id": map_data.id},
                         ).mappings()
                     ]
                 else:
                     story_point_rows = []
 
-                if LiveMapServiceV3._has_table_v3(
+                if LiveMapService._has_table(
                     s, "live_map_story_requirement_points"
                 ):
                     story_point_rows.extend(
@@ -1462,7 +1462,7 @@ class LiveMapServiceV3:
                             dict(row)
                             for row in s.execute(
                                 text(
-                                    LiveMapQueryV3.story_requirement_points_by_map_sql()
+                                    LiveMapQuery.story_requirement_points_by_map_sql()
                                 ),
                                 {"map_id": map_data.id},
                             ).mappings()
@@ -1479,30 +1479,30 @@ class LiveMapServiceV3:
                     )
 
                 story_points = [
-                    LiveMapServiceV3._serialize_story_point_summary_v3(row)
+                    LiveMapService._serialize_story_point_summary(row)
                     for row in story_point_rows
                 ]
 
                 event_points = []
-                if LiveMapServiceV3._can_query_event_points_v3(s):
+                if LiveMapService._can_query_event_points(s):
                     event_point_rows = [
                         dict(row)
                         for row in s.execute(
-                            text(LiveMapQueryV3.event_points_all_active_sql()),
+                            text(LiveMapQuery.event_points_all_active_sql()),
                         ).mappings()
                     ]
                 else:
                     event_point_rows = []
 
                 event_points = [
-                    LiveMapServiceV3._serialize_event_point_summary_v3(row)
+                    LiveMapService._serialize_event_point_summary(row)
                     for row in event_point_rows
                 ]
 
                 return {
-                    "map_selector": LiveMapServiceV3._get_map_selector_v3(s),
+                    "map_selector": LiveMapService._get_map_selector(s),
                     "floors": [
-                        LiveMapServiceV3._serialize_floor_v3(
+                        LiveMapService._serialize_floor(
                             row, zones_by_floor_id.get(row.id, [])
                         )
                         for row in floors
@@ -1511,7 +1511,7 @@ class LiveMapServiceV3:
                     "story_points": story_points,
                     "event_points": event_points,
                     "static_points": [
-                        LiveMapServiceV3._serialize_static_point_v3(row)
+                        LiveMapService._serialize_static_point(row)
                         for row in static_points
                     ],
                     "btr_routes": [route.model_dump() for route in btr_routes],

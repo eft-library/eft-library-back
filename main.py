@@ -8,9 +8,9 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi import FastAPI, WebSocket, Query
 from util.middleware import KafkaProducerMiddleware
 from api.user.util import UserUtil
-from util.location_socket_v3 import websocket_handler_v3 as websocket_handler
-from util.location_auth_v3 import authenticate_location_socket_v3
-from util.access_log_v3 import configure_access_logging_v3
+from util.location_socket import websocket_handler as websocket_handler
+from util.location_auth import authenticate_location_socket
+from util.access_log import configure_access_logging
 import logging
 
 logging.basicConfig(
@@ -20,7 +20,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger("api.access")  # 커스텀 로거 사용
-configure_access_logging_v3()
+configure_access_logging()
 
 logging.getLogger("uvicorn.access").disabled = True
 
@@ -46,7 +46,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
     로그인한 사용자만 WebSocket 연결
     토큰은 query param으로 전달
     """
-    user_email = await authenticate_location_socket_v3(websocket, token)
+    user_email = await authenticate_location_socket(websocket, token)
     if not user_email:
         return
 

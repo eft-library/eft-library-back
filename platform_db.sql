@@ -609,6 +609,97 @@ create index if not exists idx_items_category on items(category);
 create index if not exists idx_items_normalized_name on items(normalized_name);
 create index if not exists idx_items_update_time on items(update_time desc);
 
+-- 상인 판매 상품: id는 내부 식별자, source_offer_id는 수집 원천의 상품 식별자이다.
+-- 같은 원천 상품도 게임 모드 및 시즌별로 별도의 내부 id를 사용한다.
+-- source_offer_id: 교환은 barter:원천ID, 구매는 purchase:안정적식별값을 사용한다.
+-- 구매 식별값은 상인/결과 아이템/화폐/우호도/정렬된 해금 조건으로 생성하고
+-- 가격, 구매 제한, 초기화 시각은 제외한다. API regular 모드는 pvp로 매핑한다.
+create table if not exists trader_offers
+(
+    id text primary key,
+    source_offer_id text not null,
+    trader_id text not null references traders(id) on delete restrict,
+    trader_level integer not null check (trader_level between 1 and 4),
+    offer_type text not null check (offer_type in ('purchase', 'barter')),
+    game_mode text not null check (game_mode in ('pve', 'pvp', 'pvp-season')),
+    season_id text references price_seasons(id) on delete restrict,
+    season_key text generated always as (coalesce(season_id, '')) stored,
+    -- 의미가 확인된 초기화 주기당 구매 가능 수량만 저장한다. NULL은 미확인이다.
+    buy_limit integer check (buy_limit >= 0),
+    -- 원천 buyLimit 값을 보존한다. 특수 값의 의미를 추정하지 않는다.
+    raw_buy_limit integer,
+    -- NULL: 미확인, true: 무제한 확인, false: 제한 있음 확인.
+    is_unlimited boolean,
+    is_use boolean not null default true,
+    sort_order integer,
+    collected_at timestamptz not null default now(),
+    update_time timestamptz not null default now(),
+    unique (source_offer_id, game_mode, season_key),
+    check (not is_unlimited or buy_limit is null),
+    check (
+        (game_mode = 'pvp-season' and season_id is not null)
+        or (game_mode <> 'pvp-season' and season_id is null)
+    )
+);
+create index if not exists idx_trader_offers_trader_mode_season_level
+    on trader_offers(trader_id, game_mode, season_id, trader_level)
+    where is_use;
+create index if not exists idx_trader_offers_season_id on trader_offers(season_id);
+
+-- 화폐 구매와 아이템 교환 모두 비용을 행 단위로 저장한다.
+-- 화폐 비용은 currencyItem의 원천 아이템 ID를 사용한다.
+-- 비용/보상 아이템을 items에 먼저 적재한 뒤 상품의 하위 행을 적재한다.
+create table if not exists trader_offer_costs
+(
+    offer_id text not null references trader_offers(id) on delete cascade,
+    item_id text not null references items(id) on delete restrict,
+    quantity numeric not null check (quantity > 0),
+    sort_order integer,
+    primary key (offer_id, item_id)
+);
+create index if not exists idx_trader_offer_costs_item_id on trader_offer_costs(item_id);
+
+-- 한 상품에서 여러 결과 아이템을 제공하는 경우도 지원한다.
+create table if not exists trader_offer_rewards
+(
+    offer_id text not null references trader_offers(id) on delete cascade,
+    item_id text not null references items(id) on delete restrict,
+    quantity integer not null check (quantity > 0),
+    sort_order integer,
+    primary key (offer_id, item_id)
+);
+create index if not exists idx_trader_offer_rewards_item_id on trader_offer_rewards(item_id);
+
+-- 상품 구매에 필요한 퀘스트 해금 조건. 행이 없으면 퀘스트 조건이 없다.
+-- 원천 퀘스트가 quests에 아직 없어도 조건을 보존하기 위해 quest_id FK는 두지 않는다.
+-- TODO: taskUnlock의 다중 조건 및 완료 상태 의미를 확인한 뒤 수집 로직에 반영한다.
+create table if not exists trader_offer_task_unlocks
+(
+    offer_id text not null references trader_offers(id) on delete cascade,
+    quest_id text not null,
+    primary key (offer_id, quest_id)
+);
+create index if not exists idx_trader_offer_task_unlocks_quest_id
+    on trader_offer_task_unlocks(quest_id);
+
+-- 남은 초가 아닌 원천에서 확인한 다음 초기화 시각을 저장한다.
+create table if not exists trader_restock_state
+(
+    trader_id text not null references traders(id) on delete restrict,
+    game_mode text not null check (game_mode in ('pve', 'pvp', 'pvp-season')),
+    season_id text references price_seasons(id) on delete restrict,
+    season_key text generated always as (coalesce(season_id, '')) stored,
+    next_restock_at timestamptz,
+    collected_at timestamptz not null default now(),
+    update_time timestamptz not null default now(),
+    primary key (trader_id, game_mode, season_key),
+    check (
+        (game_mode = 'pvp-season' and season_id is not null)
+        or (game_mode <> 'pvp-season' and season_id is null)
+    )
+);
+create index if not exists idx_trader_restock_state_season_id on trader_restock_state(season_id);
+
 create table if not exists item_penalties (
     item_id text primary key,
     ergonomics_penalty numeric,

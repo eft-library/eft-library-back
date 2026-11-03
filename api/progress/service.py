@@ -1,10 +1,10 @@
 from api.progress.progress_req_models import ProgressItemList
 from api.progress.progress_res_models import (
-    ProgressItemV3,
-    UserProgressItemV3,
+    ProgressItem,
+    UserProgressItem,
 )
-from api.item.models import ItemV3
-from database import V3Database
+from api.item.models import Item
+from database import Database
 from datetime import datetime
 import pytz
 import logging
@@ -13,9 +13,9 @@ from sqlalchemy.dialects.postgresql import insert
 logger = logging.getLogger("api.progress")
 
 
-class ProgressServiceV3:
+class ProgressService:
     @staticmethod
-    def _serialize_progress_item_v3(progress_item: ProgressItemV3, item: ItemV3 | None):
+    def _serialize_progress_item(progress_item: ProgressItem, item: Item | None):
         return {
             "id": progress_item.id,
             "progress_type": progress_item.progress_type,
@@ -37,15 +37,15 @@ class ProgressServiceV3:
         }
 
     @staticmethod
-    def _get_user_item_ids_v3(s, user_email: str | None, progress_type: str):
+    def _get_user_item_ids(s, user_email: str | None, progress_type: str):
         if not user_email:
             return []
 
         user_progress = (
-            s.query(UserProgressItemV3)
+            s.query(UserProgressItem)
             .filter(
-                UserProgressItemV3.email == user_email,
-                UserProgressItemV3.progress_type == progress_type,
+                UserProgressItem.email == user_email,
+                UserProgressItem.progress_type == progress_type,
             )
             .first()
         )
@@ -53,37 +53,37 @@ class ProgressServiceV3:
         return user_progress.item_list if user_progress else []
 
     @staticmethod
-    def _get_progress_items_v3(s, progress_type: str):
+    def _get_progress_items(s, progress_type: str):
         rows = (
-            s.query(ProgressItemV3, ItemV3)
-            .outerjoin(ItemV3, ProgressItemV3.id == ItemV3.id)
-            .filter(ProgressItemV3.progress_type == progress_type)
-            .order_by(ItemV3.name_en, ProgressItemV3.id)
+            s.query(ProgressItem, Item)
+            .outerjoin(Item, ProgressItem.id == Item.id)
+            .filter(ProgressItem.progress_type == progress_type)
+            .order_by(Item.name_en, ProgressItem.id)
             .all()
         )
         return [
-            ProgressServiceV3._serialize_progress_item_v3(progress_item, item)
+            ProgressService._serialize_progress_item(progress_item, item)
             for progress_item, item in rows
         ]
 
     @staticmethod
-    def get_user_progress_v3(user_email: str | None):
+    def get_user_progress(user_email: str | None):
         try:
-            with V3Database.SessionLocal() as s:
-                user_kappa = ProgressServiceV3._get_user_item_ids_v3(
+            with Database.SessionLocal() as s:
+                user_kappa = ProgressService._get_user_item_ids(
                     s, user_email, "Kappa"
                 )
-                user_rebirth = ProgressServiceV3._get_user_item_ids_v3(
+                user_rebirth = ProgressService._get_user_item_ids(
                     s, user_email, "Rebirth"
                 )
 
                 return {
                     "userRebirthList": user_rebirth,
                     "userKappaList": user_kappa,
-                    "allKappaItemList": ProgressServiceV3._get_progress_items_v3(
+                    "allKappaItemList": ProgressService._get_progress_items(
                         s, "Kappa"
                     ),
-                    "allRebirthList": ProgressServiceV3._get_progress_items_v3(
+                    "allRebirthList": ProgressService._get_progress_items(
                         s, "Rebirth"
                     ),
                 }
@@ -96,12 +96,12 @@ class ProgressServiceV3:
             return None
 
     @staticmethod
-    def update_progress_v3(progress_item_list: ProgressItemList, user_email: str):
+    def update_progress(progress_item_list: ProgressItemList, user_email: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
 
                 def upsert_progress(progress_type: str, item_list):
-                    stmt = insert(UserProgressItemV3).values(
+                    stmt = insert(UserProgressItem).values(
                         email=user_email,
                         progress_type=progress_type,
                         item_list=item_list,
@@ -109,8 +109,8 @@ class ProgressServiceV3:
                     )
                     stmt = stmt.on_conflict_do_update(
                         index_elements=[
-                            UserProgressItemV3.email,
-                            UserProgressItemV3.progress_type,
+                            UserProgressItem.email,
+                            UserProgressItem.progress_type,
                         ],
                         set_={
                             "item_list": stmt.excluded.item_list,
@@ -124,7 +124,7 @@ class ProgressServiceV3:
 
                 s.commit()
 
-            return ProgressServiceV3.get_user_progress_v3(user_email)
+            return ProgressService.get_user_progress(user_email)
 
         except Exception as e:
             logger.error(

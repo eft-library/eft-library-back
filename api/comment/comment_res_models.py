@@ -1,9 +1,9 @@
 from sqlalchemy import Column, INTEGER, TEXT, TIMESTAMP
 
-from database import V3Database
+from database import Database
 
 
-class CommentReactionV3(V3Database.Base):
+class CommentReaction(Database.Base):
     __tablename__ = "community_comments_reactions"
 
     comment_id = Column(TEXT, primary_key=True)
@@ -12,7 +12,7 @@ class CommentReactionV3(V3Database.Base):
     reaction_time = Column(TIMESTAMP)
 
 
-class CommentReportV3(V3Database.Base):
+class CommentReport(Database.Base):
     __tablename__ = "comment_report"
 
     id = Column(INTEGER, primary_key=True)

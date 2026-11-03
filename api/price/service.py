@@ -1,28 +1,28 @@
 from sqlalchemy import func, and_, or_, text, bindparam
-from api.item.models import ItemV3
+from api.item.models import Item
 from api.price.models import (
-    ItemPriceHistoryV3,
-    ItemPriceV3,
-    PriceSeasonV3,
-    PriceRankReqV3,
+    ItemPriceHistory,
+    ItemPrice,
+    PriceSeason,
+    PriceRankReq,
 )
-from database import V3Database
+from database import Database
 from collections import defaultdict
 import logging
 
 logger = logging.getLogger("api.price")
 
 
-class PriceServiceV3:
-    SEASON_GAME_MODE_V3 = "pvp-season"
+class PriceService:
+    SEASON_GAME_MODE = "pvp-season"
 
     @staticmethod
-    def _to_float_v3(value):
+    def _to_float(value):
         return float(value) if value is not None else None
 
     @staticmethod
-    def _serialize_item_price_v3(
-        item: ItemV3,
+    def _serialize_item_price(
+        item: Item,
         prices_by_mode,
         histories_by_mode,
         trader_prices_by_mode,
@@ -44,22 +44,22 @@ class PriceServiceV3:
         }
 
     @staticmethod
-    def _serialize_price_row_v3(price: ItemPriceV3):
+    def _serialize_price_row(price: ItemPrice):
         return {
             "game_mode": price.game_mode,
             "season_id": price.season_id,
-            "highest_trader_price": PriceServiceV3._to_float_v3(
+            "highest_trader_price": PriceService._to_float(
                 price.highest_trader_price
             ),
             "highest_trader_id": price.highest_trader_id,
-            "flea_market_price": PriceServiceV3._to_float_v3(price.flea_market_price),
+            "flea_market_price": PriceService._to_float(price.flea_market_price),
             "trader_count": price.trader_count,
             "has_flea": price.has_flea,
             "update_time": price.update_time,
         }
 
     @staticmethod
-    def _serialize_history_row_v3(history: ItemPriceHistoryV3):
+    def _serialize_history_row(history: ItemPriceHistory):
         return {
             "game_mode": history.game_mode,
             "season_id": history.season_id,
@@ -68,13 +68,13 @@ class PriceServiceV3:
         }
 
     @staticmethod
-    def _serialize_trader_price_row_v3(row):
+    def _serialize_trader_price_row(row):
         return {
             "id": row["id"],
             "game_mode": row["game_mode"],
             "season_id": row["season_id"],
             "trader_id": row["trader_id"],
-            "price": PriceServiceV3._to_float_v3(row["price"]),
+            "price": PriceService._to_float(row["price"]),
             "trader": (
                 {
                     "id": row["trader_id"],
@@ -90,22 +90,22 @@ class PriceServiceV3:
         }
 
     @staticmethod
-    def _get_selected_season_id_v3(s, season_id: str | None):
+    def _get_selected_season_id(s, season_id: str | None):
         if season_id:
             return season_id
         return (
-            s.query(PriceSeasonV3.id)
-            .filter(PriceSeasonV3.is_current.is_(True))
+            s.query(PriceSeason.id)
+            .filter(PriceSeason.is_current.is_(True))
             .scalar()
         )
 
     @staticmethod
-    def get_price_seasons_v3():
+    def get_price_seasons():
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 seasons = (
-                    s.query(PriceSeasonV3)
-                    .order_by(PriceSeasonV3.starts_at.desc().nullslast(), PriceSeasonV3.id)
+                    s.query(PriceSeason)
+                    .order_by(PriceSeason.starts_at.desc().nullslast(), PriceSeason.id)
                     .all()
                 )
                 return [
@@ -125,34 +125,34 @@ class PriceServiceV3:
             return None
 
     @staticmethod
-    def get_item_price_v3(
+    def get_item_price(
         page: int, page_size: int, word: str, season_id: str | None = None
     ):
         try:
             offset = (page - 1) * page_size
             search_word = f"%{word}%"
 
-            with V3Database.SessionLocal() as s:
-                selected_season_id = PriceServiceV3._get_selected_season_id_v3(
+            with Database.SessionLocal() as s:
+                selected_season_id = PriceService._get_selected_season_id(
                     s, season_id
                 )
                 season_scope = or_(
-                    ItemPriceV3.game_mode != PriceServiceV3.SEASON_GAME_MODE_V3,
+                    ItemPrice.game_mode != PriceService.SEASON_GAME_MODE,
                     and_(
-                        ItemPriceV3.game_mode == PriceServiceV3.SEASON_GAME_MODE_V3,
-                        ItemPriceV3.season_id == selected_season_id,
+                        ItemPrice.game_mode == PriceService.SEASON_GAME_MODE,
+                        ItemPrice.season_id == selected_season_id,
                     ),
                 )
-                priced_item_ids = s.query(ItemPriceV3.item_id).distinct().subquery()
+                priced_item_ids = s.query(ItemPrice.item_id).distinct().subquery()
                 word_filter = or_(
-                    ItemV3.name_ko.ilike(search_word),
-                    ItemV3.name_ja.ilike(search_word),
-                    ItemV3.name_en.ilike(search_word),
+                    Item.name_ko.ilike(search_word),
+                    Item.name_ja.ilike(search_word),
+                    Item.name_en.ilike(search_word),
                 )
 
                 total_count = (
-                    s.query(func.count(ItemV3.id))
-                    .filter(ItemV3.id.in_(priced_item_ids), word_filter)
+                    s.query(func.count(Item.id))
+                    .filter(Item.id.in_(priced_item_ids), word_filter)
                     .scalar()
                 )
 
@@ -161,9 +161,9 @@ class PriceServiceV3:
                 )
 
                 item_list = (
-                    s.query(ItemV3)
-                    .filter(ItemV3.id.in_(priced_item_ids), word_filter)
-                    .order_by(ItemV3.name_en)
+                    s.query(Item)
+                    .filter(Item.id.in_(priced_item_ids), word_filter)
+                    .order_by(Item.name_en)
                     .limit(page_size)
                     .offset(offset)
                     .all()
@@ -180,41 +180,41 @@ class PriceServiceV3:
 
                 if item_ids:
                     prices = (
-                        s.query(ItemPriceV3)
-                        .filter(ItemPriceV3.item_id.in_(item_ids), season_scope)
+                        s.query(ItemPrice)
+                        .filter(ItemPrice.item_id.in_(item_ids), season_scope)
                         .all()
                     )
                     for price in prices:
                         prices_by_item[price.item_id][price.game_mode] = (
-                            PriceServiceV3._serialize_price_row_v3(price)
+                            PriceService._serialize_price_row(price)
                         )
 
                     histories = (
-                        s.query(ItemPriceHistoryV3)
+                        s.query(ItemPriceHistory)
                         .filter(
-                            ItemPriceHistoryV3.item_id.in_(item_ids),
+                            ItemPriceHistory.item_id.in_(item_ids),
                             or_(
-                                ItemPriceHistoryV3.game_mode
-                                != PriceServiceV3.SEASON_GAME_MODE_V3,
+                                ItemPriceHistory.game_mode
+                                != PriceService.SEASON_GAME_MODE,
                                 and_(
-                                    ItemPriceHistoryV3.game_mode
-                                    == PriceServiceV3.SEASON_GAME_MODE_V3,
-                                    ItemPriceHistoryV3.season_id
+                                    ItemPriceHistory.game_mode
+                                    == PriceService.SEASON_GAME_MODE,
+                                    ItemPriceHistory.season_id
                                     == selected_season_id,
                                 ),
                             ),
                         )
                         .order_by(
-                            ItemPriceHistoryV3.item_id,
-                            ItemPriceHistoryV3.game_mode,
-                            ItemPriceHistoryV3.price_time,
+                            ItemPriceHistory.item_id,
+                            ItemPriceHistory.game_mode,
+                            ItemPriceHistory.price_time,
                         )
                         .all()
                     )
                     for history in histories:
                         histories_by_item[history.item_id].setdefault(
                             history.game_mode, []
-                        ).append(PriceServiceV3._serialize_history_row_v3(history))
+                        ).append(PriceService._serialize_history_row(history))
 
                     trader_prices = (
                         s.execute(
@@ -251,12 +251,12 @@ class PriceServiceV3:
                         trader_prices_by_item[trader_price["item_id"]].setdefault(
                             trader_price["game_mode"], []
                         ).append(
-                            PriceServiceV3._serialize_trader_price_row_v3(trader_price)
+                            PriceService._serialize_trader_price_row(trader_price)
                         )
 
                 return {
                     "data": [
-                        PriceServiceV3._serialize_item_price_v3(
+                        PriceService._serialize_item_price(
                             item,
                             {
                                 "pvp": prices_by_item[item.id].get("pvp"),
@@ -284,7 +284,7 @@ class PriceServiceV3:
             return None
 
     @staticmethod
-    def _build_price_tiers_v3(rows):
+    def _build_price_tiers(rows):
         tiers = ["S", "A", "B", "C", "D", "E", "F"]
         tier_size = 100
         tier_dict = {
@@ -317,28 +317,28 @@ class PriceServiceV3:
         ]
 
     @staticmethod
-    def _get_price_top_rows_v3(
+    def _get_price_top_rows(
         s, game_mode: str, categories: list[str], season_id: str | None = None
     ):
         query = (
-            s.query(ItemV3, ItemPriceV3)
-            .join(ItemPriceV3, ItemPriceV3.item_id == ItemV3.id)
+            s.query(Item, ItemPrice)
+            .join(ItemPrice, ItemPrice.item_id == Item.id)
             .filter(
-                ItemPriceV3.game_mode == game_mode,
-                ItemPriceV3.flea_market_price.isnot(None),
-                ItemV3.width.isnot(None),
-                ItemV3.height.isnot(None),
-                ItemV3.category.in_(categories),
-                and_(ItemV3.width > 0, ItemV3.height > 0),
+                ItemPrice.game_mode == game_mode,
+                ItemPrice.flea_market_price.isnot(None),
+                Item.width.isnot(None),
+                Item.height.isnot(None),
+                Item.category.in_(categories),
+                and_(Item.width > 0, Item.height > 0),
             )
         )
-        if game_mode == PriceServiceV3.SEASON_GAME_MODE_V3:
-            query = query.filter(ItemPriceV3.season_id == season_id)
+        if game_mode == PriceService.SEASON_GAME_MODE:
+            query = query.filter(ItemPrice.season_id == season_id)
         query = query.all()
 
         rows = []
         for item, price in query:
-            per_slot = PriceServiceV3._to_float_v3(price.flea_market_price) / (
+            per_slot = PriceService._to_float(price.flea_market_price) / (
                 item.width * item.height
             )
             rows.append(
@@ -352,10 +352,10 @@ class PriceServiceV3:
                     "width": item.width,
                     "height": item.height,
                     "category": item.category,
-                    "flea_market_price": PriceServiceV3._to_float_v3(
+                    "flea_market_price": PriceService._to_float(
                         price.flea_market_price
                     ),
-                    "highest_trader_price": PriceServiceV3._to_float_v3(
+                    "highest_trader_price": PriceService._to_float(
                         price.highest_trader_price
                     ),
                     "highest_trader_id": price.highest_trader_id,
@@ -366,29 +366,29 @@ class PriceServiceV3:
         return sorted(rows, key=lambda row: row["per_slot"], reverse=True)[:700]
 
     @staticmethod
-    def get_price_top_v3(price_rank_req_v3: PriceRankReqV3):
+    def get_price_top(price_rank_req: PriceRankReq):
         try:
-            with V3Database.SessionLocal() as s:
-                selected_season_id = PriceServiceV3._get_selected_season_id_v3(
-                    s, price_rank_req_v3.seasonId
+            with Database.SessionLocal() as s:
+                selected_season_id = PriceService._get_selected_season_id(
+                    s, price_rank_req.seasonId
                 )
-                pvp_rows = PriceServiceV3._get_price_top_rows_v3(
-                    s, "pvp", price_rank_req_v3.categoryList
+                pvp_rows = PriceService._get_price_top_rows(
+                    s, "pvp", price_rank_req.categoryList
                 )
-                pve_rows = PriceServiceV3._get_price_top_rows_v3(
-                    s, "pve", price_rank_req_v3.categoryList
+                pve_rows = PriceService._get_price_top_rows(
+                    s, "pve", price_rank_req.categoryList
                 )
-                season_rows = PriceServiceV3._get_price_top_rows_v3(
+                season_rows = PriceService._get_price_top_rows(
                     s,
-                    PriceServiceV3.SEASON_GAME_MODE_V3,
-                    price_rank_req_v3.categoryList,
+                    PriceService.SEASON_GAME_MODE,
+                    price_rank_req.categoryList,
                     selected_season_id,
                 )
 
                 return {
-                    "pvp_top_list": PriceServiceV3._build_price_tiers_v3(pvp_rows),
-                    "pve_top_list": PriceServiceV3._build_price_tiers_v3(pve_rows),
-                    "pvp-season_top_list": PriceServiceV3._build_price_tiers_v3(
+                    "pvp_top_list": PriceService._build_price_tiers(pvp_rows),
+                    "pve_top_list": PriceService._build_price_tiers(pve_rows),
+                    "pvp-season_top_list": PriceService._build_price_tiers(
                         season_rows
                     ),
                     "selected_season_id": selected_season_id,
@@ -396,7 +396,7 @@ class PriceServiceV3:
 
         except Exception as e:
             logger.error(
-                f"get_price_top_v3: {price_rank_req_v3.model_dump()}, error: {e}",
+                f"get_price_top_v3: {price_rank_req.model_dump()}, error: {e}",
                 exc_info=True,
             )
             return None

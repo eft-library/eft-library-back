@@ -1,4 +1,4 @@
-class CommunityUtilV3:
+class CommunityUtil:
     @staticmethod
     def get_posts_with_post_id():
         return """

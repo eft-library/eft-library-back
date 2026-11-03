@@ -1,14 +1,14 @@
 from pydantic import BaseModel
 
 
-class BtrRoutePointV3(BaseModel):
+class BtrRoutePoint(BaseModel):
     id: str
     x: float
     z: float
     sort_order: int
 
 
-class BtrRouteStopV3(BaseModel):
+class BtrRouteStop(BaseModel):
     """BTR stop timing values use the in-raid remaining-time clock."""
 
     id: str
@@ -25,7 +25,7 @@ class BtrRouteStopV3(BaseModel):
     route_point_order: int | None
 
 
-class BtrRouteV3(BaseModel):
+class BtrRoute(BaseModel):
     """Static BTR route geometry and timetable; no current position is calculated."""
 
     id: str
@@ -35,15 +35,15 @@ class BtrRouteV3(BaseModel):
     spawn_remaining_seconds: int | None
     stop_duration_seconds: int
     timing_variance_seconds: int
-    points: list[BtrRoutePointV3]
-    stops: list[BtrRouteStopV3]
+    points: list[BtrRoutePoint]
+    stops: list[BtrRouteStop]
 
 
-class BtrRouteMapV3(BaseModel):
+class BtrRouteMap(BaseModel):
     id: str
     normalized_name: str
 
 
-class BtrRoutesResponseV3(BaseModel):
-    map: BtrRouteMapV3
-    routes: list[BtrRouteV3]
+class BtrRoutesResponse(BaseModel):
+    map: BtrRouteMap
+    routes: list[BtrRoute]

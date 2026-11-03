@@ -1,9 +1,9 @@
 from sqlalchemy import ARRAY, JSON, TEXT, TIMESTAMP, Column
 
-from database import V3Database
+from database import Database
 
 
-class UserHideoutV3(V3Database.Base):
+class UserHideout(Database.Base):
     __tablename__ = "user_hideout"
 
     email = Column(TEXT, primary_key=True)

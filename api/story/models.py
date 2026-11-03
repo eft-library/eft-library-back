@@ -1,8 +1,8 @@
-from database import V3Database
+from database import Database
 from sqlalchemy import Column, TIMESTAMP, TEXT, JSON, INTEGER, NUMERIC
 
 
-class StoryV3(V3Database.Base):
+class Story(Database.Base):
     __tablename__ = "story"
 
     id = Column(TEXT, primary_key=True)
@@ -22,7 +22,7 @@ class StoryV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class StoryRoadmapV3(V3Database.Base):
+class StoryRoadmap(Database.Base):
     __tablename__ = "story_roadmap"
 
     id = Column(TEXT, primary_key=True)

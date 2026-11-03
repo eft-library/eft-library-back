@@ -1,10 +1,10 @@
 from sqlalchemy import Column, String, TIMESTAMP, ForeignKey, Integer, Boolean
 from sqlalchemy.orm import relationship
 
-from database import V3Database
+from database import Database
 
 
-class MenuGroupV3(V3Database.Base):
+class MenuGroup(Database.Base):
     __tablename__ = "menu_groups"
 
     id = Column(String, primary_key=True)
@@ -14,13 +14,13 @@ class MenuGroupV3(V3Database.Base):
     sort_order = Column(Integer)
     update_time = Column(TIMESTAMP)
     sub_menus = relationship(
-        "MenuSubGroupV3",
+        "MenuSubGroup",
         backref="main_menu",
         order_by="MenuSubGroupV3.sort_order",
     )
 
 
-class MenuSubGroupV3(V3Database.Base):
+class MenuSubGroup(Database.Base):
     __tablename__ = "menu_sub_groups"
 
     id = Column(String, primary_key=True)
@@ -33,7 +33,7 @@ class MenuSubGroupV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class MainInfoV3(V3Database.Base):
+class MainInfo(Database.Base):
     __tablename__ = "main_contents"
 
     id = Column(String, primary_key=True)
@@ -46,7 +46,7 @@ class MainInfoV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class NewsItemV3(V3Database.Base):
+class NewsItem(Database.Base):
     __tablename__ = "news_items"
 
     id = Column(Integer, primary_key=True)

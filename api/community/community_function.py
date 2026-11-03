@@ -2,11 +2,11 @@ import re
 
 from sqlalchemy import text
 
-from api.community.util import CommunityUtilV3
-from api.news.models import InformationV3
+from api.community.util import CommunityUtil
+from api.news.models import Information
 
 
-class CommunityFunctionV3:
+class CommunityFunction:
     @staticmethod
     def extract_thumbnail_img(html):
         match = re.search(r'<img[^>]+src="([^"]+)"', html)
@@ -17,7 +17,7 @@ class CommunityFunctionV3:
     @staticmethod
     def fetch_post_detail(session, post_id: int, user_email: str):
         result = session.execute(
-            text(CommunityUtilV3.get_post_detail()),
+            text(CommunityUtil.get_post_detail()),
             {"post_id": post_id, "user_email": user_email},
         )
         return [dict(row) for row in result.mappings()][0]
@@ -25,7 +25,7 @@ class CommunityFunctionV3:
     @staticmethod
     def fetch_author_meta(session, post_id: int, user_email: str):
         result = session.execute(
-            text(CommunityUtilV3.get_detail_author_meta_data()),
+            text(CommunityUtil.get_detail_author_meta_data()),
             {"post_id": post_id, "user_email": user_email},
         )
         row = result.mappings().first()
@@ -44,20 +44,20 @@ class CommunityFunctionV3:
         session, post_id: int, page_category: str, user_email: str, limit: int = 20
     ):
         if page_category == "issue":
-            get_post_query = text(CommunityUtilV3.get_posts_with_issue())
-            get_post_count_query = text(CommunityUtilV3.get_post_issue_count())
-            current_page_query = text(CommunityUtilV3.get_current_post_issue_page_num())
+            get_post_query = text(CommunityUtil.get_posts_with_issue())
+            get_post_count_query = text(CommunityUtil.get_post_issue_count())
+            current_page_query = text(CommunityUtil.get_current_post_issue_page_num())
         elif page_category == "all":
-            get_post_query = text(CommunityUtilV3.get_posts_with_all())
-            get_post_count_query = text(CommunityUtilV3.get_post_all_count())
-            current_page_query = text(CommunityUtilV3.get_current_post_all_page_num())
+            get_post_query = text(CommunityUtil.get_posts_with_all())
+            get_post_count_query = text(CommunityUtil.get_post_all_count())
+            current_page_query = text(CommunityUtil.get_current_post_all_page_num())
         else:
-            get_post_query = text(CommunityUtilV3.get_posts_with_post_id())
+            get_post_query = text(CommunityUtil.get_posts_with_post_id())
             get_post_count_query = text(
-                CommunityUtilV3.get_post_category_count_with_post_id()
+                CommunityUtil.get_post_category_count_with_post_id()
             )
             current_page_query = text(
-                CommunityUtilV3.get_current_post_category_page_num()
+                CommunityUtil.get_current_post_category_page_num()
             )
 
         current_page_num_raw = session.execute(
@@ -90,9 +90,9 @@ class CommunityFunctionV3:
     @staticmethod
     def fetch_notice_posts(session):
         return (
-            session.query(InformationV3)
-            .filter(InformationV3.information_type == "NOTICE")
-            .order_by(InformationV3.update_time.desc())
+            session.query(Information)
+            .filter(Information.information_type == "NOTICE")
+            .order_by(Information.update_time.desc())
             .limit(5)
             .all()
         )

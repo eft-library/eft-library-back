@@ -8,23 +8,23 @@ from sqlalchemy import delete, text
 from sqlalchemy.dialects.postgresql import insert
 
 from api.kord_breach.models import (
-    KordBreachModifierConflictV3,
-    KordBreachModifierV3,
-    UserKordBreachPresetModifierV3,
-    UserKordBreachPresetV3,
+    KordBreachModifierConflict,
+    KordBreachModifier,
+    UserKordBreachPresetModifier,
+    UserKordBreachPreset,
 )
 from api.kord_breach.req_models import (
-    DeleteKordBreachPresetV3,
-    SaveKordBreachPresetV3,
+    DeleteKordBreachPreset,
+    SaveKordBreachPreset,
 )
-from database import V3Database
+from database import Database
 
 logger = logging.getLogger("api.kord_breach")
 
 
-class KordBreachServiceV3:
+class KordBreachService:
     @staticmethod
-    def _serialize_modifier_v3(modifier: KordBreachModifierV3):
+    def _serialize_modifier(modifier: KordBreachModifier):
         return {
             "id": modifier.id,
             "category": modifier.modifier_category,
@@ -43,50 +43,50 @@ class KordBreachServiceV3:
         }
 
     @staticmethod
-    def _build_conflict_map_v3(conflicts: Iterable[KordBreachModifierConflictV3]):
+    def _build_conflict_map(conflicts: Iterable[KordBreachModifierConflict]):
         conflict_map: dict[str, list[str]] = defaultdict(list)
         for conflict in conflicts:
             conflict_map[conflict.modifier_id].append(conflict.conflict_modifier_id)
         return dict(conflict_map)
 
     @staticmethod
-    def _slot_is_valid_v3(slot_no: int):
+    def _slot_is_valid(slot_no: int):
         return 1 <= slot_no <= 3
 
     @staticmethod
-    def _dedupe_ids_v3(modifier_ids: list[str]):
+    def _dedupe_ids(modifier_ids: list[str]):
         return list(dict.fromkeys(modifier_ids))
 
     @staticmethod
-    def _modifier_groups_v3(modifiers: list[KordBreachModifierV3]):
+    def _modifier_groups(modifiers: list[KordBreachModifier]):
         groups = {"global": [], "positive": [], "negative": []}
         for modifier in modifiers:
             groups.setdefault(modifier.modifier_category, []).append(
-                KordBreachServiceV3._serialize_modifier_v3(modifier)
+                KordBreachService._serialize_modifier(modifier)
             )
         return groups
 
     @staticmethod
-    def get_modifiers_v3():
+    def get_modifiers():
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 modifiers = (
-                    s.query(KordBreachModifierV3)
-                    .filter(KordBreachModifierV3.is_active.is_(True))
+                    s.query(KordBreachModifier)
+                    .filter(KordBreachModifier.is_active.is_(True))
                     .order_by(
-                        KordBreachModifierV3.modifier_category,
-                        KordBreachModifierV3.sort_order,
-                        KordBreachModifierV3.id,
+                        KordBreachModifier.modifier_category,
+                        KordBreachModifier.sort_order,
+                        KordBreachModifier.id,
                     )
                     .all()
                 )
-                conflicts = s.query(KordBreachModifierConflictV3).all()
-                groups = KordBreachServiceV3._modifier_groups_v3(modifiers)
+                conflicts = s.query(KordBreachModifierConflict).all()
+                groups = KordBreachService._modifier_groups(modifiers)
                 return {
                     "globalModifiers": groups.get("global", []),
                     "positiveModifiers": groups.get("positive", []),
                     "negativeModifiers": groups.get("negative", []),
-                    "conflictMap": KordBreachServiceV3._build_conflict_map_v3(
+                    "conflictMap": KordBreachService._build_conflict_map(
                         conflicts
                     ),
                 }
@@ -95,16 +95,16 @@ class KordBreachServiceV3:
             return None
 
     @staticmethod
-    def _validate_selection_v3(s, modifier_ids: list[str]):
-        modifier_ids = KordBreachServiceV3._dedupe_ids_v3(modifier_ids)
+    def _validate_selection(s, modifier_ids: list[str]):
+        modifier_ids = KordBreachService._dedupe_ids(modifier_ids)
         if not modifier_ids:
             return False, "empty_selection", [], 0
 
         modifiers = (
-            s.query(KordBreachModifierV3)
+            s.query(KordBreachModifier)
             .filter(
-                KordBreachModifierV3.id.in_(modifier_ids),
-                KordBreachModifierV3.is_active.is_(True),
+                KordBreachModifier.id.in_(modifier_ids),
+                KordBreachModifier.is_active.is_(True),
             )
             .all()
         )
@@ -122,8 +122,8 @@ class KordBreachServiceV3:
             return False, f"global_modifier_not_selectable:{','.join(global_ids)}", [], 0
 
         conflicts = (
-            s.query(KordBreachModifierConflictV3)
-            .filter(KordBreachModifierConflictV3.modifier_id.in_(modifier_ids))
+            s.query(KordBreachModifierConflict)
+            .filter(KordBreachModifierConflict.modifier_id.in_(modifier_ids))
             .all()
         )
         selected = set(modifier_ids)
@@ -144,7 +144,7 @@ class KordBreachServiceV3:
         return True, None, ordered_modifiers, total_score
 
     @staticmethod
-    def _serialize_preset_v3(row: dict):
+    def _serialize_preset(row: dict):
         modifier_ids = row.get("modifier_ids") or []
         positive_ids = row.get("positive_ids") or []
         negative_ids = row.get("negative_ids") or []
@@ -162,12 +162,12 @@ class KordBreachServiceV3:
         }
 
     @staticmethod
-    def get_presets_v3(user_email: str | None):
+    def get_presets(user_email: str | None):
         if not user_email:
             return []
 
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 result = s.execute(
                     text(
                         """
@@ -203,7 +203,7 @@ class KordBreachServiceV3:
                     {"email": user_email},
                 )
                 return [
-                    KordBreachServiceV3._serialize_preset_v3(dict(row))
+                    KordBreachService._serialize_preset(dict(row))
                     for row in result.mappings()
                 ]
         except Exception as e:
@@ -211,14 +211,14 @@ class KordBreachServiceV3:
             return None
 
     @staticmethod
-    def save_preset_v3(request_info: SaveKordBreachPresetV3, user_email: str):
+    def save_preset(request_info: SaveKordBreachPreset, user_email: str):
         try:
-            if not KordBreachServiceV3._slot_is_valid_v3(request_info.slotNo):
+            if not KordBreachService._slot_is_valid(request_info.slotNo):
                 return {"success": False, "reason": "invalid_slot"}
 
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 is_valid, reason, modifiers, total_score = (
-                    KordBreachServiceV3._validate_selection_v3(
+                    KordBreachService._validate_selection(
                         s, request_info.modifierIds
                     )
                 )
@@ -230,7 +230,7 @@ class KordBreachServiceV3:
                     }
 
                 now = datetime.utcnow()
-                preset_stmt = insert(UserKordBreachPresetV3).values(
+                preset_stmt = insert(UserKordBreachPreset).values(
                     email=user_email,
                     slot_no=request_info.slotNo,
                     name=request_info.name or f"프리셋 {request_info.slotNo}",
@@ -240,8 +240,8 @@ class KordBreachServiceV3:
                 )
                 preset_stmt = preset_stmt.on_conflict_do_update(
                     index_elements=[
-                        UserKordBreachPresetV3.email,
-                        UserKordBreachPresetV3.slot_no,
+                        UserKordBreachPreset.email,
+                        UserKordBreachPreset.slot_no,
                     ],
                     set_={
                         "name": preset_stmt.excluded.name,
@@ -251,15 +251,15 @@ class KordBreachServiceV3:
                 )
                 s.execute(preset_stmt)
                 s.execute(
-                    delete(UserKordBreachPresetModifierV3).where(
-                        UserKordBreachPresetModifierV3.email == user_email,
-                        UserKordBreachPresetModifierV3.slot_no
+                    delete(UserKordBreachPresetModifier).where(
+                        UserKordBreachPresetModifier.email == user_email,
+                        UserKordBreachPresetModifier.slot_no
                         == request_info.slotNo,
                     )
                 )
                 for index, modifier in enumerate(modifiers):
                     s.add(
-                        UserKordBreachPresetModifierV3(
+                        UserKordBreachPresetModifier(
                             email=user_email,
                             slot_no=request_info.slotNo,
                             modifier_id=modifier.id,
@@ -269,7 +269,7 @@ class KordBreachServiceV3:
                     )
                 s.commit()
 
-            presets = KordBreachServiceV3.get_presets_v3(user_email)
+            presets = KordBreachService.get_presets(user_email)
             saved_preset = next(
                 (
                     preset
@@ -287,23 +287,23 @@ class KordBreachServiceV3:
             return None
 
     @staticmethod
-    def delete_preset_v3(request_info: DeleteKordBreachPresetV3, user_email: str):
+    def delete_preset(request_info: DeleteKordBreachPreset, user_email: str):
         try:
-            if not KordBreachServiceV3._slot_is_valid_v3(request_info.slotNo):
+            if not KordBreachService._slot_is_valid(request_info.slotNo):
                 return {"success": False, "reason": "invalid_slot"}
 
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 s.execute(
-                    delete(UserKordBreachPresetModifierV3).where(
-                        UserKordBreachPresetModifierV3.email == user_email,
-                        UserKordBreachPresetModifierV3.slot_no
+                    delete(UserKordBreachPresetModifier).where(
+                        UserKordBreachPresetModifier.email == user_email,
+                        UserKordBreachPresetModifier.slot_no
                         == request_info.slotNo,
                     )
                 )
                 s.execute(
-                    delete(UserKordBreachPresetV3).where(
-                        UserKordBreachPresetV3.email == user_email,
-                        UserKordBreachPresetV3.slot_no == request_info.slotNo,
+                    delete(UserKordBreachPreset).where(
+                        UserKordBreachPreset.email == user_email,
+                        UserKordBreachPreset.slot_no == request_info.slotNo,
                     )
                 )
                 s.commit()
@@ -316,19 +316,19 @@ class KordBreachServiceV3:
             return None
 
     @staticmethod
-    def random_selection_v3():
+    def random_selection():
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 modifiers = (
-                    s.query(KordBreachModifierV3)
-                    .filter(KordBreachModifierV3.is_active.is_(True))
+                    s.query(KordBreachModifier)
+                    .filter(KordBreachModifier.is_active.is_(True))
                     .all()
                 )
-                conflicts = s.query(KordBreachModifierConflictV3).all()
+                conflicts = s.query(KordBreachModifierConflict).all()
 
             positive = [m for m in modifiers if m.modifier_category == "positive"]
             negative = [m for m in modifiers if m.modifier_category == "negative"]
-            conflict_map = KordBreachServiceV3._build_conflict_map_v3(conflicts)
+            conflict_map = KordBreachService._build_conflict_map(conflicts)
 
             picked_ids: set[str] = set()
             random.shuffle(negative)

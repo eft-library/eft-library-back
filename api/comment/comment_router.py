@@ -10,7 +10,7 @@ from api.comment.comment_req_models import (
     ReqCommentReport,
     UpdateComment,
 )
-from api.comment.service import CommentServiceV3
+from api.comment.service import CommentService
 from api.constants import Message
 from api.response import CustomResponse
 from api.user.util import UserUtil
@@ -22,12 +22,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 
 @router.post("/v3/insert-parent-comment", include_in_schema=False)
-def insert_parent_comment_v3(
+def insert_parent_comment(
     request_info: InsertParentComment, token: str = Depends(oauth2_scheme)
 ):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = CommentServiceV3.insert_parent_comment_v3(request_info, user_email)
+        result = CommentService.insert_parent_comment(request_info, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -35,12 +35,12 @@ def insert_parent_comment_v3(
 
 
 @router.post("/v3/insert-child-comment", include_in_schema=False)
-def insert_child_comment_v3(
+def insert_child_comment(
     request_info: InsertChildComment, token: str = Depends(oauth2_scheme)
 ):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = CommentServiceV3.insert_child_comment_v3(request_info, user_email)
+        result = CommentService.insert_child_comment(request_info, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -48,8 +48,8 @@ def insert_child_comment_v3(
 
 
 @router.post("/v3/get-comments")
-def get_comments_v3(request_info: GetComments):
-    result = CommentServiceV3.get_comment_v3(
+def get_comments(request_info: GetComments):
+    result = CommentService.get_comment(
         request_info.post_id,
         request_info.page_num,
         request_info.issue_comment_id,
@@ -61,10 +61,10 @@ def get_comments_v3(request_info: GetComments):
 
 
 @router.post("/v3/like-comment", include_in_schema=False)
-def like_comment_v3(request_info: CommentReaction, token: str = Depends(oauth2_scheme)):
+def like_comment(request_info: CommentReaction, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = CommentServiceV3.like_comment_v3(request_info.comment_id, user_email)
+        result = CommentService.like_comment(request_info.comment_id, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -72,12 +72,12 @@ def like_comment_v3(request_info: CommentReaction, token: str = Depends(oauth2_s
 
 
 @router.post("/v3/dislike-comment", include_in_schema=False)
-def dislike_comment_v3(
+def dislike_comment(
     request_info: CommentReaction, token: str = Depends(oauth2_scheme)
 ):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = CommentServiceV3.dislike_comment_v3(
+        result = CommentService.dislike_comment(
             request_info.comment_id, user_email
         )
         if result is None:
@@ -87,10 +87,10 @@ def dislike_comment_v3(
 
 
 @router.post("/v3/update-comment", include_in_schema=False)
-def update_comment_v3(request_info: UpdateComment, token: str = Depends(oauth2_scheme)):
+def update_comment(request_info: UpdateComment, token: str = Depends(oauth2_scheme)):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = CommentServiceV3.update_comment_v3(
+        result = CommentService.update_comment(
             request_info.comment_id, request_info.contents
         )
         if result is None:
@@ -100,12 +100,12 @@ def update_comment_v3(request_info: UpdateComment, token: str = Depends(oauth2_s
 
 
 @router.post("/v3/delete-comment-by-admin", include_in_schema=False)
-def delete_comment_by_admin_v3(
+def delete_comment_by_admin(
     request_info: DeleteComment, token: str = Depends(oauth2_scheme)
 ):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = CommentServiceV3.delete_comment_by_admin_v3(request_info.comment_id)
+        result = CommentService.delete_comment_by_admin(request_info.comment_id)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -113,12 +113,12 @@ def delete_comment_by_admin_v3(
 
 
 @router.post("/v3/delete-comment-by-user", include_in_schema=False)
-def delete_comment_by_user_v3(
+def delete_comment_by_user(
     request_info: DeleteComment, token: str = Depends(oauth2_scheme)
 ):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = CommentServiceV3.delete_comment_by_user_v3(request_info.comment_id)
+        result = CommentService.delete_comment_by_user(request_info.comment_id)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -126,12 +126,12 @@ def delete_comment_by_user_v3(
 
 
 @router.post("/v3/report-comment", include_in_schema=False)
-def report_comment_v3(
+def report_comment(
     request_info: ReqCommentReport, token: str = Depends(oauth2_scheme)
 ):
     user_email = UserUtil.verify_google_token(access_token=token)
     if user_email:
-        result = CommentServiceV3.report_comment_v3(request_info, user_email)
+        result = CommentService.report_comment(request_info, user_email)
         if result is None:
             return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
         return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

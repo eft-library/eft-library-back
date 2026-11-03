@@ -1,8 +1,8 @@
-from database import V3Database
+from database import Database
 from sqlalchemy import Column, TIMESTAMP, ARRAY, TEXT, NUMERIC
 
 
-class UserRoadmapV3(V3Database.Base):
+class UserRoadmap(Database.Base):
     __tablename__ = "user_roadmap"
 
     email = Column(TEXT, primary_key=True)
@@ -10,7 +10,7 @@ class UserRoadmapV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class RoadmapNodeV3(V3Database.Base):
+class RoadmapNode(Database.Base):
     __tablename__ = "roadmap_node"
 
     id = Column(TEXT, primary_key=True)
@@ -25,7 +25,7 @@ class RoadmapNodeV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class RoadmapEdgeV3(V3Database.Base):
+class RoadmapEdge(Database.Base):
     __tablename__ = "roadmap_edge"
 
     id = Column(TEXT, primary_key=True)

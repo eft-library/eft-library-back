@@ -1,9 +1,9 @@
 from sqlalchemy import BOOLEAN, Column, Integer, JSON, NUMERIC, String, TEXT, TIMESTAMP
 
-from database import V3Database
+from database import Database
 
 
-class LiveMapFloorV3(V3Database.Base):
+class LiveMapFloor(Database.Base):
     __tablename__ = "live_map_floors"
 
     id = Column(String, primary_key=True)
@@ -22,7 +22,7 @@ class LiveMapFloorV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapFloorZoneV3(V3Database.Base):
+class LiveMapFloorZone(Database.Base):
     __tablename__ = "live_map_floor_zones"
 
     id = Column(String, primary_key=True)
@@ -38,7 +38,7 @@ class LiveMapFloorZoneV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapPointV3(V3Database.Base):
+class LiveMapPoint(Database.Base):
     __tablename__ = "live_map_points"
 
     id = Column(String, primary_key=True)
@@ -51,7 +51,7 @@ class LiveMapPointV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapPointDetailV3(V3Database.Base):
+class LiveMapPointDetail(Database.Base):
     __tablename__ = "live_map_point_details"
 
     id = Column(String, primary_key=True)
@@ -64,7 +64,7 @@ class LiveMapPointDetailV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapStaticPointV3(V3Database.Base):
+class LiveMapStaticPoint(Database.Base):
     __tablename__ = "live_map_static_points"
 
     id = Column(String, primary_key=True)
@@ -86,7 +86,7 @@ class LiveMapStaticPointV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapBtrRouteV3(V3Database.Base):
+class LiveMapBtrRoute(Database.Base):
     __tablename__ = "live_map_btr_routes"
 
     id = Column(String, primary_key=True)
@@ -102,7 +102,7 @@ class LiveMapBtrRouteV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapBtrRoutePointV3(V3Database.Base):
+class LiveMapBtrRoutePoint(Database.Base):
     __tablename__ = "live_map_btr_route_points"
 
     id = Column(String, primary_key=True)
@@ -113,7 +113,7 @@ class LiveMapBtrRoutePointV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapBtrRouteStopV3(V3Database.Base):
+class LiveMapBtrRouteStop(Database.Base):
     __tablename__ = "live_map_btr_route_stops"
 
     id = Column(String, primary_key=True)
@@ -126,7 +126,7 @@ class LiveMapBtrRouteStopV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapStoryPointV3(V3Database.Base):
+class LiveMapStoryPoint(Database.Base):
     __tablename__ = "live_map_story_points"
 
     id = Column(String, primary_key=True)
@@ -140,7 +140,7 @@ class LiveMapStoryPointV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapStoryPointDetailV3(V3Database.Base):
+class LiveMapStoryPointDetail(Database.Base):
     __tablename__ = "live_map_story_point_details"
 
     id = Column(String, primary_key=True)
@@ -153,7 +153,7 @@ class LiveMapStoryPointDetailV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapStoryRequirementPointV3(V3Database.Base):
+class LiveMapStoryRequirementPoint(Database.Base):
     __tablename__ = "live_map_story_requirement_points"
 
     id = Column(String, primary_key=True)
@@ -167,7 +167,7 @@ class LiveMapStoryRequirementPointV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapStoryRequirementPointDetailV3(V3Database.Base):
+class LiveMapStoryRequirementPointDetail(Database.Base):
     __tablename__ = "live_map_story_requirement_point_details"
 
     id = Column(String, primary_key=True)
@@ -180,7 +180,7 @@ class LiveMapStoryRequirementPointDetailV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapEventPointV3(V3Database.Base):
+class LiveMapEventPoint(Database.Base):
     __tablename__ = "live_map_event_points"
 
     id = Column(String, primary_key=True)
@@ -194,7 +194,7 @@ class LiveMapEventPointV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class LiveMapEventPointDetailV3(V3Database.Base):
+class LiveMapEventPointDetail(Database.Base):
     __tablename__ = "live_map_event_point_details"
 
     id = Column(String, primary_key=True)

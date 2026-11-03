@@ -1,4 +1,4 @@
-from database import V3Database
+from database import Database
 from sqlalchemy import (
     Column,
     Computed,
@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 
-class PriceSeasonV3(V3Database.Base):
+class PriceSeason(Database.Base):
     __tablename__ = "price_seasons"
 
     id = Column(TEXT, primary_key=True)
@@ -24,7 +24,7 @@ class PriceSeasonV3(V3Database.Base):
     update_time = Column(TIMESTAMP(timezone=True), nullable=False)
 
 
-class ItemPriceV3(V3Database.Base):
+class ItemPrice(Database.Base):
     __tablename__ = "item_prices"
 
     item_id = Column(TEXT, primary_key=True)
@@ -41,7 +41,7 @@ class ItemPriceV3(V3Database.Base):
     update_time = Column(TIMESTAMP)
 
 
-class ItemTraderPriceV3(V3Database.Base):
+class ItemTraderPrice(Database.Base):
     __tablename__ = "item_trader_prices"
 
     id = Column(TEXT, nullable=False)
@@ -55,7 +55,7 @@ class ItemTraderPriceV3(V3Database.Base):
     price = Column(NUMERIC)
 
 
-class ItemPriceHistoryV3(V3Database.Base):
+class ItemPriceHistory(Database.Base):
     __tablename__ = "item_price_history"
 
     item_id = Column(TEXT, primary_key=True)
@@ -68,7 +68,7 @@ class ItemPriceHistoryV3(V3Database.Base):
     price = Column(Integer)
 
 
-class PriceRankReqV3(BaseModel):
+class PriceRankReq(BaseModel):
     """
     V3 아이템 랭크 카테고리 파라미터
     """

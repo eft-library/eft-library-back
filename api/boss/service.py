@@ -1,23 +1,23 @@
 from sqlalchemy import text
-from api.boss.query import BossQueryV3
-from database import V3Database
+from api.boss.query import BossQuery
+from database import Database
 import logging
 
 logger = logging.getLogger("api.boss")
 
 
-class BossServiceV3:
+class BossService:
     @staticmethod
-    def get_boss_by_normalized_name_v3(normalized_name: str):
+    def get_boss_by_normalized_name(normalized_name: str):
         try:
-            with V3Database.SessionLocal() as s:
-                boss_id_sql = text(BossQueryV3.boss_id_sql())
-                boss_info_sql = text(BossQueryV3.boss_info_sql())
-                boss_map_sql = text(BossQueryV3.boss_map_sql())
-                boss_item_sql = text(BossQueryV3.boss_item_sql())
-                boss_follower_sql = text(BossQueryV3.boss_follower_sql())
-                boss_follower_info_sql = text(BossQueryV3.boss_follower_info_sql())
-                boss_selector_sql = text(BossQueryV3.boss_selector_sql())
+            with Database.SessionLocal() as s:
+                boss_id_sql = text(BossQuery.boss_id_sql())
+                boss_info_sql = text(BossQuery.boss_info_sql())
+                boss_map_sql = text(BossQuery.boss_map_sql())
+                boss_item_sql = text(BossQuery.boss_item_sql())
+                boss_follower_sql = text(BossQuery.boss_follower_sql())
+                boss_follower_info_sql = text(BossQuery.boss_follower_info_sql())
+                boss_selector_sql = text(BossQuery.boss_selector_sql())
 
                 param = {"normalized_name": normalized_name}
                 boss_id = s.execute(boss_id_sql, param).scalar()
@@ -48,7 +48,7 @@ class BossServiceV3:
                         .all()
                     )
 
-                    boss_follower_item_sql = text(BossQueryV3.boss_follower_item_sql())
+                    boss_follower_item_sql = text(BossQuery.boss_follower_item_sql())
                     boss_follower_items = (
                         s.execute(boss_follower_item_sql, {"boss_ids": boss_follower})
                         .mappings()

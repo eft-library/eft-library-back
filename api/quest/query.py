@@ -1,4 +1,4 @@
-class QuestQueryV3:
+class QuestQuery:
     @staticmethod
     def completion_graph_sql():
         return """

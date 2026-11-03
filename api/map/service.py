@@ -1,13 +1,13 @@
-from api.map.models import MapV3
-from database import V3Database
+from api.map.models import Map
+from database import Database
 import logging
 
 logger = logging.getLogger("api.map")
 
 
-class MapServiceV3:
+class MapService:
     @staticmethod
-    def _serialize_top_level_map_v3(map_data: MapV3):
+    def _serialize_top_level_map(map_data: Map):
         return {
             "normalized_name": map_data.normalized_name,
             "name_en": map_data.name_en,
@@ -16,7 +16,7 @@ class MapServiceV3:
         }
 
     @staticmethod
-    def _serialize_map_v3(map_data: MapV3):
+    def _serialize_map(map_data: Map):
         return {
             "id": map_data.id,
             "normalized_name": map_data.normalized_name,
@@ -28,14 +28,14 @@ class MapServiceV3:
         }
 
     @staticmethod
-    def get_map_by_normalized_name_v3(normalized_name: str):
+    def get_map_by_normalized_name(normalized_name: str):
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 map_data = (
-                    s.query(MapV3)
+                    s.query(Map)
                     .filter(
-                        MapV3.normalized_name == normalized_name,
-                        MapV3.is_use.is_(True),
+                        Map.normalized_name == normalized_name,
+                        Map.is_use.is_(True),
                     )
                     .first()
                 )
@@ -49,13 +49,13 @@ class MapServiceV3:
                     related_parent_id = map_data.parent_map_id
 
                 top_level_maps = [
-                    MapServiceV3._serialize_top_level_map_v3(row)
-                    for row in s.query(MapV3)
+                    MapService._serialize_top_level_map(row)
+                    for row in s.query(Map)
                     .filter(
-                        MapV3.map_depth == 1,
-                        MapV3.is_use.is_(True),
+                        Map.map_depth == 1,
+                        Map.is_use.is_(True),
                     )
-                    .order_by(MapV3.sort_order)
+                    .order_by(Map.sort_order)
                     .all()
                 ]
 
@@ -69,21 +69,21 @@ class MapServiceV3:
                             "name_ja": row.name_ja,
                         }
                         for row in s.query(
-                            MapV3.normalized_name,
-                            MapV3.name_en,
-                            MapV3.name_ko,
-                            MapV3.name_ja,
+                            Map.normalized_name,
+                            Map.name_en,
+                            Map.name_ko,
+                            Map.name_ja,
                         )
                         .filter(
-                            MapV3.parent_map_id == related_parent_id,
-                            MapV3.is_use.is_(True),
+                            Map.parent_map_id == related_parent_id,
+                            Map.is_use.is_(True),
                         )
-                        .order_by(MapV3.sort_order)
+                        .order_by(Map.sort_order)
                         .all()
                     ]
 
                 return {
-                    "map": MapServiceV3._serialize_map_v3(map_data),
+                    "map": MapService._serialize_map(map_data),
                     "top_level_map": top_level_maps,
                     "related_maps": related_maps,
                 }

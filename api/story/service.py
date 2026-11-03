@@ -1,13 +1,13 @@
-from database import V3Database
+from database import Database
 import logging
-from api.story.models import StoryRoadmapV3, StoryV3
+from api.story.models import StoryRoadmap, Story
 
 logger = logging.getLogger("api.story")
 
 
-class StoryServiceV3:
+class StoryService:
     @staticmethod
-    def _serialize_story_selector_v3(story: StoryV3):
+    def _serialize_story_selector(story: Story):
         return {
             "id": story.id,
             "title_en": story.title_en,
@@ -16,7 +16,7 @@ class StoryServiceV3:
         }
 
     @staticmethod
-    def _serialize_story_detail_v3(story: StoryV3):
+    def _serialize_story_detail(story: Story):
         return {
             "id": story.id,
             "title_en": story.title_en,
@@ -35,7 +35,7 @@ class StoryServiceV3:
         }
 
     @staticmethod
-    def _serialize_story_roadmap_v3(roadmap: StoryRoadmapV3):
+    def _serialize_story_roadmap(roadmap: StoryRoadmap):
         return {
             "id": roadmap.id,
             "node_type": roadmap.node_type,
@@ -65,19 +65,19 @@ class StoryServiceV3:
         }
 
     @staticmethod
-    def get_story_by_id_v3(story_id: str):
+    def get_story_by_id(story_id: str):
         try:
-            with V3Database.SessionLocal() as s:
-                selector_list = s.query(StoryV3).order_by(StoryV3.sort_order).all()
-                story_detail = s.query(StoryV3).filter(StoryV3.id == story_id).first()
+            with Database.SessionLocal() as s:
+                selector_list = s.query(Story).order_by(Story.sort_order).all()
+                story_detail = s.query(Story).filter(Story.id == story_id).first()
 
                 return {
                     "selector": [
-                        StoryServiceV3._serialize_story_selector_v3(story)
+                        StoryService._serialize_story_selector(story)
                         for story in selector_list
                     ],
                     "detail": (
-                        StoryServiceV3._serialize_story_detail_v3(story_detail)
+                        StoryService._serialize_story_detail(story_detail)
                         if story_detail is not None
                         else None
                     ),
@@ -90,16 +90,16 @@ class StoryServiceV3:
             return None
 
     @staticmethod
-    def get_story_roadmap_v3():
+    def get_story_roadmap():
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 story_roadmap_list = (
-                    s.query(StoryRoadmapV3)
-                    .order_by(StoryRoadmapV3.node_type, StoryRoadmapV3.id)
+                    s.query(StoryRoadmap)
+                    .order_by(StoryRoadmap.node_type, StoryRoadmap.id)
                     .all()
                 )
                 return [
-                    StoryServiceV3._serialize_story_roadmap_v3(roadmap)
+                    StoryService._serialize_story_roadmap(roadmap)
                     for roadmap in story_roadmap_list
                 ]
         except Exception as e:

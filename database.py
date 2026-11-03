@@ -34,7 +34,7 @@ class DataBaseConnector:
     )
 
 
-class V3Database:
+class Database:
     Base = declarative_base()
 
     url_object = URL.create(

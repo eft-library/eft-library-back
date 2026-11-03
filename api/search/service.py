@@ -1,15 +1,15 @@
 from sqlalchemy import desc
 
-from api.search.models import AutocompleteItemV3, SitemapV3
-from database import V3Database
+from api.search.models import AutocompleteItem, Sitemap
+from database import Database
 import logging
 
 logger = logging.getLogger("api.search")
 
 
-class SearchServiceV3:
+class SearchService:
     @staticmethod
-    def _serialize_autocomplete_item_v3(item: AutocompleteItemV3):
+    def _serialize_autocomplete_item(item: AutocompleteItem):
         return {
             "url": item.url,
             "autocomplete_text_en": item.autocomplete_text_en,
@@ -21,7 +21,7 @@ class SearchServiceV3:
         }
 
     @staticmethod
-    def _serialize_sitemap_v3(sitemap: SitemapV3):
+    def _serialize_sitemap(sitemap: Sitemap):
         return {
             "id": sitemap.id,
             "url": sitemap.url,
@@ -35,19 +35,19 @@ class SearchServiceV3:
         }
 
     @staticmethod
-    def get_all_search_v3():
+    def get_all_search():
         """
         V3 검색 자동완성 정보 전체 조회
         """
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 search_list = (
-                    s.query(AutocompleteItemV3)
-                    .order_by(AutocompleteItemV3.sort_order)
+                    s.query(AutocompleteItem)
+                    .order_by(AutocompleteItem.sort_order)
                     .all()
                 )
                 return [
-                    SearchServiceV3._serialize_autocomplete_item_v3(item)
+                    SearchService._serialize_autocomplete_item(item)
                     for item in search_list
                 ]
         except Exception as e:
@@ -58,17 +58,17 @@ class SearchServiceV3:
             return None
 
     @staticmethod
-    def get_all_site_list_v3():
+    def get_all_site_list():
         """
         V3 사이트 정보 전체 조회
         """
         try:
-            with V3Database.SessionLocal() as s:
+            with Database.SessionLocal() as s:
                 sitemap_list = (
-                    s.query(SitemapV3).order_by(desc(SitemapV3.priority)).all()
+                    s.query(Sitemap).order_by(desc(Sitemap.priority)).all()
                 )
                 return [
-                    SearchServiceV3._serialize_sitemap_v3(sitemap)
+                    SearchService._serialize_sitemap(sitemap)
                     for sitemap in sitemap_list
                 ]
         except Exception as e:

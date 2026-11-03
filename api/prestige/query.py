@@ -1,4 +1,4 @@
-class PrestigeQueryV3:
+class PrestigeQuery:
     @staticmethod
     def levels_sql():
         return """

@@ -3,15 +3,15 @@ from collections import defaultdict
 
 from sqlalchemy import text
 
-from api.prestige.query import PrestigeQueryV3
-from database import V3Database
+from api.prestige.query import PrestigeQuery
+from database import Database
 
 logger = logging.getLogger("api.prestige")
 
 
-class PrestigeServiceV3:
+class PrestigeService:
     @staticmethod
-    def _item_v3(row: dict):
+    def _item(row: dict):
         return {
             "id": row["item_id"],
             "normalized_name": row["normalized_name"],
@@ -22,7 +22,7 @@ class PrestigeServiceV3:
         }
 
     @staticmethod
-    def _fetch_v3(session, query: str, prestige_ids: list[str]):
+    def _fetch(session, query: str, prestige_ids: list[str]):
         return [
             dict(row)
             for row in session.execute(
@@ -31,48 +31,48 @@ class PrestigeServiceV3:
         ]
 
     @staticmethod
-    def _build_levels_v3(session, levels: list[dict]):
+    def _build_levels(session, levels: list[dict]):
         if not levels:
             return []
 
         prestige_ids = [level["id"] for level in levels]
-        conditions = PrestigeServiceV3._fetch_v3(
-            session, PrestigeQueryV3.conditions_sql(), prestige_ids
+        conditions = PrestigeService._fetch(
+            session, PrestigeQuery.conditions_sql(), prestige_ids
         )
-        condition_items = PrestigeServiceV3._fetch_v3(
-            session, PrestigeQueryV3.condition_items_sql(), prestige_ids
+        condition_items = PrestigeService._fetch(
+            session, PrestigeQuery.condition_items_sql(), prestige_ids
         )
-        condition_statuses = PrestigeServiceV3._fetch_v3(
-            session, PrestigeQueryV3.condition_statuses_sql(), prestige_ids
+        condition_statuses = PrestigeService._fetch(
+            session, PrestigeQuery.condition_statuses_sql(), prestige_ids
         )
-        condition_maps = PrestigeServiceV3._fetch_v3(
-            session, PrestigeQueryV3.condition_maps_sql(), prestige_ids
+        condition_maps = PrestigeService._fetch(
+            session, PrestigeQuery.condition_maps_sql(), prestige_ids
         )
-        reward_items = PrestigeServiceV3._fetch_v3(
-            session, PrestigeQueryV3.reward_items_sql(), prestige_ids
+        reward_items = PrestigeService._fetch(
+            session, PrestigeQuery.reward_items_sql(), prestige_ids
         )
-        reward_skills = PrestigeServiceV3._fetch_v3(
-            session, PrestigeQueryV3.reward_skills_sql(), prestige_ids
+        reward_skills = PrestigeService._fetch(
+            session, PrestigeQuery.reward_skills_sql(), prestige_ids
         )
-        customizations = PrestigeServiceV3._fetch_v3(
-            session, PrestigeQueryV3.reward_customizations_sql(), prestige_ids
+        customizations = PrestigeService._fetch(
+            session, PrestigeQuery.reward_customizations_sql(), prestige_ids
         )
-        customization_items = PrestigeServiceV3._fetch_v3(
+        customization_items = PrestigeService._fetch(
             session,
-            PrestigeQueryV3.reward_customization_items_sql(),
+            PrestigeQuery.reward_customization_items_sql(),
             prestige_ids,
         )
-        transfer_settings = PrestigeServiceV3._fetch_v3(
-            session, PrestigeQueryV3.transfer_settings_sql(), prestige_ids
+        transfer_settings = PrestigeService._fetch(
+            session, PrestigeQuery.transfer_settings_sql(), prestige_ids
         )
-        transfer_filters = PrestigeServiceV3._fetch_v3(
-            session, PrestigeQueryV3.transfer_filters_sql(), prestige_ids
+        transfer_filters = PrestigeService._fetch(
+            session, PrestigeQuery.transfer_filters_sql(), prestige_ids
         )
 
         condition_items_by_id = defaultdict(list)
         for row in condition_items:
             condition_items_by_id[row["condition_id"]].append(
-                PrestigeServiceV3._item_v3(row)
+                PrestigeService._item(row)
             )
         statuses_by_id = defaultdict(list)
         for row in condition_statuses:
@@ -145,7 +145,7 @@ class PrestigeServiceV3:
                     "quantity": row["quantity"],
                     "attributes": row["attributes"],
                     "sort_order": row["sort_order"],
-                    "item": PrestigeServiceV3._item_v3(row),
+                    "item": PrestigeService._item(row),
                 }
             )
         reward_skills_by_level = defaultdict(list)
@@ -161,7 +161,7 @@ class PrestigeServiceV3:
         customization_items_by_id = defaultdict(list)
         for row in customization_items:
             customization_items_by_id[row["customization_id"]].append(
-                PrestigeServiceV3._item_v3(row)
+                PrestigeService._item(row)
             )
         customizations_by_level = defaultdict(list)
         for row in customizations:
@@ -243,31 +243,31 @@ class PrestigeServiceV3:
         ]
 
     @staticmethod
-    def get_all_prestige_v3():
+    def get_all_prestige():
         try:
-            with V3Database.SessionLocal() as session:
+            with Database.SessionLocal() as session:
                 levels = [
                     dict(row)
                     for row in session.execute(
-                        text(PrestigeQueryV3.levels_sql())
+                        text(PrestigeQuery.levels_sql())
                     ).mappings()
                 ]
-                return PrestigeServiceV3._build_levels_v3(session, levels)
+                return PrestigeService._build_levels(session, levels)
         except Exception as error:
             logger.error(f"get_all_prestige_v3 error: {error}", exc_info=True)
             return None
 
     @staticmethod
-    def get_prestige_by_level_v3(prestige_level: int):
+    def get_prestige_by_level(prestige_level: int):
         try:
-            with V3Database.SessionLocal() as session:
+            with Database.SessionLocal() as session:
                 level = session.execute(
-                    text(PrestigeQueryV3.level_sql()),
+                    text(PrestigeQuery.level_sql()),
                     {"prestige_level": prestige_level},
                 ).mappings().first()
                 if level is None:
                     return None
-                return PrestigeServiceV3._build_levels_v3(
+                return PrestigeService._build_levels(
                     session, [dict(level)]
                 )[0]
         except Exception as error:

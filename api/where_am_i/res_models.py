@@ -1,8 +1,8 @@
-from database import V3Database
+from database import Database
 from sqlalchemy import Column, TIMESTAMP, TEXT, func, INTEGER
 
 
-class UserLocationRequestV3(V3Database.Base):
+class UserLocationRequest(Database.Base):
     __tablename__ = "user_location_request"
 
     id = Column(INTEGER, primary_key=True)
