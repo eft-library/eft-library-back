@@ -1,4 +1,4 @@
-"""Read source modding relationships without inventing mounting trees or stat formulas."""
+"""Read source relationships and explicitly inferred trees, without deriving stat formulas."""
 from sqlalchemy import text
 
 from util.http_exceptions import HttpError
@@ -171,5 +171,8 @@ class ModdingService:
             select weapon_item_id,is_listed,is_default_reference,sort_order
             from weapon_preset_links where preset_item_id=:id order by weapon_item_id
         """),params).mappings()]
+        # Import locally to keep shared source SQL constants independent from the loader.
+        from api.modding.reconstruction_source import reconstruct_preset
+        reconstruction = reconstruct_preset(session,preset_id,preset['base_item_id'],components)
         return {'preset':dict(preset),'components':components,'weapon_links':links,
-                'composition_type':'flat_source_list'}
+                'composition_type':'flat_source_list','reconstruction':reconstruction}

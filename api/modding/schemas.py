@@ -177,11 +177,65 @@ class PresetComponent(BaseModel):
     item: ItemSummary
 
 
+class ReconstructedNode(BaseModel):
+    node_id: str
+    item_id: str
+    parent_node_id: str | None
+    slot_id: str | None
+    attributes: dict[str, Any] | None
+    source_component_index: int
+    source_unit_index: int
+
+
+class ReconstructedTree(BaseModel):
+    nodes: list[ReconstructedNode]
+
+
+class ReconstructionIssue(BaseModel):
+    code: Literal[
+        'UNSUPPORTED_BASE_ITEM','INVALID_COMPONENTS','NODE_LIMIT','ROOT_COMPONENT_COUNT',
+        'MISSING_ITEM_DEFINITION','UNRESOLVED_CONFLICT_SLOT','ITEM_CONFLICT','CATEGORY_CONFLICT',
+        'SLOT_UNREACHABLE','AMMUNITION_WITHOUT_SLOT','MULTIPLE_SOLUTIONS','SEARCH_LIMIT','SOLUTION_LIMIT',
+        'REQUIRED_SLOT_UNFILLED','NO_COMPLETE_TREE',
+    ]
+    node_id: str | None = None
+    other_node_id: str | None = None
+    item_id: str | None = None
+    slot_id: str | None = None
+
+
+class UnplacedComponent(BaseModel):
+    component_index: int
+    item_id: str
+    quantity: int
+    attributes: dict[str, Any] | None
+
+
+class PresetReconstruction(BaseModel):
+    method: Literal['inferred']
+    algorithm_version: Literal[1]
+    is_source_tree: Literal[False]
+    validation_scope: Literal['stored_slot_constraints']
+    status: Literal['unique','ambiguous','incomplete','unavailable','search_limited']
+    can_import: bool
+    requires_confirmation: Literal[True]
+    is_unique: bool | None
+    search_complete: bool
+    solution_count_lower_bound: int
+    states_examined: int
+    candidate_trees: list[ReconstructedTree]
+    partial_tree: ReconstructedTree | None
+    unplaced_components: list[UnplacedComponent]
+    issues: list[ReconstructionIssue]
+    issues_truncated: bool
+
+
 class PresetDetail(BaseModel):
     preset: PresetSummary
     components: list[PresetComponent]
     weapon_links: list[WeaponPresetLink]
     composition_type: Literal['flat_source_list']
+    reconstruction: PresetReconstruction
 
 
 Data = TypeVar('Data')

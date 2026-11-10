@@ -166,6 +166,37 @@ class ModdingApiTest(unittest.TestCase):
         self.assertEqual(detail['weapon_links'][0]['weapon_item_id'],'gun')
         self.assertEqual(self.get_data('presets/other-preset')['components'],[])
 
+    def test_inferred_tree_is_separate_from_source_components_and_importable(self):
+        with self.engine.begin() as conn:
+            conn.exec_driver_sql("""
+                insert into items(id) values ('tree-preset');
+                insert into item_presets(preset_item_id,base_item_id) values ('tree-preset','gun');
+                insert into item_preset_components values
+                    ('tree-preset',0,'gun',1,'{}'),('tree-preset',1,'receiver',1,'{}'),
+                    ('tree-preset',2,'sight',1,'{"mode":{"value":[1,4]}}');
+            """)
+        try:
+            detail=self.get_data('presets/tree-preset')
+            self.assertEqual(detail['composition_type'],'flat_source_list')
+            self.assertNotIn('parent_node_id',detail['components'][1])
+            result=detail['reconstruction']
+            self.assertEqual(result['method'],'inferred')
+            self.assertFalse(result['is_source_tree'])
+            self.assertEqual(result['status'],'unique')
+            self.assertTrue(result['can_import'])
+            nodes=result['candidate_trees'][0]['nodes']
+            self.assertEqual(len(nodes),3)
+            by_item={n['item_id']:n for n in nodes}
+            self.assertEqual(by_item['sight']['parent_node_id'],by_item['receiver']['node_id'])
+            self.assertEqual(by_item['sight']['attributes'],{'mode':{'value':[1,4]}})
+            from api.weapon_builds.schemas import CreateBuild
+            from uuid import uuid4
+            CreateBuild.model_validate({'request_id':str(uuid4()),'weapon_item_id':'gun','title':'Import','nodes':nodes})
+        finally:
+            with self.engine.begin() as conn:
+                conn.exec_driver_sql("delete from item_presets where preset_item_id='tree-preset'")
+                conn.exec_driver_sql("delete from items where id='tree-preset'")
+
     def test_not_found_and_validation(self):
         for path,code in [('items/missing','MODDING_ITEM_NOT_FOUND'),
                           ('items/gun/slots/rear-slot/candidates','MODDING_SLOT_NOT_FOUND'),
