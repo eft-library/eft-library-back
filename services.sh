@@ -127,11 +127,11 @@ start_all() {
   consumers start
   app start 9022 "$backend" restart.sh
   app start 9023 "$aiops" scripts/restart-api.sh restart
-  app start 4002 "$frontend" restart.sh
   app start 4003 "$aiops" scripts/restart-web.sh restart
   local name
   for name in "${containers[@]}"; do container start "$name"; done
   container start npm
+  app start 4002 "$frontend" restart.sh
 }
 stop_all() {
   container stop npm
