@@ -56,7 +56,11 @@ class ModdingService:
         source = f'from items i where {WEAPON_CONDITION} and {SEARCH_CONDITION}'
         projection = f"""{ITEM_JSON} as item,
             (select to_jsonb(w)-'item_id' from weapon_items w where w.item_id=i.id) as weapon_properties,
-            (select count(*) from weapon_preset_links l where l.weapon_item_id=i.id) as preset_count"""
+            (select count(*) from weapon_preset_links l where l.weapon_item_id=i.id) as preset_count,
+            (select jsonb_build_object('id',p.id,'name_en',p.name_en,'name_ko',p.name_ko,
+                                      'name_ja',p.name_ja,'image',p.image)
+             from weapon_preset_links l join items p on p.id=l.preset_item_id
+             where l.weapon_item_id=i.id and l.is_default_reference) as default_preset"""
         return ModdingService.page(session,source,{'word':word.strip()},projection,page,page_size,'weapons')
 
     @staticmethod

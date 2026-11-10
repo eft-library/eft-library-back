@@ -103,10 +103,19 @@ class WeaponProperties(BaseModel):
     is_semi_auto: bool | None
 
 
+class DefaultPresetSummary(BaseModel):
+    id: str
+    name_en: str | None
+    name_ko: str | None
+    name_ja: str | None
+    image: str | None
+
+
 class WeaponSummary(BaseModel):
     item: ItemSummary
     weapon_properties: WeaponProperties
     preset_count: int
+    default_preset: DefaultPresetSummary | None
 
 
 class Page(BaseModel):

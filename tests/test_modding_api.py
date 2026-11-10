@@ -107,6 +107,20 @@ class ModdingApiTest(unittest.TestCase):
         self.assertEqual(self.get_data('weapons',word="' OR 1=1 --")['total'],0)
         self.assertEqual(self.get_data('weapons',page=2)['weapons'],[])
 
+    def test_default_preset_summary_uses_reference_and_stays_lightweight(self):
+        # Fixture deliberately has properties.default=false but the weapon reference=true.
+        summary=self.get_data('weapons')['weapons'][0]['default_preset']
+        self.assertEqual(summary,{'id':'preset','name_en':'Preset','name_ko':'프리셋','name_ja':None,'image':None})
+        self.assertEqual(set(summary),{'id','name_en','name_ko','name_ja','image'})
+        with self.engine.begin() as conn:
+            conn.exec_driver_sql("update weapon_preset_links set is_default_reference=false,is_listed=true,sort_order=1 where weapon_item_id='gun' and preset_item_id='preset'")
+        try:
+            self.assertIsNone(self.get_data('weapons')['weapons'][0]['default_preset'])
+            self.assertEqual(self.get_data('weapons')['weapons'][0]['preset_count'],2)
+        finally:
+            with self.engine.begin() as conn:
+                conn.exec_driver_sql("update weapon_preset_links set is_default_reference=true,is_listed=false,sort_order=null where weapon_item_id='gun' and preset_item_id='preset'")
+
     def test_item_slots_preserve_duplicates_order_and_multi_level_loading(self):
         gun=self.get_data('items/gun')
         self.assertEqual(gun['weapon_properties']['ergonomics'],48)
