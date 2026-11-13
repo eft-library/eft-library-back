@@ -216,12 +216,15 @@ class BuildService:
         return public_result(session,build,actor)
 
     @staticmethod
-    def mine(session, actor, page, page_size):
-        params={'email':actor['email'],'limit':page_size,'offset':(page-1)*page_size}
-        total=session.execute(text('select count(*) from user_weapon_builds where owner_email=:email'),params).scalar_one()
-        rows=session.execute(text('''select id,title,weapon_item_id,version,is_public,published_revision,
-            created_at,updated_at from user_weapon_builds where owner_email=:email
-            order by updated_at desc,id limit :limit offset :offset'''),params).mappings()
+    def mine(session, actor, page, page_size, word='', weapon_item_id=None):
+        params={'email':actor['email'],'word':word.strip(),'weapon':weapon_item_id,
+                'limit':page_size,'offset':(page-1)*page_size}
+        source="""from user_weapon_builds where owner_email=:email
+            and (:word='' or strpos(lower(title),lower(:word))>0)
+            and (:weapon is null or weapon_item_id=:weapon)"""
+        total=session.execute(text('select count(*) '+source),params).scalar_one()
+        rows=session.execute(text('select id,title,weapon_item_id,version,is_public,published_revision, '
+            'created_at,updated_at '+source+' order by updated_at desc,id limit :limit offset :offset'),params).mappings()
         return {'total':total,'page':page,'page_size':page_size,'builds':[dict(r) for r in rows]}
 
     @staticmethod

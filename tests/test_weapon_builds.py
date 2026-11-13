@@ -68,6 +68,28 @@ class WeaponBuildTest(unittest.TestCase):
     def publish(self,build,user='alice'):
         return self.data(self.call('POST','/'+build['id']+'/publication',user=user,json={'expected_version':build['version']}))
 
+    def test_mine_search_filters_before_paging_and_never_leaks_other_owners(self):
+        first=self.create(title='M4 소음기')
+        self.publish(self.create(title='m4 기본형'))
+        self.create(title='AK 기본형')
+        self.create(user='bob',title='M4 타인 빌드')
+        self.assertEqual(self.data(self.call('GET','/mine',user='alice'))['total'],3)
+        result=self.data(self.call('GET','/mine',user='alice',params={'word':'  M4  ','page_size':1}))
+        self.assertEqual(result['total'],2)
+        self.assertEqual(len(result['builds']),1)
+        second=self.data(self.call('GET','/mine',user='alice',params={'word':'M4','page_size':1,'page':2}))
+        self.assertEqual(second['total'],2)
+        self.assertNotEqual(result['builds'][0]['id'],second['builds'][0]['id'])
+        found=self.data(self.call('GET','/mine',user='alice',params={'word':'소음기','weapon_item_id':'gun'}))
+        self.assertEqual([b['id'] for b in found['builds']],[first['id']])
+        for params in ({'word':"' OR 1=1 --"},{'word':'%'},{'word':'_'},{'word':'M4','weapon_item_id':'other'}):
+            self.assertEqual(self.data(self.call('GET','/mine',user='alice',params=params))['total'],0)
+        self.assertEqual(self.data(self.call('GET','/mine',user='alice',params={'word':'  '}))['total'],3)
+        self.assertEqual(self.data(self.call('GET','/mine',user='alice',params={'word':'M4','page':100}))['builds'],[])
+        self.data(self.call('GET','/mine',params={'word':'M4'}),401)
+        for params in ({'word':'a'*201},{'weapon_item_id':''}):
+            self.data(self.call('GET','/mine',user='alice',params=params),422)
+
     def test_private_visibility_owner_checks_and_registered_auth(self):
         build=self.create();path='/'+build['id']
         self.data(self.call('GET',path),404)

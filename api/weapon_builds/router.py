@@ -82,8 +82,10 @@ def discover_builds(session: SessionDependency, weapon_item_id: str|None=Query(N
 
 
 @router.get('/mine',response_model=BuildResponse[OwnBuildPage],responses=error_responses(authentication=True))
-def my_builds(session: SessionDependency,actor: RequiredActor,page: Page=1,page_size: Size=20):
-    return success(BuildService.mine(session,actor,page,page_size))
+def my_builds(session: SessionDependency,actor: RequiredActor,page: Page=1,page_size: Size=20,
+              word: str=Query('',max_length=200),
+              weapon_item_id: str|None=Query(None,min_length=1,max_length=200)):
+    return success(BuildService.mine(session,actor,page,page_size,word,weapon_item_id))
 
 
 @router.post('',response_model=BuildResponse[Workspace],responses=error_responses(
