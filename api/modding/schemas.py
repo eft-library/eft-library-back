@@ -128,7 +128,19 @@ class WeaponPage(Page):
     weapons: list[WeaponSummary]
 
 
+class BallisticsProperties(BaseModel):
+    properties_type: str
+    center_of_impact: float | None
+    deviation_curve: float | None
+    deviation_max: float | None
+    velocity_raw: float | None
+    initial_speed_mps: float | None
+    collected_at: datetime
+    update_time: datetime
+
+
 class ItemDetail(BaseModel):
+    ballistics: BallisticsProperties | None
     item: ItemSummary
     categories: list[CategoryEntry]
     weapon_properties: WeaponProperties | None

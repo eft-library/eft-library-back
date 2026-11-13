@@ -116,7 +116,8 @@ class ModdingService:
             select {ITEM_JSON} from weapon_allowed_ammo a join items i on i.id=a.ammo_item_id
             where a.item_id=:id order by i.name_en nulls last,i.id
         """),params)] if is_weapon else []
-        return {'item':item,'categories':[dict(row) for row in categories],
+        ballistics = session.execute(text("select to_jsonb(b)-'item_id' from item_ballistics b where item_id=:id"),params).scalar_one_or_none()
+        return {'ballistics':ballistics,'item':item,'categories':[dict(row) for row in categories],
                 'weapon_properties':weapon if is_weapon else None,'allowed_ammo':ammo,
                 'slots':list(slots.values()),
                 'conflicts':{'items':conflicting_items,'slots':conflicting_slots,'categories':conflicting_categories}}

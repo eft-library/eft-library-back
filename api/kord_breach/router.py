@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from util.auth import BearerToken
 
 from api.constants import Message
@@ -9,6 +9,11 @@ from api.kord_breach.req_models import (
     SaveKordBreachPreset,
 )
 from api.kord_breach.service import KordBreachService
+from api.kord_breach.rewards import RewardsResult, get_rewards
+from api.modding.router import SessionDependency, success
+from api.modding.schemas import ModdingResponse
+from api.modding.calculation_schemas import CalculationError
+
 from api.response import CustomResponse
 from api.user.util import UserUtil
 from util.constants import HTTPCode
@@ -83,3 +88,10 @@ def get_kord_breach_random():
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
+
+
+@router.get('/v3/rewards', response_model=ModdingResponse[RewardsResult], responses={
+    503: {'model': CalculationError, 'description': 'KORD_REWARDS_UNAVAILABLE / MODDING_LOOKUP_UNAVAILABLE'},
+})
+def get_kord_breach_rewards(session: SessionDependency, season_id: str = Query('kord-breach', min_length=1, max_length=200)):
+    return success(get_rewards(session, season_id))

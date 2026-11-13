@@ -36,6 +36,7 @@ class ModdingApiTest(unittest.TestCase):
         try:
             with raw.cursor() as cur:
                 cur.execute((Path(__file__).parents[1]/'sql/migrations/20261110_weapon_modding.sql').read_text())
+                cur.execute((Path(__file__).parents[1]/'sql/migrations/20261113_rewards_and_modding_stats.sql').read_text())
                 cur.execute("""
                     insert into items(id,name_en,name_ko,normalized_name,weight) values
                         ('gun','Rifle','소총','rifle',2.5),('ammo','Ammo','탄약','ammo',0.01),
@@ -240,6 +241,6 @@ class ModdingApiTest(unittest.TestCase):
 
     def test_openapi_has_typed_responses(self):
         schema=self.app.openapi()
-        self.assertEqual(len(schema['paths']),5)
+        self.assertEqual(len(schema['paths']),6)
         self.assertIn('SlotFilters',schema['components']['schemas'])
         self.assertIn('PresetComponent',schema['components']['schemas'])
