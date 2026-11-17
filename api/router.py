@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from api.map import map_router
 from api.news import news_router
 from api.quest import quest_router
 from api.boss import boss_router
@@ -34,7 +33,6 @@ api_router = APIRouter()
 api_router.include_router(home_router.router, prefix="/home")
 api_router.include_router(news_router.router, prefix="/news")
 api_router.include_router(search_router.router, prefix="/search")
-api_router.include_router(map_router.router, prefix="/map")
 api_router.include_router(map_of_tarkov_router.router, prefix="/map-of-tarkov")
 api_router.include_router(boss_router.router, prefix="/boss")
 api_router.include_router(quest_router.router, prefix="/quest")

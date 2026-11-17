@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, String, JSON, Integer, TIMESTAMP
+from sqlalchemy import Boolean, Column, String, Integer, TIMESTAMP
 
 from database import Database
 
@@ -17,7 +17,5 @@ class Map(Database.Base):
     mot_image_en = Column(String)
     mot_image_ko = Column(String)
     mot_image_ja = Column(String)
-    three_image = Column(String)
-    three_json = Column(JSON)
     sort_order = Column(Integer)
     update_time = Column(TIMESTAMP)

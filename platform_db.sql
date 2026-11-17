@@ -115,8 +115,6 @@ create table if not exists maps
     mot_image_en text,
     mot_image_ko text,
     mot_image_ja text,
-    three_image text,
-    three_json jsonb,
     sort_order integer,
     update_time timestamptz default now()
 );

@@ -1,0 +1,237 @@
+{
+  "captured_date": "2026-11-18",
+  "maps": [
+    {
+      "id": "55f2d3fd4bdc2d5f408b4567",
+      "normalized_name": "factory",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/factory/main/factory_first_floor.glb"
+    },
+    {
+      "id": "56f40101d2720b2a4d8b45d6",
+      "normalized_name": "customs",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/main/customs.glb"
+    },
+    {
+      "id": "5704e3c2d2720bac5b8b4567",
+      "normalized_name": "woods",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/woods/main/woods.glb"
+    },
+    {
+      "id": "5704e4dad2720bb55b8b4567",
+      "normalized_name": "lighthouse",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    },
+    {
+      "id": "5704e554d2720bac5b8b456e",
+      "normalized_name": "shoreline",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    },
+    {
+      "id": "5704e5fad2720bc05b8b4567",
+      "normalized_name": "reserve",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/reserve/main/reserve.glb"
+    },
+    {
+      "id": "5714dbc024597771384a510d",
+      "normalized_name": "interchange",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    },
+    {
+      "id": "5714dc692459777137212e12",
+      "normalized_name": "streets-of-tarkov",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/streets_of_tarkov/main/streets-of-tarkov.glb"
+    },
+    {
+      "id": "5b0fc42d86f7744a585f9105",
+      "normalized_name": "the-lab",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    },
+    {
+      "id": "653e6760052c01c1c805532f",
+      "normalized_name": "ground-zero",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/ground_zero/main/ground_zero.glb"
+    },
+    {
+      "id": "65cc8f81a9aac3e77d0cfd3e",
+      "normalized_name": "terminal",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    },
+    {
+      "id": "6733700029c367a3d40b02af",
+      "normalized_name": "the-labyrinth",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    },
+    {
+      "id": "69af492a4819ea4ba10a69c5",
+      "normalized_name": "icebreaker",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    },
+    {
+      "id": "CUSTOMS_GA_FIRST_FLOOR_DORMITORY",
+      "normalized_name": "customs-3-story-dorms-1f",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/ga/first_floor.glb"
+    },
+    {
+      "id": "CUSTOMS_GA_SECOND_FLOOR_DORMITORY",
+      "normalized_name": "customs-3-story-dorms-2f",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/ga/second_floor.glb"
+    },
+    {
+      "id": "CUSTOMS_GA_THIRD_FLOOR_DORMITORY",
+      "normalized_name": "customs-3-story-dorms-3f",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/ga/third_floor.glb"
+    },
+    {
+      "id": "CUSTOMS_INTELROOM_FIRST_FLOOR",
+      "normalized_name": "customs-intelroom-1f",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/intelroom/intelroom_first_floor.glb"
+    },
+    {
+      "id": "CUSTOMS_INTELROOM_SECOND_FLOOR",
+      "normalized_name": "customs-intelroom-2f",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/intelroom/intelroom_second_floor.glb"
+    },
+    {
+      "id": "CUSTOMS_NA_FIRST_FLOOR_DORMITORY",
+      "normalized_name": "customs-2-story-dorms-1f",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/na/first_floor.glb"
+    },
+    {
+      "id": "CUSTOMS_NA_SECOND_FLOOR_DORMITORY",
+      "normalized_name": "customs-2-story-dorms-2f",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/na/second_floor.glb"
+    },
+    {
+      "id": "FACTORY_SECOND_FLOOR",
+      "normalized_name": "factory-2f",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/factory/main/factory_second_floor.glb"
+    },
+    {
+      "id": "FACTORY_THIRD_FLOOR",
+      "normalized_name": "factory-3f",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/factory/main/factory_third_floor.glb"
+    },
+    {
+      "id": "FACTORY_UNDERGROUND",
+      "normalized_name": "factory-underground",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/factory/main/factory_underground.glb"
+    },
+    {
+      "id": "GROUND_ZERO_UNDERGROUND",
+      "normalized_name": "ground-zero-underground",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/ground_zero/underground/underground.glb"
+    },
+    {
+      "id": "RESERVE_UNDERGROUND",
+      "normalized_name": "reserve-underground",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    },
+    {
+      "id": "SHORELINE_RESORT",
+      "normalized_name": "shoreline-resort",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    },
+    {
+      "id": "THE_LAB_SECOND_FLOOR",
+      "normalized_name": "the-lab-2f",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    },
+    {
+      "id": "THE_LAB_UNDERGROUND",
+      "normalized_name": "the-lab-underground",
+      "three_image": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    }
+  ],
+  "objects": [
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/customs/ga/first_floor.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/ga/first_floor.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/customs/ga/second_floor.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/ga/second_floor.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/customs/ga/third_floor.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/ga/third_floor.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/customs/intelroom/intelroom_first_floor.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/intelroom/intelroom_first_floor.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/customs/intelroom/intelroom_second_floor.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/intelroom/intelroom_second_floor.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/customs/main/customs.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/main/customs.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/customs/na/first_floor.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/na/first_floor.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/customs/na/second_floor.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/customs/na/second_floor.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/factory/main/factory_first_floor.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/factory/main/factory_first_floor.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/factory/main/factory_second_floor.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/factory/main/factory_second_floor.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/factory/main/factory_third_floor.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/factory/main/factory_third_floor.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/factory/main/factory_underground.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/factory/main/factory_underground.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/ground_zero/main/ground_zero.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/ground_zero/main/ground_zero.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/ground_zero/underground/underground.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/ground_zero/underground/underground.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/prepare.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/prepare.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/reserve/main/reserve.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/reserve/main/reserve.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/streets_of_tarkov/main/streets-of-tarkov.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/streets_of_tarkov/main/streets-of-tarkov.glb"
+    },
+    {
+      "bucket": "eftlibrary",
+      "key": "tkl_map/woods/main/woods.glb",
+      "url": "https://image.eftlibrary.com/eftlibrary/tkl_map/woods/main/woods.glb"
+    }
+  ]
+}
