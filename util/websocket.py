@@ -31,7 +31,7 @@ async def safe_send_text(websocket: WebSocket, data: str):
     except WebSocketDisconnect:
         return False
     except RuntimeError as e:
-        logger.info(f"[SEND_SKIP] WebSocket already closed: {e}")
+        logger.warning("[SEND_SKIP] WebSocket send failed: %s", e, exc_info=True)
         return False
 
 
@@ -79,7 +79,7 @@ async def websocket_handler(websocket: WebSocket, user_email: str):
     except WebSocketDisconnect:
         pass
     except RuntimeError as e:
-        logger.info(f"[CLOSE] WebSocket receive 종료: {user_email}, {e}")
+        logger.warning("[CLOSE] WebSocket receive 종료: %s, %s", user_email, e, exc_info=True)
     finally:
         logger.info(f"[CLOSE] WebSocket 연결 종료: {user_email}")
         await cleanup_user(user_email)

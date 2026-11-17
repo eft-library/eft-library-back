@@ -182,7 +182,7 @@ async def websocket_handler(websocket, user_email):
                             or replay.get('type') not in LOCATION_TYPES | {'wpf_raid_state'}):
                         raise ValueError('Invalid cached location')
                 except (ValueError, TypeError):
-                    logger.warning('invalid_cached_location connection_id=%s', connection_id)
+                    logger.warning('invalid_cached_location connection_id=%s', connection_id, exc_info=True)
                 else:
                     cached_events.append(replay)
             for replay in sorted(cached_events, key=lambda build_event: build_event.get('received_at_unix_us', 0)):
@@ -212,7 +212,7 @@ async def websocket_handler(websocket, user_email):
                             try:
                                 notifications.append(json.loads(raw))
                             except (ValueError, TypeError):
-                                logger.warning('invalid_pending_notification connection_id=%s', connection_id)
+                                logger.warning('invalid_pending_notification connection_id=%s', connection_id, exc_info=True)
                         await send({'type': 'init', 'notifications': notifications[::-1]})
                         initialized = True
                     await restore()
@@ -232,12 +232,12 @@ async def websocket_handler(websocket, user_email):
                             if not isinstance(build_event, dict):
                                 raise ValueError('Expected object')
                         except (ValueError, TypeError):
-                            logger.warning('invalid_pubsub_event connection_id=%s', connection_id)
+                            logger.warning('invalid_pubsub_event connection_id=%s', connection_id, exc_info=True)
                             continue
                         await forward(build_event)
             except RedisError as exc:
                 logger.warning('location_subscription_retry connection_id=%s error=%s pid=%s',
-                                  connection_id, type(exc).__name__, os.getpid())
+                                  connection_id, type(exc).__name__, os.getpid(), exc_info=True)
                 await send({'type': 'location_connection_status', 'status': 'reconnecting',
                                'connection_id': connection_id})
                 await asyncio.sleep(delay)
@@ -253,9 +253,12 @@ async def websocket_handler(websocket, user_email):
         done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
         for task in done:
             task.result()
-    except (WebSocketDisconnect, RuntimeError, TimeoutError, OSError) as exc:
+    except WebSocketDisconnect as exc:
         logger.info('location_closed connection_id=%s reason=%s pid=%s',
-                       connection_id, type(exc).__name__, os.getpid())
+                    connection_id, type(exc).__name__, os.getpid())
+    except (RuntimeError, TimeoutError, OSError) as exc:
+        logger.warning('location_closed connection_id=%s reason=%s pid=%s',
+                       connection_id, type(exc).__name__, os.getpid(), exc_info=True)
     finally:
         with CancelScope(shield=True):
             for task in tasks:

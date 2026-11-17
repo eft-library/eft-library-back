@@ -36,7 +36,10 @@ async def authenticate_location_socket(websocket, token):
         return await run_in_threadpool(verify_location_token, token)
     except HTTPException as error:
         expired = error.status_code == 401
-        logger.info('location_auth_failed status=%s', error.status_code)
+        if expired:
+            logger.info('location_auth_failed status=%s', error.status_code)
+        else:
+            logger.warning('location_auth_failed status=%s', error.status_code, exc_info=True)
         # Accept the transport before closing so browsers receive a close code,
         # rather than an opaque HTTP handshake failure / 1006.
         with suppress(WebSocketDisconnect, RuntimeError, TimeoutError, OSError):

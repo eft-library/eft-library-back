@@ -232,7 +232,7 @@ async def chat_socket(websocket):
                                 (exc.headers or {}).get('Retry-After'))
             await websocket.close(code=codes.get(exc.status_code, 1008))
     except (RedisError, SQLAlchemyError, TimeoutError) as exc:
-        logging.getLogger('api.live_map.chat').warning('Chat socket unavailable (%s)', type(exc).__name__)
+        logging.getLogger('api.live_map.chat').warning('Chat socket unavailable (%s)', type(exc).__name__, exc_info=True)
         with suppress(WebSocketDisconnect, RuntimeError, TimeoutError):
             await chat_error(websocket, 503, 'CHAT_UNAVAILABLE')
             await websocket.close(code=1013)
@@ -248,4 +248,4 @@ async def chat_socket(websocket):
                 try:
                     await transaction(None, lambda s, u: s.disconnect_session(connection_id))
                 except (SQLAlchemyError, HTTPException):
-                    logging.getLogger('api.live_map.chat').warning('Chat connection close deferred to expiry')
+                    logging.getLogger('api.live_map.chat').warning('Chat connection close deferred to expiry', exc_info=True)

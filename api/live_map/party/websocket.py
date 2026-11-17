@@ -145,7 +145,10 @@ async def party_socket_handler(websocket: WebSocket, room_id: UUID):
             await socket_error(websocket, exc.status_code, exc.detail, (exc.headers or {}).get("Retry-After"))
             await websocket.close(code=codes.get(exc.status_code, 1008))
     except (RedisError, SQLAlchemyError, TimeoutError) as exc:
-        logger.warning("Party socket interrupted (%s)", type(exc).__name__)
+        logger.warning(
+            "Party socket interrupted (%s), room_id=%s",
+            type(exc).__name__, room_id, exc_info=True,
+        )
         with suppress(WebSocketDisconnect, RuntimeError, TimeoutError):
             await socket_error(websocket, 503, "PARTY_REALTIME_UNAVAILABLE")
             await websocket.close(code=1013)
@@ -155,4 +158,7 @@ async def party_socket_handler(websocket: WebSocket, room_id: UUID):
                 await run_in_threadpool(service.disconnect, connection)
             except (RedisError, SQLAlchemyError, HTTPException) as exc:
                 # Crash/disconnect recovery also uses expiring leases and the cleanup loop.
-                logger.warning("Party disconnect deferred to lease expiry (%s)", type(exc).__name__)
+                logger.warning(
+                    "Party disconnect deferred to lease expiry (%s), room_id=%s",
+                    type(exc).__name__, room_id, exc_info=True,
+                )
