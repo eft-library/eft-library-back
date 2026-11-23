@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import date, datetime, timedelta, timezone
 
@@ -8,6 +9,8 @@ from sqlalchemy.dialects.postgresql import insert
 from api.user.user_req_models import AddUserReq
 from api.user.user_res_models import User
 from api.user.util import PlatformUserUtil
+
+logger = logging.getLogger("api.user")
 
 
 class UserFunction:
@@ -91,6 +94,7 @@ class UserFunction:
                 ),
             },
         )
+        logger.info("User info upsert: email=%r", addUserReq.email)
         session.execute(stmt)
         session.commit()
 
