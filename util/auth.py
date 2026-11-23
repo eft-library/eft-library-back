@@ -1,4 +1,6 @@
 """Bearer extraction and Google token validation for HTTP endpoints."""
+import hashlib
+import logging
 import os
 
 import requests
@@ -6,6 +8,8 @@ from fastapi import Request
 from fastapi.security import OAuth2PasswordBearer
 
 from util.http_exceptions import HttpError
+
+logger = logging.getLogger("api.auth.google")
 
 
 class BearerToken(OAuth2PasswordBearer):
@@ -43,6 +47,21 @@ def verify_google_access_token(access_token: str | None) -> str:
     if not isinstance(data, dict):
         raise HttpError.AUTH_SERVICE_UNAVAILABLE.exception()
     email = data.get("email")
+    if os.getenv("GOOGLE_TOKEN_DIAGNOSTICS") == "1":
+        subject = data.get("sub") or data.get("user_id")
+        subject_hash = (
+            hashlib.sha256(subject.encode()).hexdigest()[:16]
+            if isinstance(subject, str) else None
+        )
+        logger.info(
+            "Google token info: email=%r subject_hash=%s email_fields=%s "
+            "verified_email=%r email_verified=%r",
+            email if isinstance(email, str) else None,
+            subject_hash,
+            sorted(key for key in data if "email" in key.lower()),
+            data.get("verified_email") in (True, "true") if "verified_email" in data else None,
+            data.get("email_verified") in (True, "true") if "email_verified" in data else None,
+        )
     if not isinstance(email, str) or not email.strip():
         raise HttpError.AUTH_SERVICE_UNAVAILABLE.exception()
     if data.get("verified_email", data.get("email_verified", True)) in (False, "false"):
