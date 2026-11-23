@@ -3,12 +3,13 @@ import re
 from datetime import date, datetime, timedelta, timezone
 
 import pytz
-from sqlalchemy import case, func, or_, text, update
+from sqlalchemy import case, func, or_, select, text, update
 from sqlalchemy.dialects.postgresql import insert
 
 from api.user.user_req_models import AddUserReq
 from api.user.user_res_models import User
 from api.user.util import PlatformUserUtil
+from util.http_exceptions import HttpError
 
 logger = logging.getLogger("api.user")
 
@@ -57,7 +58,13 @@ class UserFunction:
         session.commit()
 
     @staticmethod
-    def _upsert_user_info(session, addUserReq: AddUserReq):
+    def _upsert_user_info(session, addUserReq: AddUserReq, email: str, google_sub: str):
+        session.execute(
+            text("SELECT pg_advisory_xact_lock(hashtextextended(:google_sub, 0))"),
+            {"google_sub": google_sub},
+        )
+        linked_email = session.scalar(select(User.email).where(User.google_sub == google_sub))
+        account_email = linked_email if linked_email is not None else email
         tz = pytz.timezone("Asia/Seoul")
         now = datetime.now(tz)
         start_of_today, end_of_today = UserFunction._get_start_and_end_of_day(
@@ -65,7 +72,8 @@ class UserFunction:
         )
 
         stmt = insert(User).values(
-            email=addUserReq.email,
+            email=account_email,
+            google_sub=google_sub,
             name=addUserReq.name,
             is_admin=False,
             attendance_count=1,
@@ -79,7 +87,9 @@ class UserFunction:
         )
         stmt = stmt.on_conflict_do_update(
             index_elements=[User.email],
+            where=or_(User.google_sub.is_(None), User.google_sub == google_sub),
             set_={
+                "google_sub": stmt.excluded.google_sub,
                 "name": stmt.excluded.name,
                 "attendance_count": case(
                     (
@@ -94,8 +104,9 @@ class UserFunction:
                 ),
             },
         )
-        logger.info("User info upsert: email=%r", addUserReq.email)
-        session.execute(stmt)
+        logger.info("User info upsert: email=%r", account_email)
+        if session.execute(stmt.returning(User.email)).scalar_one_or_none() is None:
+            raise HttpError.INVALID_TOKEN.exception(headers={"WWW-Authenticate": "Bearer"})
         session.commit()
 
     @staticmethod

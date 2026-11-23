@@ -2,11 +2,15 @@
 import hashlib
 import logging
 import os
+from typing import NamedTuple
 
 import requests
 from fastapi import Request
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
+from database import Database
 from util.http_exceptions import HttpError
 
 logger = logging.getLogger("api.auth.google")
@@ -29,7 +33,13 @@ class BearerToken(OAuth2PasswordBearer):
         return token
 
 
-def verify_google_access_token(access_token: str | None) -> str:
+class GoogleIdentity(NamedTuple):
+    email: str
+    subject: str | None
+    email_verified: bool
+
+
+def verify_google_identity(access_token: str | None) -> GoogleIdentity:
     if not isinstance(access_token, str) or not access_token.strip():
         raise HttpError.LOGIN_REQUIRED.exception(headers={"WWW-Authenticate": "Bearer"})
     url = os.getenv("GOOGLE_TOKEN_INFO_URL")
@@ -63,6 +73,37 @@ def verify_google_access_token(access_token: str | None) -> str:
     )
     if not isinstance(email, str) or not email.strip():
         raise HttpError.AUTH_SERVICE_UNAVAILABLE.exception()
-    if data.get("verified_email", data.get("email_verified", True)) in (False, "false"):
+    verified = data.get("verified_email", data.get("email_verified"))
+    if verified in (False, "false"):
         raise HttpError.INVALID_TOKEN.exception(headers={"WWW-Authenticate": "Bearer"})
-    return email
+    return GoogleIdentity(
+        email,
+        subject if isinstance(subject, str) and subject.strip() else None,
+        verified in (True, "true"),
+    )
+
+
+def resolve_google_account_email(email: str, subject: str | None) -> str:
+    if not isinstance(subject, str) or not subject.strip():
+        return email
+    try:
+        with Database.SessionLocal() as session:
+            account = session.execute(text("""
+                SELECT email, google_sub
+                FROM user_info
+                WHERE google_sub = :subject OR email = :email
+                ORDER BY CASE WHEN google_sub = :subject THEN 0 ELSE 1 END
+                LIMIT 1
+                """), {"subject": subject, "email": email}).one_or_none()
+    except SQLAlchemyError:
+        raise HttpError.AUTH_SERVICE_UNAVAILABLE.exception() from None
+    if account is None:
+        return email
+    if account.google_sub is not None and account.google_sub != subject:
+        raise HttpError.INVALID_TOKEN.exception(headers={"WWW-Authenticate": "Bearer"})
+    return account.email
+
+
+def verify_google_access_token(access_token: str | None) -> str:
+    identity = verify_google_identity(access_token)
+    return resolve_google_account_email(identity.email, identity.subject)

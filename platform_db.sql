@@ -437,6 +437,7 @@ create index if not exists idx_hideout_bonus_level on hideout_bonus(hideout_leve
 create table if not exists user_info
 (
   email text primary key,
+  google_sub text,
   name text,
   nickname text,
   is_admin boolean,
@@ -445,6 +446,8 @@ create table if not exists user_info
   last_update_nickname timestamptz default now(),
   create_time timestamptz default now()
 );
+
+create unique index if not exists idx_user_info_google_sub on user_info(google_sub);
 
 create table if not exists information
 (

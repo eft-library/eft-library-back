@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from util.auth import BearerToken
+from util.auth import BearerToken, verify_google_identity
 
 from api.constants import Message
 from api.response import CustomResponse
@@ -21,8 +21,11 @@ oauth2_scheme = BearerToken(tokenUrl="token")
 
 
 @router.post("/v3/add", include_in_schema=False)
-def add_user(addUserReq: AddUserReq):
-    result = UserService.add_new_user(addUserReq)
+def add_user(addUserReq: AddUserReq, token: str = Depends(oauth2_scheme)):
+    identity = verify_google_identity(token)
+    if not identity.subject or not identity.email_verified:
+        raise HttpError.INVALID_TOKEN.exception(headers={"WWW-Authenticate": "Bearer"})
+    result = UserService.add_new_user(addUserReq, identity.email, identity.subject)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

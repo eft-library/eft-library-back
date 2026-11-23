@@ -2,6 +2,8 @@ from datetime import datetime, timedelta, timezone
 import json
 import logging
 
+from fastapi import HTTPException
+
 from database import Database
 
 from api.user.user_function import UserFunction
@@ -15,15 +17,16 @@ logger = logging.getLogger("api.user")
 
 class UserService:
     @staticmethod
-    def add_new_user(addUserReq: AddUserReq):
+    def add_new_user(addUserReq: AddUserReq, email: str, google_sub: str):
         try:
             with Database.SessionLocal() as s:
-                UserFunction._upsert_user_info(s, addUserReq)
+                UserFunction._upsert_user_info(s, addUserReq, email, google_sub)
                 return True
+        except HTTPException:
+            raise
         except Exception as e:
             logger.error(
-                f"add_new_user_v3: {addUserReq.model_dump()}, error: {e}",
-                exc_info=True,
+                "add_new_user_v3: account storage failed (%s)", type(e).__name__,
             )
             return None
 

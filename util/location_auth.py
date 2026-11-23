@@ -8,6 +8,7 @@ import requests
 from fastapi import HTTPException, WebSocketDisconnect
 from starlette.concurrency import run_in_threadpool
 
+from util.auth import resolve_google_account_email
 from util.http_exceptions import HttpError
 
 logger = logging.getLogger('ws.location.auth.v3')
@@ -26,7 +27,7 @@ def verify_location_token(token):
         data = api_response.json()
         if not isinstance(data, dict) or not isinstance(data.get('email'), str) or not data['email']:
             raise HttpError.AUTH_SERVICE_UNAVAILABLE.exception()
-        return data['email']
+        return resolve_google_account_email(data['email'], data.get('sub') or data.get('user_id'))
     except (requests.RequestException, ValueError):
         raise HttpError.AUTH_SERVICE_UNAVAILABLE.exception() from None
 

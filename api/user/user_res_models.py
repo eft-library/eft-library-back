@@ -7,6 +7,7 @@ class User(Database.Base):
     __tablename__ = "user_info"
 
     email = Column(TEXT, primary_key=True)
+    google_sub = Column(TEXT)
     name = Column(TEXT)
     nickname = Column(TEXT)
     is_admin = Column(BOOLEAN)

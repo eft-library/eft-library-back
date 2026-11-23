@@ -10,6 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from redis import Redis
 from redis.exceptions import RedisError
 
+from util.auth import resolve_google_account_email
 from util.http_exceptions import HttpError
 
 
@@ -39,7 +40,7 @@ def authenticate_party_user(
     verified = payload.get("verified_email", payload.get("email_verified", True))
     if not isinstance(email, str) or not email.strip() or verified in (False, "false"):
         raise HttpError.INVALID_TOKEN.exception(headers={"WWW-Authenticate": "Bearer"})
-    return email
+    return resolve_google_account_email(email, payload.get("sub") or payload.get("user_id"))
 
 
 class PartyPassword:
