@@ -53,7 +53,9 @@ class ModdingService:
 
     @staticmethod
     def weapons(session, word, page, page_size):
-        source = f'from items i where {WEAPON_CONDITION} and {SEARCH_CONDITION}'
+        source = f"""from items i
+            where {WEAPON_CONDITION} and {SEARCH_CONDITION}
+              and exists (select 1 from item_slots s where s.item_id=i.id)"""
         projection = f"""{ITEM_JSON} as item,
             (select to_jsonb(w)-'item_id' from weapon_items w where w.item_id=i.id) as weapon_properties,
             (select count(*) from weapon_preset_links l where l.weapon_item_id=i.id) as preset_count,

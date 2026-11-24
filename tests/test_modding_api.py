@@ -40,16 +40,17 @@ class ModdingApiTest(unittest.TestCase):
                 cur.execute("""
                     insert into items(id,name_en,name_ko,normalized_name,weight) values
                         ('gun','Rifle','소총','rifle',2.5),('ammo','Ammo','탄약','ammo',0.01),
+                        ('launcher','Flare launcher','신호탄 발사기','flare-launcher',1.0),
                         ('receiver','Upper receiver','리시버','receiver',0.27),('sight','Sight','가늠자','sight',0.01),
                         ('scope','Scope','조준경','scope',0.4),('blocked','Blocked','제외','blocked',0.1),
                         ('blocked-cat','Blocked category','분류 제외','blocked-cat',0.1),
                         ('other','Other','기타','other',0.1),('preset','Preset','프리셋','preset',3.2),
                         ('other-preset','Other preset','다른 프리셋','other-preset',3.1);
-                    insert into weapon_items(item_id,ergonomics) values ('gun',48),('ammo',99);
+                    insert into weapon_items(item_id,ergonomics) values ('gun',48),('ammo',99),('launcher',0);
                     insert into weapon_allowed_ammo values ('gun','ammo');
                     insert into item_categories(id,normalized_name) values ('weapons','weapon'),('optics','optics'),('excluded','excluded');
                     insert into item_category_memberships values
-                        ('gun','weapons',0),('scope','optics',0),('blocked-cat','optics',0),('blocked-cat','excluded',1);
+                        ('gun','weapons',0),('launcher','weapons',0),('scope','optics',0),('blocked-cat','optics',0),('blocked-cat','excluded',1);
                     insert into item_slots(item_id,slot_id,name_id,required,sort_order) values
                         ('gun','receiver-slot','mod_reciever',true,0),
                         ('receiver','rear-slot','mod_sight_rear',false,0),
@@ -98,14 +99,15 @@ class ModdingApiTest(unittest.TestCase):
         self.assertEqual(response.json()['msg'],'OK')
         return response.json()['data']
 
-    def test_weapon_list_excludes_ammo_and_supports_search_and_empty_pages(self):
-        data=self.get_data('weapons')
+    def test_weapon_list_excludes_ammo_and_slotless_weapons(self):
+        data=self.get_data('weapons',page_size=1)
         self.assertEqual(data['total'],1)
         self.assertEqual(data['weapons'][0]['item']['id'],'gun')
         self.assertEqual(data['weapons'][0]['preset_count'],2)
         for word in ('소총','RIFLE','gun'):
             self.assertEqual(self.get_data('weapons',word=word)['total'],1)
         self.assertEqual(self.get_data('weapons',word="' OR 1=1 --")['total'],0)
+        self.assertEqual(self.get_data('weapons',word='launcher')['total'],0)
         self.assertEqual(self.get_data('weapons',page=2)['weapons'],[])
 
     def test_default_preset_summary_uses_reference_and_stays_lightweight(self):
