@@ -52,11 +52,12 @@ def get_posts(
     category: str,
     page_num: int,
     token: Optional[str] = Depends(oauth2_scheme),
+    preview: bool = False,
 ):
     user_email: Optional[str] = None
     if token:
         user_email = UserUtil.verify_google_token(access_token=token)
-    result = CommunityService.get_posts(category, page_num, user_email)
+    result = CommunityService.get_posts(category, page_num, user_email, preview=preview)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -68,11 +69,12 @@ def get_search_posts(
     word: str,
     search_type: str,
     token: Optional[str] = Depends(oauth2_scheme),
+    preview: bool = False,
 ):
     user_email: Optional[str] = None
     if token:
         user_email = UserUtil.verify_google_token(access_token=token)
-    result = CommunityService.get_search(search_type, word, page_num, user_email)
+    result = CommunityService.get_search(search_type, word, page_num, user_email, preview=preview)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)
@@ -81,7 +83,10 @@ def get_search_posts(
 @router.post("/v3/detail")
 def get_posts_detail(request_info: GetPostDetail):
     result = CommunityService.get_detail_post(
-        request_info.url, request_info.user_email, request_info.page_category
+        request_info.url,
+        request_info.user_email,
+        request_info.page_category,
+        compact=request_info.compact,
     )
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
@@ -89,11 +94,13 @@ def get_posts_detail(request_info: GetPostDetail):
 
 
 @router.get("/v3/side-post")
-def get_side_post(token: Optional[str] = Depends(oauth2_scheme)):
+def get_side_post(
+    token: Optional[str] = Depends(oauth2_scheme), preview: bool = False
+):
     user_email: Optional[str] = None
     if token:
         user_email = UserUtil.verify_google_token(access_token=token)
-    result = CommunityService.get_side_info(user_email)
+    result = CommunityService.get_side_info(user_email, preview=preview)
     if result is None:
         return CustomResponse.response(None, HTTPCode.OK, Message.FAIL)
     return CustomResponse.response(result, HTTPCode.OK, Message.SUCCESS)

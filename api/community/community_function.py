@@ -9,9 +9,16 @@ from api.news.models import Information
 class CommunityFunction:
     @staticmethod
     def extract_thumbnail_img(html):
-        match = re.search(r'<img[^>]+src="([^"]+)"', html)
-        if match:
-            return match.group(1)
+        for match in re.finditer(
+            r"""<img\b[^>]*?\ssrc\s*=\s*(["'])(.*?)\1""",
+            html or "",
+            re.IGNORECASE | re.DOTALL,
+        ):
+            source = match.group(2)
+            if len(source.encode("utf-8")) <= 2048 and re.fullmatch(
+                r"https?://[^/\s?#]+[^\s]*", source, re.IGNORECASE
+            ):
+                return source
         return None
 
     @staticmethod
@@ -103,14 +110,17 @@ class CommunityFunction:
         return int(id_str)
 
     @staticmethod
-    def get_search_sql(search_type: str):
+    def get_search_sql(search_type: str, *, preview: bool = False):
+        contents = CommunityUtil.post_preview_sql("cp.contents") if preview else "cp.contents"
+        thumbnail = CommunityUtil.thumbnail_url_sql() if preview else "cp.thumbnail"
+        comment_contents = CommunityUtil.post_preview_sql("c.contents") if preview else "c.contents"
         queries = {
-            "title": """
+            "title": f"""
                 SELECT cp.id::text AS id, cp.slug, cp.user_email, cp.category, ui.nickname,
-                       cp.title, cp.contents, cpv.view_count,
+                       cp.title, {contents} AS contents, cpv.view_count,
                        COALESCE(cc.comment_count, 0) AS comment_count,
                        COALESCE(r.reaction_score, 0) AS reaction_score,
-                       cp.thumbnail, cp.delete_by_user, cp.delete_by_admin, cp.create_time, cp.update_time
+                       {thumbnail} AS thumbnail, cp.delete_by_user, cp.delete_by_admin, cp.create_time, cp.update_time
                 FROM community_posts cp
                 LEFT JOIN user_info ui ON cp.user_email = ui.email
                 LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
@@ -130,12 +140,12 @@ class CommunityFunction:
                 ORDER BY cp.create_time DESC
                 LIMIT :limit OFFSET :offset
             """,
-            "titleContent": """
+            "titleContent": f"""
                 SELECT cp.id::text AS id, cp.slug, cp.user_email, cp.category, ui.nickname,
-                       cp.title, cp.contents, cpv.view_count,
+                       cp.title, {contents} AS contents, cpv.view_count,
                        COALESCE(cc.comment_count, 0) AS comment_count,
                        COALESCE(r.reaction_score, 0) AS reaction_score,
-                       cp.thumbnail, cp.delete_by_user, cp.delete_by_admin, cp.create_time, cp.update_time
+                       {thumbnail} AS thumbnail, cp.delete_by_user, cp.delete_by_admin, cp.create_time, cp.update_time
                 FROM community_posts cp
                 LEFT JOIN user_info ui ON cp.user_email = ui.email
                 LEFT JOIN community_posts_views cpv ON cp.id = cpv.post_id
@@ -155,7 +165,7 @@ class CommunityFunction:
                 ORDER BY cp.create_time DESC
                 LIMIT :limit OFFSET :offset
             """,
-            "comment": """
+            "comment": f"""
                 WITH comment_count AS (
                     SELECT post_id, COUNT(*) AS comment_count FROM community_comments GROUP BY post_id
                 ),
@@ -165,12 +175,12 @@ class CommunityFunction:
                     FROM community_posts_reactions GROUP BY post_id
                 )
                 SELECT cp.id::text AS id, cp.slug, cp.user_email, cp.category, ui.nickname,
-                       cp.title, cp.contents, cpv.view_count,
+                       cp.title, {contents} AS contents, cpv.view_count,
                        COALESCE(cc.comment_count, 0) AS comment_count,
                        COALESCE(r.reaction_score, 0) AS reaction_score,
-                       cp.thumbnail, cp.delete_by_user, cp.delete_by_admin, cp.create_time, cp.update_time,
+                       {thumbnail} AS thumbnail, cp.delete_by_user, cp.delete_by_admin, cp.create_time, cp.update_time,
                        json_build_object(
-                           'id', c.id, 'contents', c.contents, 'user_email', c.user_email,
+                           'id', c.id, 'contents', {comment_contents}, 'user_email', c.user_email,
                            'create_time', c.create_time, 'nickname', cui.nickname, 'update_time', c.update_time
                        ) AS comment
                 FROM community_posts cp
@@ -199,7 +209,7 @@ class CommunityFunction:
             """,
         }
         if search_type == "author":
-            return """
+            return f"""
                 WITH comment_count AS (
                     SELECT post_id, COUNT(*) AS comment_count FROM community_comments GROUP BY post_id
                 ),
@@ -209,11 +219,11 @@ class CommunityFunction:
                     FROM community_posts_reactions GROUP BY post_id
                 )
                 SELECT cp.id::text AS id, cp.slug, cp.user_email, cp.category, ui.nickname,
-                       cp.title, cp.contents, cpv.view_count, COALESCE(cc.comment_count, 0) AS comment_count,
-                       COALESCE(r.reaction_score, 0) AS reaction_score, cp.thumbnail,
+                       cp.title, {contents} AS contents, cpv.view_count, COALESCE(cc.comment_count, 0) AS comment_count,
+                       COALESCE(r.reaction_score, 0) AS reaction_score, {thumbnail} AS thumbnail,
                        cp.delete_by_user, cp.delete_by_admin, cp.create_time, cp.update_time,
                        json_build_object(
-                           'id', c.id, 'contents', c.contents, 'user_email', c.user_email,
+                           'id', c.id, 'contents', {comment_contents}, 'user_email', c.user_email,
                            'create_time', c.create_time, 'nickname', cui.nickname, 'update_time', c.update_time
                        ) AS comment
                 FROM community_posts cp
@@ -236,7 +246,7 @@ class CommunityFunction:
                 LIMIT :limit OFFSET :offset
             """
         if search_type == "all":
-            return """
+            return f"""
                 WITH comment_count AS (
                     SELECT post_id, COUNT(*) AS comment_count FROM community_comments GROUP BY post_id
                 ),
@@ -247,9 +257,9 @@ class CommunityFunction:
                 )
                 SELECT *
                 FROM (
-                    SELECT cp.id::text AS id, cp.slug, cp.user_email, ui.nickname, cp.category, cp.title, cp.contents,
+                    SELECT cp.id::text AS id, cp.slug, cp.user_email, ui.nickname, cp.category, cp.title, {contents} AS contents,
                            cpv.view_count, COALESCE(cc.comment_count, 0) AS comment_count,
-                           COALESCE(r.reaction_score, 0) AS reaction_score, cp.thumbnail, NULL::json AS comment,
+                           COALESCE(r.reaction_score, 0) AS reaction_score, {thumbnail} AS thumbnail, NULL::json AS comment,
                            cp.create_time
                     FROM community_posts cp
                     LEFT JOIN user_info ui ON cp.user_email = ui.email
@@ -262,10 +272,10 @@ class CommunityFunction:
 
                     UNION ALL
 
-                    SELECT cp.id::text AS id, cp.slug, cp.user_email, ui.nickname, cp.category, cp.title, cp.contents,
+                    SELECT cp.id::text AS id, cp.slug, cp.user_email, ui.nickname, cp.category, cp.title, {contents} AS contents,
                            cpv.view_count, COALESCE(cc.comment_count, 0) AS comment_count,
-                           COALESCE(r.reaction_score, 0) AS reaction_score, cp.thumbnail,
-                           json_build_object('id', c.id, 'contents', c.contents, 'user_email', c.user_email, 'nickname', cui.nickname, 'create_time', c.create_time, 'update_time', c.update_time) AS comment,
+                           COALESCE(r.reaction_score, 0) AS reaction_score, {thumbnail} AS thumbnail,
+                           json_build_object('id', c.id, 'contents', {comment_contents}, 'user_email', c.user_email, 'nickname', cui.nickname, 'create_time', c.create_time, 'update_time', c.update_time) AS comment,
                            cp.create_time
                     FROM community_posts cp
                     LEFT JOIN user_info ui ON cp.user_email = ui.email

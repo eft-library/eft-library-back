@@ -112,18 +112,20 @@ class CommunityService:
             return None
 
     @staticmethod
-    def get_posts(category: str, page_num: int, user_email: Optional[str] = None):
+    def get_posts(
+        category: str, page_num: int, user_email: Optional[str] = None, *, preview: bool = False
+    ):
         try:
             limit, offset = 20, (page_num - 1) * 20
             with Database.SessionLocal() as s:
                 if category == "issue":
-                    posts_sql = text(CommunityUtil.get_posts_with_issue())
+                    posts_sql = text(CommunityUtil.get_posts_with_issue(preview=preview))
                     count_sql = text(CommunityUtil.get_post_issue_count())
                 elif category == "all":
-                    posts_sql = text(CommunityUtil.get_posts_with_all())
+                    posts_sql = text(CommunityUtil.get_posts_with_all(preview=preview))
                     count_sql = text(CommunityUtil.get_post_all_count())
                 else:
-                    posts_sql = text(CommunityUtil.get_posts_with_category())
+                    posts_sql = text(CommunityUtil.get_posts_with_category(preview=preview))
                     count_sql = text(CommunityUtil.get_post_category_count())
                 params = {
                     "limit": limit,
@@ -143,17 +145,27 @@ class CommunityService:
             return None
 
     @staticmethod
-    def get_detail_post(post_id_slug: str, user_email: str, page_category: str):
+    def get_detail_post(
+        post_id_slug: str, user_email: str, page_category: str, *, compact: bool = False
+    ):
         try:
             with Database.SessionLocal() as s:
                 post_id = CommunityFunction.parse_id_and_slug(post_id_slug)
+                post = CommunityFunction.fetch_post_detail(s, post_id, user_email)
+                author = CommunityFunction.fetch_author_meta(s, post_id, user_email)
+                if compact:
+                    links = s.execute(
+                        text(CommunityUtil.get_related_post_links()),
+                        {"category": post["category"], "user_email": user_email},
+                    )
+                    return {
+                        "post_detail": post,
+                        "author_detail": author,
+                        "related_posts": [dict(row) for row in links.mappings()],
+                    }
                 return {
-                    "post_detail": CommunityFunction.fetch_post_detail(
-                        s, post_id, user_email
-                    ),
-                    "author_detail": CommunityFunction.fetch_author_meta(
-                        s, post_id, user_email
-                    ),
+                    "post_detail": post,
+                    "author_detail": author,
                     "posts": CommunityFunction.fetch_posts_with_paging(
                         s, post_id, page_category, user_email
                     ),
@@ -166,11 +178,11 @@ class CommunityService:
             return None
 
     @staticmethod
-    def get_side_info(user_email: str):
+    def get_side_info(user_email: Optional[str], *, preview: bool = False):
         try:
             with Database.SessionLocal() as s:
                 issue_posts = s.execute(
-                    text(CommunityUtil.get_posts_with_issue()),
+                    text(CommunityUtil.get_posts_with_issue(preview=preview)),
                     {"limit": 5, "offset": 0, "user_email": user_email},
                 )
                 return {
@@ -434,7 +446,8 @@ class CommunityService:
 
     @staticmethod
     def get_search(
-        search_type: str, word: str, page_num: int, user_email: Optional[str] = None
+        search_type: str, word: str, page_num: int, user_email: Optional[str] = None,
+        *, preview: bool = False,
     ):
         try:
             limit, offset = 20, (page_num - 1) * 20
@@ -446,7 +459,7 @@ class CommunityService:
             }
             with Database.SessionLocal() as s:
                 search_result = s.execute(
-                    text(CommunityFunction.get_search_sql(search_type)),
+                    text(CommunityFunction.get_search_sql(search_type, preview=preview)),
                     params,
                 )
                 total = s.execute(

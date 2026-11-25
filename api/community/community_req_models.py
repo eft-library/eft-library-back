@@ -50,6 +50,7 @@ class GetPostDetail(BaseModel):
     url: str
     user_email: str
     page_category: str
+    compact: bool = False
 
 
 class ReqPostReport(BaseModel):
