@@ -603,6 +603,9 @@ create table if not exists items (
     width integer,
     height integer,
     image text,
+    memo_ko text,
+    memo_en text,
+    memo_ja text,
     update_time timestamptz default now()
 );
 create index if not exists idx_items_parent_category on items(parent_category);

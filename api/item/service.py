@@ -94,6 +94,9 @@ class ItemService:
             "width": item.width,
             "height": item.height,
             "image": item.image,
+            "memo_ko": item.memo_ko,
+            "memo_en": item.memo_en,
+            "memo_ja": item.memo_ja,
         }
 
     @staticmethod

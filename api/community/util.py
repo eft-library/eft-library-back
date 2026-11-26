@@ -39,7 +39,10 @@ class CommunityUtil:
     def post_preview_sql(column: str) -> str:
         return f"""
             left(trim(regexp_replace(
-                replace(regexp_replace(left({column}, 16384), '<[^>]*(>|$)', ' ', 'g'), '&nbsp;', ' '),
+                replace(replace(replace(replace(replace(replace(
+                    regexp_replace(left({column}, 16384), '<[^>]*(>|$)', ' ', 'g'),
+                    '&nbsp;', ' '), '&lt;', '<'), '&gt;', '>'),
+                    '&quot;', '"'), '&#39;', chr(39)), '&amp;', '&'),
                 '[[:space:]]+', ' ', 'g'
             )), 140)
         """

@@ -16,6 +16,9 @@ class Item(Database.Base):
     width = Column(INTEGER)
     height = Column(INTEGER)
     image = Column(TEXT)
+    memo_ko = Column(TEXT)
+    memo_en = Column(TEXT)
+    memo_ja = Column(TEXT)
     update_time = Column(TIMESTAMP)
 
 
